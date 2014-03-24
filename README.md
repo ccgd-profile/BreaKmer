@@ -40,6 +40,21 @@ Input file formats
 
 BreaKmer parameters
 ===================
-| Parameter | Description |
-|---------- | ----------- |
-| -l        | Logging level |
+| Parameter | Description | Default |
+|---------- | ----------- | ------- |
+| -l, --log_level    | Logging level | Debug |
+| -a, --keep_repeat_regions | Keep indels in repeat regions. Requires a repeat mask bed file. | False |
+| -p, --preset_ref_data | Preset all the reference dta for all the target regions before running analysis. | False |
+| -s, --indel_size | Indel size filter | 15 |
+| -c, --trl_sr_thresh | Assembled read support threshold for translocations | 2 |
+| -d, --indel_sr_thresh | Assembled read support threshold for indels | 5 | 
+| -r, --rearr_sr_thresh | Assembled read support threshold for inversions and tandem duplications | 3 |
+| -g, --gene_list | File containing a list of target region names to consider for analysis. Names must match targets_bed_file region names. | None |
+| -k, --keep_intron_vars | Keep indels or rearrangements with breakpoints in intron regions | False |
+| -v, --var_filter | Variant types to report (all, indel, trl, rearrangement) | all |
+| -m, --rearr_min_seg_len | Threshold for minimum segment length to be rearranged | 30 |
+| -n, --trl_min_seg_len | Threshold for minimum length of a translocation segment | 25 |
+| -t, --align_thresh | Threshold for minimum read alignment for assembly | .90 |
+| -z, --no_output_header | Suppress headers on output files. | False |
+
+- kmer_size = option to change the length of the kmer size used (default = 15).
