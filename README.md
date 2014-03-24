@@ -28,7 +28,6 @@ Configuration file
 - A configuration file with all the options is available, kmer_region.cfg.
 - The options in the configuration file determine where the output files are directed and stored as well as where key input files are located.
 
-
 Input file formats
 ==================
 
@@ -37,4 +36,10 @@ Input file formats
 - other_regions_file = tab-delimited file with columns <chr,start,end,region_name>
    - This file is intended to cover regions that are not annotated in the annotation file.
 - cutadapt_config_file = each row corresponds to a parameter for cutadapt (see cutadapt.cfg example file or cutadapt documentation)
- 
+
+
+BreaKmer parameters
+===================
+| Parameter | Description |
+|---------- | ----------- |
+| -l        | Logging level |
