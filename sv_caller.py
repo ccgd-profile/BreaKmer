@@ -173,7 +173,7 @@ class sv_event :
     for i in range(len(blat_res_sorted)) :
       br = blat_res_sorted[i][1]
       br_valid[0] = br_valid[0] and br.valid
-      br_valid[1] = br_valid[1] and (br.repeat_overlap > 75.0)
+      br_valid[1] = br_valid[1] and (br.rep_man.simple_rep_overlap > 75.0)
       max_repeat = max(max_repeat, br.repeat_overlap)
       res_values['repeat_matching'].append(":".join([str(br.repeat_overlap), str(br.get_nmatch_total()), str(round(br.mean_cov,3))]))
       res_values['anno_genes'].append(br.get_gene_anno())
@@ -328,7 +328,7 @@ class sv_event :
   def filter_rearr(self, query_region, params, brkpts, brkpt_counts, brkpt_kmers, rearr_type, disc_read_count ) :
     in_ff, span_ff = filter_by_feature(brkpts, query_region, params.opts['keep_intron_vars'])
     filter = (min(brkpt_counts['n']) < params.get_sr_thresh('rearrangement')) or self.br_sorted[0][1] < params.get_min_segment_length('rearr') or (in_ff and span_ff) or (disc_read_count < 1) or (rearr_type == 'rearrangement') or (min(brkpt_kmers) == 0)
-    self.logger.info('Check filter for rearrangment')
+    self.logger.info('Check filter for rearrangement')
     self.logger.info('Filter by feature for being in exon (%r) or spanning exon (%r)'%(in_ff, span_ff))
     self.logger.info('Split read threshold %d, breakpoint read counts %d'%(min(brkpt_counts['n']),params.get_sr_thresh('rearrangement')))
     self.logger.info('Minimum segment length observed (%d) meets threshold (%d)'%(self.br_sorted[0][1], params.get_min_segment_length('rearr')))
@@ -341,7 +341,7 @@ class sv_event :
     filter = br_valid[1] or (max(brkpt_counts['d']) < params.get_sr_thresh('trl')) #or not br_valid[0]
     self.logger.debug('Check translocation filter')
     self.logger.debug('All blat result segments are within annotated or pre-specified regions %r'%br_valid[0])
-    self.logger.debug('All blat result segments are within repeat regions that cover > 75.0 percent of the segment %r'%br_valid[1])
+    self.logger.debug('All blat result segments are within simple repeat regions that cover > 75.0 percent of the segment %r'%br_valid[1])
     self.logger.debug('The maximum read count support around breakpoints %d meets split read threshold %d'%(max(brkpt_counts['d']),params.get_sr_thresh('trl')))
     self.logger.debug('The minimum number of kmers at breakpoints %d'%min(brkpt_kmers))
     self.logger.debug('The maximum repeat overlap by a blat result: %f'%max_repeat)
@@ -582,19 +582,13 @@ class blat_manager :
     nhits = 0
     for i in self.hit_freq :
       if i > 0 : nhits += 1  
-    #print 'Check blat indel', br.spans_query()
     if br.spans_query() or (len(self.blat_results) == 1 and br.in_target) :
       self.logger.info('Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)'%(br.spans_query(), (len(self.blat_results) == 1), br.in_target))
       indel = True
-      keep_br = br.valid and br.mean_cov < 2 and br.in_target and not br.in_repeat and (br.get_ngap_total() >= indel_size_thresh)
-      #print 'Keep br', keep_br
+      keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.get_ngap_total() >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
       self.logger.debug('Keep blat result %r'%keep_br)
       if keep_br :
         brkpt_cov = [self.meta_dict['contig_vals'][1].get_counts(x, x, 'indel') for x in br.query_brkpts]  
-        #print 'Breakpoints', br.query_brkpts
-        #print 'Coverage', brkpt_cov
-        #print 'Block sizes', br.query_blocksizes
-        #print 'Contig values', self.meta_dict['contig_vals']
         low_cov = min(brkpt_cov) < self.meta_dict['params'].get_sr_thresh('indel')  
         flank_match_thresh = True
         for fm in br.indel_flank_match :
@@ -610,9 +604,7 @@ class blat_manager :
         else : 
           self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.'%(in_ff, low_cov, min(br.query_blocksizes)) )
       else : 
-#        indel = False 
-        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, br.in_repeat, indel_size_thresh, br.get_ngap_total() < indel_size_thresh))
-    #print indel
+        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, ",".join(br.rep_man.breakpoint_in_rep), indel_size_thresh, br.get_ngap_total() < indel_size_thresh))
     return indel
   #*********************************************************
 
@@ -798,6 +790,49 @@ class align_manager :
   #*********************************************************
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Class blat_repeat_man
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+class blat_repeat_manager :
+  def __init__(self) :
+    # Booleans for both breakpoints and whether they land in simple repeats
+    self.breakpoint_in_rep = [False, False]
+    self.total_rep_overlap = 0.0
+    self.simple_rep_overlap = 0.0
+    self.other_values = [False, 0.0, [], [False, False]]
+
+  def setup(self, coords, repeat_locs) :
+    self.check_repeat_regions(coords, repeat_locs)
+   
+  #-----------------------------------------------------------
+  def check_repeat_regions(self, coords, repeat_locs) :
+    start, end = coords
+    seg_len = float(end-start)
+    in_repeat = False
+    rep_overlap = 0.0
+    simple_overlap = 0.0
+    rep_coords = []
+    filter_reps_edges = [False, False]
+    for rloc in repeat_locs :
+      rchr, rbp1, rbp2, rname = rloc
+      if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
+        in_repeat = True
+        rep_overlap += float(min(rbp2,end)-max(rbp1,start))
+        rep_coords.append((rbp1,rbp2))
+        # Simple or low complexity seq repeat for filtering
+        if rname.find(")n") > -1 or rname.find("_rich") > -1 : 
+          simple_overlap += float(min(rbp2,end)-max(rbp1,start))
+          if (rbp1<=start and rbp2>=start) : filter_reps_edges[0] = True
+          elif (rbp1<=end and rbp2>=end) : filter_reps_edges[1] = True
+#        if rep_overlap >= seg_len :
+#          break
+    roverlap = round( (float(min(rep_overlap, seg_len)) / float(seg_len))*100, 2)
+    self.total_rep_overlap = roverlap
+    self.simple_rep_overlap = round( (float(min(simple_overlap, seg_len)) / float(seg_len))*100, 2)
+    self.breakpoint_in_rep = filter_reps_edges
+    self.other_values = [in_repeat, roverlap, rep_coords, filter_reps_edges]
+#-----------------------------------------------------------
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Class blat_res
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 class blat_res :
@@ -810,6 +845,7 @@ class blat_res :
     self.strand = ''
     self.genes = ''
     self.in_target = False
+    self.rep_man = None
     self.in_repeat = False
     self.repeat_overlap = 0.0
     self.repeat_coords = None
@@ -901,8 +937,10 @@ class blat_res :
         rmask = None
         if self.vals['hit']['name'] in all_rep_mask : 
           rmask = all_rep_mask[self.vals['hit']['name']]
+      self.rep_man = blat_repeat_manager()
       if rmask :
-        self.in_repeat, self.repeat_overlap, self.repeat_coords, self.filter_reps_edges = check_repeat_regions(self.get_coords('hit'), rmask)
+        self.rep_man.setup(self.get_coords('hit'), rmask) 
+        self.in_repeat, self.repeat_overlap, self.repeat_coords, self.filter_reps_edges = self.rep_man.other_values 
 
   def get_coords(self,type) : return self.vals[type]['coords']
   
@@ -1038,7 +1076,9 @@ class blat_res :
   def set_gene_anno(self, annotations, query_region) :
     br_start = self.get_coords('hit')[0]
     br_end = self.get_coords('hit')[1]
-    if query_region[0] == self.get_name('hit') and br_start >= query_region[1] and br_end <= query_region[2] :
+    start_in = br_start >= (query_region[1]-200) and br_start <= (query_region[2]+200)
+    end_in = br_end <= (query_region[2]+200) and br_end >= (query_region[1]-200)
+    if query_region[0] == self.get_name('hit') and (start_in or end_in) :
       self.in_target = True
       self.genes = query_region[3]
     else :

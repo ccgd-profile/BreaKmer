@@ -126,7 +126,7 @@ def check_repeat_regions(coords, repeat_locs) :
   filter_reps_edges = [False, False]
   for rloc in repeat_locs :
     rchr, rbp1, rbp2, rname = rloc
-    if (rbp1>=start and rbp1<=end) or (rbp2>=start and rbp2<=end) or (rbp1<=start and rbp2>=end):
+    if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
       in_repeat = True
       rep_overlap += float(min(rbp2,end)-max(rbp1,start))
       rep_coords.append((rbp1,rbp2))
