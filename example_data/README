@@ -1,0 +1,17 @@
+BreaKmer example files:
+B2M.bam -
+B2M.bam.bai -
+breakmer.cfg -
+cutadapt.conf -
+genes.bed - 
+output/
+ gfserver_8242.log -
+ example_summary.out - 
+ example_indel_svs.out
+ B2M/
+   B2M_indel_svs.out
+   contig1_reads.sorted.bam
+   contig1_svs.out
+   contig1_reads.bam
+   contig_reads.sorted.bam.bai
+targets/ 
