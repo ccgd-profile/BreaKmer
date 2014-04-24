@@ -83,7 +83,35 @@ Input file formats
 - cutadapt_config_file = each row corresponds to a parameter for cutadapt (see cutadapt.cfg example file or cutadapt documentation)
   - The file provided is intended for data generated using the paired-end Illumina TruSeq library.
   - Many of the Illumina library sequences have been annotated [elsewhere](https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors).
-
+- reference_fasta = genome reference fasta formatted file containing all the chromosome reference sequences that were used to initially align the data.
+- gene_annotation = Annotation file containing the location of reference genes. These can be downloaded from UCSC Genome Browser, (i.e., [hg19 refGene table](http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/))
+```
+#bin    name    chrom   strand  txStart txEnd   cdsStart        cdsEnd  exonCount       exonStarts      exonEnds        score   name2   cdsStartStat    cdsEndStat      exonFrames
+0       NM_032291       chr1    +       66999824        67210768        67000041        67208778        25      66999824,67091529,67098752,67101626,67105459,67108492,67109226,67126195,67
+133212,67136677,67137626,67138963,67142686,67145360,67147551,67154830,67155872,67161116,67184976,67194946,67199430,67205017,67206340,67206954,67208755, 67000051,67091593,67098777,6710169
+8,67105516,67108547,67109402,67126207,67133224,67136702,67137678,67139049,67142779,67145435,67148052,67154958,67155999,67161176,67185088,67195102,67199563,67205220,67206405,67207119,6721
+0768,   0       SGIP1   cmpl    cmpl    0,1,2,0,0,0,1,0,0,0,1,2,1,1,1,1,0,1,1,2,2,0,2,1,1,
+1       NM_032785       chr1    -       48998526        50489626        48999844        50489468        14      48998526,49000561,49005313,49052675,49056504,49100164,49119008,49128823,49
+332862,49511255,49711441,50162984,50317067,50489434,    48999965,49000588,49005410,49052838,49056657,49100276,49119123,49128913,49332902,49511472,49711536,50163109,50317190,50489626,  0AGBL4    cmpl    cmpl    2,2,1,0,0,2,1,1,0,2,0,1,1,0,
+1       NM_018090       chr1    +       16767166        16786584        16767256        16785385        8       16767166,16770126,16774364,16774554,16775587,16778332,16782312,16785336, 16767348,16770227,16774469,16774636,16775696,16778510,16782388,16786584, 0       NECAP2  cmpl    cmpl    0,2,1,1,2,0,1,2,
+1       NM_052998       chr1    +       33546713        33585995        33547850        33585783        12      33546713,33546988,33547201,33547778,33549554,33557650,33558882,33560148,33
+562307,33563667,33583502,33585644,      33546895,33547109,33547413,33547955,33549728,33557823,33559017,33560314,33562470,33563780,33583717,33585995,    0       ADC     cmpl    cmpl    -1
+,-1,-1,0,0,0,2,2,0,1,0,2,
+...
+```
+- repeat_mask_file = A BED formatted file containing repeat masked regions. These can be found from [UCSC Genome Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?hgsid=370921603_HSUaLVPi7dEbtDqCy5W1ANaqC7Fz) with group = Repeats, track = RepeatMasker, table = rmsk
+```
+chr1    16777160        16777470        AluSp   2147    +
+chr1    25165800        25166089        AluY    2626    -
+chr1    33553606        33554646        L2b     626     +
+chr1    50330063        50332153        L1PA10  12545   +
+chr1    58720067        58720973        L1PA2   8050    -
+chr1    75496180        75498100        L1MB7   10586   +
+chr1    83886030        83886750        ERVL-E-int      980     -
+chr1    100662895       100663391       L2a     1422    -
+chr1    117440426       117440514       L1ME1   532     +
+chr1    117440494       117441457       L1ME1   4025    +
+```
 
 BreaKmer parameters
 -------------
@@ -123,7 +151,7 @@ Output files and formats
 ### Final output 
   - When the program completes, the final output files are directed into a directory labeled 'output' within the specified analysis directory. 
   - Summary file
-    - A summary file labeled /<analysis_name/>_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.
+    - A summary file labeled \<analysis_name\>\_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.
   - Output for each SV type are put in respective tab-delimited files, labeled \<analysis_name\>\_\<indel,trl,inv\_rearrangement,td\_rearrangement\>\_svs.out
     - The columns are:
        - Gene/Target names
