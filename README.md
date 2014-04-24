@@ -111,10 +111,10 @@ Output files and formats
 - While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
 
 ### Logging
-  - While the program is running a log file will (\<analysis\_directory\>) continually be updated with information regarding the status of the analysis.
+  - While the program is running a log file will (\<analysis\_directory\>/log.txt) continually be updated with information regarding the status of the analysis.
 
 ### Target data
-  - For each region analyzed, a directory with the name of the region, as specified in the targets bed file, is created in a 'targets' directory (/<analysis_dir/>/targets).
+  - For each region analyzed, a directory with the name of the region, as specified in the targets bed file, is created in a 'targets' directory (\<analysis\_dir\>/targets).
   - Each target directory contains 'data', 'contigs', and 'kmers' directories. 
     - data - Contains the extracted reference-aligned reads from this target region as well as the kmers created from these extracted reads.
     - contigs - Contains a directory for each contig that was created, which contains the contig sequence in fasta format, and the reads used to assemble the contig in fastq format. The BLAT results are also stored with formatted output if a SV was called.
@@ -124,7 +124,7 @@ Output files and formats
   - When the program completes, the final output files are directed into a directory labeled 'output' within the specified analysis directory. 
   - Summary file
     - A summary file labeled /<analysis_name/>_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.
-  - Output for each SV type are put in respective tab-delimited files, labeled /<analysis_name/>_/<indel,trl,inv_rearrangement,td_rearrangement/>_svs.out
+  - Output for each SV type are put in respective tab-delimited files, labeled \<analysis_name\>\_\<indel,trl,inv\_rearrangement,td\_rearrangement\>\_svs.out
     - The columns are:
        - Gene/Target names
        - Target genomic breakpoints (chr:pos)
