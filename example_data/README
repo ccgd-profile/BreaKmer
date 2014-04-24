@@ -1,17 +1,40 @@
 BreaKmer example files:
-B2M.bam -
-B2M.bam.bai -
-breakmer.cfg -
-cutadapt.conf -
-genes.bed - 
+B2M.bam - BAM file containing aligned reads to B2M.
+B2M.bam.bai - Indexed BAM file.
+breakmer.cfg - BreaKmer config file.
+cutadapt.conf - Cutadapt configuration file.
+genes.bed - BED file specifying which genes to analyze.
 output/
- gfserver_8242.log -
- example_summary.out - 
- example_indel_svs.out
+ gfserver_8242.log - Example output log file from gfServer program.
+ example_summary.out - Example summary output file.
+ example_indel_svs.out - Example indel output file.
  B2M/
-   B2M_indel_svs.out
-   contig1_reads.sorted.bam
-   contig1_svs.out
-   contig1_reads.bam
-   contig_reads.sorted.bam.bai
-targets/ 
+   B2M_indel_svs.out - Example indel output file for B2M.
+   contig1_reads.sorted.bam - Example BAM file containing extracted reads for detected indel event in B2M.
+   contig1_svs.out - Example output file for SV event found in a contig.
+   contig1_reads.bam - Unsorted extracted reads in BAM format.
+   contig_reads.sorted.bam.bai - Index of sorted extracted reads BAM file.
+targets/
+ B2M/
+   data/
+     B2M_sv_reads.bam - BAM formatted file with extracted reads from the defined B2M region.
+     B2M_sv_reads.fastq - Fastq formatted file with the extracted reads from the defined B2M region.
+     B2M_sv_reads.sorted.bam - Sorted BAM of extracted reads. 
+     B2M_sv_reads.sorted.bam.bai - Index of the sorted BAM file.
+     B2M_sv_reads_cleaned.fastq - Fastq formatted file containing the read sequences after they have been cleaned of adapter and low-quality sequence.
+     B2M_sv_reads_cleaned_filtered.fastq - Cleaned reads that have been further filtered if the original soft-clipped sequences were removed.
+     B2M_sv_sc_seqs.fa - Fasta formatted file containing the soft-clipped sequences.
+     B2M_sv_reads_cleaned_filtered.fastq_15mers_counts_0 - Jellyfish intermediate output file for the 15mers generated from the filtered reads.
+     B2M_sv_reads_cleaned_filtered.fastq_15mers_dump_0 - Jellyfish final output file of the 15mers generated from the filtered reads.
+     B2M_sv_sc_seqs.fa_15mers_counts_0 - Jellyfish intermediate output file for the 15mers generated from the unaligned sequences from the extracted reads.
+     B2M_sv_sc_seqs.fa_15mers_dump_0 - Jellyfish final output file of the 15mers generated from the unaligned sequences from the extracted reads.
+   contigs/
+     contig/
+       blat_res_target.psl - Raw BLAT output from re-aligning the contig to the target region reference sequence.
+       blat_res_target.psl.mod - Modified BLAT output with the correct genomic chromosome and coordinates from hit.
+       contig1.fa - Fast formatted file containing contig1 consensus sequence.
+       contig1.fq - Fastq formatted file containing the read sequences used for assemblying contig1.
+       contig1_svs.out - The SV formatted output for contig1.
+   kmers/
+     B2M_sample_kmers.out - Sample only 15-mers with number of reads in which they are found.
+     B2M_sample_kmers_merged.out - The 15-mers and the IDs of the reads used to assemble contigs.
