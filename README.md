@@ -69,6 +69,7 @@ Input file formats
 -----------
 
 - targets_bed_file = tab-delimited file with columns: chr, start, end, region_name, feature_name
+  - Each "target" region can contain multiple subregions that are annotated by feature type (i.e., intron, exon). These feature types are used in the filtering steps with certain parameters. Note that the minimum coordinate and maximum coordinate +/- 200 bp are used as the boundaries for each region (e.g., 45003745-200,45008540+200 for B2M).
 ```
 15      45003745        45003811        B2M     exon
 15      45007621        45007922        B2M     exon
@@ -167,4 +168,4 @@ Output files and formats
        - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).
        - Contig ID
        - Contig sequence. 
-
+  - Each target gene in which a SV was detected has a separate output directory (\<analysis\_dir\>/output/\<target\_name\>) containing formatted output specific to the target and the related reference-aligned sequence reads for the contigs that contain the structural variants detected in BAM format.
