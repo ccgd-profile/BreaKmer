@@ -12,10 +12,14 @@ python setup.py install
 Use appropriate commands for installing locally:
 python setup.py install --user
 
-Once installed, BreaKmer can be run with hte following command:
+The following are required python modules that will need to be installed:
+- Biopython (http://biopython.org/wiki/Main_Page)
+- Pysam (https://code.google.com/p/pysam/)
+
+Once installed, BreaKmer can be run with the following command:
 python breakmer.py <options> <path to config file>
 
-Note that BreaKmer requires the following to operate properly:
+Note that BreaKmer requires the following programs to operate properly:
 - BLAT standalone and server (gfServer, gfClient) (http://hgdownload.cse.ucsc.edu/admin/exe/)
 - Cutadapt - used for trimming adapter sequence from aligned reads (https://code.google.com/p/cutadapt/)
 - Jellyfish - used for generating kmers (http://www.cbcb.umd.edu/software/jellyfish/)
