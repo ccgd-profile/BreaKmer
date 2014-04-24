@@ -6,20 +6,23 @@ A method to identify genomic structural variation in target regions/genes from r
 Installation
 ----------
 
+Prior to installation the following are required for installation:
+- [Biopython](http://biopython.org/wiki/Main_Page)
+- [Pysam](https://code.google.com/p/pysam/)
+
 Download the python scripts and run the command:
 python setup.py install
 
 Use appropriate commands for installing locally:
 python setup.py install --user
 
-The following are required python modules that will need to be installed:
-- Biopython (http://biopython.org/wiki/Main_Page)
-- Pysam (https://code.google.com/p/pysam/)
-
 Once installed, BreaKmer can be run with the following command:
 python breakmer.py <options> <path to config file>
 
-Note that BreaKmer requires the following programs to operate properly:
+Requirements
+---------
+
+### Programs
 - BLAT standalone and server binaries ([blat, gfServer, gfClient](http://hgdownload.cse.ucsc.edu/admin/exe/)).
   - Re-alignment to reference sequence.
 - [Cutadapt](https://code.google.com/p/cutadapt/)
@@ -28,6 +31,12 @@ Note that BreaKmer requires the following programs to operate properly:
   - Generating kmers.
 
 Paths to these binaries need to be specified in the configuration file input to breakmer.py
+
+### Data
+- BreaKmer requires sequence reads that have been aligned to a reference sequence in a binary alignment format (BAM). The alignment program must soft-clip or trim reads that can be partially aligned to the reference sequence. The partially aligned reads and unmapped reads with mapped mates (paired-end data) are used to build contigs with potential SV. 
+- There are a number of aligners that soft-clip partially aligned sequences, bwa and Bowtie are two well-known tools:
+  - [bwa](http://bio-bwa.sourceforge.net/)
+  - [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
 
 Configuration file
 ------------
@@ -56,12 +65,20 @@ Input file formats
 -----------
 
 - targets_bed_file = tab-delimited file with columns <chr,start,end,region_name,feature_name>
-   - example row = 1       2489165 2489273 TNFRSF14        exon
+```
+15      45003745        45003811        B2M     exon
+15      45007621        45007922        B2M     exon
+15      45008527        45008540        B2M     exon
+```
 - other_regions_file = tab-delimited file with columns <chr,start,end,region_name>
    - This file is intended to cover regions that are not annotated in the annotation file. These are useful for cluster regions that are not well annotated in the annotation files.
+```
+14   22090057        23021075        TRA
+7    141998851       142510972       TRB
+```
 - cutadapt_config_file = each row corresponds to a parameter for cutadapt (see cutadapt.cfg example file or cutadapt documentation)
   - The file provided is intended for data generated using the paired-end Illumina TruSeq library.
-  - Many of the Illumina library sequences have been annotated here - https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors
+  - Many of the Illumina library sequences have been annotated [elsewhere](https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors).
 
 
 BreaKmer parameters
