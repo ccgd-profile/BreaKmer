@@ -1,10 +1,10 @@
-BreaKmer
+# BreaKmer
 ========
 
-A method to identify structural variation from target-captured NGS data.
+A method to identify genomic structural variation in target regions/genes from reference-aligned high-throughput sequence data.
 
-Installation
-============
+## Installation
+----------
 
 Download the python scripts and run the command:
 python setup.py install
@@ -20,17 +20,21 @@ Once installed, BreaKmer can be run with the following command:
 python breakmer.py <options> <path to config file>
 
 Note that BreaKmer requires the following programs to operate properly:
-- BLAT standalone and server (gfServer, gfClient) (http://hgdownload.cse.ucsc.edu/admin/exe/)
-- Cutadapt - used for trimming adapter sequence from aligned reads (https://code.google.com/p/cutadapt/)
-- Jellyfish - used for generating kmers (http://www.cbcb.umd.edu/software/jellyfish/)
+- BLAT standalone and server binaries ([blat, gfServer, gfClient](http://hgdownload.cse.ucsc.edu/admin/exe/)).
+  - Re-alignment to reference sequence.
+- [Cutadapt](https://code.google.com/p/cutadapt/)
+  - Trims adapter sequence from aligned reads.
+- [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish/) 
+  - Generating kmers.
 
 Paths to these binaries need to be specified in the configuration file input to breakmer.py
 
-Configuration file
-==================
+## Configuration file
+------------
 
 - A configuration file with all the options is available, breakmer.cfg.
 - The options in the configuration file determine where the output files are directed and stored as well as where key input files are located:
+```
 analysis_name=<sample_id>
 targets_bed_file=<path to bed file containing locations of target regions>
 sample_bam_file=<path to sample bam file>
@@ -46,9 +50,10 @@ reference_fasta=<path to whole genome reference fasta file>
 gene_annotation_file=<path to ucsc_hg19_refgene.txt>
 repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
 kmer_size=15
+```
 
-Input file formats
-==================
+## Input file formats
+-----------
 
 - targets_bed_file = tab-delimited file with columns <chr,start,end,region_name,feature_name>
    - example row = 1       2489165 2489273 TNFRSF14        exon
@@ -59,8 +64,8 @@ Input file formats
   - Many of the Illumina library sequences have been annotated here - https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors
 
 
-BreaKmer parameters
-===================
+## BreaKmer parameters
+-------------
 | Parameter | Description | Default |
 |---------- | ----------- | ------- |
 | -l, --log_level    | Logging level | Debug |
