@@ -1,12 +1,9 @@
 1. Edit the configuration file appropriately (breakmer.cfg).
 
-2. Run BreaKmer
-```
-python breakmer.py -g glist breakmer.cfg
-```
+2. Run BreaKmer - python breakmer.py -g glist breakmer.cfg
 
 BreaKmer example files
-================
+
 B2M.bam - BAM file containing aligned reads to B2M.
 B2M.bam.bai - Indexed BAM file.
 breakmer.cfg - BreaKmer config file.
