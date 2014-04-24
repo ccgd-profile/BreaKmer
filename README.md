@@ -29,8 +29,23 @@ Paths to these binaries need to be specified in the configuration file input to 
 Configuration file
 ==================
 
-- A configuration file with all the options is available, kmer_region.cfg.
-- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located.
+- A configuration file with all the options is available, breakmer.cfg.
+- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located:
+analysis_name=<sample_id>
+targets_bed_file=<path to bed file containing locations of target regions>
+sample_bam_file=<path to sample bam file>
+normal_bam_file=<path to normal bam file>
+analysis_dir=<path to analysis directory>
+reference_data_dir=<path to where reference files will/are stored> 
+other_regions_file=<path to bed file containing targeted unannotated cluster regions> 
+cutadapt=<path to cutadapt binary> 
+cutadapt_config_file=<path to cutadapt configuration file> 
+jellyfish=<path to Jellyfish binary> 
+blat=<path to BLAT binaries, blat, gfServer, gfClient>
+reference_fasta=<path to whole genome reference fasta file>
+gene_annotation_file=<path to ucsc_hg19_refgene.txt>
+repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
+kmer_size=15
 
 Input file formats
 ==================
@@ -38,8 +53,10 @@ Input file formats
 - targets_bed_file = tab-delimited file with columns <chr,start,end,region_name,feature_name>
    - example row = 1       2489165 2489273 TNFRSF14        exon
 - other_regions_file = tab-delimited file with columns <chr,start,end,region_name>
-   - This file is intended to cover regions that are not annotated in the annotation file.
+   - This file is intended to cover regions that are not annotated in the annotation file. These are useful for cluster regions that are not well annotated in the annotation files.
 - cutadapt_config_file = each row corresponds to a parameter for cutadapt (see cutadapt.cfg example file or cutadapt documentation)
+  - The file provided is intended for data generated using the paired-end Illumina TruSeq library.
+  - Many of the Illumina library sequences have been annotated here - https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors
 
 
 BreaKmer parameters
