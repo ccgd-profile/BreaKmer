@@ -108,6 +108,7 @@ BreaKmer parameters
 
 Output files and formats
 -----------
+- While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
 
 ### Logging
     - While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
