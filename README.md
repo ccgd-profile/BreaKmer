@@ -106,11 +106,11 @@ BreaKmer parameters
 
 - kmer_size = option to change the length of the kmer size used (default = 15 bp).
 
-Output files and format
+Output files and formats
 -----------
 
 ### Logging
-    - While the program is running a log file (/<analysis_dir/>/log.txt) will continually be updated with information regarding the status of the analysis. 
+    - While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
 
 ### Target data
   - For each region analyzed, a directory with the name of the region, as specified in the targets bed file, is created in a 'targets' directory (/<analysis_dir/>/targets).
