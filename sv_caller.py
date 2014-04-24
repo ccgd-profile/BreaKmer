@@ -604,7 +604,7 @@ class blat_manager :
         else : 
           self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.'%(in_ff, low_cov, min(br.query_blocksizes)) )
       else : 
-        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, ",".join(br.rep_man.breakpoint_in_rep), indel_size_thresh, br.get_ngap_total() < indel_size_thresh))
+        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.get_ngap_total() < indel_size_thresh))
     return indel
   #*********************************************************
 
@@ -928,6 +928,7 @@ class blat_res :
     self.seg_overlap = [left, right]
       
   def set_repeat(self, target_rep_mask, all_rep_mask) :
+    self.rep_man = blat_repeat_manager()
     if self.matches['rep'] > 0 : 
       self.in_repeat = True
     if not self.in_repeat and target_rep_mask and all_rep_mask :
@@ -937,7 +938,6 @@ class blat_res :
         rmask = None
         if self.vals['hit']['name'] in all_rep_mask : 
           rmask = all_rep_mask[self.vals['hit']['name']]
-      self.rep_man = blat_repeat_manager()
       if rmask :
         self.rep_man.setup(self.get_coords('hit'), rmask) 
         self.in_repeat, self.repeat_overlap, self.repeat_coords, self.filter_reps_edges = self.rep_man.other_values 
