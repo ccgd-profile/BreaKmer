@@ -1,9 +1,9 @@
-# BreaKmer
+BreaKmer
 ========
 
 A method to identify genomic structural variation in target regions/genes from reference-aligned high-throughput sequence data.
 
-## Installation
+Installation
 ----------
 
 Download the python scripts and run the command:
@@ -29,7 +29,7 @@ Note that BreaKmer requires the following programs to operate properly:
 
 Paths to these binaries need to be specified in the configuration file input to breakmer.py
 
-## Configuration file
+Configuration file
 ------------
 
 - A configuration file with all the options is available, breakmer.cfg.
@@ -52,7 +52,7 @@ repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
 kmer_size=15
 ```
 
-## Input file formats
+Input file formats
 -----------
 
 - targets_bed_file = tab-delimited file with columns <chr,start,end,region_name,feature_name>
@@ -64,7 +64,7 @@ kmer_size=15
   - Many of the Illumina library sequences have been annotated here - https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors
 
 
-## BreaKmer parameters
+BreaKmer parameters
 -------------
 | Parameter | Description | Default |
 |---------- | ----------- | ------- |
