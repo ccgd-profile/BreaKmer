@@ -1,7 +1,7 @@
 BreaKmer
 ========
 
-A method to identify genomic structural variation in target regions/genes from reference-aligned high-throughput sequence data.
+A method to identify genomic structural variation in target regions/genes from reference-aligned high-throughput sequence data. It uses a “kmer” strategy to assemble misaligned sequence reads for predicting insertions, deletions, inversions, tandem duplications, and translocations at base-pair resolution.
 
 Installation
 ----------
@@ -64,7 +64,7 @@ kmer_size=15
 Input file formats
 -----------
 
-- targets_bed_file = tab-delimited file with columns <chr,start,end,region_name,feature_name>
+- targets_bed_file = tab-delimited file with columns \<chr,start,end,region_name,feature_name\>
 ```
 15      45003745        45003811        B2M     exon
 15      45007621        45007922        B2M     exon
@@ -101,3 +101,12 @@ BreaKmer parameters
 | -z, --no_output_header | Suppress headers on output files. | False |
 
 - kmer_size = option to change the length of the kmer size used (default = 15).
+
+Output files and format
+-----------
+
+- While the program is running a log file (<analysis_dir>/log.txt) will continually be updated with information regarding the status of the analysis. For each region analyzed, 
+- When the program completes, the final output files are directed into a directory labeled 'output' within the specified analysis directory. 
+
+### Summary file
+When the analysis completes, there will be a summary file labeled <analysis_name>_summary.out that contains
