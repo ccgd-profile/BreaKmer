@@ -111,7 +111,7 @@ Output files and formats
 - While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
 
 ### Logging
-  - While the program is running a log file will (/<) continually be updated with information regarding the status of the analysis.
+  - While the program is running a log file will (<analysis>) continually be updated with information regarding the status of the analysis.
 
 ### Target data
   - For each region analyzed, a directory with the name of the region, as specified in the targets bed file, is created in a 'targets' directory (/<analysis_dir/>/targets).
