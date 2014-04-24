@@ -32,9 +32,30 @@ class runner :
     trgt_groups = []
     group_counter = 0
     trgt_group = []
-    for i in range(len(self.targets)) : 
-      trgt = self.targets[i]
-      trgt_vals = [trgt.chrom, trgt.start, trgt.end, trgt.name, trgt.target_intervals]
+
+#    trgt_values = []
+#    trgt_names = self.params.targets.keys()
+#    trgt_names.sort()
+#    for tn in trgt_names :
+#      trgt_intvs = self.params.targets[tn]
+#      chrom = None
+#      start = None
+#      end = None
+#      name = None 
+#      for value in trgt_intvs :
+#        if not name : name = value[3]
+#        if not chrom : chrom = value[0]
+#        if not start : start = int(value[1])
+#        if not end : end = int(value[2])
+#        if int(value[1]) < start : start = int(value[1])
+#        if int(value[2]) > end : end = int(value[2])
+#      trgt_values.append([chrom, start, end, name, trgt_intvs])
+
+    target_names = self.targets.keys()
+    target_names.sort()
+    for trgt_name in target_names :
+      trgt = self.targets[trgt_name] 
+      trgt_vals = [trgt.chrom, trgt.start, trgt.end, trgt.name, trgt.target_intervals] 
       if len(trgt_group) == ntargets_per_group : 
         trgt_groups.append(trgt_group)
         trgt_group = []
@@ -69,7 +90,7 @@ class runner :
   def run(self, start_time) :
     trgt_lst = self.params.targets.keys()
     trgt_lst.sort() 
-#    self.create_targets()
+    self.create_targets()
 
     if self.params.opts['preset_ref_data'] :
       self.logger.info('Creating all reference data.')
@@ -78,7 +99,7 @@ class runner :
     self.params.start_blat_server()
 
     for trgt_name in trgt_lst :
-      trgt = target(self.params.targets[trgt_name], self.params) # self.targets[trgt_name]
+      trgt = self.targets[trgt_name] #target(self.params.targets[trgt_name], self.params) # self.targets[trgt_name]
       self.logger.info('Analyzing %s', trgt.name)
       if not self.params.opts['preset_ref_data'] : trgt.set_ref_data() # Write reference sequence fasta for gene if it doesn't exist.
       trgt.extract_bam_reads() # Extract the reads that provide evidence for structural variation.
@@ -262,8 +283,8 @@ class target :
   def add_discordant_pe(self, aread, read_d, bamfile) :
     qname = aread.qname
     # Keep discordant read pairs
-    if aread.mapq > 0 and (aread.tid != aread.mrnm or aread.isize > 1000) :
-      mate_refid = bamfile.getrname(aread.mrnm)
+    if aread.mapq > 0 and ((aread.rnext!=-1 and aread.tid != aread.rnext) or abs(aread.tlen) > 1000) and not aread.mate_is_unmapped :
+      mate_refid = bamfile.getrname(aread.rnext)
       mate_read = bamfile.mate(aread)
       if mate_read.mapq > 0 : 
         if mate_refid not in read_d['disc'] : read_d['disc'][mate_refid] = []
@@ -323,6 +344,8 @@ class target :
 
     kmer_size = self.params.get_kmer_size()
     for aread in areads :
+      if aread.mate_is_unmapped or aread.rnext == -1 :
+        aread.mate_is_unmapped = True
       qname = aread.qname
       if aread.is_duplicate or aread.is_qcfail : 
         continue
@@ -404,10 +427,11 @@ class target :
       nseqs += 1
 
     for qname in read_d['unmapped_keep'] :
-      read = read_d['unmapped'][qname]
-      read_d['sv'][get_seq_readname(read)] = (read,None,None,False)
-      lout = ">" + read.qname + "\n" + str(read.seq)
-      sv_sc_fa.write(lout+"\n") 
+      if qname in read_d['unmapped'] :
+        read = read_d['unmapped'][qname]
+        read_d['sv'][get_seq_readname(read)] = (read,None,None,False)
+        lout = ">" + read.qname + "\n" + str(read.seq)
+        sv_sc_fa.write(lout+"\n") 
 
     self.sv_reads = {}
     for qname in read_d['sv'] :
