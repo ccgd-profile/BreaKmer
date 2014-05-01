@@ -129,11 +129,11 @@ class sv_event :
     if i == 0 :
       brkpt_d['q'][0] = [max(0,qs-1),qe]
       brkpt_d['q'][1].append([qe, qe-brkpt_d['q'][0][0], None])
-      tbrkpt = [ts]
+      tbrkpt = [te]
       filt_rep_start = br.filter_reps_edges[0]
       if br.strand == '-' :
-        tbrkpt = [te]
-        filt_rep_start = br.filter_reps_edges[1]
+        tbrkpt = [ts]
+        filt_rep_start = br.filter_reps_edges[0]
     elif last_iter : 
       brkpt_d['q'][1][-1][2] = qe - brkpt_d['q'][1][-1][0]
       brkpt_d['q'][1].append([qs,qs-brkpt_d['q'][0][0],qe-qs])
