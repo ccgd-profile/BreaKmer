@@ -130,7 +130,7 @@ class runner :
     for res in self.results :
       tag = res[6]
       if tag not in result_files :  
-        header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'contig_id', 'contig_seq']) + "\n"
+        header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
         res_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name']+"_"+tag+"_svs.out")
         self.logger.info('Writing %s output file %s'%(tag,res_fn))
         result_files[tag] = open(res_fn,'w')
@@ -587,7 +587,7 @@ class target :
       if tag.find('rearrangement') > -1 : 
         tag = 'rearrangement'
       if tag not in result_files :  
-        header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'contig_id', 'contig_seq']) + "\n"
+        header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
         res_fn = os.path.join(self.paths['output'],self.name+"_"+tag+"_svs.out")
         self.logger.info('Writing %s results to file %s'%(tag,res_fn))
         result_files[tag] = open(res_fn,'w')
@@ -600,22 +600,22 @@ class target :
   #*********************************************************
   def get_sv_counts(self) :
     total = 0
-    trl_genes = []
+    rearr_genes = []
     for res in self.results :
       tag = res[6]
       if tag.find('rearrangement') > -1 : 
         tag = 'rearrangement'
-      if tag == 'trl' :
+      if tag == 'rearrangment' :
         genes = res[0].split(",")
         genes.sort()
-        trl_genes.append(";".join(genes))
+        rearr_genes.append(";".join(genes))
       else : 
         self.svs[tag][0] += 1
         total += 1
-    if len(set(trl_genes)) > 0 : 
-      total += len(set(trl_genes))
-      self.svs['trl'][0] = len(set(trl_genes))
-      self.svs['trl'][1] = ",".join(list(set(trl_genes)))
+    if len(set(rearr_genes)) > 0 : 
+      total += len(set(rearr_genes))
+      self.svs[tag][0] = len(set(rearr_genes))
+      self.svs[tag][1] = ",".join(list(set(rearr_genes)))
     return total
   #*********************************************************
 
@@ -627,12 +627,12 @@ class target :
     keys = self.svs.keys()
     keys.sort()
     header += ['N_'+str(x) for x in keys]
-    trls = '-'
+    rearrs = '-'
     for t in keys :
-      if t == 'trl' : trls = self.svs[t][1]
+      if t == 'rearrangment' : rearrs = self.svs[t][1]
       str_out += str(self.svs[t][0]) +'\t'
-    header.append('Trls')
-    str_out += trls
+    header.append('Rearrangements')
+    str_out += rearrs
     return "\t".join(header), str_out
   #*********************************************************
 
@@ -768,7 +768,7 @@ class contig :
 
   #*********************************************************
   def check_target_blat(self, query_region ) :
-    meta_dict = {'offset': query_region[1]-200, 'tname': query_region[0].replace('chr',''), 'query_res_fn': self.query_res_fn}
+    meta_dict = {'offset': query_region[1]-200, 'tname': query_region[0].replace('chr',''), 'query_res_fn': self.query_res_fn, 'sbam': self.params.opts['sample_bam_file']}
     am = align_manager(meta_dict)
     hit, self.query_res_fn = am.check_target_results()
     return hit
@@ -776,7 +776,7 @@ class contig :
 
   #*********************************************************
   def make_calls(self, query_region, disc_reads, rep_mask) :
-    meta_dict = {'params': self.params, 'repeat_mask': rep_mask, 'query_region': query_region, 'query_res_fn' : self.query_res_fn, 'disc_reads' : disc_reads, 'contig_vals': (self.contig_seq,self.contig_rcounts,self.id,self.reads,len(self.kmers), self.contig_kmer_locs)}
+    meta_dict = {'params': self.params, 'repeat_mask': rep_mask, 'query_region': query_region, 'query_res_fn' : self.query_res_fn, 'disc_reads' : disc_reads, 'contig_vals': (self.contig_seq,self.contig_rcounts,self.id,self.reads,len(self.kmers), self.contig_kmer_locs), 'sbam': self.params.opts['sample_bam_file']}
     am = align_manager(meta_dict)
     self.result = am.get_result()
 '''
