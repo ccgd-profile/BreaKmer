@@ -11,10 +11,11 @@ from optparse import OptionParser
 # Class sv event
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 class sv_event :
-  def __init__(self, blat_res, query_region, contig_vals) :
+  def __init__(self, blat_res, query_region, contig_vals, sample_bam) :
     self.events = []
     self.blat_res = []
     self.br_sorted = []
+    self.sample_bam = sample_bam
     self.qlen = 0
     self.nmatch = 0
     self.in_target = False
@@ -31,7 +32,7 @@ class sv_event :
     self.query_size = None
     self.query_cov = [0]*len(self.contig_seq)
     self.homology = {'non':[False,None], 'in':[False,None]}
-    self.result_values = {'anno_genes':None, 'target_breakpoints':None, 'align_cigar':'', 'mismatches':0, 'strands':None, 'repeat_matching':None, 'sv_type':None, 'split_read_count':None, 'nkmers':self.nkmers, 'disc_read_count':0, 'contig_id':self.contig_id,'contig_seq':self.contig_seq, 'sv_subtype':None}
+    self.result_values = {'anno_genes':None, 'target_breakpoints':None, 'align_cigar':'', 'mismatches':0, 'strands':None, 'repeat_matching':None, 'sv_type':None, 'split_read_count':None, 'nkmers':self.nkmers, 'disc_read_count':0, 'contig_id':query_region[3] + "_" + self.contig_id,'contig_seq':self.contig_seq, 'sv_subtype':None, 'breakpoint_coverages':0}
     self.add(blat_res)
   #*********************************************************
 
@@ -95,11 +96,53 @@ class sv_event :
   #*********************************************************
 
   #*********************************************************
+  def get_brkpt_coverages(self) :
+    brkpts = []
+    tbp = self.result_values['target_breakpoints']
+    if self.result_values['target_breakpoints'].find("(") > -1 :
+      tbp = self.result_values['target_breakpoints'].split()[0]
+      print tbp
+    tbp = tbp.split(',')
+    print tbp
+    for bp in tbp :
+      print 'iter', bp
+      chrom,locs = bp.split(':')
+      chrom = chrom.replace('chr','')
+      ll = locs.split('-')
+      if len(ll) > 1 : 
+        brkpts.append((int(chrom),int(ll[0]),int(ll[0])+1))
+        brkpts.append((int(chrom),int(ll[1]),int(ll[1])+1))
+      else :
+        brkpts.append((int(chrom), int(ll[0]), int(ll[0])+1))
+      
+    bamfile = Samfile(self.sample_bam,'rb')
+
+    covs = [0]*len(brkpts)
+    bp_index = 0
+    for bp in brkpts :
+      cov = 0
+      c,s,e = bp
+      areads = bamfile.fetch(str(c), s, e)
+
+      for aread in areads :
+        if aread.is_duplicate or aread.is_qcfail or aread.is_unmapped or aread.mapq < 10 : 
+          continue
+        cov += 1
+      covs[bp_index] = cov
+      bp_index += 1
+    return ",".join([str(x) for x in covs])
+  #*********************************************************
+
+  #*********************************************************
   def get_values(self) :
-    lst = ['anno_genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'repeat_matching', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'contig_id', 'contig_seq']
+    lst = ['anno_genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'repeat_matching', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']
     out_lst = []
     for l in lst :
+      if self.result_values[l] == 'trl' :
+        self.result_values[l] = 'rearrangement'  
       out_lst.append(str(self.result_values[l]))
+      if l == 'target_breakpoints' :
+        self.result_values['breakpoint_coverages'] = self.get_brkpt_coverages()
     return out_lst
   #*********************************************************
 
@@ -152,11 +195,11 @@ class sv_event :
         filt_rep_start = br.filter_reps_edges[1]
         tbrkpt = [te, ts]
 
-    brkpt_d['brkpt_str'].append(str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
+    brkpt_d['brkpt_str'].append('chr'+str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
     brkpt_d['r'].extend(tbrkpt)
     brkpt_d['f'].append(filt_rep_start)
     brkpt_d['t'][target_key] = (br.get_name('hit'),tbrkpt[0])
-    brkpt_d['formatted'].append( str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
+    brkpt_d['formatted'].append( 'chr'+str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
     return brkpt_d
   #*********************************************************
 
@@ -599,7 +642,7 @@ class blat_manager :
         self.logger.info('Indel result has matching flanking sequence of largest indel event (10 perc of query) on both sides (%r)'%flank_match_thresh)
         in_ff, span_ff = filter_by_feature(br.get_brkpt_locs(), self.meta_dict['query_region'], self.meta_dict['params'].opts['keep_intron_vars'])
         if not in_ff and not low_cov and flank_match_thresh :
-          self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'])
+          self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'], self.meta_dict['sbam'])
           self.logger.debug('Top hit contains whole query sequence, indel variant')
         else : 
           self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.'%(in_ff, low_cov, min(br.query_blocksizes)) )
@@ -716,7 +759,7 @@ class blat_manager :
             ngap.append((qe+1,ge))
         if iter == 0 : 
           self.logger.debug('Creating SV event from blat result with start %d, end %d'%(qs, qe))
-          self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'])
+          self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'], self.meta_dict['sbam'])
           new_gaps.extend(ngap)
           hit = True
         elif self.check_add_br(qs, qe, gs, ge, br) :
