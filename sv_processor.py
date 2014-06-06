@@ -506,7 +506,7 @@ class target :
 
       # If read is mapped and mate is unmapped
       if (aread.pos >= self.start and aread.pos <= self.end) and aread.mapq > 0 and aread.mate_is_unmapped : 
-        read_d['unmapped_keep'].append(qname)
+        read_d['unmapped_keep'].append(aread.qname)
 
     sv_fq = open(self.files['sv_fq'],'w')
     sv_sc_fa = open(self.files['sv_sc_unmapped_fa'],'w')
