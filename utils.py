@@ -643,7 +643,13 @@ class params :
     cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &'%(self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'],ref_fasta_name+".2bit")
     self.logger.info("Starting gfServer %s"%cmd)
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+    start_time = time.time()
     while not server_ready(self.opts['gfserver_log']) :
+      new_time = time.time()
+      wait_time = new_time - start_time
+      if wait_time > 1000 :
+        self.logger.info('gfServer wait time exceeded ~15 minutes, exiting')
+        sys.exit()
       self.logger.info('Waiting for blat gfServer to load reference seq')
       time.sleep(60)
     self.logger.info('Server ready!')
