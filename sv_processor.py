@@ -481,7 +481,7 @@ class target :
               clip_coords = [0,s]
               if overlap_reads and aread.is_reverse : 
                 mate_seq = valid_reads[pair_indices[aread.qname][int(aread.is_read1)]][0].seq
-                add_sc[0] = self.check_pair_overlap(bamfile.mate(aread).seq, aread, [0,s], 'back')
+                add_sc[0] = self.check_pair_overlap(mate_seq, aread, [0,s], 'back')
               if proper_map :
                 if aread.is_reverse : indel_only = True
                 else : indel_only = False
@@ -490,7 +490,7 @@ class target :
               add_sc[1] = True
               if overlap_reads and not aread.is_reverse : 
                 mate_seq = valid_reads[pair_indices[aread.qname][int(aread.is_read1)]][0].seq
-                add_sc[1] = self.check_pair_overlap(bamfile.mate(aread).seq, aread, [e,ll], 'front')
+                add_sc[1] = self.check_pair_overlap(mate_seq, aread, [e,ll], 'front')
               if proper_map :
                 if aread.is_reverse : indel_only = indel_only and False
                 else : indel_only = indel_only and True
