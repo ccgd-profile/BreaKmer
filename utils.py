@@ -649,7 +649,7 @@ class params :
       wait_time = new_time - start_time
       if wait_time > 1000 :
         self.logger.info('gfServer wait time exceeded ~15 minutes, exiting')
-        sys.exit()
+        sys.exit(1)
       self.logger.info('Waiting for blat gfServer to load reference seq')
       time.sleep(60)
     self.logger.info('Server ready!')
