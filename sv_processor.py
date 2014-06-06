@@ -8,6 +8,90 @@ from sv_caller import *
 import math
 import logging
 
+#-----------------------------------------------------------
+def process_reads(areads, read_d, bamfile) :
+  pair_indices = {}
+  valid_reads = []
+  for aread in areads :
+    skip = False
+    if aread.mate_is_unmapped or aread.rnext == -1 : # Indicate that mate is unmapped
+      aread.mate_is_unmapped = True
+    if aread.is_duplicate or aread.is_qcfail : # Skip duplicates and failures
+      skip = True
+    if aread.is_unmapped : # Store unmapped reads
+      read_d['unmapped'][aread.qname] = aread
+      skip = True
+
+    # If read is unmapped or duplicate or qcfail, then don't store
+    if not skip :
+      proper_map = False
+      overlap_reads = False
+      # These two functions can opeate on the first read of the pair.
+      # Check if fragment hasn't been checked yet and that the mate is mapped.
+      if aread.qname not in pair_indices and not aread.mate_is_unmapped :
+        add_discordant_pe(aread, read_d, bamfile) # 
+        proper_map, overlap_reads = pe_meta(aread)
+      valid_reads.append((aread, proper_map, overlap_reads))
+
+      if aread.qname not in pair_indices and not aread.mate_is_unmapped :
+        pair_indices[aread.qname] = {}
+      if aread.qname in pair_indices :
+        pair_indices[aread.qname][int(aread.is_read1)] = len(valid_reads)-1
+  return pair_indices, valid_reads
+#-----------------------------------------------------------
+
+#-----------------------------------------------------------
+def pe_meta(aread) :
+  # First check if read is from a proper paired-end mapping --> <--    
+  proper_map = False
+  overlap_reads = False
+  if ( ((aread.flag==83) or (aread.flag==147)) and (aread.tlen < 0) ) or (((aread.flag==99) or (aread.flag==163)) and (aread.tlen > 0)) :
+    proper_map = True
+    if abs(aread.tlen) < (2*len(aread.seq)) :
+      overlap_reads = True
+  return proper_map, overlap_reads
+#-----------------------------------------------------------
+
+#-----------------------------------------------------------
+# Function is called for reads that are known to be 
+# mapped and 
+#-----------------------------------------------------------
+def add_discordant_pe(aread, read_d, bamfile) :
+  qname = aread.qname
+  # Keep discordant read pairs where the map quality is > 0, the paired reads are mapped to different chroms or > 1000 bp apart, and
+  # the mate is mapped.
+  if aread.mapq > 0 and ((aread.rnext != -1 and aread.tid != aread.rnext) or abs(aread.tlen) > 1000) and not aread.mate_is_unmapped :
+    mate_refid = bamfile.getrname(aread.rnext) # Grab the paired read
+    mate_read = bamfile.mate(aread)
+    if mate_read.mapq > 0 :
+      if mate_refid not in read_d['disc'] :
+        read_d['disc'][mate_refid] = []
+      read_d['disc'][mate_refid].append((aread.pos, aread.pnext)) # Store the read position and the mate position
+
+  if aread.mapq > 0 and not aread.mate_is_unmapped and aread.tid == aread.mrnm :
+    if aread.is_read1 :
+      read_positions = None
+      if aread.is_reverse and aread.mate_is_reverse :
+        # reverse -- reverse, samflag 115 (note: only considering read1, read2 samflag 179)
+        read_positions = (aread.pos, aread.mpos, 0, 0, qname)
+        if aread.mpos < aread.pos : read_positions = (aread.mpos, aread.pos, 0, 0, qname)
+        read_d['inv_reads'].append(read_positions)
+      elif not aread.is_reverse and not aread.mate_is_reverse :
+        # forward -- forward = samflag 67 (note: only considering read1, read2 samflag 131)
+        read_positions = (aread.pos, aread.mpos, 1, 1, qname)
+        if aread.mpos < aread.pos : read_positions = (aread.mpos, aread.pos, 1, 1, qname)
+        read_d['inv_reads'].append(read_positions)
+      elif aread.is_reverse and not aread.mate_is_reverse and aread.pos < aread.mpos :
+        # reverse -- forward = samflag 83 with positive insert (read2 samflag 163 with + insert size)
+        read_positions = (aread.pos, aread.mpos, 0, 1, aread.qname)
+        read_d['td_reads'].append(read_positions)
+      elif not aread.is_reverse and aread.mate_is_reverse and aread.mpos < aread.pos :
+        # reverse -- forward = samflag 99 with - insert (read2 samflag 147 with - insert)
+        read_positions = (aread.mpos, aread.pos, 1, 0, qname)
+        read_d['td_reads'].append(read_positions)
+      if read_positions : read_d['other'].append(read_positions)
+#-----------------------------------------------------------
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Class sv_analysis
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -314,6 +398,7 @@ class target :
         if read_positions : read_d['other'].append(read_positions)
   #*********************************************************
 
+  #*********************************************************
   def pe_meta(self, aread) :
     # First check if read is from a proper paired-end mapping --> <--    
     proper_map = False
@@ -323,60 +408,62 @@ class target :
       if abs(aread.isize) < 2*len(aread.seq) :
         overlap_reads = True   
     return proper_map, overlap_reads
+  #*********************************************************
 
   #*********************************************************
-  def extract_bam_reads(self) :
+  def setup_read_extraction_files(self) :
     self.files['sv_fq'] = os.path.join(self.paths['data'],self.name + "_sv_reads.fastq")
     self.files['sv_sc_unmapped_fa'] = os.path.join(self.paths['data'],self.name + "_sv_sc_seqs.fa")
     self.files['sv_bam'] = os.path.join(self.paths['data'],self.name + "_sv_reads.bam")
     self.files['sv_bam_sorted'] = os.path.join(self.paths['data'],self.name + "_sv_reads.sorted.bam")
-    sv_fq = open(self.files['sv_fq'],'w')
-    sv_sc_fa = open(self.files['sv_sc_unmapped_fa'],'w')
+  #*********************************************************
+  
+  #*********************************************************
+  def extract_bam_reads(self) :
+    self.setup_read_extraction_files()
     self.logger.info('Extracting bam reads from %s to %s'%(self.params.opts['sample_bam_file'],self.files['sv_fq']))
     
     bamfile = Samfile(self.params.opts['sample_bam_file'],'rb')
     sv_bam = Samfile(self.files['sv_bam'], "wb", template=bamfile)
 
-    nseqs = 1
     read_d = {'unmapped':{}, 'disc':{}, 'sv':{}, 'unmapped_keep':[], 'inv_reads':[], 'td_reads':[], 'other':[]}
     self.logger.debug('Fetching bam file reads from %s, %s %d %d'%(self.params.opts['sample_bam_file'],self.chrom, self.start-200, self.end+200))
     areads = bamfile.fetch(self.chrom, self.start-200, self.end+200)
-
     kmer_size = self.params.get_kmer_size()
-    for aread in areads :
-      if aread.mate_is_unmapped or aread.rnext == -1 :
-        aread.mate_is_unmapped = True
-      qname = aread.qname
-      if aread.is_duplicate or aread.is_qcfail : 
-        continue
-      elif aread.is_unmapped :
-        read_d['unmapped'][aread.qname] = aread
-        continue
 
-      self.add_discordant_pe(aread, read_d, bamfile)
-      proper_map, overlap_reads = self.pe_meta(aread)
+    pair_indices, valid_reads = process_reads(areads, read_d, bamfile)
+
+    for aread, proper_map, overlap_reads in valid_reads :
+#    for aread in areads :
+#      if aread.mate_is_unmapped or aread.rnext == -1 :
+#        aread.mate_is_unmapped = True
+#      qname = aread.qname
+#      if aread.is_duplicate or aread.is_qcfail : 
+#        continue
+#      elif aread.is_unmapped :
+#        read_d['unmapped'][aread.qname] = aread
+#        continue
+
+#      self.add_discordant_pe(aread, read_d, bamfile)
+#      proper_map, overlap_reads = self.pe_meta(aread)
 
       # Only take soft-clips from outer regions of properly mapped reads, take all others
       # Cigar is a list of tuples 
-      cigar = aread.cigar
-      keep_read = False
-      if cigar and len(cigar) > 1 : 
-        tc_coords = trim_coords(aread.qual,3)
+      if aread.cigar and len(aread.cigar) > 1 : 
+        tc_coords = trim_coords(aread.qual, 3)
         sc_coords = [0,len(aread.qual)]
-        softclipped = False
         coords = [0,0]
         for i in range(len(cigar)) :
           code,clen = cigar[i]
           if not code == 2 and not code == 4 : coords[1] += clen
           if code == 4 :
-            softclipped = True
             if i == 0 : 
               coords[0] = clen
               coords[1] += clen
           sc_coords = coords
         # Only keep reads that have a soft clip in sequence that has not been trimmed 
         # due to low quality sequence.           
-        sc_seq = {'clipped':[],'buffered':[]}
+        sc_seq = {'clipped':[], 'buffered':[]}
         if sc_coords[0] > tc_coords[0] or sc_coords[1] < tc_coords[1] : 
           clip_coords = [0,0]
           s,e = sc_coords
@@ -393,7 +480,7 @@ class target :
               add_sc[0] = True
               clip_coords = [0,s]
               if overlap_reads and aread.is_reverse : 
-#                print 'sc seq', seq[0:s], aread.seq
+                mate_seq = valid_reads[pair_indices[aread.qname][int(aread.is_read1)]][0].seq
                 add_sc[0] = self.check_pair_overlap(bamfile.mate(aread).seq, aread, [0,s], 'back')
               if proper_map :
                 if aread.is_reverse : indel_only = True
@@ -402,7 +489,7 @@ class target :
               clip_coords = [e,ll]
               add_sc[1] = True
               if overlap_reads and not aread.is_reverse : 
-#                print 'sc seq', seq[e:ll], aread.seq
+                mate_seq = valid_reads[pair_indices[aread.qname][int(aread.is_read1)]][0].seq
                 add_sc[1] = self.check_pair_overlap(bamfile.mate(aread).seq, aread, [e,ll], 'front')
               if proper_map :
                 if aread.is_reverse : indel_only = indel_only and False
@@ -415,16 +502,14 @@ class target :
             sc_seq['buffered'].append(seq[(e-kmer_size):ll])
             sc_seq['clipped'].append(seq[e:ll])
           if final_add :
-#            print 'Adding soft clipped seq'
-#            print aread.qname
-#            print sc_seq
-#            print indel_only
             read_d['sv'][get_seq_readname(aread)] = (aread,sc_seq,clip_coords,indel_only)
 
       # If read is mapped and mate is unmapped
       if (aread.pos >= self.start and aread.pos <= self.end) and aread.mapq > 0 and aread.mate_is_unmapped : 
         read_d['unmapped_keep'].append(qname)
-      nseqs += 1
+
+    sv_fq = open(self.files['sv_fq'],'w')
+    sv_sc_fa = open(self.files['sv_sc_unmapped_fa'],'w')
 
     for qname in read_d['unmapped_keep'] :
       if qname in read_d['unmapped'] :
