@@ -453,8 +453,8 @@ class target :
         tc_coords = trim_coords(aread.qual, 3)
         sc_coords = [0,len(aread.qual)]
         coords = [0,0]
-        for i in range(len(cigar)) :
-          code,clen = cigar[i]
+        for i in range(len(aread.cigar)) :
+          code,clen = aread.cigar[i]
           if not code == 2 and not code == 4 : coords[1] += clen
           if code == 4 :
             if i == 0 : 
