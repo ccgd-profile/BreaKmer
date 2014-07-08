@@ -1,6 +1,6 @@
 1. Edit the configuration file appropriately (breakmer.cfg).
 
-2. Run BreaKmer - python breakmer.py -g glist breakmer.cfg
+2. Run BreaKmer - python breakmer.py breakmer.cfg
 
 BreaKmer example files
 
