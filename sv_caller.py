@@ -101,11 +101,8 @@ class sv_event :
     tbp = self.result_values['target_breakpoints']
     if self.result_values['target_breakpoints'].find("(") > -1 :
       tbp = self.result_values['target_breakpoints'].split()[0]
-      print tbp
     tbp = tbp.split(',')
-    print tbp
     for bp in tbp :
-      print 'iter', bp
       chrom,locs = bp.split(':')
       chrom = chrom.replace('chr','')
       ll = locs.split('-')
