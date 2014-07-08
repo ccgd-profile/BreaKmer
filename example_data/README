@@ -1,6 +1,8 @@
 1. Edit the configuration file appropriately (breakmer.cfg).
 
-2. Run BreaKmer - python breakmer.py breakmer.cfg
+2. Run BreaKmer - python <path_to_scripts>/breakmer.py <path_to_configuration_file>/breakmer.cfg
+
+3. The output files will be within the designated analysis directory as specified in the configuration file.
 
 BreaKmer example files
 
