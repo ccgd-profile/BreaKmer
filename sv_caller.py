@@ -107,10 +107,10 @@ class sv_event :
       chrom = chrom.replace('chr','')
       ll = locs.split('-')
       if len(ll) > 1 : 
-        brkpts.append((int(chrom),int(ll[0]),int(ll[0])+1))
-        brkpts.append((int(chrom),int(ll[1]),int(ll[1])+1))
+        brkpts.append((chrom,int(ll[0]),int(ll[0])+1))
+        brkpts.append((chrom,int(ll[1]),int(ll[1])+1))
       else :
-        brkpts.append((int(chrom), int(ll[0]), int(ll[0])+1))
+        brkpts.append((chrom, int(ll[0]), int(ll[0])+1))
       
     bamfile = Samfile(self.sample_bam,'rb')
 
