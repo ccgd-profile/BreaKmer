@@ -56,7 +56,7 @@ def parse_config_f(config_fn, opts) :
     linesplit = line.split("=")
     if len(linesplit) == 1 : 
       print 'Config line', line, ' not set correctly. Exiting.'
-      sys.exit()
+      sys.exit(2)
     else :
       k,v = linesplit
       param_opts[k] = v
@@ -86,8 +86,16 @@ parser.add_option('-t', '--align_thresh', dest='align_thresh', default=.90, type
 parser.add_option('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %default]')
 
 if __name__ == '__main__' :
-  opts, args = parser.parse_args(sys.argv[1:])
-  config_fn = args[0]
+  try :
+    opts, args = parser.parse_args(sys.argv[1:])
+    if len(args) != 1 :
+      parser.error('Requires input of configuration file name')
+      usage()
+    else :
+      config_fn = args[0]
+  except parser.error:
+    usage()
+    sys.exit(2)
 
   tic = time.clock()
   config_d = parse_config_f(config_fn,opts)
