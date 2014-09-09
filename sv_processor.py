@@ -206,6 +206,7 @@ class runner :
     
     cmd = '%s stop localhost %d'%(self.params.opts['gfserver'], self.params.opts['blat_port']) # Stop gfServer
     os.system(cmd)
+    print 'Analysis complete.'
   #*********************************************************
 
   #*********************************************************
@@ -590,7 +591,7 @@ class target :
     self.logger.info('Writing clean reads to %s'%self.files['cleaned_fq'])
     cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt, cutadapt_config, self.files['sv_fq'], self.files['cleaned_fq'])
     self.logger.debug('Cutadapt system command %s'%cmd)
-    p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, errors = p.communicate()
     self.logger.debug('Clean reads output %s'%output)
     self.logger.debug('Clean reads errors %s'%errors)
