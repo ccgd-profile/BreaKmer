@@ -616,11 +616,13 @@ class params :
       self.logger.info('Storing all repeats by chrom from file %s'%self.opts['repeat_mask_file'])
       self.repeat_mask = setup_rmask_all(self.opts['repeat_mask_file'])
 
+    
+
   def start_blat_server(self) :
-    blat_bin_dir = os.path.split(self.opts['blat'])[0]
-    self.opts['gfserver'] = os.path.join(blat_bin_dir,'gfServer')
-    self.opts['gfclient'] = os.path.join(blat_bin_dir,'gfClient')
-    fatotwobit = os.path.join(blat_bin_dir,'faToTwoBit')
+#    blat_bin_dir = os.path.split(self.opts['blat'])[0]
+#    self.opts['gfserver'] = os.path.join(blat_bin_dir,'gfServer')
+#    self.opts['gfclient'] = os.path.join(blat_bin_dir,'gfClient')
+#    fatotwobit = os.path.join(blat_bin_dir,'faToTwoBit')
     self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
     ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
     # Check if 2bit is there.
@@ -630,7 +632,7 @@ class params :
       # Create 2bit requires faToTwoBit
       curdir = os.getcwd()
       os.chdir(self.opts['reference_fasta_dir'])
-      cmd = '%s %s %s'%(fatotwobit,ref_fasta_name+".fa",ref_fasta_name+".2bit")
+      cmd = '%s %s %s'%(self.opts['fatotwobit'],ref_fasta_name+".fa",ref_fasta_name+".2bit")
       p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
       output, errors = p.communicate()
       os.chdir(curdir)
