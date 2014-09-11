@@ -7,8 +7,9 @@ Installation
 ----------
 
 Prior to installation the following are required for installation:
-- [Biopython](http://biopython.org/wiki/Main_Page)
-- [Pysam](https://code.google.com/p/pysam/)
+- [Python 2.7][https://www.python.org/download/releases/2.7/]
+- [Biopython 1.62](http://biopython.org/wiki/Main_Page)
+- [Pysam 0.6](https://code.google.com/p/pysam/)
 
 Download the python scripts and run the command:
 ```
@@ -27,11 +28,11 @@ Requirements
 ---------
 
 ### Programs
-- BLAT standalone and server binaries ([blat, gfServer, gfClient](http://hgdownload.cse.ucsc.edu/admin/exe/)).
+- BLAT standalone and server binaries ([blat, gfServer, gfClient, faToTwoBit](http://hgdownload.cse.ucsc.edu/admin/exe/)).
   - Re-alignment to reference sequence.
-- [Cutadapt](https://code.google.com/p/cutadapt/)
+- [Cutadapt 1.5](https://code.google.com/p/cutadapt/)
   - Trims adapter sequence from aligned reads.
-- [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish/) 
+- [Jellyfish 1.1.11](http://www.cbcb.umd.edu/software/jellyfish/) 
   - Generating kmers.
 
 Paths to these binaries need to be specified in the configuration file input to breakmer.py
@@ -46,23 +47,30 @@ Configuration file
 ------------
 
 - A configuration file with all the options is available, breakmer.cfg.
-- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located:
+- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located.
+- Below lists and describes the parameters that can be used in the configuration file. Do not keep commented text (i.e., #Required parameters) in the configuration file.
 ```
-analysis_name=<sample_id>
-targets_bed_file=<path to bed file containing locations of target regions>
-sample_bam_file=<path to sample bam file>
-normal_bam_file=<path to normal bam file>
+# Required parameters
+analysis_name=<sample_id> # Text string that will be used to label the output files.
+targets_bed_file=<path to bed file containing locations of target regions> # Format is below.
+sample_bam_file=<path to sample bam file> # Bam file should have an indexed file in the same location with the same base filename.
 analysis_dir=<path to analysis directory>
-reference_data_dir=<path to where reference files will/are stored> 
-other_regions_file=<path to bed file containing targeted unannotated cluster regions> 
+reference_data_dir=<path to where reference files will be/are stored>
 cutadapt=<path to cutadapt binary> 
 cutadapt_config_file=<path to cutadapt configuration file> 
 jellyfish=<path to Jellyfish binary> 
-blat=<path to BLAT binaries, blat, gfServer, gfClient>
-reference_fasta=<path to whole genome reference fasta file>
+blat=<path to BLAT binary> 
+gfServer=<path to gfServer binary>
+gfClient=<path to gfClient binary>
+faToTwoBit=<path to faToTwoBit binary>
+reference_fasta=<path to whole genome reference fasta file> # Chromosome names must match what is used in targets bed file and alignment of reads.
 gene_annotation_file=<path to ucsc_hg19_refgene.txt>
-repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
 kmer_size=15
+
+# Optional parameters
+repeat_mask_file=<path to ucsc_hg19_rmsk.bed> # Only used when available, useful for helping filtering events in simple repeat regions.
+other_regions_file=<path to bed file containing targeted unannotated regions> # Only useful when considering non-genic or unannotated regions (i.e., IGH region)
+normal_bam_file=<path to normal bam file>
 ```
 
 Input file formats
