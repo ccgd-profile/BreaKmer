@@ -7,7 +7,7 @@ Installation
 ----------
 
 Prior to installation the following are required for installation:
-- [Python 2.7][https://www.python.org/download/releases/2.7/]
+- [Python 2.7](https://www.python.org/download/releases/2.7)
 - [Biopython 1.62](http://biopython.org/wiki/Main_Page)
 - [Pysam 0.6](https://code.google.com/p/pysam/)
 
@@ -31,6 +31,18 @@ Dependencies and versions tested:
 - gfClient (v35x1)
 - cutadapt (v1.5)
 - jellyfish (v1.1.11)
+
+Usage
+---------
+
+```
+python <PATH_TO_BREAKMER_SCRIPTS>/breakmer.py <OPTIONAL PARAMETERS> <PATH_TO_CONFIG_FILE>
+```
+
+List the available command line parameters.
+```
+python <PATH_TO_BREAKMER_DIR>/breakmer.py -h
+```
 
 Requirements
 ---------
@@ -67,7 +79,7 @@ targets_bed_file=<path to bed file containing locations of target regions>
 sample_bam_file=<path to sample bam file>
 analysis_dir=<path to analysis directory>
 reference_data_dir=<path to where reference files will/are stored> 
-cutadapt=<path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.15/bin/cutadapt> 
+cutadapt=<path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.5/bin/cutadapt> 
 cutadapt_config_file=<path to cutadapt configuration file> 
 jellyfish=<path to Jellyfish binary v1.1.11 required, i.e. /usr/bin/jellyfish>
 blat=<path to blat binary, i.e. /usr/bin/blat>
