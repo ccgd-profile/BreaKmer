@@ -16,7 +16,7 @@ setup(name='BreaKmer',
       license='LICENSE',
       py_modules=['BreaKmer'],
       install_requires=[
-        'pysami >= 0.6',
+        'pysam >= 0.6',
         'biopython >= 1.62'
       ]  
       )
