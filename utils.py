@@ -1,6 +1,8 @@
 #! /usr/bin/local/python
 
 import os
+import sys
+import glob
 import logging
 import shutil
 from Bio import SeqIO
@@ -11,10 +13,106 @@ from pysam import *
 import multiprocessing
 from itertools import izip, islice, repeat, izip_longest
 
-
 ################################################################
 # Utility functions
 ###############################################################
+def create_ref_test_fa(target_fa_in, test_fa_out) :
+  if not os.path.isfile(get_marker_fn(test_fa_out)) :
+    fa_in = open(target_fa_in, "rU")
+    fa_out = open(test_fa_out, "w")
+
+    record = SeqIO.read(fa_in, "fasta")
+    ref_target_seq = str(record.seq)
+    end = min(len(ref_target_seq), 1500)
+    start = max(0,len(ref_target_seq)-1500)
+    fa_out.write(">"+record.id + "_start\n" + ref_target_seq[0:end] + "\n>" + record.id + "_end\n" + ref_target_seq[start:len(ref_target_seq)] + "\n") 
+    fa_out.close()
+
+    cmd = 'touch %s'%get_marker_fn(test_fa_out)
+    p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+    output, errors = p.communicate()
+    return True
+  else :
+    return False  
+
+def get_altref_genecoords(blat_path, altref_fa, query_fa_fn, chr, out_fn) : 
+  altref_twobit = os.path.splitext(altref_fa)[0] + ".2bit"
+  blat_db = altref_twobit + ":" + str(chr)
+  cmd = "%s -noHead %s %s %s"%(blat_path, blat_db, query_fa_fn, out_fn)
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  output, errors = p.communicate()
+
+  coords = [[0,0],[0,0], False]
+  blat_res = open(out_fn, 'rU')
+  hits = [False, False]
+  for line in blat_res.readlines() :
+    line = line.strip()
+    linesplit = line.split()
+    res_id = linesplit[9]
+    if res_id.find("start") > -1 :
+      if coords[0][0] < int(linesplit[0]) : 
+        coords[0][0] = int(linesplit[0])
+        coords[0][1] = int(linesplit[15])
+        hits[0] = True
+    elif res_id.find("end") > -1 : 
+      if coords[1][0] < int(linesplit[0]) :
+        coords[1][0] = int(linesplit[0])
+        coords[1][1] = int(linesplit[16])
+        hits[1] = True
+  coords[2] = hits[0] and hits[1]
+  blat_res.close() 
+#  os.remove(out_fn)
+  return coords
+
+def test_cutadapt(fq_fn, cutadapt_bin, cutadapt_config) :
+  fq_clean = os.path.basename(fq_fn).split('.')[0] + "_cleaned.fq"
+  fq_clean_fn = os.path.join(os.path.dirname(fq_fn), fq_clean)
+  cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt_bin, cutadapt_config, fq_fn, fq_clean_fn)
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  output, errors = p.communicate()
+  rc = p.returncode
+  if rc != 0 :
+    return (None, rc)
+  else :
+    return (fq_clean_fn, rc) 
+
+def test_jellyfish(jfish_bin, fa_fn, analysis_dir) :
+  kmer_size = 15
+  count_fn = os.path.join(analysis_dir, "test_jellyfish_counts")
+  cmd = '%s count -m %d -s %d -t %d -o %s %s'%(jfish_bin, kmer_size, 100000000, 8, count_fn, fa_fn)
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  output, errors = p.communicate()
+  if p.returncode != 0 :
+    return ("Jellyfish counts", p.returncode)
+
+  dump_fn = os.path.join(analysis_dir, "test_jellyfish_dump")
+  cmd = '%s dump -c -o %s %s'%(jfish_bin, dump_fn, count_fn+"_0")
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
+  output, errors = p.communicate()
+  if p.returncode != 0 :
+    return ("Jellyfish dump", p.returncode)
+  return ("Jellyfish", 0)
+
+def write_test_fq(fq_fn) :
+  fq_f = open(fq_fn,'w')
+  fq_f.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
+  fq_f.close()
+
+def which(program):
+  def is_exe(fpath):
+    return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+  fpath, fname = os.path.split(program)
+  if fpath:
+    if is_exe(program):
+      return program
+  else:
+    for path in os.environ["PATH"].split(os.pathsep):
+      path = path.strip('"')
+      exe_file = os.path.join(path, program)
+      if is_exe(exe_file):
+        return exe_file
+  return None
 
 def calc_contig_complexity(seq, N=3, w=6) :
   cmers = [] 
@@ -151,9 +249,13 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size) :
   logger = logging.getLogger('root')
   file_path = os.path.split(fa_fn)[0]
   file_base = os.path.basename(fa_fn)
-  dump_fn = os.path.join(file_path,file_base + "_" + str(kmer_size) + "mers_dump")
+  dump_fn = os.path.join(file_path, file_base + "_" + str(kmer_size) + "mers_dump")
   dump_marker_fn = get_marker_fn(dump_fn)
   if not os.path.isfile(dump_marker_fn) :
+    if not os.path.exists(fa_fn) :
+      logger.info('%s does not exist.'%fa_fn)
+      dump_fn = None
+      return dump_fn
     count_fn = os.path.join(file_path, file_base + "_" + str(kmer_size) + "mers_counts")
     logger.info('Running %s on file %s to determine kmers'%(jellyfish,fa_fn)) 
     cmd = '%s count -m %d -s %d -t %d -o %s %s'%(jellyfish,kmer_size,100000000,8,count_fn,fa_fn)
@@ -172,6 +274,11 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size) :
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     output, errors = p.communicate()  
     logger.info('Completed jellyfish dump %s, touching marker file %s'%(dump_fn,dump_marker_fn))
+    count_fns = glob.glob(os.path.join(file_path, "*mers_counts*"))
+#    if fa_fn.find("altrefseq") > -1 : 
+#      os.remove(fa_fn)
+    for cf in count_fns :
+      os.remove(cf)
   else :
     logger.info('Jellfish already run and kmers already generated for target.')
   return dump_fn
@@ -180,7 +287,7 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size) :
 #-----------------------------------------------------------
 def setup_ref_data(setup_params) :
    genes = setup_params[0]
-   rep_mask, ref_fa, ref_path, jfish_path, kmer_size = setup_params[1]
+   rep_mask, ref_fa, altref_fa_fns, ref_path, jfish_path, blat_path, kmer_size = setup_params[1]
 
    logger = logging.getLogger('root')
 
@@ -191,11 +298,42 @@ def setup_ref_data(setup_params) :
        logger.info('Extracting repeat mask regions for target gene %s.'%name)
        setup_rmask(gene, gene_ref_path, rep_mask)
      
-     logger.info('Extracting refseq sequence for %s'%name)
-     f_fn = extract_refseq_fa(gene, gene_ref_path, ref_fa, "forward")
-     r_fn = extract_refseq_fa(gene, gene_ref_path, ref_fa, "reverse")
-     run_jellyfish(f_fn, jfish_path, kmer_size)
-     run_jellyfish(r_fn, jfish_path, kmer_size)
+     logger.info('Extracting refseq sequence for %s, %s:%d-%d'%(name, chr, bp1, bp2))
+     directions = ['forward', 'reverse']
+     for dir in directions :
+       target_fa_fn = os.path.join(gene_ref_path, name + '_' + dir + '_refseq.fa')
+       ref_fn = extract_refseq_fa(gene, gene_ref_path, ref_fa, dir, target_fa_fn)
+       run_jellyfish(ref_fn, jfish_path, kmer_size)
+
+     if altref_fa_fns : 
+       if not create_ref_test_fa(os.path.join(gene_ref_path, name + '_forward_refseq.fa'), os.path.join(gene_ref_path, name + '_start_end_refseq.fa')) :
+         return
+
+       altref_fns = []
+       alt_iter = 1
+       altref_fas = altref_fa_fns.split(',')
+       for altref in altref_fas :
+         for dir in directions :
+            fn = os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
+            marker_fn = get_marker_fn(fn) 
+            if not os.path.isfile(marker_fn) :
+              altref_fns.append((altref, fn, alt_iter))
+         alt_iter += 1
+      
+       if len(altref_fns) > 0 :
+         altref_fas = altref_fa_fns.split(',')
+         alt_iter = 1
+         for i in range(len(altref_fns)) :
+           alt_gene_coords = get_altref_genecoords(blat_path, altref_fns[i][0], os.path.join(gene_ref_path, name + '_start_end_refseq.fa'), chr, os.path.join(gene_ref_path, name + '_altref_blat_' + str(altref_fns[i][2]) + '.psl'))
+           if not alt_gene_coords[2] :
+             logger.info("No sequence for target gene %s in %s, no reference kmers extracted."%(name, altref_fns[i][0]))
+             alt_iter += 1
+             continue
+           gene = (chr, alt_gene_coords[0][1], alt_gene_coords[1][1], name, intvs)
+           target_fa_fn = altref_fns[i][1] #os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
+           ref_fn = extract_refseq_fa(gene, gene_ref_path, altref_fns[i][0], dir, target_fa_fn)
+           run_jellyfish(ref_fn, jfish_path, kmer_size)
+         os.remove(os.path.join(gene_ref_path, name + '_start_end_refseq.fa'))
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------
@@ -283,7 +421,10 @@ def get_fastq_reads_old(fn, sv_reads) :
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------
-def load_kmers(fns,kmers) :
+def load_kmers(fns, kmers) :
+  if not fns :
+    return kmers
+
   fns = fns.split(",")
   for fn in fns :
     f = open(fn,'rU')
@@ -353,12 +494,12 @@ def setup_rmask(gene_coords, ref_path, rmask_fn) :
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------
-def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction) :
+def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn) :
   logger = logging.getLogger('root')
 
   chrom, s, e, name, intervals = gene_coords
-  fa_fn = os.path.join(ref_path,name+'_'+direction+'_refseq.fa')
-  marker_fn = get_marker_fn(fa_fn) 
+#  fa_fn = os.path.join(ref_path, name+'_'+direction+'_refseq.fa')
+  marker_fn = get_marker_fn(target_fa_fn) 
 
   if not os.path.isfile(marker_fn) :
     ref_d = SeqIO.to_dict(SeqIO.parse(ref_fa, 'fasta'))
@@ -368,16 +509,16 @@ def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction) :
       seq_str = str(seq.reverse_complement())
     else :
       seq_str = str(seq)
-    fa = open(fa_fn,'w')
+    fa = open(target_fa_fn,'w')
     fa.write(">"+name+"\n"+seq_str+"\n")
     fa.close()
     cmd = 'touch %s'%marker_fn
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     output, errors = p.communicate()
-    logger.info('Completed writing refseq fasta file %s, touching marker file %s'%(fa_fn, marker_fn))
+    logger.info('Completed writing refseq fasta file %s, touching marker file %s'%(target_fa_fn, marker_fn))
   else :
-    logger.info('Refseq sequence fasta (%s) exists already'%fa_fn)
-  return fa_fn 
+    logger.info('Refseq sequence fasta (%s) exists already'%target_fa_fn)
+  return target_fa_fn 
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------  
@@ -411,9 +552,6 @@ def trim_coords(qual_str, min_qual):
 
 #----------------------------------------------------------- 
 def trim_qual(read, min_qual, min_len):
-#  print read
-#  print read.seq
-#  print read.qual
   qual_str = read.qual
   q = []
   coords = [0,len(qual_str)]
@@ -541,6 +679,42 @@ class params :
     self.repeat_mask = None
     self.set_params()
 
+  def check_binaries(self) :
+    # Binaries required for operation: blat, gfserver, gfclient, fatotwobit, cutadapt, jellyfish
+    binaries = ('blat', 'gfserver', 'gfclient', 'fatotwobit', 'cutadapt', 'jellyfish')
+    for bin in binaries :
+      if bin in self.opts :
+        bin_path = self.opts[bin]
+        bin_check = which(bin_path)
+      else :
+        bin_check = which(bin)
+        self.opts[bin] = bin_check
+      if not bin_check :
+        print 'Missing path/executable for', bin
+        sys.exit(2)
+      self.logger.debug('%s path = %s'%(bin, bin_check))
+
+    self.logger.debug('All the required binaries have been check successfully!')
+
+    # Test cutadapt and jellyfish binaries
+    test_dir = os.path.join(self.paths['analysis'], 'bin_test')
+    test_fq = os.path.join(test_dir, 'test.fq')
+    if not os.path.exists(test_dir) :
+      os.makedirs(test_dir)
+    write_test_fq(test_fq)
+    clean_fq, rc = test_cutadapt(test_fq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
+    if clean_fq :
+      self.logger.debug('Test cutadapt ran successfully')
+      jfish_prgm, rc = test_jellyfish(self.opts['jellyfish'], clean_fq, test_dir)
+      if rc != 0 :
+        self.logger.debug('%s unable to run successfully, exit code %s. Check installation and correct version.'%(jfish_prgm, str(rc)))
+        sys.exit(2)
+      else :
+        self.logger.debug('Test jellyfish ran successfully')
+    else :
+      self.logger.debug('Cutadapt failed to run, exit code %s. Check installation and version.'%str(rc))
+      sys.exit(2)
+
   def set_targets(self,gene_list) :
     region_list = None
     if gene_list :
@@ -611,12 +785,32 @@ class params :
       self.logger.info('Creating %s directory (%s)'%(path,self.paths[path]))
       if not os.path.exists(self.paths[path]) : os.makedirs(self.paths[path])
 
+    self.check_binaries() 
+
     # Set repeats if specified
     if not self.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.opts:
       self.logger.info('Storing all repeats by chrom from file %s'%self.opts['repeat_mask_file'])
       self.repeat_mask = setup_rmask_all(self.opts['repeat_mask_file'])
 
-    
+    # Setup alternative reference sequence files if they were passed in.
+    if 'alternate_reference_fastas' in self.opts :
+      self.logger.info('Alternate reference fastas listed in configuration %s'%self.opts['alternate_reference_fastas'])
+      self.opts['alternate_reference_fastas'] = self.opts['alternate_reference_fastas'].split(',')
+      # Check for altref 2bit files 
+      for fn in self.opts['alternate_reference_fastas'] :
+        twobit_fn = os.path.splitext(fn)[0] + '.2bit'
+        if not os.path.exists(twobit_fn) :
+          self.logger.info('Creating 2bit from %s alternate reference fasta'%fn)
+          # Create 2bit requires faToTwoBit
+          curdir = os.getcwd()
+          os.chdir(os.path.dirname(fn))
+          cmd = '%s %s %s'%(self.opts['fatotwobit'], fn, twobit_fn)
+          self.logger.info('fatotwobit command %s'%cmd)
+          p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+          output, errors = p.communicate()
+          os.chdir(curdir)
+    else :
+      self.logger.info('No alternate reference fasta files listed in configuration.')
 
   def start_blat_server(self) :
 #    blat_bin_dir = os.path.split(self.opts['blat'])[0]
