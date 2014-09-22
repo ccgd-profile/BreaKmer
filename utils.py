@@ -16,6 +16,15 @@ from itertools import izip, islice, repeat, izip_longest
 ################################################################
 # Utility functions
 ###############################################################
+
+def stringify(fn) :
+  # Turn file contents into a space delimited string
+  str = []
+  for line in open(fn,'rU').readlines() :
+    line = line.strip()
+    str.append(line)
+  return ' '.join(str)
+
 def create_ref_test_fa(target_fa_in, test_fa_out) :
   if not os.path.isfile(get_marker_fn(test_fa_out)) :
     fa_in = open(target_fa_in, "rU")
@@ -67,7 +76,8 @@ def get_altref_genecoords(blat_path, altref_fa, query_fa_fn, chr, out_fn) :
 def test_cutadapt(fq_fn, cutadapt_bin, cutadapt_config) :
   fq_clean = os.path.basename(fq_fn).split('.')[0] + "_cleaned.fq"
   fq_clean_fn = os.path.join(os.path.dirname(fq_fn), fq_clean)
-  cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt_bin, cutadapt_config, fq_fn, fq_clean_fn)
+  cutadapt_params = stringify(cutadapt_config)
+  cmd = '%s %s %s %s > %s'%(sys.executable, cutadapt_bin, cutadapt_params, fq_fn, fq_clean_fn)
   p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   output, errors = p.communicate()
   rc = p.returncode
