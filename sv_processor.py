@@ -154,9 +154,13 @@ class runner :
       else : mask_fn = self.params.opts['repeat_mask_file']
 
     ref_fa_fn = self.params.opts['reference_fasta']
+    altref_fa_fns = None
+    if 'alternate_reference_fastas' in self.params.opts :
+      altref_fa_fns = ",".join(self.params.opts['alternate_reference_fastas'])
     ref_data_dir = self.params.opts['reference_data_dir']
     jfish_path = self.params.opts['jellyfish']
-    ref_params = [mask_fn, ref_fa_fn, ref_data_dir, jfish_path, self.params.get_kmer_size()]
+    blat_path = self.params.opts['blat']
+    ref_params = [mask_fn, ref_fa_fn, altref_fa_fns, ref_data_dir, jfish_path, blat_path, self.params.get_kmer_size()]
     setup_params = izip(trgt_groups, repeat(ref_params))
     p.map(setup_ref_data, setup_params)
   #*********************************************************
@@ -185,11 +189,14 @@ class runner :
     for trgt_name in trgt_lst :
       trgt = self.targets[trgt_name] #target(self.params.targets[trgt_name], self.params) # self.targets[trgt_name]
       self.logger.info('Analyzing %s', trgt.name)
-      if not self.params.opts['preset_ref_data'] : trgt.set_ref_data() # Write reference sequence fasta for gene if it doesn't exist.
-      trgt.extract_bam_reads() # Extract the reads that provide evidence for structural variation.
-      if not trgt.clean_reads() :  # Clean soft-clipped and reads that did not map together or at all
-        trgt.rm_output_dir()
+      if not self.params.opts['preset_ref_data'] : # Write reference sequence fasta for gene if it doesn't exist.
+        trgt.set_ref_data()
+#      trgt.extract_bam_reads() # Extract the reads that provide evidence for structural variation.
+      if not trgt.get_sv_reads() :
         continue
+#clean_reads() :  # Clean soft-clipped and reads that did not map together or at all
+#        trgt.rm_output_dir()
+#        continue
       trgt.compare_kmers() # Get reference and case kmers
       trgt.resolve_sv() # Build contigs and blat them against the reference genome
       self.summary_header, trgt_summary = trgt.get_summary() 
@@ -287,11 +294,25 @@ class target :
         self.logger.error('Keep repeat regions option is false, but no repeat mask bed file provided. All repeat region variants will be reported.')
         self.params.opts['keep_repeat_regions'] = True
       else :
-        self.files['rep_mask_fn'] = os.path.join(self.paths['ref_data'],self.name+'_rep_mask.bed')
+        self.files['rep_mask_fn'] = os.path.join(self.paths['ref_data'], self.name+'_rep_mask.bed')
 
-    self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'],self.name+'_forward_refseq.fa'),os.path.join(self.paths['ref_data'],self.name+'_reverse_refseq.fa')]
+    self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name+'_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name+'_reverse_refseq.fa')]
 
-    self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'],self.name+'_forward_refseq.fa_dump'),os.path.join(self.paths['ref_data'],self.name+'_reverse_refseq.fa_dump')]
+    ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
+    ref_fa_marker_f.write(self.params.opts['reference_fasta'])
+    ref_fa_marker_f.close()
+
+    if 'alternate_reference_fastas' in self.params.opts :
+      alt_ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.alternate_reference_fastas'), 'w')
+      self.files['target_altref_fn'] = []
+      alt_iter = 1
+      for altref in self.params.opts['alternate_reference_fastas'] :
+        self.files['target_altref_fn'].append([os.path.join(self.paths['ref_data'], self.name + '_forward_altrefseq_' + str(alt_iter) + '.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_altrefseq_' + str(alt_iter) + '.fa')])
+        alt_iter += 1
+        alt_ref_fa_marker_f.write(altref +'\n')
+      alt_ref_fa_marker_f.close()
+
+    self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name+'_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name+'_reverse_refseq.fa_dump')]
   #*********************************************************
 
   #*********************************************************
@@ -361,7 +382,38 @@ class target :
       direction = "forward"
       if fn.find("forward") == -1 : direction = "reverse"
       self.logger.info('Extracting refseq sequence and writing %s'%fn)
-      extract_refseq_fa(self.get_values(), self.paths['ref_data'], self.params.opts['reference_fasta'],direction)
+      extract_refseq_fa(self.get_values(), self.paths['ref_data'], self.params.opts['reference_fasta'], direction, fn)
+
+    # Write alternate reference files.
+    if 'target_altref_fn' in self.files :
+      if not create_ref_test_fa(os.path.join(self.paths['ref_data'], self.name + "_forward_refseq.fa"), os.path.join(self.paths['ref_data'], self.name + "_start_end_refseq.fa")) :
+        return
+
+      altref_fns = []
+      alt_iter = 1
+      for i in range(len(self.files['target_altref_fn'])) :
+        for j in range(len(self.files['target_altref_fn'][i])) :
+           fn = self.files['target_altref_fn'][i][j]
+           marker_fn = get_marker_fn(fn) 
+           if not os.path.isfile(marker_fn) :
+             altref_fns.append((self.params.opts['alternate_reference_fastas'][i], fn, alt_iter))
+        alt_iter += 1
+      if len(altref_fns) > 0 :
+        create_ref_test_fa(os.path.join(self.paths['ref_data'], self.name + "_forward_refseq.fa"), os.path.join(self.paths['ref_data'], self.name + "_start_end_refseq.fa"))
+        for i in range(len(altref_fns)) : #range(len(self.files['target_altref_fn'])) :
+          alt_gene_coords = get_altref_genecoords(self.params.opts['blat'], altref_fns[i][0], os.path.join(self.paths['ref_data'], self.name + "_start_end_refseq.fa"), self.chrom, os.path.join(self.paths['ref_data'], self.name + '_altref_blat_' + str(altref_fns[i][2]) + '.psl'))
+          if not alt_gene_coords[2] :
+            self.logger.info("No sequence for target gene in %s, no reference kmers extracted."%altref_fns[i][0])
+            continue
+          gene_vals = (self.chrom, alt_gene_coords[0][1], alt_gene_coords[1][1], self.name, self.target_intervals)
+          fn = altref_fns[i][1] #self.files['target_altref_fn'][i][j]
+          direction = "forward"
+          if fn.find("forward") == -1 : direction = "reverse"
+          self.logger.info('Extracting alternate refseq sequence and writing %s'%fn)
+          extract_refseq_fa(gene_vals, self.paths['ref_data'], altref_fns[i][0], direction, fn)
+        # Clean up BLAT files!
+#        os.remove(os.path.join(self.paths['ref_data'], self.name + "_start_end_refseq.fa")) 
+     
   #*********************************************************
 
   #*********************************************************
@@ -412,23 +464,42 @@ class target :
   #*********************************************************
 
   #*********************************************************
-  def setup_read_extraction_files(self) :
-    self.files['sv_fq'] = os.path.join(self.paths['data'],self.name + "_sv_reads.fastq")
-    self.files['sv_sc_unmapped_fa'] = os.path.join(self.paths['data'],self.name + "_sv_sc_seqs.fa")
-    self.files['sv_bam'] = os.path.join(self.paths['data'],self.name + "_sv_reads.bam")
-    self.files['sv_bam_sorted'] = os.path.join(self.paths['data'],self.name + "_sv_reads.sorted.bam")
+  def get_sv_reads(self) :
+    self.extract_bam_reads('sv')
+    if 'normal_bam_file' in self.params.opts :
+      self.extract_bam_reads('norm')
+      self.clean_reads('norm')
+    
+    check = True
+    if not self.clean_reads('sv') :
+      self.rm_output_dir()
+      check = False
+    return check
+  #*********************************************************
+
+  #*********************************************************
+  def setup_read_extraction_files(self, type) :
+    self.files['%s_fq'%type] = os.path.join(self.paths['data'],self.name + "_sv_reads.fastq")
+    self.files['%s_sc_unmapped_fa'%type] = os.path.join(self.paths['data'],self.name + "_sv_sc_seqs.fa")
+    if type == 'sv' :
+      self.files['sv_bam'] = os.path.join(self.paths['data'],self.name + "_sv_reads.bam")
+      self.files['sv_bam_sorted'] = os.path.join(self.paths['data'],self.name + "_sv_reads.sorted.bam")
   #*********************************************************
   
   #*********************************************************
-  def extract_bam_reads(self) :
-    self.setup_read_extraction_files()
-    self.logger.info('Extracting bam reads from %s to %s'%(self.params.opts['sample_bam_file'],self.files['sv_fq']))
+  def extract_bam_reads(self, type) :
+    self.setup_read_extraction_files(type)
+   
+    bam_type = 'sample'
+    if type == 'norm' : bam_type = 'normal'
+
+    self.logger.info('Extracting bam reads from %s to %s'%(self.params.opts['%s_bam_file'%bam_type],self.files['sv_fq']))
     
-    bamfile = Samfile(self.params.opts['sample_bam_file'],'rb')
-    sv_bam = Samfile(self.files['sv_bam'], "wb", template=bamfile)
+    bamfile = Samfile(self.params.opts['%s_bam_file'%bam_type],'rb')
+    if type == 'sv' : sv_bam = Samfile(self.files['sv_bam'], "wb", template=bamfile)
 
     read_d = {'unmapped':{}, 'disc':{}, 'sv':{}, 'unmapped_keep':[], 'inv_reads':[], 'td_reads':[], 'other':[]}
-    self.logger.debug('Fetching bam file reads from %s, %s %d %d'%(self.params.opts['sample_bam_file'],self.chrom, self.start-200, self.end+200))
+    self.logger.debug('Fetching bam file reads from %s, %s %d %d'%(self.params.opts['%s_bam_file'%bam_type],self.chrom, self.start-200, self.end+200))
     areads = bamfile.fetch(self.chrom, self.start-200, self.end+200)
     kmer_size = self.params.get_kmer_size()
 
@@ -519,11 +590,14 @@ class target :
         lout = ">" + read.qname + "\n" + str(read.seq)
         sv_sc_fa.write(lout+"\n") 
 
-    self.sv_reads = {}
+    if not self.sv_reads :
+      self.sv_reads = {}
+    self.sv_reads[type] = {}
     for qname in read_d['sv'] :
       aread, sc_seq, cc, indel_only = read_d['sv'][qname]
-      self.sv_reads[qname] = read_d['sv'][qname]
-      sv_bam.write(aread)
+      self.sv_reads[type][qname] = read_d['sv'][qname]
+      if type == 'sv': 
+        sv_bam.write(aread)
       lout = fq_line(aread, indel_only, self.params.get_kmer_size(), True)
       if lout : sv_fq.write(lout)
       if sc_seq :
@@ -532,19 +606,24 @@ class target :
     self.disc_reads = {'disc':read_d['disc'], 'inv':read_d['inv_reads'], 'td':read_d['td_reads'], 'other':read_d['other']}
     sv_fq.close()
     sv_sc_fa.close()
-    sv_bam.close()
     bamfile.close()
-    self.logger.info('Sorting bam file %s to %s'%(self.files['sv_bam'],self.files['sv_bam_sorted']))
-    sort(self.files['sv_bam'],self.files['sv_bam_sorted'].replace('.bam',''))
-    self.logger.info('Indexing sorted bam file %s'%self.files['sv_bam_sorted'])
-    index(self.files['sv_bam_sorted'])
+
+    if type == 'sv' :
+      sv_bam.close()
+      self.logger.info('Sorting bam file %s to %s'%(self.files['sv_bam'],self.files['sv_bam_sorted']))
+      sort(self.files['sv_bam'],self.files['sv_bam_sorted'].replace('.bam',''))
+      self.logger.info('Indexing sorted bam file %s'%self.files['sv_bam_sorted'])
+      index(self.files['sv_bam_sorted'])
   #*********************************************************
 
+  #*********************************************************
   def check_overlap(self, dir, mseq, sc_seq) :
 #    print dir, sc_seq, mseq, mseq.find(sc_seq)
     if dir == 'back' : return mseq.find(sc_seq) != (len(mseq)-len(sc_seq))
     else : return mseq.find(sc_seq) != 0
+  #*********************************************************
 
+  #*********************************************************
   # Move to utils
   def check_pair_overlap(self, mate_seq, read, coords, trim_dir) :
     nmisses = 0
@@ -582,14 +661,14 @@ class target :
     return add_sc #, read
 
   #*********************************************************
-  def clean_reads(self) :
+  def clean_reads(self, type) :
     # Run cleaning program
     cutadapt = self.params.opts['cutadapt']
     cutadapt_config = self.params.opts['cutadapt_config_file']
     self.logger.info('Cleaning reads using %s with configuration file %s'%(cutadapt,cutadapt_config))
-    self.files['cleaned_fq'] = os.path.join(self.paths['data'],self.name + "_sv_reads_cleaned.fastq")
-    self.logger.info('Writing clean reads to %s'%self.files['cleaned_fq'])
-    cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt, cutadapt_config, self.files['sv_fq'], self.files['cleaned_fq'])
+    self.files['%s_cleaned_fq'%type] = os.path.join(self.paths['data'],self.name + "_%s_reads_cleaned.fastq"%type)
+    self.logger.info('Writing clean reads to %s'%self.files['%s_cleaned_fq'%type])
+    cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt, cutadapt_config, self.files['%s_fq'%type], self.files['%s_cleaned_fq'%type])
     self.logger.debug('Cutadapt system command %s'%cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, errors = p.communicate()
@@ -598,10 +677,13 @@ class target :
 
     # Use these for pulling out reads after finding sample-only kmers.
     # Filter the cleaned reads to make sure soft clips were not adapters, re-write fastq
-    self.files['cleaned_fq'], self.cleaned_read_recs, self.read_len = get_fastq_reads(self.files['cleaned_fq'], self.sv_reads)
-    self.sv_reads = None
+    if not self.cleaned_read_recs :
+      self.cleaned_read_recs = {}
+    self.cleaned_read_recs[type] = None
+    self.files['%s_cleaned_fq'%type], self.cleaned_read_recs[type], self.read_len = get_fastq_reads(self.files['%s_cleaned_fq'%type], self.sv_reads[type])
+    self.sv_reads[type] = None
     check = True
-    if len(self.cleaned_read_recs) == 0 : check = False
+    if len(self.cleaned_read_recs[type]) == 0 : check = False
     self.logger.info('Check there are cleaned reads %r'%check)
     return check 
   #*********************************************************
@@ -613,14 +695,28 @@ class target :
     kmer_size = self.params.get_kmer_size()
     for i in range(len(self.files['target_ref_fn'])) : 
       self.logger.info('Indexing kmers for reference sequence %s'%self.files['target_ref_fn'][i])
-      self.kmers['ref'] = load_kmers(run_jellyfish(self.files['target_ref_fn'][i],jellyfish,kmer_size),self.kmers['ref'])
-    self.logger.info('Indexing kmers for sample sequence %s'%self.files['cleaned_fq'])
+      self.kmers['ref'] = load_kmers(run_jellyfish(self.files['target_ref_fn'][i], jellyfish, kmer_size), self.kmers['ref'])
+
+    if 'target_altref_fn' in self.files :
+      for i in range(len(self.files['target_altref_fn'])) :
+        for j in range(len(self.files['target_altref_fn'][i])) :
+          self.logger.info('Indexing kmers for reference sequence %s'%self.files['target_altref_fn'][i])
+          self.kmers['ref'] = load_kmers(run_jellyfish(self.files['target_altref_fn'][i][j], jellyfish, kmer_size), self.kmers['ref'])
+
+    self.logger.info('Indexing kmers for sample sequence %s'%self.files['sv_cleaned_fq'])
     self.kmers['case'] = {} 
-    self.kmers['case'] = load_kmers(run_jellyfish(self.files['cleaned_fq'],jellyfish,kmer_size),self.kmers['case'])
+    self.kmers['case'] = load_kmers(run_jellyfish(self.files['sv_cleaned_fq'],jellyfish,kmer_size),self.kmers['case'])
     self.kmers['case_sc'] = {}
     self.kmers['case_sc'] = load_kmers(run_jellyfish(self.files['sv_sc_unmapped_fa'],jellyfish,kmer_size),self.kmers['case_sc'])
     sc_mers = set(self.kmers['case'].keys()) & set(self.kmers['case_sc']) 
     sample_only_mers = list(sc_mers.difference(set(self.kmers['ref'].keys())))
+
+    if 'normal_bam_file' in self.params.opts :
+      norm_kmers = {}
+      norm_kmers = load_kmers(run_jellyfish(self.files['norm_cleaned_fq'],jellyfish,kmer_size),norm_kmers)
+      sample_only_mers = set(sample_only_mers).difference(set(norm_kmers.keys()))
+
+    sample_only_mers = list(sample_only_mers)
 
     # Write case only kmers out to file.
     self.files['sample_kmers'] = os.path.join(self.paths['kmers'],self.name + "_sample_kmers.out")
@@ -640,7 +736,7 @@ class target :
     self.files['kmer_clusters'] = os.path.join(self.paths['kmers'],self.name + "_sample_kmers_merged.out")
     self.logger.info('Writing kmer clusters to file %s'%self.files['kmer_clusters'])
     
-    self.kmers['clusters'] = init_assembly(self.kmers['case_only'], self.cleaned_read_recs, kmer_size, self.params.get_sr_thresh('min'), self.read_len)
+    self.kmers['clusters'] = init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], kmer_size, self.params.get_sr_thresh('min'), self.read_len)
     self.cleaned_read_recs = None
     self.kmers['case_only'] = {}
   #*********************************************************
