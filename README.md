@@ -7,9 +7,9 @@ Installation
 ----------
 
 Prior to installation the following are required for installation:
-- [Python 2.7](https://www.python.org/download/releases/2.7)
+- [Python 2.7][https://www.python.org/download/releases/2.7/]
 - [Biopython 1.62](http://biopython.org/wiki/Main_Page)
-- [Pysam 0.60](https://code.google.com/p/pysam/)
+- [Pysam 0.6](https://code.google.com/p/pysam/)
 
 Download the python scripts and run the command:
 ```
@@ -36,7 +36,7 @@ Requirements
 ---------
 
 ### Programs
-- BLAT standalone and server binaries ([blat, gfServer, gfClient](http://hgdownload.cse.ucsc.edu/admin/exe/)).
+- BLAT standalone and server binaries ([blat, gfServer, gfClient, faToTwoBit](http://hgdownload.cse.ucsc.edu/admin/exe/)).
   - Re-alignment to reference sequence.
 - [Cutadapt v1.5](https://code.google.com/p/cutadapt/)
   - Trims adapter sequence from aligned reads.
@@ -57,7 +57,7 @@ Configuration file
 ------------
 
 - A configuration file with all the options is available, breakmer.cfg.
-- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located.
+- Below lists and describes the parameters that can be used in the configuration file. Do not keep commented text (i.e., #Required parameters) in the configuration file.
 - Note that the paths to the six required program binaries (Cutadapt, Jellyfish, blat, gfServer, and gfClient) can be set in the configuration file
   or these binaries can be included in the users path (e.g., for linux users: export PATH=$PATH:/path/to/binary).
 ```
@@ -76,13 +76,13 @@ gfclient=<path to gfClient binary, i.e. /usr/bin/gfClient>
 fatotwobit=<path to faToTwoBit binary, i.e. /usr/bin/faToTwoBit>
 reference_fasta=<path to whole genome reference fasta file, one file with all records>
 gene_annotation_file=<path to ucsc_hg19_refgene.txt>
-repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
 kmer_size=15
 
 # Optional parameters
 other_regions_file=<path to bed file containing coordinates for targeted unannotated cluster regions if they exist, such as IGH, IGK> 
 normal_bam_file=<path to normal bam file, can be used to filter germline events with matched-normal sample>
 alternate_fastas=<comma delimited list of the paths to alternate fasta files, such as HuRef or CHM1>
+repeat_mask_file=<path to ucsc_hg19_rmsk.bed> # Only used when available, useful for helping filtering events in simple repeat regions.
 ```
 
 Input file formats
@@ -140,7 +140,7 @@ BreaKmer parameters
 | Parameter | Description | Default |
 |---------- | ----------- | ------- |
 | -l, --log_level    | Logging level | Debug |
-| -a, --keep_repeat_regions | Keep indels in repeat regions. Requires a repeat mask bed file. | False |
+| -a, --keep_repeat_regions | Keep indels in repeat regions. No repeat mask bed file required if set. | False |
 | -p, --preset_ref_data | Preset all the reference dta for all the target regions before running analysis. | False |
 | -s, --indel_size | Indel size filter | 15 |
 | -c, --trl_sr_thresh | Assembled read support threshold for translocations | 2 |
