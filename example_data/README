@@ -11,8 +11,7 @@ B2M.bam.bai - Indexed BAM file.
 breakmer.cfg - BreaKmer config file.
 cutadapt.conf - Cutadapt configuration file.
 genes.bed - BED file specifying which genes to analyze.
-output/
- gfserver_8242.log - Example output log file from gfServer program.
+example_output/ - Directory containing the example output that should be expected with a successful run.
  example_summary.out - Example summary output file.
  example_indel_svs.out - Example indel output file.
  B2M/
@@ -21,7 +20,7 @@ output/
    contig1_svs.out - Example output file for SV event found in a contig.
    contig1_reads.bam - Unsorted extracted reads in BAM format.
    contig_reads.sorted.bam.bai - Index of sorted extracted reads BAM file.
-targets/
+example_targets/ - Directory containing the example targets output.
  B2M/
    data/
      B2M_sv_reads.bam - BAM formatted file with extracted reads from the defined B2M region.
