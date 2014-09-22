@@ -625,7 +625,7 @@ class blat_manager :
     if br.spans_query() or (len(self.blat_results) == 1 and br.in_target) :
       self.logger.info('Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)'%(br.spans_query(), (len(self.blat_results) == 1), br.in_target))
       indel = True
-      keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.get_ngap_total() >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
+      keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.indel_maxevent_size[0] >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
       self.logger.debug('Keep blat result %r'%keep_br)
       if keep_br :
         brkpt_cov = [self.meta_dict['contig_vals'][1].get_counts(x, x, 'indel') for x in br.query_brkpts]  
@@ -644,7 +644,7 @@ class blat_manager :
         else : 
           self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.'%(in_ff, low_cov, min(br.query_blocksizes)) )
       else : 
-        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.get_ngap_total() < indel_size_thresh))
+        self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r'%(br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.indel_maxevent_size[0] < indel_size_thresh))
     return indel
   #*********************************************************
 
@@ -896,6 +896,7 @@ class blat_res :
     self.query_brkpts = []
     self.query_blocksizes = []
     self.indel_sizes = []
+    self.indel_maxevent_size = [0,'']
     self.mean_cov = 0.0
     self.perc_ident = 0.0
     self.seg_overlap = [0,0]
@@ -971,7 +972,7 @@ class blat_res :
     self.rep_man = blat_repeat_manager()
     if self.matches['rep'] > 0 : 
       self.in_repeat = True
-    if not self.in_repeat and target_rep_mask and all_rep_mask :
+    if target_rep_mask and all_rep_mask :
       # Check rep_mask if it exists.
       rmask = target_rep_mask
       if not self.in_target : 
@@ -1030,9 +1031,9 @@ class blat_res :
       match_sum += int(nmatch)
     return match_sum
 
-  def set_indel_flank_matches(self, max_event) :
-    if max_event[0] > 0 :
-      csplit = self.cigar.split(str(max_event[0]) + max_event[1])
+  def set_indel_flank_matches(self) :
+    if self.indel_maxevent_size[0] > 0 :
+      csplit = self.cigar.split(str(self.indel_maxevent_size[0]) + self.indel_maxevent_size[1])
       lflank = csplit[0]
       self.indel_flank_match[0] += self.sum_indel_flank_matches(lflank)
       rflank = csplit[-1]
@@ -1040,8 +1041,6 @@ class blat_res :
 
   def set_indel_locs(self) :
     chrm = 'chr'+str(self.get_name('hit'))
-    indel_str = []
-    max_event = [0,'']
     for i in range(self.fragments['count']-1) :
       if i==0 and self.fragments['query'][i][0] > 0 : 
         self.cigar = str(self.fragments['query'][i][0]) + "S"
@@ -1056,27 +1055,25 @@ class blat_res :
       self.cigar += str(self.query_blocksizes[i]) + "M"
       if ins_bp > 0 :
         self.breakpts.append([bp1])
-        indel_str.append("I"+str(ins_bp))
+        self.indel_sizes.append("I"+str(ins_bp))
         self.add_query_brkpt(qend1)
         self.add_query_brkpt(qstart2)
         self.cigar += str(ins_bp) + "I"
-        if ins_bp > max_event[0] : max_event = [ins_bp,"I"]
+        if ins_bp > self.indel_maxevent_size[0] : self.indel_maxevent_size = [ins_bp,"I"]
       if del_bp > 0 :
         self.breakpts.append([bp1,bp2])
-        indel_str.append("D"+str(del_bp))
+        self.indel_sizes.append("D"+str(del_bp))
         self.add_query_brkpt(qend1)
         self.cigar += str(del_bp) + "D"
-        if del_bp > max_event[0] : max_event = [del_bp,"D"]
+        if del_bp > self.indel_maxevent_size[0] : self.indel_maxevent_size = [del_bp,"D"]
       
     self.cigar += str(self.query_blocksizes[-1]) + "M"
     end_clipped = self.get_size('query') - self.get_coords('query')[1] 
     if end_clipped > 0 : 
       self.cigar += str(end_clipped) + "S"
 
-    self.set_indel_flank_matches(max_event)
+    self.set_indel_flank_matches()
 
-    if len(indel_str) > 0 : 
-      self.indel_sizes.append(",".join(indel_str))
     if self.strand == "-" :
       for i in range(len(self.query_brkpts)) :
         self.query_brkpts[i] = self.get_size('query') - self.query_brkpts[i]  
@@ -1087,16 +1084,17 @@ class blat_res :
 
   def get_brkpt_str(self, with_sizes=False) :
     brkpt_out = []
-    bp_str = ''
+    bp_str = []
     chrm = 'chr' + str(self.get_name('hit'))
     if len(self.breakpts) > 0 :
       for b,s in zip(self.breakpts, self.indel_sizes) : 
         if len(b) > 1 : bb = "-".join([str(x) for x in b])
         else : bb = str(b[0])
-        bp_str = chrm + ":" + bb
+        bstr = chrm + ":" + bb
         if with_sizes : 
-          bp_str += " " + "(" + s + ")"
-      brkpt_out.append(bp_str)
+          bstr += " " + "(" + s + ")"
+        bp_str.append(bstr)
+      brkpt_out.append(",".join(bp_str))
     return ",".join(brkpt_out)
   
   def get_brkpt_locs(self) :
