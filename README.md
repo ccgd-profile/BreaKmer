@@ -7,8 +7,9 @@ Installation
 ----------
 
 Prior to installation the following are required for installation:
-- [Biopython](http://biopython.org/wiki/Main_Page)
-- [Pysam](https://code.google.com/p/pysam/)
+- [Python 2.7](https://www.python.org/download/releases/2.7)
+- [Biopython 1.62](http://biopython.org/wiki/Main_Page)
+- [Pysam 0.60](https://code.google.com/p/pysam/)
 
 Download the python scripts and run the command:
 ```
@@ -23,15 +24,23 @@ Once installed, BreaKmer can be run with the following command:
 python breakmer.py <options> <path to config file>
 ```
 
+BreaKmer has currently been installed and tested on 64bit linux machine using CentOS release 5.5 using python2.7. 
+Dependencies and versions tested:
+- blat (Standalone BLAT v35x1)
+- gfServer (v35x1)
+- gfClient (v35x1)
+- cutadapt (v1.5)
+- jellyfish (v1.1.11)
+
 Requirements
 ---------
 
 ### Programs
 - BLAT standalone and server binaries ([blat, gfServer, gfClient](http://hgdownload.cse.ucsc.edu/admin/exe/)).
   - Re-alignment to reference sequence.
-- [Cutadapt](https://code.google.com/p/cutadapt/)
+- [Cutadapt v1.5](https://code.google.com/p/cutadapt/)
   - Trims adapter sequence from aligned reads.
-- [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish/) 
+- [Jellyfish v1.1.11](http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz)
   - Generating kmers.
 
 Paths to these binaries need to be specified in the configuration file input to breakmer.py
@@ -41,28 +50,39 @@ Paths to these binaries need to be specified in the configuration file input to 
 - There are a number of aligners that soft-clip partially aligned sequences, bwa and Bowtie are two well-known tools:
   - [bwa](http://bio-bwa.sourceforge.net/)
   - [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
+- It is also useful to mark duplicate reads prior to using BreaKmer, as these will inflate read counts for identified variants.
+  - [Picard MarkDuplicates](http://picard.sourceforge.net/command-line-overview.shtml#MarkDuplicates)
 
 Configuration file
 ------------
 
 - A configuration file with all the options is available, breakmer.cfg.
-- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located:
+- The options in the configuration file determine where the output files are directed and stored as well as where key input files are located.
+- Note that the paths to the six required program binaries (Cutadapt, Jellyfish, blat, gfServer, and gfClient) can be set in the configuration file
+  or these binaries can be included in the users path (e.g., for linux users: export PATH=$PATH:/path/to/binary).
 ```
+# Required parameters
 analysis_name=<sample_id>
 targets_bed_file=<path to bed file containing locations of target regions>
 sample_bam_file=<path to sample bam file>
-normal_bam_file=<path to normal bam file>
 analysis_dir=<path to analysis directory>
 reference_data_dir=<path to where reference files will/are stored> 
-other_regions_file=<path to bed file containing targeted unannotated cluster regions> 
-cutadapt=<path to cutadapt binary> 
+cutadapt=<path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.15/bin/cutadapt> 
 cutadapt_config_file=<path to cutadapt configuration file> 
-jellyfish=<path to Jellyfish binary> 
-blat=<path to BLAT binaries, blat, gfServer, gfClient>
-reference_fasta=<path to whole genome reference fasta file>
+jellyfish=<path to Jellyfish binary v1.1.11 required, i.e. /usr/bin/jellyfish>
+blat=<path to blat binary, i.e. /usr/bin/blat>
+gfserver=<path to gfServer binary, i.e. /usr/bin/gfServer>
+gfclient=<path to gfClient binary, i.e. /usr/bin/gfClient>
+fatotwobit=<path to faToTwoBit binary, i.e. /usr/bin/faToTwoBit>
+reference_fasta=<path to whole genome reference fasta file, one file with all records>
 gene_annotation_file=<path to ucsc_hg19_refgene.txt>
 repeat_mask_file=<path to ucsc_hg19_rmsk.bed>
 kmer_size=15
+
+# Optional parameters
+other_regions_file=<path to bed file containing coordinates for targeted unannotated cluster regions if they exist, such as IGH, IGK> 
+normal_bam_file=<path to normal bam file, can be used to filter germline events with matched-normal sample>
+alternate_fastas=<comma delimited list of the paths to alternate fasta files, such as HuRef or CHM1>
 ```
 
 Input file formats
