@@ -71,7 +71,7 @@ usage = '%prog [options] <config file name>'
 desc = """Script to identify structural variants within targeted locations."""
 parser = OptionParser(usage=usage,description=desc)
 parser.add_option('-l', '--log_level', dest='log_level', default='DEBUG', type='string', help='Log level [default: %default]')
-parser.add_option('-a', '--keep_repeat_regions', dest='keep_repeat_regions', default=False, action='store_true', help='Keep indels in repeat regions. Requires a repeat mask bed file. [default: %default]')
+parser.add_option('-a', '--keep_repeat_regions', dest='keep_repeat_regions', default=False, action='store_true', help='Keep indels in repeat regions. No repeat mask bed file required if set. [default: %default]')
 parser.add_option('-p', '--preset_ref_data', dest='preset_ref_data', default=False, action="store_true", help='Preset all the reference data for all the targets before running analysis. [default: %default]')
 parser.add_option('-s', '--indel_size', dest='indel_size', default=15, type='int', help='Indel size filter [default: %default]')
 parser.add_option('-c', '--trl_sr_thresh', dest='trl_sr_thresh', default=2, type='int', help='Split read support threshold for translocations [default: %default]')
@@ -98,7 +98,7 @@ if __name__ == '__main__' :
     sys.exit(2)
 
   tic = time.clock()
-  config_d = parse_config_f(config_fn,opts)
+  config_d = parse_config_f(config_fn, opts)
   setup_logger(config_d,'root')
   r = runner(config_d)
   r.run(tic)
