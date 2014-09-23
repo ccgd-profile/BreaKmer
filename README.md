@@ -24,7 +24,7 @@ Using the setup.py script for installation should setup the required python modu
 
 BreaKmer has currently been installed and tested on:
 - 64bit linux using CentOS release 5.5 and python2.7.2 
-- 64bit linux using Ubuntu and python2.7.6
+- 64bit linux using Ubuntu release 14.04 and python2.7.6
 
 Usage
 ---------
@@ -60,7 +60,7 @@ Requirements
 - [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish)
   - Generating kmers.
   - [v1.1.11](http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz) tested
-  - [v2.1.3](http://www.genome.umd.edu/jellyfish.html) untested
+  - [v2.1.3](http://www.genome.umd.edu/jellyfish.html) tested
 
 When these programs are installed, the paths to the binaries can be either be specified in the BreaKmer configuration file or put in the path (e.g. export PATH=$PATH:/path/to/binary).
 
@@ -117,7 +117,7 @@ analysis_dir=<path to analysis directory, location where analysis and final outp
 reference_data_dir=<path to where reference files will/are stored for each of the targeted genes analyzed> 
 cutadapt=<path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.5/bin/cutadapt> 
 cutadapt_config_file=<path to cutadapt configuration file> 
-jellyfish=<path to Jellyfish binary v1.1.11 required, i.e. /usr/bin/jellyfish>
+jellyfish=<path to Jellyfish binary, i.e. /usr/bin/jellyfish>
 blat=<path to blat binary, i.e. /usr/bin/blat>
 gfserver=<path to gfServer binary, i.e. /usr/bin/gfServer>
 gfclient=<path to gfClient binary, i.e. /usr/bin/gfClient>
@@ -153,6 +153,7 @@ Input file formats
   - The file provided is intended for data generated using the paired-end Illumina TruSeq library.
   - Many of the Illumina library sequences have been annotated [elsewhere](https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors).
 - reference_fasta = genome reference fasta formatted file containing all the chromosome reference sequences that were used to initially align the data.
+  - This shold be a single file containing all the sequences.
 - gene_annotation = Annotation file containing the location of reference genes. These can be downloaded from UCSC Genome Browser, (i.e., [hg19 refGene table](http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/))
 ```
 #bin    name    chrom   strand  txStart txEnd   cdsStart        cdsEnd  exonCount       exonStarts      exonEnds        score   name2   cdsStartStat    cdsEndStat      exonFrames
