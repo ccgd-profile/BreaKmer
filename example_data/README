@@ -26,7 +26,7 @@ To analyze the example data follow these steps:
 1. Edit the template configuration file appropriately (breakmer.cfg).
   - We have provided all the files necessary to run the example data. The configuration file paths need to be changed accordingly.
 
-analysis_name=breakmer_test
+analysis_name=example
 targets_bed_file=<path to example_data directory>/genes.bed
 sample_bam_file=<path to example_data directory>/B2M.bam
 analysis_dir=<path to example_data directory>
@@ -47,6 +47,25 @@ kmer_size=15
   - python <path to BreaKmer directory>/breakmer.py <path to example directory>/breakmer.cfg
 
 3. The output files will be within the designated analysis directory (i.e., example_data) as specified in the configuration file.
+
+The final output file with the results will be within the example_indel_svs.out file with the following:
+genes	target_breakpoints	align_cigar	mismatches	strands	rep_overlap_segment_len	sv_type	split_read_count	nkmers	disc_read_count	breakpoint_coverages	contig_id	contig_seq
+B2M	chr15:45007873-45008026 (D153)	89M153D50M	0	+	0.0:139	indel	12	14	0	176,53	B2M_contig1	AAGGACTGGTCTTTCTATCTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATCAGATTAG
+
+The results indicates:
+genes = B2M - Event occurs in B2M gene
+target_breakpoints = chr15:45007873-45008026 (D153) - 153 bp deletion with breakpoints located at 45007873 and 45008026
+align_cigar = 89M153D50M - 89 bp of the contig match the reference, 153 bp are deleted in the contig sequence compared to reference, and 50 bp are matching
+mismatches = 0 - No single nucleotide mismatches between the reference sequence and the contig sequence.
+strands = + - Contig aligns on the + strand of the reference
+rep_overlap_segment_len = 0.0:139 - Two values indications 1. % of repeat overlap 2. Contig segment matching length
+sv_type = indel
+split_read_count = 12 - Number of split reads supporting the event
+nkmers = 14 - Number of sample only kmers used to build the contig
+disc_read_count = 0 - No discordantly mapped read pairs extracted for this event.
+breakpoint_coverages = 176,53 - Number of non-duplicated aligned sequences at the inferred breakpoint locations
+contig_id = B2M_contig1
+contig_seq = AAGGACTGGTCTTTCTATCTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATCAGATTAG - contig sequence assembled containing this event.
 
 The output of the program should appear in the example_data/output and example_data/targets directories. The follow example files have been provided to check the users output and the expected output.
 
