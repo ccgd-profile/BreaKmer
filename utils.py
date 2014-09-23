@@ -87,6 +87,11 @@ def test_cutadapt(fq_fn, cutadapt_bin, cutadapt_config) :
     return (fq_clean_fn, rc) 
 
 def test_jellyfish(jfish_bin, fa_fn, analysis_dir) :
+  cmd = '%s --version'%jfish_bin
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  output, errors = p.communicate()
+  jfish_version = int(output.split()[1].split('.')[0])
+
   kmer_size = 15
   count_fn = os.path.join(analysis_dir, "test_jellyfish_counts")
   cmd = '%s count -m %d -s %d -t %d -o %s %s'%(jfish_bin, kmer_size, 100000000, 8, count_fn, fa_fn)
@@ -95,8 +100,9 @@ def test_jellyfish(jfish_bin, fa_fn, analysis_dir) :
   if p.returncode != 0 :
     return ("Jellyfish counts", p.returncode)
 
+  if jfish_version < 2 : count_fn += '_0'
   dump_fn = os.path.join(analysis_dir, "test_jellyfish_dump")
-  cmd = '%s dump -c -o %s %s'%(jfish_bin, dump_fn, count_fn+"_0")
+  cmd = '%s dump -c -o %s %s'%(jfish_bin, dump_fn, count_fn)
   p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
   output, errors = p.communicate()
   if p.returncode != 0 :
@@ -266,6 +272,13 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size) :
       logger.info('%s does not exist.'%fa_fn)
       dump_fn = None
       return dump_fn
+
+    cmd = '%s --version'%jellyfish
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output, errors = p.communicate()
+    jfish_version = int(output.split()[1].split('.')[0])
+    logger.info('Using jellyfish version %d'%jfish_version)
+     
     count_fn = os.path.join(file_path, file_base + "_" + str(kmer_size) + "mers_counts")
     logger.info('Running %s on file %s to determine kmers'%(jellyfish,fa_fn)) 
     cmd = '%s count -m %d -s %d -t %d -o %s %s'%(jellyfish,kmer_size,100000000,8,count_fn,fa_fn)
@@ -274,7 +287,9 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size) :
     output, errors = p.communicate()
     logger.info('Jellyfish count output %s'%output)
     logger.info('Jellyfish count errors %s'%errors)
-    cmd = '%s dump -c -o %s %s'%(jellyfish,dump_fn,count_fn+"_0")
+
+    if jfish_version < 2 : count_fn += '_0'
+    cmd = '%s dump -c -o %s %s'%(jellyfish,dump_fn,count_fn)
     logger.info('Jellyfish dump system command %s'%cmd)
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     output, errors = p.communicate()
