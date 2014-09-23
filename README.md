@@ -225,16 +225,17 @@ Output files and formats
     - A summary file labeled \<analysis_name\>\_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.
   - Output for each SV type are put in respective tab-delimited files, labeled \<analysis_name\>\_\<indel,trl,inv\_rearrangement,td\_rearrangement\>\_svs.out
     - The columns are:
-       - Gene/Target names
-       - Target genomic breakpoints (chr:pos)
-       - Re-alignment CIGAR string
-       - Number of re-alignment mismatches
-       - Strand(s) of contig when realigned
-       - Percentage re-alignment overlaps with repeat regions, length of aligned BLAT segments
-       - Type of variation detected
-       - Number of reads that cover the assembled contig at the inferred breakpoint
-       - Number of kmers used to assemble the contig
-       - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).
-       - Contig ID
-       - Contig sequence. 
+       - genes - Gene/Target names
+       - target_breakpoints - Target genomic breakpoints (chr:pos) (I/D<size> for indels)
+       - align_cigar - Re-alignment CIGAR string
+       - mismatches - Number of re-alignment mismatches
+       - strands - Strand(s) of contig when realigned
+       - rep_overlap_segment_len - Percentage re-alignment overlaps with repeat regions:length of aligned BLAT segments
+       - sv_type - Type of variation detected
+       - split_read_count - Number of assembled reads that cover the assembled contig at the inferred breakpoint
+       - nkmers - Number of kmers used to assemble the contig
+       - disc_read_count - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).
+       - breakpoint_coverages - Number of non-duplicated reads aligned at the inferred breakpoint locations.
+       - contig_id - Contig ID
+       - contig_seq - Contig sequence. 
   - Each target gene in which a SV was detected has a separate output directory (\<analysis\_dir\>/output/\<target\_name\>) containing formatted output specific to the target and the related reference-aligned sequence reads for the contigs that contain the structural variants detected in BAM format.
