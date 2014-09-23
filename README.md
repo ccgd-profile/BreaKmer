@@ -59,8 +59,8 @@ Requirements
   - v1.5 tested
 - [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish)
   - Generating kmers.
-  - v1.1.11(http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz) tested
-  - v2.1.3(http://www.genome.umd.edu/jellyfish.html) untested
+  - [v1.1.11](http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz) tested
+  - [v2.1.3](http://www.genome.umd.edu/jellyfish.html) untested
 
 When these programs are installed, the paths to the binaries can be either be specified in the BreaKmer configuration file or put in the path (e.g. export PATH=$PATH:/path/to/binary).
 
