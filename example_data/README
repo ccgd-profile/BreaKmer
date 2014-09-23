@@ -19,12 +19,19 @@ The following files have been provided in the BreaKmer directory (one level up f
 <path to BreaKmer directory>/bin/gfServer - blat server binary for linux x86 64bit
 <path to BreaKmer directory>/ref/ucsc_hg19_refgene.txt
 <path to BreaKmer directory>/ref/ucsc_hg19_rmsk.bed
-<path to BreaKmer directory>/ref/ucsc_hg19_dna.chr15.fa
 
 To analyze the example data follow these steps:
 
 1. Edit the template configuration file appropriately (breakmer.cfg).
-  - We have provided all the files necessary to run the example data. The configuration file paths need to be changed accordingly.
+  - We have provided all the files necessary to run the example data other than the genome fasta file (see below). 
+  - The configuration file paths need to be changed accordingly.
+  - To create reference genome fasta file for example data:
+    a. Downloaded the chromFa.tar.gz file from UCSC Genome Browser (http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz). 
+    b. Make directory named genome in <path to BreaKmer directory>/ref
+    c. Unpack chromFa.tar.gz in <path to BreaKmer directory>/ref/genome (tar -xvzf chromFa.tar.gz) - this will output many reference chromosome sequence fasta files (e.g., chr1.fa, chr2.fa, chr3.fa, etc...)
+    d. Concatenate all the primary chromosomes together (chr1, chr2, chr3,...chrX, chrY, chrM) in order (i.e., cat chr1.fa chr2.fa ... chrM > hg19_ref_genome.primary-assembly.fa) - this will produce one file containing all the chromosome sequences.
+    e. Rename the sequences by removing all the 'chr' since these are the names of the chromosomes in our example data. (sed -i 's/chr//g' hg19_ref_genome.primary-assembly.fa)
+    f. Move reference genome file to <path to BreaKmer directory>/ref
 
 analysis_name=example
 targets_bed_file=<path to example_data directory>/genes.bed
@@ -38,7 +45,7 @@ blat=<path to BreaKmer directory>/bin/blat
 gfclient=<path to BreaKmer directory>/bin/gfClient
 gfserver=<path to BreaKmer directory>/bin/gfServer
 fatotwobit=<path to BreaKmer directory>/bin/faToTwoBit
-reference_fasta=<path to BreaKmer directory>/ref/ucsc_hg19_dna.chr15.fa
+reference_fasta=<path to BreaKmer directory>/ref/<GENOME FASTA FILE>
 gene_annotation_file=<path to BreaKmer directory>/ref/ucsc_hg19_refgene.txt
 repeat_mask_file=<path to BreaKmer directory>/ref/ucsc_hg19_rmsk.bed
 kmer_size=15 
