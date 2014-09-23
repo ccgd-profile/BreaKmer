@@ -6,10 +6,8 @@ A method to identify genomic structural variation in target regions/genes from r
 Installation
 ----------
 
-Prior to installation the following are required for installation:
+The following are required for installation:
 - [Python 2.7](https://www.python.org/download/releases/2.7)
-- [Biopython 1.62](http://biopython.org/wiki/Main_Page)
-- [Pysam 0.6](https://code.google.com/p/pysam/)
 
 Download the python scripts and run the command:
 ```
@@ -19,29 +17,31 @@ Use appropriate commands for installing locally:
 ```
 python setup.py install --user
 ```
-Once installed, BreaKmer can be run with the following command:
-```
-python breakmer.py <options> <path to config file>
-```
 
-BreaKmer has currently been installed and tested on 64bit linux machine using CentOS release 5.5 using python2.7. 
-Dependencies and versions tested:
-- blat (Standalone BLAT v35x1)
-- gfServer (v35x1)
-- gfClient (v35x1)
-- cutadapt (v1.5)
-- jellyfish (v1.1.11)
+Using the setup.py script for installation should setup the required python module dependencies for appropriate usage. If the install script is not used, the two modules need to be downloaded and installed if not already:
+- [Biopython 1.62](http://biopython.org/wiki/Main_Page)
+- [Pysam 0.6](https://code.google.com/p/pysam/)
+
+BreaKmer has currently been installed and tested on:
+- 64bit linux using CentOS release 5.5 and python2.7.2 
+- 64bit linux using Ubuntu and python2.7.6
 
 Usage
 ---------
 
-```
-python <PATH_TO_BREAKMER_SCRIPTS>/breakmer.py <OPTIONAL PARAMETERS> <PATH_TO_CONFIG_FILE>
-```
-
 List the available command line parameters.
 ```
 python <PATH_TO_BREAKMER_DIR>/breakmer.py -h
+```
+
+Analyze all the target genes specified in the targets bed file.
+```
+python <path to breakmer scripts>/breakmer.py <options> <path to breakmer configuration file>
+```
+
+Analyze a subset of genes specified in a file.
+```
+python <path to breakmer scripts>/breakmer.py -g <file containing list of target genes to analyze> <path to breakmer configuration file>
 ```
 
 Requirements
@@ -50,35 +50,71 @@ Requirements
 ### Programs
 - BLAT standalone and server binaries ([blat, gfServer, gfClient, faToTwoBit](http://hgdownload.cse.ucsc.edu/admin/exe/)).
   - Re-alignment to reference sequence.
-- [Cutadapt v1.5](https://code.google.com/p/cutadapt/)
+  - Versions tested :
+    - standalone BLAT v35x1
+    - gfServer v35x1
+    - gfClient v35x1
+- [Cutadapt](https://code.google.com/p/cutadapt/)
   - Trims adapter sequence from aligned reads.
-- [Jellyfish v1.1.11](http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz)
+  - v1.5 tested
+- [Jellyfish](http://www.cbcb.umd.edu/software/jellyfish)
   - Generating kmers.
+  - v1.1.11(http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz) tested
+  - v2.1.3(http://www.genome.umd.edu/jellyfish.html) untested
 
-Paths to these binaries need to be specified in the configuration file input to breakmer.py
+When these programs are installed, the paths to the binaries can be either be specified in the BreaKmer configuration file or put in the path (e.g. export PATH=$PATH:/path/to/binary).
 
-### Data
-- BreaKmer requires sequence reads that have been aligned to a reference sequence in a binary alignment format (BAM). The alignment program must soft-clip or trim reads that can be partially aligned to the reference sequence. The partially aligned reads and unmapped reads with mapped mates (paired-end data) are used to build contigs with potential SV. 
-- There are a number of aligners that soft-clip partially aligned sequences, bwa and Bowtie are two well-known tools:
-  - [bwa](http://bio-bwa.sourceforge.net/)
-  - [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
-- It is also useful to mark duplicate reads prior to using BreaKmer, as these will inflate read counts for identified variants.
-  - [Picard MarkDuplicates](http://picard.sourceforge.net/command-line-overview.shtml#MarkDuplicates)
+### Sequence data
+- Sample bam file
+  - BreaKmer requires sequence reads that have been aligned to a reference sequence in a binary alignment format (BAM). The alignment program must soft-clip or trim reads that can be partially aligned to the reference sequence (e.g., bwa, bowtie, novoalign, mosaik). The partially aligned reads and unmapped reads with mapped mates (paired-end data) are used to build contigs with potential SV. This bam file is required as input in the configuration file as the "sample_bam_file".
+    - The BAM files need to be sorted and indexed, with the indexed files in the same directory as the BAM file.
+    - There are a number of aligners that soft-clip partially aligned sequences, bwa and Bowtie are two well-known tools:
+      - [bwa](http://bio-bwa.sourceforge.net/)
+      - [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
+    - It is also useful to mark duplicate reads prior to using BreaKmer, as these will inflate read counts for identified variants.
+      - [Picard MarkDuplicates](http://picard.sourceforge.net/command-line-overview.shtml#MarkDuplicates)
+- Normal bam file
+  - A matched normal with similarly targeted sequencing data as the sample can be input to help filter germline events. The sequences in the normal bam file are processed for each target in a similar manner to the sample sequences and used to further filter our kmers. This is an optional input in the configuration file as "normal_bam_file".
+
+### Reference data
+- Reference fasta file 
+  - BreaKmer makes use of reference sequence data throughout the program. The genomic reference sequence used to align the short sequence reads is required as an input in the configuration file as the "reference_fasta".
+  - Format: single fasta file with chromosome number/id as names (i.e. '>1', '>2', '>3')
+  - Hg19 fasta files can be downloaded from UCSC Genome Browser(http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/)
+  - This file should be placed in a writeable directory. A 2bit file will be generated from this file to start the blat server.
+- Reference genome annotation 
+  - This file is used by BreaKmer to annotate the locations of the breakpoints identified and the genes involved. This is required as input in the configuration file as the "gene_annotation_file".
+  - Format: tab delimited file containing a row for each RefSeq transcript with multiple columns describing the coding coordinates of the transcript.
+  - Hg19 RefSeq annotation file can be downloaded from UCSC Genome Browser [Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?command=start) using assembly: Feb. 2009 (GRCh37/hg19), group: Genes and Gene Predictions, track: RefSeq Genes, table: refGene
+- Repeat mask bed file 
+  - This file is used by BreaKmer to determine whether breakpoints and identified variants lie within simple and low-complexity repeat regions that have been annotated. This is an optional input in the configuration file as "repeat_mask_file".
+  - Format: tab delimited file containing the coordinates for the various repeat regions.
+  - Hg19 repeat regions bed file can be downloaded from UCSC Genome Browser [Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?command=start) with group = Repeats, track = RepeatMasker, table = rmsk, output format: BED
+- Alternate reference assembly sequences 
+  - This is an optional input in the configuration file as the "alternate_fastas". These are used to supplement the required reference fasta sequence and helpful for removing indel variants that exist in the reference sequence but not either of the alternate assembly sequences.
+  - Format: single fasta file with chromosome number/id as names (i.e. '>1', '>2', '>3')
+  - There are two alternate assemblies available for human, [CHM1_1.1](http://www.ncbi.nlm.nih.gov/assembly/GCF_000306695.2/) and [HuRef](http://www.ncbi.nlm.nih.gov/assembly/GCA_000002125.2).
+
+### Other files
+- Target regions bed file
+  - The target regions sequenced need to be specified in a bed file for BreaKmer to know the coordinates of the regions sequenced and which are to be analyzed. This is a required input in the configuration file as the "targets_bed_file".
+  - Format: a tab delimited file containing the chromosome, start, end, HUGO gene name, and exon/intron feature of a tile region of the genome. The tiled regions should not be overlapping.
 
 Configuration file
 ------------
 
-- A configuration file with all the options is available, breakmer.cfg.
+- A template configuration file with all the options is available, breakmer.cfg.
 - Below lists and describes the parameters that can be used in the configuration file. Do not keep commented text (i.e., #Required parameters) in the configuration file.
 - Note that the paths to the six required program binaries (Cutadapt, Jellyfish, blat, gfServer, and gfClient) can be set in the configuration file
   or these binaries can be included in the users path (e.g., for linux users: export PATH=$PATH:/path/to/binary).
+- Use full paths (e.g., /home/bob and not ~/)
 ```
 # Required parameters
-analysis_name=<sample_id>
+analysis_name=<sample_id, string value that all the output files will contain>
 targets_bed_file=<path to bed file containing locations of target regions>
-sample_bam_file=<path to sample bam file>
-analysis_dir=<path to analysis directory>
-reference_data_dir=<path to where reference files will/are stored> 
+sample_bam_file=<path to sorted and indexed sample bam file>
+analysis_dir=<path to analysis directory, location where analysis and final output files will be located>
+reference_data_dir=<path to where reference files will/are stored for each of the targeted genes analyzed> 
 cutadapt=<path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.5/bin/cutadapt> 
 cutadapt_config_file=<path to cutadapt configuration file> 
 jellyfish=<path to Jellyfish binary v1.1.11 required, i.e. /usr/bin/jellyfish>
@@ -87,7 +123,7 @@ gfserver=<path to gfServer binary, i.e. /usr/bin/gfServer>
 gfclient=<path to gfClient binary, i.e. /usr/bin/gfClient>
 fatotwobit=<path to faToTwoBit binary, i.e. /usr/bin/faToTwoBit>
 reference_fasta=<path to whole genome reference fasta file, one file with all records>
-gene_annotation_file=<path to ucsc_hg19_refgene.txt>
+gene_annotation_file=<path to gene annotation file, e.g., ucsc_hg19_refgene.txt>
 kmer_size=15
 
 # Optional parameters
@@ -170,6 +206,7 @@ BreaKmer parameters
 
 Output files and formats
 -----------
+
 - While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. 
 
 ### Logging
