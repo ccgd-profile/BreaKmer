@@ -373,6 +373,7 @@ def get_fastq_reads(fn, sv_reads) :
     qname_split = header.lstrip("@").split("_")
     indel_only = qname_split[-1]
     qname = "_".join(qname_split[0:len(qname_split)-1])
+    add = False
     if qname in sv_reads : 
       oseq, sc_seqs, clip_coords, indel_meta = sv_reads[qname]
       cleaned_seq = seq 
@@ -921,23 +922,25 @@ class FastqFile(object) :
   def next(self) :
     header, seq, qual_header, qual = [self._f.next() for _ in range(4)]
     header = header.strip()
-    inst,lane,tile,x,y_end = header.split(':')
+    # inst,lane,tile,x,y_end = header.split(':')
     seq = seq.strip()
     qual = qual.strip()
+    '''
     bc = None
     y = y_end
     if y.find('/') > -1 :
       y, end = y.split('/')
     if y.find('#') > -1 :
       y, bc = y.split('#')
-    header_dict = {'inst':inst,
+     header_dict = {'inst':inst,
                    'lane':int(lane),
                    'tile':int(tile),
                    'x':int(x),
                    'y':int(y),
                    'end':end,
                    'bc': bc}
-    return (header,seq,qual)
+    '''
+    return (header, seq, qual)
 # End FastqFile class
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
