@@ -860,7 +860,13 @@ class params :
     curdir = os.getcwd()
     os.chdir(self.opts['reference_fasta_dir'])
     # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit 
-    self.opts['blat_port'] = random.randint(8000,9500)
+    blatPortNumber = random.randint(8000,9500)
+    if 'blat_port' in self.opts:
+        if not isinstance(self.opts['blat_port'], int):
+            self.logger.error('Blat port specified is not an integer value, exiting.')
+            sys.exit()
+        blatPortNumber = int(self.opts['blat_port'])
+    self.opts['blat_port'] = blatPortNumber
     self.opts['gfserver_log'] = os.path.join(self.paths['output'],'gfserver_%d.log'%self.opts['blat_port'])
     cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &'%(self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'],ref_fasta_name+".2bit")
     self.logger.info("Starting gfServer %s"%cmd)
