@@ -65,7 +65,7 @@ def parse_config_f(config_fn, opts) :
   return param_opts
 
 parser = argparse.ArgumentParser(prog='BreaKmer', description="Program to identify structural variants within targeted locations.", usage='%(prog)s [options]')
-parser.add_argument('-l', '--log_level', dest='log_level', default='DEBUG', type='string', help='Log level [default: DEBUG]')
+parser.add_argument('-l', '--log_level', dest='log_level', default='DEBUG', help='Log level [default: DEBUG]')
 parser.add_argument('-a', '--keep_repeat_regions', dest='keep_repeat_regions', default=False, action='store_true', help='Keep indels in repeat regions. No repeat mask bed file required if set. [default: %default]')
 parser.add_argument('-p', '--preset_ref_data', dest='preset_ref_data', default=False, action="store_true", help='Preset all the reference data for all the targets before running analysis. [default: %default]')
 parser.add_argument('-s', '--indel_size', dest='indel_size', default=15, type='int', help='Indel size filter [default: %default]')
