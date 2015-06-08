@@ -42,23 +42,20 @@ sv_caller.py - call SVs from blat result.
 '''
 
 
-def parse_config_f(config_fn, opts) :
-  param_opts = {}
-  config_f = open(config_fn, 'rU')
-  flines = config_f.readlines()
-  for line in flines :
-    line = line.strip()
-    linesplit = line.split("=")
-    if len(linesplit) == 1 : 
-      print 'Config line', line, ' not set correctly. Exiting.'
-      sys.exit(2)
-    else :
-      k,v = linesplit
-      param_opts[k] = v
-
-  for opt in vars(opts) : 
-    param_opts[opt] = vars(opts)[opt]
-  return param_opts
+def parse_config_f(config_fn, opts):
+    param_opts = {}
+    for line in open(config_fn, 'rU'):
+        line = line.strip()
+        linesplit = line.split("=")
+        if len(linesplit) == 1 : 
+            print 'Configuration line', line, 'not set correctly. Exiting.'
+            sys.exit(2)
+        else :
+            k,v = linesplit
+            param_opts[k] = v
+    for opt in vars(opts): 
+        param_opts[opt] = vars(opts)[opt]
+    return param_opts
 
 
 parser = argparse.ArgumentParser(description="Program to identify structural variants within targeted locations.", usage='%(prog)s [options]', add_help=True)
@@ -80,42 +77,21 @@ parser.add_argument('-z', '--no_output_header', dest='no_output_header', default
 parser.add_argument('-f', '--filter_list', dest='filter_list', default=None, help='Input a set of events to filter out. [default: %(default)s]')
 
 
-'''
-usage = '%prog [options] <config file name>'
-desc = """Script to identify structural variants within targeted locations."""
-parser = OptionParser(usage=usage,description=desc)
-parser.add_option('-l', '--log_level', dest='log_level', default='DEBUG', type='string', help='Log level [default: %default]')
-parser.add_option('-a', '--keep_repeat_regions', dest='keep_repeat_regions', default=False, action='store_true', help='Keep indels in repeat regions. No repeat mask bed file required if set. [default: %default]')
-parser.add_option('-p', '--preset_ref_data', dest='preset_ref_data', default=False, action="store_true", help='Preset all the reference data for all the targets before running analysis. [default: %default]')
-parser.add_option('-s', '--indel_size', dest='indel_size', default=15, type='int', help='Indel size filter [default: %default]')
-parser.add_option('-c', '--trl_sr_thresh', dest='trl_sr_thresh', default=2, type='int', help='Split read support threshold for translocations [default: %default]')
-parser.add_option('-d', '--indel_sr_thresh', dest='indel_sr_thresh', default=5, type='int', help='Split read support threshold for indels [default: %default]')
-parser.add_option('-r', '--rearr_sr_thresh', dest='rearr_sr_thresh', default=3, type='int', help='Split read support threshold for rearrangements [default: %default]')
-parser.add_option('-g', '--gene_list', dest='gene_list', default=None, type='string', help='Gene list to consider for analysis [default: %default]')
-parser.add_option('-k', '--keep_intron_vars', dest='keep_intron_vars', default=False, action='store_true', help='Keep intronic indels or rearrangements [default: %default]')
-parser.add_option('-v', '--var_filter', dest='var_filter', default='all', type='string', help='Variant types to report (all, indel, trl, rearrangment) [default: %default]')
-parser.add_option('-m', '--rearr_min_seg_len', dest='rearr_minseg_len', default=30, type='int', help='Threshold for minimum segment to be rearranged [default: %default]')
-parser.add_option('-n', '--trl_min_seg_len', dest='trl_minseg_len', default=25, type='int', help='Threshold for minimum length of translocation segment [default: %default]')
-parser.add_option('-t', '--align_thresh', dest='align_thresh', default=.90, type='int', help='Threshold for minimum read alignment for assembly [default: %default]')
-parser.add_option('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %default]')
-'''
+if __name__ == '__main__':
+    try:
+        args = sys.argv[1:]
+        opts = parser.parse_args()
+        if len(args) != 1:
+            parser.error('Requires input of configuration file name')
+            parser.usage()
+        else:
+            config_fn = args[0]
+    except parser.error:
+        parser.usage()
+        sys.exit(2)
 
-
-if __name__ == '__main__' :
-  try :
-    args = sys.argv[1:]
-    opts = parser.parse_args()
-    if len(args) != 1 :
-      parser.error('Requires input of configuration file name')
-      parser.usage()
-    else :
-      config_fn = args[0]
-  except parser.error:
-    parser.usage()
-    sys.exit(2)
-
-  tic = time.clock()
-  config_d = parse_config_f(config_fn, opts)
-  utils.setup_logger(config_d,'root')
-  r = runner(config_d)
-  r.run(tic)
+    tic = time.clock()
+    config_d = parse_config_f(config_fn, opts)
+    utils.setup_logger(config_d, 'root')
+    r = runner(config_d)
+    r.run(tic)
