@@ -90,11 +90,8 @@ def add_discordant_pe(aread, read_d, bamfile) :
         read_positions = (aread.mpos, aread.pos, 1, 0, qname)
         read_d['td_reads'].append(read_positions)
       if read_positions : read_d['other'].append(read_positions)
-#-----------------------------------------------------------
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Class sv_analysis
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 class runner :
   def __init__(self, config_d) :
     self.params = params(config_d)
@@ -104,7 +101,7 @@ class runner :
     self.summary_header = ''
     self.logger = logging.getLogger('root')
 
-  #********************************************************* 
+
   def preset_ref_data(self) :
     nprocs = 6
     ngroups = 6
@@ -163,7 +160,6 @@ class runner :
     ref_params = [mask_fn, ref_fa_fn, altref_fa_fns, ref_data_dir, jfish_path, blat_path, self.params.get_kmer_size()]
     setup_params = izip(trgt_groups, repeat(ref_params))
     p.map(setup_ref_data, setup_params)
-  #*********************************************************
 
   #*********************************************************
   def create_targets(self) :
