@@ -1,8 +1,9 @@
 #! /usr/bin/local/python
 
 import sys
-from utils import *
-from sv_processor import *
+import utils
+import time
+from sv_processor import runner
 import argparse
 
 
@@ -106,15 +107,15 @@ if __name__ == '__main__' :
     opts = parser.parse_args()
     if len(args) != 1 :
       parser.error('Requires input of configuration file name')
-      usage()
+      parser.usage()
     else :
       config_fn = args[0]
   except parser.error:
-    usage()
+    parser.usage()
     sys.exit(2)
 
   tic = time.clock()
   config_d = parse_config_f(config_fn, opts)
-  setup_logger(config_d,'root')
+  utils.setup_logger(config_d,'root')
   r = runner(config_d)
   r.run(tic)
