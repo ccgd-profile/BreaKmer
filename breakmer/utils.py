@@ -261,7 +261,7 @@ def setup_logger(logFnPath, name):
     logger.setLevel(logging.DEBUG)
 
     # FileHandler
-    fileHandle = logging.FileHandler(os.path.join(output_path, 'log.txt'), mode='w')
+    fileHandle = logging.FileHandler(os.path.join(outputPath, 'log.txt'), mode='w')
     fileHandle.setLevel(logging.DEBUG)
     # ConsoleHandler
     consoleHandle = logging.StreamHandler()
