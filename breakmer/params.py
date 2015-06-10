@@ -154,9 +154,7 @@ class ParamManager:
         """
 
         self.opts = {}
-        config_f = open(config_fn, 'rU')
-        flines = config_f.readlines()
-        for line in flines:
+        for line in open(arguments.configFn, 'rU'):
             line = line.strip()
             # Allow for blank lines and comments
             if line == '' or line.find('#') > -1:
