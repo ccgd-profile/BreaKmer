@@ -130,7 +130,8 @@ class TargetManager:
         """
 
         intervals = self.params.targets[self.name]
-        for chrom, int(start), int(end) in intervals:
+        for values in intervals:
+            chrom, start, end = values[0], int(values[1]), int(values[2])
             if not self.chrom:
                 self.chrom = chrom
             if not self.start:
@@ -289,7 +290,7 @@ class TargetManager:
             None
         """
 
-        self.setup_read_extraction_files(type)
+        self.setup_read_extraction_files(sampleType)
         bamType = 'sample'
         if sampleType == 'norm':
             bamType = 'normal'
