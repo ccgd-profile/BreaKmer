@@ -1,4 +1,7 @@
 #! /usr/bin/local/python
+# -*- coding: utf-8 -*-
+"""sv_processor module
+"""
 
 import sys
 import os
@@ -9,7 +12,7 @@ import math
 import logging
 
 
-def process_reads(areads, read_d, bamfile) :
+def process_reads(areads, read_d, bamfile):
     pair_indices = {}
     valid_reads = []
     for aread in areads :
@@ -21,9 +24,8 @@ def process_reads(areads, read_d, bamfile) :
         if aread.is_unmapped : # Store unmapped reads
             read_d['unmapped'][aread.qname] = aread
             skip = True
-
         # If read is unmapped or duplicate or qcfail, then don't store
-        if not skip :
+        if not skip:
             proper_map = False
             overlap_reads = False
             # These two functions can opeate on the first read of the pair.
@@ -32,7 +34,6 @@ def process_reads(areads, read_d, bamfile) :
                 add_discordant_pe(aread, read_d, bamfile) # 
                 proper_map, overlap_reads = pe_meta(aread)
             valid_reads.append((aread, proper_map, overlap_reads))
-
             if aread.qname not in pair_indices and not aread.mate_is_unmapped :
                 pair_indices[aread.qname] = {}
             if aread.qname in pair_indices :
@@ -40,7 +41,7 @@ def process_reads(areads, read_d, bamfile) :
     return pair_indices, valid_reads
 
 
-def pe_meta(aread) :
+def pe_meta(aread):
     # First check if read is from a proper paired-end mapping --> <--    
     proper_map = False
     overlap_reads = False
@@ -91,9 +92,12 @@ def add_discordant_pe(aread, read_d, bamfile) :
             if read_positions : read_d['other'].append(read_positions)
 
 
-class runner :
-    def __init__(self, config_d):
-        self.params = params(config_d)
+class Runner:
+    """
+    """
+
+    def __init__(self, config):
+        self.params = params(config)
         self.results = []
         self.targets = {}
         self.summary = {}
@@ -121,7 +125,7 @@ class runner :
 #      chrom = None
 #      start = None
 #      end = None
-#      name = None 
+#      name = None
 #      for value in trgt_intvs :
 #        if not name : name = value[3]
 #        if not chrom : chrom = value[0]
@@ -172,7 +176,7 @@ class runner :
         return targets
 
 
-    def run(self, start_time):
+    def run(self):
         trgt_lst = self.params.targets.keys()
         trgt_lst.sort() 
         self.create_targets()
@@ -302,9 +306,8 @@ class target :
             alt_ref_fa_marker_f.close()
 
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name+'_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name+'_reverse_refseq.fa_dump')]
-    #*********************************************************
 
-    #*********************************************************
+
     def get_values(self) : return (self.chrom, self.start, self.end, self.name, self.target_intervals)
     #*********************************************************
 
