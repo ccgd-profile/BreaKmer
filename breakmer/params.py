@@ -169,8 +169,8 @@ class ParamManager:
                 key, value = linesplit
                 self.opts[key] = value
 
-        for opt in vars(opts):
-            self.opts[opt] = vars(opts)[opt]
+        for opt in vars(arguments):
+            self.opts[opt] = vars(arguments)[opt]
 
         # Sanity check for required params
         # Required when preset_ref_data = True:
