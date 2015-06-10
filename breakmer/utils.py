@@ -269,7 +269,7 @@ def setup_logger(logFnPath, name):
 
     formatter = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     fileHandle.setFormatter(formatter)
-    consoldeHandle.setFormatter(formatter)
+    consoleHandle.setFormatter(formatter)
 
     logger.addHandler(fileHandle)
     logger.addHandler(consoleHandle)
