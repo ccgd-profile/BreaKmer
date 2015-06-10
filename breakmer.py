@@ -1,65 +1,15 @@
 #! /usr/bin/local/python
 # -*- coding: utf-8 -*-
 
-"""
-Author: Ryan Abo
-12/23/2013
-
-Requires a configuration file containing key=value style formatting.
-
-This is the main script that initiates the analysis.
-
-Submodules:
-utils.py - utility functions.
- classes:
- - fq_read
- - FastqFile
- - anno
- - params
-sv_processor.py - classes to manage analysis, process, analyze, write.
- classes:
- - runner - analysis-wide information and analysis (loop through each)
- - target - target-level information and analysis
- - contig - contig-level information and analysis
-sv_assembly.py - classes to take sample kmers and produce contigs.
- classes:
- - kmers
- - kmer
- - buffer
- - contig
-sv_caller.py - call SVs from blat result.
- classes:
- - align_manager
- - blat_manager
- - blat_res
- - sv_event
-"""
-
 import sys
-import utils
-from sv_processor import runner
 import argparse
+import breakmer.params as params
+import breakmer.processor.analysis as breakmer_analysis
 
-
-def parse_config_f(arguments):
-    '''
-    Parse configuration file.
-    '''
-
-    param_opts = {}
-    for line in open(arguments.configFn, 'rU'):
-        line = line.strip()
-        linesplit = line.split('=')
-        if len(linesplit) == 1:
-            print 'Configuration line', line, 'not set correctly. Exiting.'
-            sys.exit(2)
-        else:
-            key, value = linesplit
-            param_opts[key] = value
-    for opt in vars(arguments):
-        param_opts[opt] = vars(arguments)[opt]
-    return param_opts
-
+__author__ = "Ryan Abo"
+__copyright__ = "Copyright 2015, Ryan Abo"
+__email__ = "ryanabo@gmail.com"
+__license__ = "MIT"
 
 PARSER = argparse.ArgumentParser(description="Program to identify structural variants within targeted locations.", usage='%(prog)s [options]', add_help=True)
 PARSER.add_argument('configFn', help='Path to the configuration file. Required')
@@ -77,11 +27,7 @@ PARSER.add_argument('-m', '--rearr_min_seg_len', dest='rearr_minseg_len', defaul
 PARSER.add_argument('-n', '--trl_min_seg_len', dest='trl_minseg_len', default=25, type=int, help='Threshold for minimum length of translocation segment [default: %(default)s]')
 PARSER.add_argument('-t', '--align_thresh', dest='align_thresh', default=.90, type=int, help='Threshold for minimum read alignment for assembly [default: %(default)s]')
 PARSER.add_argument('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %(default)s]')
-PARSER.add_argument('-f', '--filter_list', dest='filter_list', default=None, help='Input a set of events to filter out. [default: %(default)s]')
+PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
 
-
-ARGS = PARSER.parse_args()
-CONFIG = parse_config_f(ARGS)
-utils.setup_logger(CONFIG, 'root')
-BREAKMER = runner(CONFIG)
-BREAKMER.run()
+RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(ARGS))
+RUN_TRACKER.run()
