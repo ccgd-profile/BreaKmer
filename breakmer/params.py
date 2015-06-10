@@ -233,15 +233,15 @@ class ParamManager:
         utils.write_test_fq(test_fq)
         clean_fq, rc = utils.test_cutadapt(test_fq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
         if clean_fq:
-            utils.log(self.logging_name, 'info','Test cutadapt ran successfully')
+            utils.log(self.logging_name, 'info', 'Test cutadapt ran successfully')
             jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], clean_fq, test_dir)
             if rc != 0:
-                utils.log(self.logging_name, 'error','%s unable to run successfully, exit code %s. Check installation and correct version.'%(jfish_prgm, str(rc)))
+                utils.log(self.logging_name, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
             else:
-                utils.log(self.logging_name, 'info','Test jellyfish ran successfully')
+                utils.log(self.logging_name, 'info', 'Test jellyfish ran successfully')
         else:
-            utils.log(self.logging_name, 'error','Cutadapt failed to run, exit code %s. Check installation and version.'%str(rc))
+            utils.log(self.logging_name, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
             sys.exit(1)
 
     def set_targets(self, geneList):
@@ -303,7 +303,10 @@ class ParamManager:
         Return:
             None
         """
-        
+
+        # This makes the assumption that an existing blat server exists at this port.
+        # Typically nice for debugging and --keep_blat_server was used.
+        # TODO - make this more stable
         if self.get_param('blat_port'):
             return
 
@@ -311,58 +314,52 @@ class ParamManager:
         ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
 
         # Check if 2bit is there.
-        self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'],ref_fasta_name+".2bit")
+        self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
         if not os.path.exists(self.opts['blat_2bit']):
-            utils.log(self.logging_name, 'info','Creating 2bit from %s reference fasta'%ref_fasta_name+".fa")
+            utils.log(self.logging_name, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
             # Create 2bit requires faToTwoBit
             curdir = os.getcwd()
             os.chdir(self.opts['reference_fasta_dir'])
-            cmd = '%s %s %s'%(self.opts['fatotwobit'],ref_fasta_name+".fa",ref_fasta_name+".2bit")
-            p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            cmd = '%s %s %s' % (self.opts['fatotwobit'], ref_fasta_name + ".fa", ref_fasta_name + ".2bit")
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             output, errors = p.communicate()
             os.chdir(curdir)
 
         curdir = os.getcwd()
         os.chdir(self.opts['reference_fasta_dir'])
-        # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit 
-        self.opts['blat_port'] = random.randint(8000,9500)
+        # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
+        self.opts['blat_port'] = random.randint(8000, 9500)
         self.opts['blat_hostname'] = 'localhost'
-        self.opts['gfserver_log'] = os.path.join(self.paths['output'],'gfserver_%d.log'%self.opts['blat_port'])
-        cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &'%(self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'],ref_fasta_name+".2bit")
-        utils.log(self.logging_name, 'info',"Starting gfServer %s"%cmd)
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        self.opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.opts['blat_port'])
+        cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &' % (self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'], ref_fasta_name + ".2bit")
+        utils.log(self.logging_name, 'info', "Starting gfServer %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         start_time = time.time()
         while not utils.server_ready(self.opts['gfserver_log']):
             new_time = time.time()
             wait_time = new_time - start_time
             if wait_time > 1000:
-                utils.log(self.logging_name, 'error','gfServer wait time exceeded ~15 minutes, exiting')
+                utils.log(self.logging_name, 'error', 'gfServer wait time exceeded ~15 minutes, exiting')
                 sys.exit(1)
-            utils.log(self.logging_name, 'info','Waiting for blat gfServer to load reference seq')
+            utils.log(self.logging_name, 'info', 'Waiting for blat gfServer to load reference seq')
             time.sleep(60)
-        utils.log(self.logging_name, 'info','Server ready!')
+        utils.log(self.logging_name, 'info', 'Server ready!')
         os.chdir(curdir)
-    #----------------------------------------------------------------------------
 
-    #----------------------------------------------------------------------------
-    def get_kmer_size(self): 
+    def get_kmer_size(self):
         return int(self.opts['kmer_size'])
-    #----------------------------------------------------------------------------
 
-    #----------------------------------------------------------------------------
     def get_min_segment_length(self, type):
         return int(self.opts[type + '_minseg_len'])
-    #----------------------------------------------------------------------------
 
-    #----------------------------------------------------------------------------
     def get_sr_thresh(self, type):
         """Get the threshold input for the number of reads that are required to
         support a structural variant event.
         """
         if type == 'min':
             return min(self.get_sr_thresh('trl'), self.get_sr_thresh('rearrangement'), self.get_sr_thresh('indel'))
-        else: 
-            if type == 'trl': 
+        else:
+            if type == 'trl':
                 return int(self.opts['trl_sr_thresh'])
             elif type == 'rearrangement':
                 return int(self.opts['rearr_sr_thresh'])
@@ -371,7 +368,7 @@ class ParamManager:
 
     def get_param(self, key, required=False):
         """Get the parameter value.
-        
+
         If the parameer is required to be availale, then exit the program
         and throw an error.
         Args:
@@ -388,13 +385,10 @@ class ParamManager:
         if key in self.opts:
             value = self.opts[key]
         elif required:
-            utils.log(self.logging_name, 'error','Missing required parameter %s, exiting.'%key)
+            utils.log(self.logging_name, 'error', 'Missing required parameter %s, exiting.' % key)
             sys.exit(1)
         return value
-    #----------------------------------------------------------------------------
 
-    #----------------------------------------------------------------------------
     def set_param(self, key, value):
         """Set the parameter value"""
-        self.opts[key] = value 
-    #----------------------------------------------------------------------------
+        self.opts[key] = value

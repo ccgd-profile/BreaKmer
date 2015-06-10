@@ -24,10 +24,12 @@ PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='G
 PARSER.add_argument('-k', '--keep_intron_vars', dest='keep_intron_vars', default=False, action='store_true', help='Keep intronic indels or rearrangements [default: %(default)s]')
 PARSER.add_argument('-v', '--var_filter', dest='var_filter', default='all', help='Variant types to report (all, indel, trl, rearrangment) [default: %(default)s]')
 PARSER.add_argument('-m', '--rearr_min_seg_len', dest='rearr_minseg_len', default=30, type=int, help='Threshold for minimum segment to be rearranged [default: %(default)s]')
-PARSER.add_argument('-n', '--trl_min_seg_len', dest='trl_minseg_len', default=25, type=int, help='Threshold for minimum length of translocation segment [default: %(default)s]')
+PARSER.add_argument('-b', '--trl_min_seg_len', dest='trl_minseg_len', default=25, type=int, help='Threshold for minimum length of translocation segment [default: %(default)s]')
 PARSER.add_argument('-t', '--align_thresh', dest='align_thresh', default=.90, type=int, help='Threshold for minimum read alignment for assembly [default: %(default)s]')
 PARSER.add_argument('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %(default)s]')
 PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
+PARSER.add_argument('-n', '--nprocessors', dest='nprocs', default=1, type=int, help='The number of processors to use for analysis [default: %(default)s]')
+PARSER.add_argument('-x', '--keep_blat_server', dest='keep_blat_server', default=False, action='store_true', help='Keep the blat server alive [default: %(default)s]')
 
 RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(PARSER.parse_args()))
 RUN_TRACKER.run()

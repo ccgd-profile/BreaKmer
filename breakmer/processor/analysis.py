@@ -21,7 +21,7 @@ def analyze_targets(targetList):
     Each target ref data is set, if necessary, then the reads are extracted,
     contigs built, and calls made.
     Args:
-        lst: A list of TargetManager objects, representing target regions.
+        targetList: A list of TargetManager objects, representing target regions.
     Returns:
         None
     """
@@ -36,7 +36,7 @@ def analyze_targets(targetList):
         # targetRegion fails to find any interesting reads to use. Exiting.
         if not targetRegion.find_sv_reads():
             continue
-        targetRegion.compare_kmers()
+        # targetRegion.compare_kmers()
         # targetRegion.resolve_sv()
         # targetRegion.complete_analysis()
 
@@ -72,7 +72,7 @@ class RunTracker:
         """
 
         startTime = time.clock()
-        targetAnalysisLst = self.create_targets()
+        targetAnalysisList = self.create_targets()
 
         if not self.params.get_param('preset_ref_data'):
             self.params.start_blat_server()
@@ -81,9 +81,9 @@ class RunTracker:
         if nprocs > 1:
             self.logger.info('Creating all reference data.')
             p = multiprocessing.Pool(nprocs)
-            p.map(analyze_targets, targetAnalysisLst)
+            p.map(analyze_targets, targetAnalysisList)
         else:
-            analyze_targets(targetAnalysisLst)
+            analyze_targets(targetAnalysisList)
 
 #        self.write_output()
         self.logger.info('Analysis complete in %s' % str(time.clock() - startTime))
@@ -107,7 +107,7 @@ class RunTracker:
         multiprocs = nprocs > 1
         ngroups = nprocs
         ntargets = len(self.params.targets)
-        ntargetsPerGroup = ntargets/nprocs
+        ntargetsPerGroup = ntargets / nprocs
         modval = math.fmod(ntargets, nprocs)
         if modval > 0:
             ngroups += 1
