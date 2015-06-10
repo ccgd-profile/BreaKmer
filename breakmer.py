@@ -29,5 +29,5 @@ PARSER.add_argument('-t', '--align_thresh', dest='align_thresh', default=.90, ty
 PARSER.add_argument('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %(default)s]')
 PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
 
-RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(ARGS))
+RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(PARSER.parse_args()))
 RUN_TRACKER.run()
