@@ -41,9 +41,13 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
 
     # While there are kmers to analyze continue to build contigs.
     contigBuffer = ContigBuffer()
+    # Sort all the kmers by count and store in order.
     kmerTracker.set_all_kmer_values()
+    # Check if there are any kmers left to seed the build process.
     while kmerTracker.has_mers():
+        # Update the set of kmers to consider for building.
         kmerTracker.update_kmer_set()
+        # Get kmer seed for new contig.
         kmer, kmer_count = kmerTracker.get_kmer()
         # Only analyze contigs that exist in 2 or more reads.
         if kmer_count < 2:
@@ -67,104 +71,100 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
     return contigs
 
 
-def setup_contigs(kmer_seq, fq_recs, kmer_len, kmer_tracker, contig_buffer):
+def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     """Create a contig instance starting with a seed kmer and associated reads.
-    First find the reads containing the kmer_seq value, iterate through reads and
+    First find the reads containing the kmerSeq value, iterate through reads and
     either create a new contig or add to existing contig.
     Args:
-        kmer_seq: String of kmer sequence.
-        fq_recs: Dictionary with sequence values as keys and a list of fq_read objects.
-        kmer_len: Integer of kmer size.
-        kmer_tracker: KmerTracker object that contains all the kmer values.
-        contig_buffer: ContigBuffer object to track the buffered contig objects.
+        kmerSeq:        String of kmer sequence.
+        fqRecs:         Dictionary with sequence values as keys and a list of fq_read objects.
+        kmerLen:        Integer of kmer size.
+        kmerTracker:    KmerTracker object that contains all the kmer values.
+        contigBuffer:   ContigBuffer object to track the buffered contig objects.
     Return: None
     """
-
     logger = logging.getLogger('breakmer.assembly.assembler')
     contig = None
-
     # Find all reads with kmer sequence passed in.
-    kmer_reads = find_reads(kmer_seq, fq_recs.items(), set())
-    contig_buffer.add_used_mer(kmer_seq)
+    kmerReads = find_reads(kmerSeq, fqRecs.items(), set())
+    contigBuffer.add_used_mer(kmerSeq)
 
-    kmer_values = {'seq': kmer_seq,
-                   'counts': kmer_tracker.get_count(kmer_seq),
-                   'kmer_set': kmer_tracker.kmer_set,
-                   'len': kmer_len}
-    for read_vals in kmer_reads:
-        read, kmer_pos, bool, rlen, nreads = read_vals
+    kmerValues = {'seq': kmerSeq,
+                  'counts': kmerTracker.get_count(kmerSeq),
+                  'kmer_set': kmerTracker.kmer_set,
+                  'len': kmerLen}
+    for readVals in kmerReads:
+        read, kmer_pos, bool, rlen, nreads = readVals
         read_align_values = {'read': read,
                              'align_pos': kmer_pos,
                              'nreads': nreads}
-        contig_buffer.add_used_read(read.id)
+        contigBuffer.add_used_read(read.id)
         # If no contig, build one.
         if not contig:
-            contig = contig_assembler.Contig(kmer_values, read_align_values)
-            contig_buffer.add_contig(read, contig)
+            contig = contig_assembler.Contig(kmerValues, read_align_values)
+            contigBuffer.add_contig(read, contig)
         # Check if read should be added to the existing contig.
         else:
-            contig.check_read(kmer_values, read_align_values, 'setup')
+            contig.check_read(kmerValues, read_align_values, 'setup')
     if contig:
-        contig.finalize(fq_recs, kmer_tracker, contig_buffer, 'setup')
+        contig.finalize(fqRecs, kmerTracker, contigBuffer, 'setup')
 
 
-def find_reads(kmer_seq, read_items, used_reads, order='for'):
+def find_reads(kmerSeq, readItems, usedReads, order='for'):
     """Return a list of tuples containing information from reads with the kmer sequence.
     First search all the read sequences for the given kmer sequence. Then,
     filter out used reads and order them according to position of the kmer
     sequence in the read sequence.
     Args:
-        kmer_seq: String of kmer sequence.
-        read_items: List of fq_recs (key, value) tuples.
-        used_reads: Set of read IDs that have been previously used.
+        kmerSeq: String of kmer sequence.
+        readItems: List of fq_recs (key, value) tuples.
+        usedReads: Set of read IDs that have been previously used.
         order: String indicating how the list of the identified reads
                should be ordered.
     Return:
-        kmer_reads: List of tuples containing:
+        kmerReads: List of tuples containing:
                     1. read object,
                     2. start position of kmer match in read seq
                     3. Boolean that a match was found.
                     4. Length of the read sequence.
                     5. Number of reads with this sequence.
     """
-
-    kmer_reads = []
-    mapped_reads = filter(lambda x: x[2], map(read_search, [kmer_seq]*len(read_items), read_items))
+    kmerReads = []
+    mapped_reads = filter(lambda x: x[2], map(read_search, [kmerSeq] * len(readItems), readItems))
     mapped_read_ids = map(lambda x: x[0].id, mapped_reads)
-    filter_ids = set(mapped_read_ids) - set(used_reads)
+    filter_ids = set(mapped_read_ids) - set(usedReads)
     matched_reads = filter(lambda x: (x[0].id in filter_ids), mapped_read_ids)
     if order == 'rev':
-        kmer_reads = sorted(matched_reads, key=lambda z: (-z[1], -z[3]))
+        kmerReads = sorted(matched_reads, key=lambda z: (-z[1], -z[3]))
     else:
-        kmer_reads = sorted(matched_reads, key=lambda z: (z[1], -z[3]))
-    return kmer_reads
+        kmerReads = sorted(matched_reads, key=lambda z: (z[1], -z[3]))
+    return kmerReads
 
 
-def read_search(kmer_seq, read_items):
-    """Return a tuple containing information regarding the alignment of the kmer_seq
+def read_search(kmerSeq, readItems):
+    """Return a tuple containing information regarding the alignment of the kmerSeq
     in a sequence read.
-    This uses regex searching function re.search to determine if the kmer_seq
+    This uses regex searching function re.search to determine if the kmerSeq
     is contained in the read sequence. If so, then it returns a 5 element
     tuple about information regarding this alignment. If no match, then return
     a 3 element tuple with None values.
     Args:
-        kmer_seq: String of kmer sequence.
-        read_items: List of fq_recs (key, value) tuples.
+        kmerSeq: String of kmer sequence.
+        readItems: List of fq_recs (key, value) tuples.
     Return:
-        search_result: Tuple of result information.
+        searchResult: Tuple of result information.
                        1. read object,
                        2. start position of kmer match in read seq
                        3. Boolean that a match was found.
                        4. Length of the read sequence.
                        5. Number of reads with this sequence.
     """
-
-    search_result = (None, None, None)
-    seq, reads = read_values
-    x = re.search(kmer_seq, seq)
+    searchResult = (None, None, None)
+    seq, reads = readItems
+    x = re.search(kmerSeq, seq)
     if x:
-        search_result = (reads[0], x.start(), True, len(reads[0].seq), len(reads))
-    return search_result
+        searchResult = (reads[0], x.start(), True, len(reads[0].seq), len(reads))
+    return searchResult
 
 
 class ContigBuffer:
@@ -174,7 +174,6 @@ class ContigBuffer:
         used_reads: Set of read IDs that have been used to build contigs.
         contigs: OrderedDict to track reads and the contigs they contribute to.
     """
-
     def __init__(self):
         self.used_kmers = set()
         self.used_reads = set()
@@ -188,7 +187,6 @@ class ContigBuffer:
             contig: Contig object.
         Return: None
         """
-
         if read.id not in self.contigs and not read.used:
             self.contigs[read.id] = contig
             read.used = True
@@ -261,24 +259,22 @@ class KmerTracker:
     """Wrapper class for storing the kmer objects. Useful for adding
     and extracting kmers.
     Attributes:
-        kmers: List of tuples containing kmer count, kmer, kmer object
-        ordered_kmers: OrderedDict object containing kmer seq as key and kmer count as value.
-                       The top values are the most frequence kmer values.
-        kmer_seqs: Set of kmer seq values that exist in ordered_kmers.
+        kmers:          List of tuples containing kmer count, kmer, kmer object.
+        orderedKmers:   OrderedDict object containing kmer seq as key and kmer count as value.
+                        The top values are the most frequence kmer values.
+        kmerSeqs:       Set of kmer seq values that exist in orderedKmers.
     """
-
     def __init__(self):
         self.kmers = []
-        self.ordered_kmers = OrderedDict()
-        self.kmer_seqs = set()
+        self.orderedKmers = OrderedDict()
+        self.kmerSeqs = set()
 
     def add_kmer(self, mer, count):
-        """Add a kmer object to the list.
-        Stores a tuple with kmer count and kmer sequence string.
+        """Add a kmer object to the list. Stores a tuple with kmer count and kmer sequence string.
         This allows easy sorting.
         Args:
-            mer: String kmer sequence value.
-            count: Integer of number of reads kmer is within.
+            mer:    String kmer sequence value.
+            count:  Integer of number of reads kmer is within.
         Return:
             None
         """
@@ -286,15 +282,14 @@ class KmerTracker:
             self.kmers.append((int(count), mer))
 
     def set_all_kmer_values(self):
-        """Sort the kmer list by number of reads (descending) they are in first and then
+        """Sort the kmer list by number of reads (descending) first and then
         by sequence value and store them in an ordered dictionary.
         Args: None
         Return: None
         """
-
-        kmers_sorted = sorted(self.kmers, key=lambda x: (int(x[0]), x[1]), reverse=True)
-        for kmer in kmers_sorted:
-            self.ordered_kmers[kmer[1]] = kmer[0]
+        kmersSorted = sorted(self.kmers, key=lambda x: (int(x[0]), x[1]), reverse=True)
+        for kmer in kmersSorted:
+            self.orderedKmers[kmer[1]] = kmer[0]
 
     def has_mers(self):
         """Check if there are any kmers left in the dictionary.
@@ -304,20 +299,18 @@ class KmerTracker:
             True if there are items in the dictionary and the counts of those items are > 1.
             False if there are no items in the dictionary or the counts of those items are <= 1.
         """
-
-        if len(self.ordered_kmers) > 0 and max(self.ordered_kmers.values()) > 1:
+        if len(self.orderedKmers) > 0 and max(self.orderedKmers.values()) > 1:
             return True
         else:
             return False
 
     def update_kmer_set(self):
-        """Update the set of kmer values. The ordered_kmers dictionary
+        """Update the set of kmer values. The orderedKmers dictionary
         dynamically changes as kmers are taken out.
         Args: None
         Return: None
         """
-
-        self.kmer_set = set(self.ordered_kmers.keys())
+        self.kmer_set = set(self.orderedKmers.keys())
 
     def get_kmer(self):
         """Return the first kmer in the ordered dictionary"""
@@ -325,8 +318,8 @@ class KmerTracker:
 
     def get_count(self, kmer_seq):
         """Return the number of reads the kmer_seq is within."""
-        return self.ordered_kmers[kmer_seq]
+        return self.orderedKmers[kmer_seq]
 
     def remove_kmer(self, kmer_seq):
         """Delete the record associated with kmer sequence."""
-        del self.ordered_kmers[kmer_seq]
+        del self.orderedKmers[kmer_seq]

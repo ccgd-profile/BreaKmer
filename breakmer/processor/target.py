@@ -154,10 +154,10 @@ class Variation:
         utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
         output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
-        self.variation.setup_cleaned_reads(sampleType)
+        self.setup_cleaned_reads(sampleType)
         self.files['%s_cleaned_fq' % sampleType], self.variation.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
         self.clear_sv_reads(sampleType)
-        check = self.variation.continue_analysis_check(sampleType)
+        check = self.continue_analysis_check(sampleType)
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
         return check
 
