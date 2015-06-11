@@ -17,10 +17,8 @@ __license__ = "MIT"
 def load_kmers(fns, kmers):
     """
     """
-
     if not fns:
         return kmers
-
     fns = fns.split(',')
     for fn in fns:
         for line in open(fn, 'rU'):
@@ -38,7 +36,6 @@ class Variation:
 
 
     """
-
     def __init__(self, params):
         self.params = params
         self.var_reads = {}
@@ -358,7 +355,7 @@ class TargetManager:
         if sampleType == 'norm':
             bamType = 'normal'
         bamFile = self.params.opts['%s_bam_file' % bamType]
-        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.files['%s_fq' % sampleType]))
+        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.variation.files['%s_fq' % sampleType]))
         self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
 
     def compare_kmers(self):
