@@ -163,48 +163,51 @@ class Variation:
         return check
 
     def set_reference_kmers(self, targetRefFns):
-        """
-        """
-        jellyfish = self.params.get_param('jellyfish')
-        kmer_size = self.params.get_kmer_size()
+        """Set the reference sequence kmers"""
         self.kmers['ref'] = {}
         for i in range(len(targetRefFns)):
-            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % self.files['target_ref_fn'][i])
-            self.kmers['ref'] = load_kmers(utils.run_jellyfish(targetRefFns[i], jellyfish, kmer_size), self.kmers['ref'])
+            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % targetRefFns[i])
+            self.get_kmers(targetRefFns[i], self.kmers['ref'])
 
-    def get_kmers(self, seqFn, keyStr):
+    def set_sample_kmers(self):
+        """Set the sample kmers"""
+        utils.log(self.loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
+        self.kmers['case'] = {}
+        self.kmers['case_sc'] = {}
+        self.get_kmers(self.files['sv_cleaned_fq'], self.kmers['case'])
+        self.get_kmers(self.files['sv_sc_unmapped_fa'], self.kmers['case_sc'])
 
+    def get_kmers(self, seqFn, kmerDict):
+        """Generic function to run jellyfish on a set of sequences"""
+        jellyfish = self.params.get_param('jellyfish')
+        kmer_size = self.params.get_kmer_size()
+        # Load the kmers into the kmer dictionary based on keyStr value.
+        load_kmers(utils.run_jellyfish(seqFn, jellyfish, kmer_size), kmerDict)
 
     def compare_kmers(self, kmerPath, name, readLen, targetRefFns):
         """
         """
-
-
         # Set the reference sequence kmers.
         self.set_refrence_kmers(targetRefFns)
 
         # Set sample kmers.
-        utils.log(self.loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
-        self.kmers['case'] = {}
-        self.kmers['case'] = load_kmers(utils.run_jellyfish(self.files['sv_cleaned_fq'], jellyfish, kmer_size), self.kmers['case'])
-        self.kmers['case_sc'] = {}
-        self.kmers['case_sc'] = load_kmers(utils.run_jellyfish(self.files['sv_sc_unmapped_fa'], jellyfish, kmer_size), self.kmers['case_sc'])
-        sc_mers = set(self.kmers['case'].keys()) & set(self.kmers['case_sc'].keys())
-        sample_only_mers = list(sc_mers.difference(set(self.kmers['ref'].keys())))
+        self.set_sample_kmers()
+        # Merge the kmers from the cleaned sample sequences and the unmapped and softclipped sequences.
+        scKmers = set(self.kmers['case'].keys()) & set(self.kmers['case_sc'].keys())
+        # Take the difference from the reference kmers.
+        sampleOnlyKmers = list(scKmers.difference(set(self.kmers['ref'].keys())))
         # Add normal sample kmers if available.
         if self.params.get_param('normal_bam_file'):
-            norm_kmers = {}
-            norm_kmers = load_kmers(utils.run_jellyfish(self.files['norm_cleaned_fq'], jellyfish, kmer_size), norm_kmers)
-            sample_only_mers = set(sample_only_mers).difference(set(norm_kmers.keys()))
-
-        sample_only_mers = list(sample_only_mers)
+            normKmers = {}
+            self.get_kmers(self.files['norm_cleaned_fq'], normKmers)
+            sampleOnlyKmers = list(set(sampleOnlyKmers).difference(set(normKmers.keys())))
 
         # Write case only kmers out to file.
-        self.files['sample_kmers'] = os.path.join(kmerPath, self.name + "_sample_kmers.out")
+        self.files['sample_kmers'] = os.path.join(kmerPath, name + "_sample_kmers.out")
         sample_kmer_fout = open(self.files['sample_kmers'], 'w')
         kmer_counter = 1
         self.kmers['case_only'] = {}
-        for mer in sample_only_mers:
+        for mer in sampleOnlyKmers:
             sample_kmer_fout.write("\t".join([str(x) for x in [mer, str(self.kmers['case'][mer])]]) + "\n")
             self.kmers['case_only'][mer] = self.kmers['case'][mer]
         sample_kmer_fout.close()
