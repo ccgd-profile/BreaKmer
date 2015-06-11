@@ -321,7 +321,8 @@ class VariantReadTracker:
                     self.other.append(read_positions)
 
     def check_clippings(self, kmer_size, region_start_pos, region_end_pos):
-        """ """
+        """
+        """
         for read_vals in self.valid:
             read, proper_map, overlap_reads = read_vals
             if read.cigar or len(read.cigar) > 1:
