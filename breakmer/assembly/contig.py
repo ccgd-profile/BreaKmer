@@ -10,7 +10,7 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
-def get_read_kmers(new_seq, kmer_len, kmer_seqs, order='for'):
+def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
     """Return new sample kmers from the existing contig sequence that can help extend
     the contig sequence.
     All the k-length mers are determined from the new_seq. These kmer sequences are put
@@ -18,7 +18,7 @@ def get_read_kmers(new_seq, kmer_len, kmer_seqs, order='for'):
     to the position of the kmer in the new_seq string and returned.
     Args:
         new_seq: String of the contig sequence to create kmers from.
-        kmer_len: Integer of the kmer length
+        kmerLen: Integer of the kmer length
         kmer_seqs: The set of kmer sequences from the pool of extracted reads.
         order: String for the direction to order the news set of kmer sequences. A None
                value indicates no ordering.
@@ -32,7 +32,7 @@ def get_read_kmers(new_seq, kmer_len, kmer_seqs, order='for'):
                5. String of how to order tuples in the list
     """
     m = len(new_seq) / 2
-    kmers = map(lambda x: (new_seq[x:x + kmer_len], x, int(x < m), abs(x - m), order), range(0, (len(new_seq) - kmer_len)))
+    kmers = map(lambda x: (new_seq[x:x + kmerLen], x, int(x < m), abs(x - m), order), range(0, (len(new_seq) - kmerLen)))
     ks = set(map(lambda x: x[0], kmers))
     ss = ks & kmer_seqs
     kmers = filter(lambda x: x[0] in ss, kmers)
@@ -254,21 +254,26 @@ class ContigCounts:
 class Builder:
     """A class to perform all the contig building functions and store temporary data structures.
     Attributes:
-        read_batch: ReadBatch object
-        seq: String of the consensus sequence.
-        counts: ContigCounts object to manage all the read counts supporting the consensus sequence.
-        checked_kmers: List of kmer sequences that had previously been checked while building the contig.
-        kmer_len: Integer of the kmer length.
-        kmers: List of kmer sequences that have contributed to building the contig.
-        kmer_locs: List of integers representing the positions of the kmers in the contig seq.
+        read_batch:     ReadBatch object
+        seq:            String of the consensus sequence.
+        counts:         ContigCounts object to manage all the read counts supporting the consensus sequence.
+        checked_kmers:  List of kmer sequences that had previously been checked while building the contig.
+        kmerLen:        Integer of the kmer length.
+        kmers:          List of kmer sequences that have contributed to building the contig.
+        kmer_locs:      List of integers representing the positions of the kmers in the contig seq.
     """
 
-    def __init__(self, kmer_values, read_align_values):
-        self.read_batch = ReadBatch(read_align_values['read'], kmer_values['align_pos'])
-        self.seq = read_align_values['read'].seq
-        self.counts = ContigCounts(read_align_values['read'], read_align_values['nread'])
-        self.checked_kmers = [kmer_values['seq']]
-        self.kmer_len = kmer_values['len']
+    def __init__(self, kmerObj, readAlignValues):
+        """
+        Args:
+            kmerObj:            A Kmer object containing seq and count information for a kmer.
+            readAlignValues:    A dictionary containing information about where a kmer exists in a read.
+        """
+        self.read_batch = ReadBatch(readAlignValues['read'], readAlignValues['align_pos'])
+        self.seq = readAlignValues['read'].seq
+        self.counts = ContigCounts(readAlignValues['read'], readAlignValues['nread'])
+        self.checked_kmers = [kmerObj.seq]
+        self.kmerLen = kmerObj.len
         self.kmers = []
         self.kmer_locs = []
 
@@ -293,7 +298,6 @@ class Builder:
         Return:
             hit: String value 'remove' or ''.
         """
-
         hit = ''
         self.read_batch.check_kmer_read(kmer_values['pos'], read_align_values['read'])
         if self.check_align(kmer_values, read_align_values, type):
@@ -350,7 +354,7 @@ class Builder:
                 match = False
                 indx1 = align_manager.get_kmer_align_index(0, kmer_vals['seq'])
                 indx2 = align_manager.get_kmer_align_index(1, kmer_vals['seq'])
-                if indx1[0] > -1 and indx1[1] > -1 : 
+                if indx1[0] > -1 and indx1[1] > -1 :
                     if (indx2[0] == -1 and indx2[1] == -1) or (abs(indx2[0] - indx2[1]) > abs(indx1[0] - indx1[1])) : # Read overlaps off front of contig sequence.
                         match = True
                         self.contig_overlap_read(align_manager.get_alignment(0), query_read, read_align_values['nreads'], kmer_values['kmer_set'], type)
@@ -376,7 +380,6 @@ class Builder:
             end: Integer for the end position the contig sequence aligns to the read sequence.
         Return: None
         """
-
         self.seq = read.seq
         self.counts.set_superseq(read, nreads, start, end)
 
@@ -390,7 +393,6 @@ class Builder:
             indel_only: Boolean to indicate whether to add to indel only count vector.
         Return: None
         """
-
         self.counts.set_counts(start, end, nreads, indel_only)
 
     def add_postseq(self, post_seq, start, end, nreads, indel_only):
@@ -404,7 +406,6 @@ class Builder:
             indel_only: Boolean to indicate whether read only supports indel events.
         Return: None
         """
-
         self.seq += post_seq
         self.counts.set_counts(start, end, nreads, indel_only)
         self.counts.extend_counts(len(post_seq), nreads, indel_only, 'post')
@@ -440,8 +441,10 @@ class Builder:
         rm_reads = map(lambda y: y.read, filter(lambda x: x.redundant, self.read_batch.reads))
         keep_reads = filter(lambda x: x.aligned and not x.redundant, self.read_batch.reads)
         add_reads = map(lambda y: y.read, keep_reads)
-        contig_reads = contig_reads | set(add_reads) # Merge add_reads into contig_reads
-        contig_reads = contig_reads - set(rm_reads) # Remove rm_reads
+        # Merge add_reads into contig_reads
+        contig_reads = contig_reads | set(add_reads)
+        # Remove rm_reads
+        contig_reads = contig_reads - set(rm_reads)
         self.read_batch.clean(fq_recs, contig_buffer, keep_reads[-1])
         return contig_reads
 
@@ -463,10 +466,10 @@ class Builder:
                 self.set_kmers(kmer_seqs)
         else:
             post_seq = query_read.seq[alignment.prei:]
-            nseq = self.seq[(len(self.seq) - (self.kmer_len - 1)):] + post_seq
+            nseq = self.seq[(len(self.seq) - (self.kmerLen - 1)):] + post_seq
             self.add_postseq(post_seq, alignment.j, alignment.prej, nreads, query_read.indel_only)
             if type == 'grow':
-                nkmers = get_read_kmers(nseq, self.kmer_len, kmer_seqs, 'for')
+                nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'for')
                 self.kmers.extend(nkmers)
 
     def read_overlap_contig(self, alignment, query_read, nreads, kmer_seqs, type):
@@ -485,10 +488,10 @@ class Builder:
             self.add_subseq(alignment.i, alignment.prei, nreads, query_read.indel_only)
         else:
             pre_seq = query_read.seq[0:alignment.j]
-            nseq = pre_seq + self.seq[0:(self.kmer_len - 1)]
+            nseq = pre_seq + self.seq[0:(self.kmerLen - 1)]
             self.add_preseq(query_read.seq[0:alignment.j], alignment.i, alignment.prei, nreads, query_read.indel_only)
             if type == 'grow':
-                nkmers = get_read_kmers(nseq, self.kmer_len, kmer_seqs, 'rev')
+                nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'rev')
                 self.kmers.extend(nkmers)
 
     def check_alt_reads(self, kmer_tracker, contig_buffer, contig_kmers):
@@ -503,14 +506,14 @@ class Builder:
         new_contigs = []
         kmer_set = set()
         for read, nreads in self.read_batch.alt:
-            alt_kmers = get_read_kmers(read.seq, self.kmer_len, kmer_tracker.kmer_seqs, '')
+            alt_kmers = get_read_kmers(read.seq, self.kmerLen, kmer_tracker.kmer_seqs, '')
             new_kmers = set(alt_kmers) - set(contig_kmers) - contig_buffer.used_mers - kmer_set
             if len(new_kmers) > 0:
                 for kmer_seq in list(new_kmers):
                     read_count = kmer_tracker.get_count(kmer_seq)
                     if read_count > 1:
                         kmer_pos = read.seq.find(kmer_seq)
-                        kmer_values = {'seq': kmer_seq, 'counts': kmer_tracker.get_count(kmer_seq), 'kmer_set': kmer_tracker.kmer_set, 'len': self.kmer_len}
+                        kmer_values = {'seq': kmer_seq, 'counts': kmer_tracker.get_count(kmer_seq), 'kmer_set': kmer_tracker.kmer_set, 'len': self.kmerLen}
                         read_align_values = {'read': read, 'align_pos': kmer_pos, 'nreads': nreads}
                         new_contigs.append((read, Contig(kmer_values, read_align_values)))
                         kmer_set = kmer_set | new_kmers
@@ -525,7 +528,7 @@ class Builder:
         Return: None
         """
 
-        self.kmers = get_read_kmers(str(self.seq), self.kmer_len, kmer_seqs, 'mid')
+        self.kmers = get_read_kmers(str(self.seq), self.kmerLen, kmer_seqs, 'mid')
 
     def set_kmer_locs(self):
         """Add the start alignment positions of each kmer sequence in the kmers list
@@ -537,7 +540,7 @@ class Builder:
         self.kmer_locs = [0] * len(self.seq)
         for kmer in self.kmers:
             kmer_pos = self.seq.find(kmer[0])
-            self.kmer_locs[kmer_pos:(kmer_pos + self.kmer_len)] = map(lambda x: x+1, self.kmer_locs[kmer_pos:(kmer_pos + self.kmer_len)])  
+            self.kmer_locs[kmer_pos:(kmer_pos + self.kmerLen)] = map(lambda x: x + 1, self.kmer_locs[kmer_pos:(kmer_pos + self.kmerLen)])
 
     def refresh_kmers(self):
         """Return a list of kmer_sequences that have not been checked already.
@@ -559,7 +562,6 @@ class Builder:
     def get_kmer_locs(self):
         """Return the final kmer locations list."""
         return self.kmer_locs
-
 
     def get_total_reads(self):
         """Return total number of reads supporting contig."""
@@ -634,12 +636,12 @@ class Meta:
         cluster_f.close()
 
         assembly_fq = open(self.fq_fn, 'w')
-        logger.info('Writing reads containing kmers to fastq %s'%self.fq_fn)
-        for read in reads :
+        logger.info('Writing reads containing kmers to fastq %s' % self.fq_fn)
+        for read in reads:
             assembly_fq.write(read.id + '\n' + read.seq + '\n+\n' + read.qual + '\n')
         assembly_fq.close()
 
-        logger.info('Writing contig fasta file for blatting %s'%self.fa_fn)
+        logger.info('Writing contig fasta file for blatting %s' % self.fa_fn)
         blat_f = open(self.fa_fn, 'w')
         blat_f.write('>' + self.id + '\n' + seq)
         blat_f.close()
@@ -659,37 +661,33 @@ class Contig:
         reads: Set of
     """
 
-    def __init__(self, kmer_values, read_align_values):
+    def __init__(self, kmerObj, readAlignValues):
         self.meta = Meta()
         self.setup = False
-        self.builder = Builder(kmer_values, read_align_values)
+        self.builder = Builder(kmerObj, readAlignValues)
         self.seq = None
         self.kmers = None
         self.kmer_locs = None
         self.reads = set()
-        self.buffer = set([read_align_values['read'].id])
+        self.buffer = set([readAlignValues['read'].id])
 
-    def check_read(self, kmer_values, read_align_values, type='setup'):
+    def check_read(self, kmerObj, readAlignValues, fncType='setup'):
         """Check if the read passed in can be added to the current contig.
-
         Wrapper function to Builder class check_read function.
         Args:
-            kmer_values: Dictionary containing:
-                         - 'seq': String kmer sequence value.
-                         - 'counts': Integer of reads containing kmer sequence.
-                         - 'kmer_set': Set with all kmer sequences.
-            read_align_values: Dictionary containing:
+            kmerObj:         Instance of Kmer object with attributes for kmer sequence.
+            readAlignValues: Dictionary containing:
                          - 'read': fq_read object that contains kmer sequence.
                          - 'align_pos': Integer position of kmer in read sequence
                          - 'nreads': Integer of number of reads with the same sequence.
-            type: String indicating the state of this function.
+            fncType: String indicating the state of this function.
         Return:
             String containing 'hit' or '' indicating that read matched contig seq
             or did not, respectively.
         """
 
-        self.buffer.add(read_align_values['read'].id)
-        return self.builder.check_read(kmer_values, read_align_values, type)
+        self.buffer.add(readAlignValues['read'].id)
+        return self.builder.check_read(kmerObj, readAlignValues, fncType)
 
     def check_valid(self, read_count_thresh, read_len):
         """Determine if the finished contig sequence meets minimum requirements for
@@ -783,7 +781,7 @@ class Contig:
         reads = assembler.find_reads(kmer, read_items, self.buffer, read_order)
         return reads
 
-    def grow(self, fq_recs, kmer_tracker, kmer_len, contig_buffer):
+    def grow(self, fq_recs, kmer_tracker, kmerLen, contig_buffer):
         """Iterates through new sample only kmers in a contig assembly and tries to
         add more relevant reads to extend the contig assembly sequence.
         For each 'new' kmer, assess the reads that have the kmer. When this function
@@ -791,7 +789,7 @@ class Contig:
         Args:
             fq_recs: Dictionary of fq_read objects key = sequence, value = list of fq_reads
             kmer_tracker: KmerTracker object containing all the kmer sequences.
-            kmer_len: Integer of kmer size.
+            kmerLen: Integer of kmer size.
             contig_buffer: ContigBuffer object.
         Return: None
         """
@@ -805,7 +803,7 @@ class Contig:
                 kmer_seq, kmer_pos, less_than_half, dist_half, order = kmer_lst
                 reads = self.get_kmer_reads(kmer_lst, fq_recs.items())
                 contig_buffer.add_used_mer(kmer_seq)
-                kmer_values = {'seq': kmer_seq, 'counts': kmer_tracker.get_count(kmer_seq), 'kmer_set': kmer_tracker.kmer_set, 'len': kmer_len}
+                kmer_values = {'seq': kmer_seq, 'counts': kmer_tracker.get_count(kmer_seq), 'kmer_set': kmer_tracker.kmer_set, 'len': kmerLen}
                 for read_lst in reads:
                     read, kmer_pos, bool, rlen, nreads = read_lst
                     contig_buffer.add_used_read(read.id)

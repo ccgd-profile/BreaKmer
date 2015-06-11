@@ -87,27 +87,28 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     contig = None
     # Find all reads with kmer sequence passed in.
     # kmerReads contains a list of tuples.
-    #   1. fq_read object
+    #   1. fq_read object defined in breakmer.utils.py
+    #   2. Starting position of the kmer match in the read sequence
+    #   3. Boolean that a match was found.
+    #   4. Length of the read sequence.
+    #   5. Number of reads with this sequence.
     kmerReads = find_reads(kmerSeq, fqRecs.items(), set())
     contigBuffer.add_used_mer(kmerSeq)
 
-    kmerValues = {'seq': kmerSeq,
-                  'counts': kmerTracker.get_count(kmerSeq),
-                  'kmer_set': kmerTracker.kmerSeqs,
-                  'len': kmerLen}
+    kmerObj = Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, kmerLen)
     for readVals in kmerReads:
-        read, kmer_pos, matchFound, rlen, nreads = readVals
-        read_align_values = {'read': read,
-                             'align_pos': kmer_pos,
-                             'nreads': nreads}
+        read, kmerPos, matchFound, seqLen, nReadsWithSeq = readVals
+        readAlignValues = {'read': read,
+                           'align_pos': kmerPos,
+                           'nreads': nReads}
         contigBuffer.add_used_read(read.id)
         # If no contig, build one.
         if not contig:
-            contig = contig_assembler.Contig(kmerValues, read_align_values)
+            contig = contig_assembler.Contig(kmerObj, readAlignValues)
             contigBuffer.add_contig(read, contig)
         # Check if read should be added to the existing contig.
         else:
-            contig.check_read(kmerValues, read_align_values, 'setup')
+            contig.check_read(kmerObj, readAlignValues, 'setup')
     if contig:
         contig.finalize(fqRecs, kmerTracker, contigBuffer, 'setup')
 
@@ -171,6 +172,18 @@ def read_search(kmerSeq, readItems):
     return searchResult
 
 
+class Kmer:
+    """Class to track value associated with a particular kmer sequence.
+    Attributes:
+
+    """
+    def __init__(self, seq, counts, kmerSeqSet, kmerLen):
+        self.seq = seq
+        self.counts = counts
+        self.kmerSeqSet = kmerSeqSet
+        self.kmerLen = kmerLen
+
+
 class ContigBuffer:
     """A class to track the used kmers and reads and their relation to contigs.
     Attributes:
@@ -187,10 +200,12 @@ class ContigBuffer:
         """Add read to contigs dict with contig object it is connected to.
         Set key to read ID and value to the contig object. Set the read used to True.
         Args:
-            read: fq_read object
+            read:   fq_read object
             contig: Contig object.
-        Return: None
+        Return:
+            None
         """
+        # Tie a contig to the seed read ID and store in dictionary.
         if read.id not in self.contigs and not read.used:
             self.contigs[read.id] = contig
             read.used = True

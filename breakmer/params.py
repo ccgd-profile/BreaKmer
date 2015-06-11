@@ -264,7 +264,7 @@ class ParamManager:
 
         regionList = None
         if geneList:
-            region_list = []
+            regionList = []
             for line in open(geneList, 'r'):
                 line = line.strip()
                 regionList.append(line.upper())
