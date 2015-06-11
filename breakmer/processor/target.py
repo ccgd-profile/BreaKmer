@@ -89,7 +89,7 @@ class TargetManager:
     necessary to perform an independent analysis.
     Attributes:
         params:        ParamManager instance
-        logging_name:  Module name for logging file purposes.
+        loggingName:  Module name for logging file purposes.
         name:          Target name specified in the input bed file.
         chrom:         Chromosome ID as specified in the input bed file.
         start:         Genomic position for the target region (minimum value
@@ -252,7 +252,7 @@ class TargetManager:
             check = False
         return check
 
-    def clean_reads(self, type):
+    def clean_reads(self, sampleType):
         """Trim adapter sequences from the extracted reads, format and organize
         the cleaned reads into new files.
         Cutadapt is run to trim the adapter sequences from the sequence reads to
@@ -271,66 +271,26 @@ class TargetManager:
         cutadapt = self.params.get_param('cutadapt')
         cutadaptConfigFn = self.params.get_param('cutadapt_config_file')
         utils.log(self.loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
-        self.files['%s_cleaned_fq' % type] = os.path.join(self.paths['data'], self.name + '_%s_reads_cleaned.fastq' % type)
-        utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % type])
-        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % type], self.files['%s_cleaned_fq' % type], self.loggingName)
+        self.files['%s_cleaned_fq' % sampleType] = os.path.join(self.paths['data'], self.name + '_%s_reads_cleaned.fastq' % sampleType)
+        utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
+        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
-        self.variation.setup_cleaned_reads(type)
-        self.files['%s_cleaned_fq' % type], self.variation.cleaned_read_recs[type], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % type], self.get_sv_reads(type))
-        self.clear_sv_reads(type)
-        check = self.variation.continue_analysis_check(type)
+        self.variation.setup_cleaned_reads(sampleType)
+        self.files['%s_cleaned_fq' % sampleType], self.variation.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
+        self.clear_sv_reads(sampleType)
+        check = self.variation.continue_analysis_check(sampleType)
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
         return check
-
-    def extract_bam_reads(self, sampleType):
-        """
-        Args:
-            sampleType: A string indicating a tumor ('sv') or normal ('norm') sample being processed.
-        Return:
-            None
-        """
-
-        self.setup_read_extraction_files(sampleType)
-        bamType = 'sample'
-        if sampleType == 'norm':
-            bamType = 'normal'
-
-        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (self.params.opts['%s_bam_file' % bamType], self.files['sv_fq']))
-
-        regionStartCoord = self.start - self.regionBuffer
-        regionEndCoord = self.end + self.regionBuffer
-        bamFile = self.params.opts['%s_bam_file' % bamType]
-        self.variation.var_reads[type] = bam_handler.get_variant_reads(bamFile, self.chrom, regionStartCoord, regionEndCoord)
-        self.variation.var_reads[type].check_clippings(self.params.get_kmer_size(), self.start, self.end)
-
-        svBam = None
-        if sampleType == 'sv':
-            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=self.variation.var_reads[type].bam)
-
-        readsFq = open(self.files['%s_fq' % type], 'w')
-        scFa = open(self.files['%s_sc_unmapped_fa' % type], 'w')
-
-        self.variation.var_reads[type].write_seqs(scFa, readsFq, svBam, self.params.get_kmer_size())
-
-        readsFq.close()
-        scFa.close()
-
-        if sampleType == 'sv':
-            svBam.close()
-            utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
-            pysam.sort(self.files['sv_bam'], self.files['sv_bam_sorted'].replace('.bam', ''))
-            utils.log(self.loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
-            pysam.index(self.files['sv_bam_sorted'])
 
     def setup_read_extraction_files(self, sampleType):
         """Create file names to store the extracted reads.
         This creates four files (for tumor samples):
-        1. fastq with extracted reads
-        2. fasta file with softclipped sequences
-        3. bam file with extracted reads
-        4. sorted bam file with extracted reads.
+        1. fastq with extracted reads = sv_fq or normal_fq
+        2. fasta file with softclipped sequences = sv_sc_unmapped_fa
+        3. bam file with extracted reads = sv_bam
+        4. sorted bam file with extracted reads = sv_bam_sorted
         Args:
-            sampleType (str): The type of input data - tumor or normal
+            sampleType (str): The type of input data - sv or normal
         Returns:
             None
         """
@@ -345,6 +305,49 @@ class TargetManager:
             self.files['sv_bam'] = os.path.join(self.paths['data'], self.name + '_sv_reads.bam')
             # Store variant reads in sorted bam file
             self.files['sv_bam_sorted'] = os.path.join(self.paths['data'], self.name + '_sv_reads.sorted.bam')
+
+    def extract_bam_reads(self, sampleType):
+        """
+        Args:
+            sampleType: A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+        Return:
+            None
+        """
+        # Create the file paths for the files that will be created from the read extraction.
+        self.setup_read_extraction_files(sampleType)
+        bamType = 'sample'
+        if sampleType == 'norm':
+            bamType = 'normal'
+
+        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (self.params.opts['%s_bam_file' % bamType], self.files['%s_fq' % sampleType]))
+        # Set a buffer region for extracting reads in a region.
+
+        # Bundle the information needed to extract data and allow variation class to handle this information.
+        regionStartCoord = self.start - self.regionBuffer
+        regionEndCoord = self.end + self.regionBuffer
+        bamFile = self.params.opts['%s_bam_file' % bamType]
+        self.variation.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, self.chrom, regionStartCoord, regionEndCoord)
+        self.variation.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), self.start, self.end)
+
+        svBam = None
+        if sampleType == 'sv':
+            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=bamFile)
+
+        # Write access methods to files and pass to variation class method to do all of this chunk.
+        readsFq = open(self.files['%s_fq' % sampleType], 'w')
+        scFa = open(self.files['%s_sc_unmapped_fa' % sampleType], 'w')
+
+        self.variation.var_reads[sampleType].write_seqs(scFa, readsFq, svBam, self.params.get_kmer_size())
+
+        readsFq.close()
+        scFa.close()
+
+        if sampleType == 'sv':
+            svBam.close()
+            utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
+            pysam.sort(self.files['sv_bam'], self.files['sv_bam_sorted'].replace('.bam', ''))
+            utils.log(self.loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
+            pysam.index(self.files['sv_bam_sorted'])
 
     def compare_kmers(self):
         """Move this to Variation class
@@ -388,7 +391,7 @@ class TargetManager:
         kmer_counter = 1
         kmer_dict['case_only'] = {}
         for mer in sample_only_mers:
-            sample_kmer_fout.write("\t".join([str(x) for x in [mer, str(kmer_dict['case'][mer])]])+"\n")
+            sample_kmer_fout.write("\t".join([str(x) for x in [mer, str(kmer_dict['case'][mer])]]) + "\n")
             kmer_dict['case_only'][mer] = kmer_dict['case'][mer]
         sample_kmer_fout.close()
 
@@ -459,7 +462,9 @@ class TargetManager:
         self.variation.clear_cleaned_reads()
 
     def rm_output_dir(self):
+        """ """
         shutil.rmtree(self.paths['output'])
 
     def add_result(self, result):
+        """ """
         self.variation.add_result(result)
