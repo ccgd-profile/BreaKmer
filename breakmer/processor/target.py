@@ -27,7 +27,6 @@ def load_kmers(fns, kmers):
             if mer not in kmers:
                 kmers[mer] = 0
             kmers[mer] += int(count)
-    return kmers
 
 
 class Variation:
@@ -46,6 +45,7 @@ class Variation:
         self.results = []
         self.files = {}
         self.svs = {}
+        self.loggingName = 'breakmer.processor.target'
 
     def setup_cleaned_reads(self, type):
         """
@@ -162,17 +162,26 @@ class Variation:
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
         return check
 
-    def compare_kmers(self, kmerPath, readLen):
+    def set_reference_kmers(self, targetRefFns):
         """
         """
         jellyfish = self.params.get_param('jellyfish')
         kmer_size = self.params.get_kmer_size()
+        self.kmers['ref'] = {}
+        for i in range(len(targetRefFns)):
+            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % self.files['target_ref_fn'][i])
+            self.kmers['ref'] = load_kmers(utils.run_jellyfish(targetRefFns[i], jellyfish, kmer_size), self.kmers['ref'])
+
+    def get_kmers(self, seqFn, keyStr):
+
+
+    def compare_kmers(self, kmerPath, name, readLen, targetRefFns):
+        """
+        """
+
 
         # Set the reference sequence kmers.
-        self.kmers['ref'] = {}
-        for i in range(len(self.files['target_ref_fn'])):
-            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % self.files['target_ref_fn'][i])
-            self.kmers['ref'] = load_kmers(utils.run_jellyfish(self.files['target_ref_fn'][i], jellyfish, kmer_size), self.kmers['ref'])
+        self.set_refrence_kmers(targetRefFns)
 
         # Set sample kmers.
         utils.log(self.loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
@@ -206,7 +215,7 @@ class Variation:
         self.kmers['case_sc'] = {}
 
         utils.log(self.loggingName, 'info', 'Writing %d sample-only kmers to file %s' % (len(self.kmers['case_only']), self.files['sample_kmers']))
-        self.files['kmer_clusters'] = os.path.join(kmerPath, self.name + "_sample_kmers_merged.out")
+        self.files['kmer_clusters'] = os.path.join(kmerPath, name + "_sample_kmers_merged.out")
         utils.log(self.loggingName, 'info', 'Writing kmer clusters to file %s' % self.files['kmer_clusters'])
 
         self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], kmer_size, self.params.get_sr_thresh('min'), readLen)
@@ -412,7 +421,7 @@ class TargetManager:
     def compare_kmers(self):
         """Obtain the sample only kmers and initiate assembly of reads with these kmers.
         """
-        self.variation.compare_kmers()
+        self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len)
         """
         kmer_dict = self.variation.kmers
         jellyfish = self.params.get_param('jellyfish')
