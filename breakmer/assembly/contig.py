@@ -49,16 +49,16 @@ class AssemblyRead:
     """Wrapper class for a sequence read used in a contig assembly. This will
     track meta information about the sequence read.
     Attributes:
-        read: fq_read object
-        redundant: Boolean to indicate whether the read is duplicated.
-        align_checked: Boolean to indicate if the read has been checked against
-                       the contig sequence.
-        aligned: Boolean to indicate if the read aligned to the contig sequence.
+        read:           fq_read object
+        redundant:      Boolean to indicate whether the read is duplicated.
+        alignChecked:   Boolean to indicate if the read has been checked against
+                        the contig sequence.
+        aligned:        Boolean to indicate if the read aligned to the contig sequence.
     """
     def __init__(self, read, redundant, checked, aligned):
         self.read = read
         self.redundant = redundant
-        self.align_checked = checked
+        self.alignChecked = checked
         self.aligned = aligned
 
 
@@ -66,28 +66,25 @@ class ReadBatch:
     """A class to track the reads that are being considered for building a contig
     sequence.
     Attributes:
-        delete: Set of fq_read objects to remove from further analysis.
-        alt: List of tuples containing (fq_read object, integer of nreads
-        reads: List of AssemblyRead objects containing the reads used to build a contig.
-        mer_pos_d: Dictionary containing kmer position information. DEPRECATED
+        delete:     Set of fq_read objects to remove from further analysis.
+        alt:        List of tuples containing (fq_read object, integer of nreads with the same sequence)
+        reads:      List of AssemblyRead objects containing the reads used to build a contig.
+        mer_pos_d:  Dictionary containing kmer position information. DEPRECATED
     """
-
     def __init__(self, read, mer_pos):
         self.delete = set()
         self.alt = []
         self.reads = [AssemblyRead(read, False, True, True)]
-        self.mer_pos_d = {mer_pos: [0]}
+        # self.mer_pos_d = {mer_pos: [0]} DEPRECATED
 
     def check_kmer_read(self, kmer_read_align_pos, read):
-        """Adds AssemblyRead to reads list.
-        Note that the check for add_to_pos_d is deprecated.
+        """Adds AssemblyRead to reads list. Note that the check for add_to_pos_d is deprecated.
         Args:
             kmer_read_align_pos: Integer of the position the kmer sequence found
                                  in the read sequence.
-            read: fq_read object.
+            read:                fq_read object.
         Return: None
         """
-
         check = True
         redund_read = False
         add_read = True
@@ -103,7 +100,6 @@ class ReadBatch:
             self.reads.append(AssemblyRead(read, False, check, False))
         return check
         """
-
         self.reads.append(AssemblyRead(read, False, check, False))
 
     def set_last_read_aligned(self):
@@ -285,11 +281,7 @@ class Builder:
         analysis to build another contig possibly. Otherwise, discard the read for
         further analysis.
         Args:
-            kmer_values: Dictionary containing:
-                         - 'seq': String kmer sequence value.
-                         - 'counts': Integer of reads containing kmer sequence.
-                         - 'kmer_set': Set with all kmer sequences.
-                         - 'len': Integer for kmer length.
+            kmer_values:       Kmer object containing kmer seq specific values.
             read_align_values: Dictionary containing:
                          - 'read': fq_read object that contains kmer sequence.
                          - 'align_pos': Integer position of kmer in read sequence
@@ -299,7 +291,7 @@ class Builder:
             hit: String value 'remove' or ''.
         """
         hit = ''
-        self.read_batch.check_kmer_read(kmer_values['pos'], read_align_values['read'])
+        self.read_batch.check_kmer_read(read_align_values['align_pos'], read_align_values['read'])
         if self.check_align(kmer_values, read_align_values, type):
             hit = 'remove'
             read_align_values['read'].used = True
@@ -548,7 +540,6 @@ class Builder:
         Return:
             List of 
         """
-
         return filter(lambda x: x[0] not in set(self.checked_kmers), self.kmers)
 
     def get_seq(self):
@@ -651,14 +642,15 @@ class Contig:
     """Interface class to assemble a contig and store data all the relevant data
     for the assembly.
     Attributes:
-        meta: Meta class object to store all the interface related data.
-        kmer_locs: List of integers indicating the start alignment position of the kmers
-                   in the contig sequence.
-        setup: Boolean to indicate whether a contig has gone through the setup process.
-        build: Builder class object that handles all the assembly functions.
-        seq: String for assembled sequence.
-        kmers: List of kmer sequences used to build contig.
-        reads: Set of
+        meta:       Meta class object to store all the interface related data.
+        kmer_locs:  List of integers indicating the start alignment position of the kmers
+                    in the contig sequence.
+        setup:      Boolean to indicate whether a contig has gone through the setup process.
+        build:      Builder class object that handles all the assembly functions.
+        seq:        String for assembled sequence.
+        kmers:      List of kmer sequences used to build contig.
+        reads:      Set of read IDs that have been used to build contig.
+        buffer:     Set of read IDs used in a batch of processing for building a contig. This is flushed.
     """
 
     def __init__(self, kmerObj, readAlignValues):
@@ -685,7 +677,6 @@ class Contig:
             String containing 'hit' or '' indicating that read matched contig seq
             or did not, respectively.
         """
-
         self.buffer.add(readAlignValues['read'].id)
         return self.builder.check_read(kmerObj, readAlignValues, fncType)
 
