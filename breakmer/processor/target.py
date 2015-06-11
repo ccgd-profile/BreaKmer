@@ -47,18 +47,21 @@ class Variation:
         self.svs = {}
         self.loggingName = 'breakmer.processor.target'
 
-    def setup_cleaned_reads(self, type):
+    def setup_cleaned_reads(self, sampleType):
+        """Initiate the cleaned_read_recs dictionary for sample or normal data.
+        Args:
+            type: String indicating the sample type - 'sv' or 'normal'
+        Returns:
+            None
         """
-        """
-
         if not self.cleaned_read_recs:
             self.cleaned_read_recs = {}
-        self.cleaned_read_recs[type] = None
+        self.cleaned_read_recs[sampleType] = None
 
-    def clear_sv_reads(self, type):
+    def clear_sv_reads(self, sampleType):
         """
         """
-        self.var_reads[type].clear_sv_reads()
+        self.var_reads[sampleType].clear_sv_reads()
 
     def clear_cleaned_reads(self):
         """
@@ -68,7 +71,6 @@ class Variation:
     def continue_analysis_check(self, type):
         """
         """
-
         check = True
         if len(self.cleaned_read_recs[type]) == 0:
             check = False
@@ -155,7 +157,7 @@ class Variation:
         output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
         self.setup_cleaned_reads(sampleType)
-        self.files['%s_cleaned_fq' % sampleType], self.variation.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
+        self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
         self.clear_sv_reads(sampleType)
         check = self.continue_analysis_check(sampleType)
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)

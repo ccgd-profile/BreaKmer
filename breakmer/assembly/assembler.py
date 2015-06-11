@@ -86,15 +86,17 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     logger = logging.getLogger('breakmer.assembly.assembler')
     contig = None
     # Find all reads with kmer sequence passed in.
+    # kmerReads contains a list of tuples.
+    #   1. fq_read object
     kmerReads = find_reads(kmerSeq, fqRecs.items(), set())
     contigBuffer.add_used_mer(kmerSeq)
 
     kmerValues = {'seq': kmerSeq,
                   'counts': kmerTracker.get_count(kmerSeq),
-                  'kmer_set': kmerTracker.kmer_set,
+                  'kmer_set': kmerTracker.kmerSeqs,
                   'len': kmerLen}
     for readVals in kmerReads:
-        read, kmer_pos, bool, rlen, nreads = readVals
+        read, kmer_pos, matchFound, rlen, nreads = readVals
         read_align_values = {'read': read,
                              'align_pos': kmer_pos,
                              'nreads': nreads}
@@ -130,14 +132,16 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
                     5. Number of reads with this sequence.
     """
     kmerReads = []
-    mapped_reads = filter(lambda x: x[2], map(read_search, [kmerSeq] * len(readItems), readItems))
-    mapped_read_ids = map(lambda x: x[0].id, mapped_reads)
-    filter_ids = set(mapped_read_ids) - set(usedReads)
-    matched_reads = filter(lambda x: (x[0].id in filter_ids), mapped_read_ids)
+    # Filter all the reads not containing the kmerSeq
+    mappedReads = filter(lambda x: x[2], map(read_search, [kmerSeq] * len(readItems), readItems))
+    # Extract the read ids of the reads containing kmerSeq
+    mappedReadIds = map(lambda x: x[0].id, mappedReads)
+    filterIds = set(mappedReadIds) - set(usedReads)
+    matchedReads = filter(lambda x: (x[0].id in filterIds), mappedReadIds)
     if order == 'rev':
-        kmerReads = sorted(matched_reads, key=lambda z: (-z[1], -z[3]))
+        kmerReads = sorted(matchedReads, key=lambda z: (-z[1], -z[3]))
     else:
-        kmerReads = sorted(matched_reads, key=lambda z: (z[1], -z[3]))
+        kmerReads = sorted(matchedReads, key=lambda z: (z[1], -z[3]))
     return kmerReads
 
 
@@ -243,15 +247,14 @@ class ContigBuffer:
         map(kmer_tracker.remove_kmer, list(self.used_kmers))
         self.used_kmers = set()
 
-    def remove_reads(self, fq_reads):
+    def remove_reads(self, fqReads):
         """Remove the used reads from the fq_reads dictionary.
         Args:
-            fq_reads: Dictionary of fq_reads.
+            fqReads: Dictionary of fq_reads.
         Return: None
         """
-
-        del_used = filter(lambda x: x in fq_reads, list(self.used_reads))
-        map(fq_reads.__delitem__, del_used)
+        del_used = filter(lambda x: x in fqReads, list(self.used_reads))
+        map(fqReads.__delitem__, del_used)
         self.used_reads = set()
 
 
@@ -284,8 +287,10 @@ class KmerTracker:
     def set_all_kmer_values(self):
         """Sort the kmer list by number of reads (descending) first and then
         by sequence value and store them in an ordered dictionary.
-        Args: None
-        Return: None
+        Args:
+            None
+        Return:
+            None
         """
         kmersSorted = sorted(self.kmers, key=lambda x: (int(x[0]), x[1]), reverse=True)
         for kmer in kmersSorted:
@@ -307,19 +312,21 @@ class KmerTracker:
     def update_kmer_set(self):
         """Update the set of kmer values. The orderedKmers dictionary
         dynamically changes as kmers are taken out.
-        Args: None
-        Return: None
+        Args:
+            None
+        Return:
+            None
         """
-        self.kmer_set = set(self.orderedKmers.keys())
+        self.kmerSeqs = set(self.orderedKmers.keys())
 
     def get_kmer(self):
         """Return the first kmer in the ordered dictionary"""
-        return self.ordered_kmer.items()[0]
+        return self.orderedKmers.items()[0]
 
-    def get_count(self, kmer_seq):
+    def get_count(self, kmerSeq):
         """Return the number of reads the kmer_seq is within."""
-        return self.orderedKmers[kmer_seq]
+        return self.orderedKmers[kmerSeq]
 
-    def remove_kmer(self, kmer_seq):
+    def remove_kmer(self, kmerSeq):
         """Delete the record associated with kmer sequence."""
-        del self.orderedKmers[kmer_seq]
+        del self.orderedKmers[kmerSeq]

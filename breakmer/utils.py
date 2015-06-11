@@ -709,27 +709,32 @@ def server_ready(f):
 
 
 class fq_read:
-        def __init__(self, header, seq, qual, indel_only):
-                self.id = header
-                self.seq = str(seq)
-                self.qual = str(qual)
-                self.used = False
-                self.dup = False
-                self.indel_only = indel_only
+    """
+    """
+    def __init__(self, header, seq, qual, indel_only):
+        self.id = header
+        self.seq = str(seq)
+        self.qual = str(qual)
+        self.used = False
+        self.dup = False
+        self.indel_only = indel_only
 
 
 class FastqFile(object):
-    def __init__(self,f):
-        if isinstance(f,str):
+    """
+    """
+    def __init__(self, f):
+        if isinstance(f, str):
             f = open(f)
             self._f = f
+
     def __iter__(self):
         return self
 
     def next(self):
         header, seq, qual_header, qual = [self._f.next() for _ in range(4)]
         header = header.strip()
-        inst,lane,tile,x,y_end = header.split(':')
+        inst, lane, tile, x, y_end = header.split(':')
         seq = seq.strip()
         qual = qual.strip()
         bc = None
@@ -739,13 +744,13 @@ class FastqFile(object):
         if y.find('#') > -1:
             y, bc = y.split('#')
         header_dict = {'inst':inst,
-                                     'lane':int(lane),
-                                     'tile':int(tile),
-                                     'x':int(x),
-                                     'y':int(y),
-                                     'end':end,
-                                     'bc': bc}
-        return (header,seq,qual)
+                       'lane':int(lane),
+                       'tile':int(tile),
+                       'x':int(x),
+                       'y':int(y),
+                       'end':end,
+                       'bc': bc}
+        return (header, seq, qual)
 
 
 class Annotation:
