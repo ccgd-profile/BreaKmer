@@ -33,16 +33,21 @@ def load_kmers(fns, kmers):
 
 
 class Variation:
-    """
+    """This class handles the storage and interaction of all the variant reads that could
+    be contributing to the support of a structural variant.
+
+
     """
 
-    def __init__(self):
+    def __init__(self, params):
+        self.params = params
         self.var_reads = {}
         self.sv_reads = None
         self.cleaned_read_recs = None
         self.kmer_clusters = []
         self.kmers = {}
         self.results = []
+        self.files = {}
         self.svs = {}
 
     def setup_cleaned_reads(self, type):
@@ -82,6 +87,84 @@ class Variation:
         """
         self.results.append(result)
 
+    def set_var_reads(self, sampleType, bamFile, chrom, start, end, regionBuffer):
+        """
+        """
+        # Get VariantReadTracker object from bam_handler module.
+        self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer)
+        # Iterate through reads that are not perfectly aligned and store necessary information for downstream analysis.
+        self.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), start, end)
+
+        svBam = None
+        if sampleType == 'sv':
+            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=bamFile)
+        readsFq = open(self.files['%s_fq' % sampleType], 'w')
+        scFa = open(self.files['%s_sc_unmapped_fa' % sampleType], 'w')
+        # Write all the stored sequences into files.
+        self.var_reads[sampleType].write_seqs(scFa, readsFq, svBam, self.params.get_kmer_size())
+        readsFq.close()
+        scFa.close()
+
+        if sampleType == 'sv':
+            svBam.close()
+            utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
+            pysam.sort(self.files['sv_bam'], self.files['sv_bam_sorted'].replace('.bam', ''))
+            utils.log(self.loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
+            pysam.index(self.files['sv_bam_sorted'])
+
+    def setup_read_extraction_files(self, sampleType, dataPath, name):
+        """Create file names to store the extracted reads.
+        This creates four files (for tumor samples):
+        1. fastq with extracted reads = sv_fq or normal_fq
+        2. fasta file with softclipped sequences = sv_sc_unmapped_fa
+        3. bam file with extracted reads = sv_bam
+        4. sorted bam file with extracted reads = sv_bam_sorted
+        Args:
+            sampleType (str): The type of input data - sv or normal
+        Returns:
+            None
+        """
+        # Store extracted reads in <data_path>/<target_name>_<type>_reads.fastq
+        self.files['%s_fq' % sampleType] = os.path.join(dataPath, name + '_%s_reads.fastq' % sampleType)
+        # Store softclipped sequences in a fasta file <data_path>/<target_name>_<type>_sc_seqs.fa
+        self.files['%s_sc_unmapped_fa' % sampleType] = os.path.join(dataPath, name + '_%s_sc_seqs.fa' % sampleType)
+
+        if sampleType == 'sv':
+            # Store variant reads in bam formatted file <data_path>/<target_name>_sv_reads.bam
+            self.files['sv_bam'] = os.path.join(dataPath, name + '_sv_reads.bam')
+            # Store variant reads in sorted bam file
+            self.files['sv_bam_sorted'] = os.path.join(dataPath, name + '_sv_reads.sorted.bam')
+
+    def clean_reads(self, sampleType):
+        """Trim adapter sequences from the extracted reads, format and organize
+        the cleaned reads into new files.
+        Cutadapt is run to trim the adapter sequences from the sequence reads to
+        remove any 'noise' that bogs down the assembly process or analysis. The
+        cleaned reads output from cutadapt are then re-processed to determine
+        if the soft-clipped sequences were trimmed off or not to further filter
+        out reads. The soft-clipped sequences that remain are stored and a new
+        fastq file is written.
+        Args:
+            type (str): A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+        Return:
+            check (boolean): A boolean to indicate whether the are any reads left after
+                             cleaning is complete.
+        """
+
+        cutadapt = self.params.get_param('cutadapt')
+        cutadaptConfigFn = self.params.get_param('cutadapt_config_file')
+        utils.log(self.loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
+        self.files['%s_cleaned_fq' % sampleType] = os.path.join(self.paths['data'], self.name + '_%s_reads_cleaned.fastq' % sampleType)
+        utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
+        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
+
+        self.variation.setup_cleaned_reads(sampleType)
+        self.files['%s_cleaned_fq' % sampleType], self.variation.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
+        self.clear_sv_reads(sampleType)
+        check = self.variation.continue_analysis_check(sampleType)
+        utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
+        return check
+
 
 class TargetManager:
     """TargetManager class handles all the high level information relating to a target.
@@ -117,7 +200,7 @@ class TargetManager:
         self.files = {}
         self.read_len = 0
         self.repeat_mask = None
-        self.variation = Variation()
+        self.variation = Variation(params)
         self.regionBuffer = 200
         self.setup()
 
@@ -253,58 +336,14 @@ class TargetManager:
         return check
 
     def clean_reads(self, sampleType):
-        """Trim adapter sequences from the extracted reads, format and organize
-        the cleaned reads into new files.
-        Cutadapt is run to trim the adapter sequences from the sequence reads to
-        remove any 'noise' that bogs down the assembly process or analysis. The
-        cleaned reads output from cutadapt are then re-processed to determine
-        if the soft-clipped sequences were trimmed off or not to further filter
-        out reads. The soft-clipped sequences that remain are stored and a new
-        fastq file is written.
+        """Wrapper for Variation clean_reads function.
         Args:
             type (str): A string indicating a tumor ('sv') or normal ('norm') sample being processed.
         Return:
             check (boolean): A boolean to indicate whether the are any reads left after
                              cleaning is complete.
         """
-
-        cutadapt = self.params.get_param('cutadapt')
-        cutadaptConfigFn = self.params.get_param('cutadapt_config_file')
-        utils.log(self.loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
-        self.files['%s_cleaned_fq' % sampleType] = os.path.join(self.paths['data'], self.name + '_%s_reads_cleaned.fastq' % sampleType)
-        utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
-        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
-
-        self.variation.setup_cleaned_reads(sampleType)
-        self.files['%s_cleaned_fq' % sampleType], self.variation.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
-        self.clear_sv_reads(sampleType)
-        check = self.variation.continue_analysis_check(sampleType)
-        utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
-        return check
-
-    def setup_read_extraction_files(self, sampleType):
-        """Create file names to store the extracted reads.
-        This creates four files (for tumor samples):
-        1. fastq with extracted reads = sv_fq or normal_fq
-        2. fasta file with softclipped sequences = sv_sc_unmapped_fa
-        3. bam file with extracted reads = sv_bam
-        4. sorted bam file with extracted reads = sv_bam_sorted
-        Args:
-            sampleType (str): The type of input data - sv or normal
-        Returns:
-            None
-        """
-
-        # Store extracted reads in <data_path>/<target_name>_<type>_reads.fastq
-        self.files['%s_fq' % sampleType] = os.path.join(self.paths['data'], self.name + '_%s_reads.fastq' % sampleType)
-        # Store softclipped sequences in a fasta file <data_path>/<target_name>_<type>_sc_seqs.fa
-        self.files['%s_sc_unmapped_fa' % type] = os.path.join(self.paths['data'], self.name + '_%s_sc_seqs.fa' % sampleType)
-
-        if sampleType == 'sv':
-            # Store variant reads in bam formatted file <data_path>/<target_name>_sv_reads.bam
-            self.files['sv_bam'] = os.path.join(self.paths['data'], self.name + '_sv_reads.bam')
-            # Store variant reads in sorted bam file
-            self.files['sv_bam_sorted'] = os.path.join(self.paths['data'], self.name + '_sv_reads.sorted.bam')
+        return self.variation.clean_reads(sampleType)
 
     def extract_bam_reads(self, sampleType):
         """
@@ -314,40 +353,13 @@ class TargetManager:
             None
         """
         # Create the file paths for the files that will be created from the read extraction.
-        self.setup_read_extraction_files(sampleType)
+        self.variation.setup_read_extraction_files(sampleType, self.paths['data'], self.name)
         bamType = 'sample'
         if sampleType == 'norm':
             bamType = 'normal'
-
-        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (self.params.opts['%s_bam_file' % bamType], self.files['%s_fq' % sampleType]))
-        # Set a buffer region for extracting reads in a region.
-
-        # Bundle the information needed to extract data and allow variation class to handle this information.
-        regionStartCoord = self.start - self.regionBuffer
-        regionEndCoord = self.end + self.regionBuffer
         bamFile = self.params.opts['%s_bam_file' % bamType]
-        self.variation.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, self.chrom, regionStartCoord, regionEndCoord)
-        self.variation.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), self.start, self.end)
-
-        svBam = None
-        if sampleType == 'sv':
-            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=bamFile)
-
-        # Write access methods to files and pass to variation class method to do all of this chunk.
-        readsFq = open(self.files['%s_fq' % sampleType], 'w')
-        scFa = open(self.files['%s_sc_unmapped_fa' % sampleType], 'w')
-
-        self.variation.var_reads[sampleType].write_seqs(scFa, readsFq, svBam, self.params.get_kmer_size())
-
-        readsFq.close()
-        scFa.close()
-
-        if sampleType == 'sv':
-            svBam.close()
-            utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
-            pysam.sort(self.files['sv_bam'], self.files['sv_bam_sorted'].replace('.bam', ''))
-            utils.log(self.loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
-            pysam.index(self.files['sv_bam_sorted'])
+        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.files['%s_fq' % sampleType]))
+        self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
 
     def compare_kmers(self):
         """Move this to Variation class
