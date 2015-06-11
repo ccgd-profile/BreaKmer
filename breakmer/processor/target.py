@@ -132,7 +132,7 @@ class Variation:
             # Store variant reads in sorted bam file
             self.files['sv_bam_sorted'] = os.path.join(dataPath, name + '_sv_reads.sorted.bam')
 
-    def clean_reads(self, sampleType):
+    def clean_reads(self, dataPath, name, sampleType):
         """Trim adapter sequences from the extracted reads, format and organize
         the cleaned reads into new files.
         Cutadapt is run to trim the adapter sequences from the sequence reads to
@@ -147,11 +147,10 @@ class Variation:
             check (boolean): A boolean to indicate whether the are any reads left after
                              cleaning is complete.
         """
-
         cutadapt = self.params.get_param('cutadapt')
         cutadaptConfigFn = self.params.get_param('cutadapt_config_file')
         utils.log(self.loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
-        self.files['%s_cleaned_fq' % sampleType] = os.path.join(self.paths['data'], self.name + '_%s_reads_cleaned.fastq' % sampleType)
+        self.files['%s_cleaned_fq' % sampleType] = os.path.join(dataPath, name + '_%s_reads_cleaned.fastq' % sampleType)
         utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
         output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
@@ -316,6 +315,8 @@ class TargetManager:
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
     def add_path(self, key, path):
+        """
+        """
         utils.log(self.loggingName, 'info', 'Creating %s %s path (%s)' % (self.name, key, path))
         self.paths[key] = path
         if not os.path.exists(self.paths[key]):
@@ -403,7 +404,7 @@ class TargetManager:
             check (boolean): A boolean to indicate whether the are any reads left after
                              cleaning is complete.
         """
-        return self.variation.clean_reads(sampleType)
+        return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
 
     def extract_bam_reads(self, sampleType):
         """

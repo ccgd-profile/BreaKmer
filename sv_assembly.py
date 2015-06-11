@@ -7,7 +7,7 @@ import os
 import olc
 from collections import OrderedDict
 from utils import *
-#----------------------------------------------------------- 
+
 def setup_contigs(mer, fq_recs, kmer_len, akmers, buff) :
   logger = logging.getLogger('root')
   ct = None
