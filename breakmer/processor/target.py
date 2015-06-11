@@ -94,7 +94,7 @@ class Variation:
 
         svBam = None
         if sampleType == 'sv':
-            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=bamFile)
+            svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=pysam.Samfile(bamFile, 'rb'))
         readsFq = open(self.files['%s_fq' % sampleType], 'w')
         scFa = open(self.files['%s_sc_unmapped_fa' % sampleType], 'w')
         # Write all the stored sequences into files.
@@ -161,6 +161,57 @@ class Variation:
         check = self.variation.continue_analysis_check(sampleType)
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
         return check
+
+    def compare_kmers(self, kmerPath, readLen):
+        """
+        """
+        jellyfish = self.params.get_param('jellyfish')
+        kmer_size = self.params.get_kmer_size()
+
+        # Set the reference sequence kmers.
+        self.kmers['ref'] = {}
+        for i in range(len(self.files['target_ref_fn'])):
+            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % self.files['target_ref_fn'][i])
+            self.kmers['ref'] = load_kmers(utils.run_jellyfish(self.files['target_ref_fn'][i], jellyfish, kmer_size), self.kmers['ref'])
+
+        # Set sample kmers.
+        utils.log(self.loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
+        self.kmers['case'] = {}
+        self.kmers['case'] = load_kmers(utils.run_jellyfish(self.files['sv_cleaned_fq'], jellyfish, kmer_size), self.kmers['case'])
+        self.kmers['case_sc'] = {}
+        self.kmers['case_sc'] = load_kmers(utils.run_jellyfish(self.files['sv_sc_unmapped_fa'], jellyfish, kmer_size), self.kmers['case_sc'])
+        sc_mers = set(self.kmers['case'].keys()) & set(self.kmers['case_sc'].keys())
+        sample_only_mers = list(sc_mers.difference(set(self.kmers['ref'].keys())))
+        # Add normal sample kmers if available.
+        if self.params.get_param('normal_bam_file'):
+            norm_kmers = {}
+            norm_kmers = load_kmers(utils.run_jellyfish(self.files['norm_cleaned_fq'], jellyfish, kmer_size), norm_kmers)
+            sample_only_mers = set(sample_only_mers).difference(set(norm_kmers.keys()))
+
+        sample_only_mers = list(sample_only_mers)
+
+        # Write case only kmers out to file.
+        self.files['sample_kmers'] = os.path.join(kmerPath, self.name + "_sample_kmers.out")
+        sample_kmer_fout = open(self.files['sample_kmers'], 'w')
+        kmer_counter = 1
+        self.kmers['case_only'] = {}
+        for mer in sample_only_mers:
+            sample_kmer_fout.write("\t".join([str(x) for x in [mer, str(self.kmers['case'][mer])]]) + "\n")
+            self.kmers['case_only'][mer] = self.kmers['case'][mer]
+        sample_kmer_fout.close()
+
+        # Clean out data structures.
+        self.kmers['ref'] = {}
+        self.kmers['case'] = {}
+        self.kmers['case_sc'] = {}
+
+        utils.log(self.loggingName, 'info', 'Writing %d sample-only kmers to file %s' % (len(self.kmers['case_only']), self.files['sample_kmers']))
+        self.files['kmer_clusters'] = os.path.join(kmerPath, self.name + "_sample_kmers_merged.out")
+        utils.log(self.loggingName, 'info', 'Writing kmer clusters to file %s' % self.files['kmer_clusters'])
+
+        self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], kmer_size, self.params.get_sr_thresh('min'), readLen)
+        self.clear_cleaned_reads()
+        self.kmers['case_only'] = {}
 
 
 class TargetManager:
@@ -359,9 +410,10 @@ class TargetManager:
         self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
 
     def compare_kmers(self):
-        """Move this to Variation class
+        """Obtain the sample only kmers and initiate assembly of reads with these kmers.
         """
-
+        self.variation.compare_kmers()
+        """
         kmer_dict = self.variation.kmers
         jellyfish = self.params.get_param('jellyfish')
         kmer_size = self.params.get_kmer_size()
@@ -416,11 +468,11 @@ class TargetManager:
         kmer_dict['clusters'] = assembly.init_assembly(kmer_dict['case_only'], self.variation.cleaned_read_recs['sv'], kmer_size, self.params.get_sr_thresh('min'), self.read_len)
         self.clear_cleaned_reads()
         kmer_dict['case_only'] = {}
+        """
 
     def resolve_sv(self):
         """
         """
-
         iter = 1
         contigs = self.variation.kmers['clusters']
         utils.log(self.loggingName, 'info', 'Resolving structural variants from %d kmer clusters' % len(contigs))
