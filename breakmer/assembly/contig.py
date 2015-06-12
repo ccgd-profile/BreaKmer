@@ -3,6 +3,7 @@
 
 import os
 import logging
+import breakmer.assembly.olc as olcAssembly
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -327,7 +328,7 @@ class Builder:
         queryRead = readAlignValues['read']
 
         minScore = float(min(len(self.seq), len(queryRead.seq))) / 4.0
-        alignManager = AlignManager(self.seq, queryRead.seq, minScore, 0.90)
+        alignManager = olcAssembly.AlignManager(self.seq, queryRead.seq, minScore, 0.90)
 
         print 'breakmer.assembler.contig.py check_align'
         print queryRead.seq
