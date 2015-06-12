@@ -487,18 +487,18 @@ class TargetManager:
         utils.log(self.loggingName, 'info', 'Resolving structural variants from %d kmer clusters' % len(contigs))
 
         for contig in contigs:
-            utils.log(self.loggingName, 'info', 'Assessing contig %s' % contig.seq())
             contigId = self.name + '_contig' + str(iter)
+            utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
             contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.files['kmer_clusters'])
-            contig.query_ref()
-            contig.make_calls()
-            if contig.has_result():
-                contig.write_result()
-                contig.write_bam()
-                self.add_result(result)
-            else:
-                utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
-            iter += 1
+            # contig.query_ref()
+            # contig.make_calls()
+            # if contig.has_result():
+            #     contig.write_result()
+            #     contig.write_bam()
+            #     self.add_result(result)
+            # else:
+            #     utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
+            # iter += 1
 
     def complete_analysis(self):
         """ """
