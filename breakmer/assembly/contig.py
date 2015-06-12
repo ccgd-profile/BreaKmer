@@ -455,7 +455,7 @@ class Builder:
         self.read_batch.clean(fq_recs, contig_buffer, keep_reads[-1])
         return contig_reads
 
-    def contig_overlap_read(self, alignment, query_read, nreads, kmer_seqs, type):
+    def contig_overlap_read(self, alignment, query_read, nreads, kmer_seqs, assemblyType):
         """Assembled consensus and read sequences, where the consensus end overlaps
         with the read sequence beginning.
         Args:
@@ -469,13 +469,13 @@ class Builder:
 
         if alignment.prej == len(self.seq) and alignment.j == 0:
             self.set_superseq(query_read, nreads, alignment.i, alignment.prei)
-            if type == 'grow':
+            if assemblyType == 'grow':
                 self.set_kmers(kmer_seqs)
         else:
             post_seq = query_read.seq[alignment.prei:]
             nseq = self.seq[(len(self.seq) - (self.kmerLen - 1)):] + post_seq
             self.add_postseq(post_seq, alignment.j, alignment.prej, nreads, query_read.indel_only)
-            if type == 'grow':
+            if assemblyType == 'grow':
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'for')
                 self.kmers.extend(nkmers)
 
@@ -501,7 +501,7 @@ class Builder:
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'rev')
                 self.kmers.extend(nkmers)
 
-    def check_alt_reads(self, kmer_tracker, contig_buffer, contig_kmers):
+    def check_alternate_reads(self, kmer_tracker, contig_buffer, contig_kmers):
         """Iterate through the buffered reads that were not aligned to the contig
         and determine if a new contig should be created.
         Args:
@@ -509,7 +509,6 @@ class Builder:
             contig_buffer: ContigBuffer object
             contig_kmers: List of kmer sequence used in the contig assembly.
         """
-
         new_contigs = []
         kmer_set = set()
         for read, nreads in self.read_batch.alt:
@@ -633,19 +632,16 @@ class Meta:
         Return: None
         """
         logger = logging.getLogger('breakmer.assembly.contig')
-
         cluster_f = open(cluster_fn, 'w')
         cluster_f.write(self.id + ' ' + str(len(kmers)) + '\n')
         cluster_f.write(','.join([x[0] for x in kmers]) + '\n')
         cluster_f.write(','.join([x.id for x in reads]) + '\n\n')
         cluster_f.close()
-
         assembly_fq = open(self.fq_fn, 'w')
         logger.info('Writing reads containing kmers to fastq %s' % self.fq_fn)
         for read in reads:
             assembly_fq.write(read.id + '\n' + read.seq + '\n+\n' + read.qual + '\n')
         assembly_fq.close()
-
         logger.info('Writing contig fasta file for blatting %s' % self.fa_fn)
         blat_f = open(self.fa_fn, 'w')
         blat_f.write('>' + self.id + '\n' + seq)

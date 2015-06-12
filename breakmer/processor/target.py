@@ -488,7 +488,7 @@ class TargetManager:
 
         for contig in contigs:
             utils.log(self.loggingName, 'info', 'Assessing contig %s' % contig.seq())
-            contig_id = 'contig' + str(iter)
+            contig_id = self.name + '_contig' + str(iter)
             contig.set_meta_information(contig_id, self.params, self.get_values(), self.paths['contigs'], self.files['kmer_clusters'])
 
             contig.query_ref()

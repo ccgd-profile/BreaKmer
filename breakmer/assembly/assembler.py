@@ -100,7 +100,7 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
         read, kmerPos, matchFound, seqLen, nReadsWithSeq = readVals
         readAlignValues = {'read': read,
                            'align_pos': kmerPos,
-                           'nreads': nReads}
+                           'nreads': nReadsWithSeq}
         contigBuffer.add_used_read(read.id)
         # If no contig, build one.
         if not contig:
