@@ -609,6 +609,9 @@ class Meta:
             contig_path: String of the path to the contig directory to store files.
         Return: None
         """
+        self.params = params
+        self.id = contig_id
+        self.target_region = query_region_values
 
         self.path = os.path.join(contig_path, self.id)
         logger = logging.getLogger('breakmer.assembly.contig')
@@ -616,10 +619,6 @@ class Meta:
 
         if not os.path.exists(self.path):
             os.makedirs(self.path)
-
-        self.params = params
-        self.id = contig_id
-        self.target_region = query_region_values
         self.fq_fn = os.path.join(contig_path, self.id, self.id + '.fq')
         self.fa_fn = os.path.join(contig_path, self.id, self.id + '.fa')
 
