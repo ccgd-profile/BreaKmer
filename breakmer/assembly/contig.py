@@ -719,7 +719,6 @@ class Contig:
             source: String for the source of function call.
         Return: None
         """
-
         if source == 'setup':
             self.set_kmers(kmer_tracker.kmer_seqs)
 
@@ -727,17 +726,14 @@ class Contig:
         new_contigs = self.builder.check_alternate_reads(kmer_tracker, contig_buffer)
         for new_contig in new_contigs:
             contig_buffer.add_contig(new_contig[0], new_contig[1])
-
         self.reads = self.builder.finalize_reads(self.reads, fq_recs, contig_buffer)
 
     def set_kmers(self, kmer_seqs):
         """Wrapper function to Builder class set_kmers function.
-
         Args:
             kmer_seqs: Set of all kmer sequences.
         Return: None
         """
-
         self.setup = True
         self.builder.set_kmers(kmer_seqs)
 

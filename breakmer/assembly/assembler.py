@@ -138,7 +138,7 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
     # Extract the read ids of the reads containing kmerSeq
     mappedReadIds = map(lambda x: x[0].id, mappedReads)
     filterIds = set(mappedReadIds) - set(usedReads)
-    matchedReads = filter(lambda x: (x in filterIds), mappedReadIds)
+    matchedReads = filter(lambda x: (x[0].id in filterIds), mappedReads)
     if order == 'rev':
         kmerReads = sorted(matchedReads, key=lambda z: (-z[1], -z[3]))
     else:
