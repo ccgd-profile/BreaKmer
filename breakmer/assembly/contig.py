@@ -632,7 +632,6 @@ class Meta:
             seq: String of contig sequence.
         Return: None
         """
-
         logger = logging.getLogger('breakmer.assembly.contig')
 
         cluster_f = open(cluster_fn, 'w')

@@ -216,7 +216,6 @@ class ContigBuffer:
             read_id: String of read ID.
         Return: None
         """
-
         if read_id in self.contigs:
             del self.contigs[read_id]
 
@@ -227,7 +226,6 @@ class ContigBuffer:
         Return:
             Contig object to grow or complete.
         """
-
         read_id = self.contigs.keys()[0]
         contig = self.contigs[read_id]
         del self.contigs[read_id]
@@ -239,7 +237,6 @@ class ContigBuffer:
             read_id: String for read ID.
         Return: None
         """
-
         self.used_reads.add(read_id)
 
     def add_used_mer(self, kmer_seq):
@@ -248,8 +245,7 @@ class ContigBuffer:
             kmer_seq: String for kmer sequence.
         Return: None
         """
-
-        self.used_mers.add(kmer_seq)
+        self.used_kmers.add(kmer_seq)
 
     def remove_kmers(self, kmer_tracker):
         """Remove used kmer sequences from the kmer tracking object and reset used
@@ -258,7 +254,6 @@ class ContigBuffer:
             kmer_tracker: KmerTracker object.
         Return: None
         """
-
         map(kmer_tracker.remove_kmer, list(self.used_kmers))
         self.used_kmers = set()
 
