@@ -189,7 +189,7 @@ class Variation:
         """
         """
         # Set the reference sequence kmers.
-        self.set_refrence_kmers(targetRefFns)
+        self.set_reference_kmers(targetRefFns)
 
         # Set sample kmers.
         self.set_sample_kmers()
@@ -272,7 +272,6 @@ class TargetManager:
         Returns:
             None
         """
-
         intervals = self.params.targets[self.name]
         for values in intervals:
             chrom, start, end = values[0], int(values[1]), int(values[2])
@@ -317,7 +316,7 @@ class TargetManager:
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
     def add_path(self, key, path):
-        """
+        """Utility function to create all the output directories.
         """
         utils.log(self.loggingName, 'info', 'Creating %s %s path (%s)' % (self.name, key, path))
         self.paths[key] = path
@@ -382,7 +381,6 @@ class TargetManager:
                    False when there are no reads extracted or left after cleaning
                    and True when there are.
         """
-
         # Extract reads from tumor sample.
         self.extract_bam_reads('sv')
         if self.params.get_param('normal_bam_file'):
