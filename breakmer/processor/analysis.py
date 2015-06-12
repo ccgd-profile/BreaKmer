@@ -37,7 +37,7 @@ def analyze_targets(targetList):
         if not targetRegion.find_sv_reads():
             continue
         targetRegion.compare_kmers()
-        # targetRegion.resolve_sv()
+        targetRegion.resolve_sv()
         # targetRegion.complete_analysis()
 
 
