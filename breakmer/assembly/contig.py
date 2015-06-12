@@ -4,7 +4,6 @@
 import os
 import logging
 import breakmer.assembly.olc as olcAssembly
-import breakmer.assembly.assembler as assembler
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -773,7 +772,7 @@ class Contig:
                 read_order = 'rev'
         elif order == 'for':
             read_order = 'rev'
-        reads = assembler.find_reads(kmer, read_items, self.buffer, read_order)
+        reads = find_reads(kmer, read_items, self.buffer, read_order)
         return reads
 
     def grow(self, fq_recs, kmerTracker, kmerLen, contig_buffer):
