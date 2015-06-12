@@ -20,6 +20,8 @@ class AlignParams:
         self.set_values(params, target)
 
     def set_values(self, params, target):
+        """
+        """
         blast = params.get_param('blast')
         if blast:
             self.program['target'] = 'blast'
@@ -39,27 +41,30 @@ class AlignParams:
 
 
 class Realignment:
-    def __init__(self, contig):
+    """
+    """
+    def __init__(self, params, target, contig):
         self.scope = None
         self.result_manager = None
+        self.contig = contig
+        self.alignParams = AlignParams(params, target)
 
-    def align(self, align_params, scope):
+    def align(self, scope):
         """
         """
         self.scope = scope
+        # alignment_program, extension, bin = align_params
 
-        alignment_program, extension, bin = align_params
-
-        self.result_fn = os.path.join(path, '%s_res.%s.%s' % (alignment_program, type, extension))
-        if alignment_program == 'blast':
+        self.result_fn = os.path.join(path, '%s_res.%s.%s' % (self.alignParams.program, scope, self.alignParams.extension))
+        if self.alignParams.program == 'blast':
             cmd = 
-        elif alignment_program == 'blat':
+        elif self.alignParams.program == 'blat':
             cmd = 
 
         if not os.path.isfile(self.result_fn):
             return False
         else:
-            self.result_manager = AlignResults(self.result_fn, alignment_program, scope)
+            self.result_manager = AlignResults(self.result_fn, self.alignParams.program, scope)
 
 
 class AlignResults:

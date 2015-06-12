@@ -4,6 +4,7 @@
 import os
 import logging
 import breakmer.assembly.olc as olcAssembly
+import breakmer.assembly.assembler as assembler
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
