@@ -108,22 +108,22 @@ class ReadBatch:
         """Sets the last read added to the reads list as aligned."""
         self.reads[-1].aligned = True
 
-    def clean(self, fq_reads, contig_buffer, last_keep_read):
+    def clean(self, fq_reads, contigBuffer, last_keep_read):
         """Remove all data from data structures.
         Iterate through reads in delete set and delete them from the fq dictionary.
-        Check if the delete reads are in the contig_buffer contig dictionary. If the
+        Check if the delete reads are in the contigBuffer contig dictionary. If the
         contig associated with the read is not setup then delete the read from the dictionary.
         Args:
             fq_reads: Dictionary containing the extracted reads.
-            contig_buffer: ContigBuffer object.
+            contigBuffer: ContigBuffer object.
             last_keep_read: fq_read object kept for further use.
         Return: None
         """
 
         map(fq_reads.__delitem__, map(lambda x: x.seq, list(self.delete)))
-        for read_id in filter(lambda x: x in contig_buffer.contigs, list(self.delete)):
-            if not contig_buffer.contigs[read_id].setup:
-                del contig_buffer.contigs[read_id]
+        for read_id in filter(lambda x: x in contigBuffer.contigs, list(self.delete)):
+            if not contigBuffer.contigs[read_id].setup:
+                del contigBuffer.contigs[read_id]
         self.delete = set()
         self.alt = []
         self.reads = [last_keep_read]
@@ -434,14 +434,14 @@ class Builder:
         self.counts.set_counts(start, end, nreads, indel_only)
         self.counts.extend_counts(len(pre_seq), nreads, indel_only, 'pre')
 
-    def finalize_reads(self, contig_reads, fq_recs, contig_buffer):
+    def finalize_reads(self, contig_reads, fq_recs, contigBuffer):
         """Sort out the reads to keep for reporting and remove the others.
         Aligned and non-redundant reads are removed from the contig read set. The
         variables in read_batch are cleared.
         Args:
             contig_reads: Set of fq_read objects.
             fq_recs: Dictionary of fq_read objects.
-            contig_buffer: ContigBuffer class object.
+            contigBuffer: ContigBuffer class object.
         Return:
             contig_reads: Set of fq_reads objects
         """
@@ -452,7 +452,7 @@ class Builder:
         contig_reads = contig_reads | set(add_reads)
         # Remove rm_reads
         contig_reads = contig_reads - set(rm_reads)
-        self.read_batch.clean(fq_recs, contig_buffer, keep_reads[-1])
+        self.read_batch.clean(fq_recs, contigBuffer, keep_reads[-1])
         return contig_reads
 
     def contig_overlap_read(self, alignment, query_read, nreads, kmer_seqs, assemblyType):
@@ -500,30 +500,32 @@ class Builder:
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'rev')
                 self.kmers.extend(nkmers)
 
-    def check_alternate_reads(self, kmer_tracker, contig_buffer, contig_kmers):
+    def check_alternate_reads(self, kmerTracker, contigBuffer, contigKmers):
         """Iterate through the buffered reads that were not aligned to the contig
         and determine if a new contig should be created.
         Args:
-            kmer_tracker: KmerTracker object contains all the kmer sequence values.
-            contig_buffer: ContigBuffer object
-            contig_kmers: List of kmer sequence used in the contig assembly.
+            kmerTracker: KmerTracker object contains all the kmer sequence values.
+            contigBuffer: ContigBuffer object
+            contigKmers: List of kmer sequence used in the contig assembly.
         """
-        new_contigs = []
-        kmer_set = set()
+        newContigs = []
+        kmerSet = set()
         for read, nreads in self.read_batch.alt:
-            alt_kmers = get_read_kmers(read.seq, self.kmerLen, kmer_tracker.kmer_seqs, '')
-            new_kmers = set(alt_kmers) - set(contig_kmers) - contig_buffer.used_mers - kmer_set
-            if len(new_kmers) > 0:
-                for kmer_seq in list(new_kmers):
-                    read_count = kmer_tracker.get_count(kmer_seq)
-                    if read_count > 1:
-                        kmerPos = read.seq.find(kmer_seq)
-                        kmer_values = {'seq': kmer_seq, 'counts': kmer_tracker.get_count(kmer_seq), 'kmer_set': kmer_tracker.kmer_set, 'len': self.kmerLen}
-                        read_align_values = {'read': read, 'align_pos': kmerPos, 'nreads': nreads}
-                        new_contigs.append((read, Contig(kmer_values, read_align_values)))
-                        kmer_set = kmer_set | new_kmers
+            altKmers = get_read_kmers(read.seq, self.kmerLen, kmerTracker.kmer_seqs, '')
+            newKmers = set(altKmers) - set(contigKmers) - contigBuffer.used_mers - kmerSet
+            if len(newKmers) > 0:
+                for kmerSeq in list(newKmers):
+                    readCount = kmerTracker.get_count(kmerSeq)
+                    if readCount > 1:
+                        kmerPos = read.seq.find(kmerSeq)
+                        kmerObj = assemblyUtils.Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, self.kmerLen)
+                        read_align_values = {'read': read,
+                                             'align_pos': kmerPos,
+                                             'nreads': nreads}
+                        newContigs.append((read, Contig(kmer_values, read_align_values)))
+                        kmerSet = kmerSet | newKmers
                         break
-        return new_contigs
+        return newContigs
 
     def set_kmers(self, kmer_seqs):
         """Wrapper function to get_read_kmers function to parse a sequence string
@@ -703,23 +705,23 @@ class Contig:
         else:
             return False
 
-    def finalize(self, fq_recs, kmerTracker, contig_buffer, source='setup'):
+    def finalize(self, fq_recs, kmerTracker, contigBuffer, source='setup'):
         """Finish an assembly and add the buffered contigs that were created from
-        non-aligned reads to the contig_buffer.
+        non-aligned reads to the contigBuffer.
         Args:
             fq_recs: Dicionary of fq_read objects.
             kmerTracker: KmerTracker object with all kmer sequence values.
-            contig_buffer: ContigBuffer object.
+            contigBuffer: ContigBuffer object.
             source: String for the source of function call.
         Return: None
         """
         if source == 'setup':
             self.set_kmers(kmerTracker.kmerSeqs)
         # Get alternate read kmers and see if any are different from contig kmers.
-        new_contigs = self.builder.check_alternate_reads(kmerTracker, contig_buffer, self.kmers)
+        new_contigs = self.builder.check_alternate_reads(kmerTracker, contigBuffer, self.kmers)
         for new_contig in new_contigs:
-            contig_buffer.add_contig(new_contig[0], new_contig[1])
-        self.reads = self.builder.finalize_reads(self.reads, fq_recs, contig_buffer)
+            contigBuffer.add_contig(new_contig[0], new_contig[1])
+        self.reads = self.builder.finalize_reads(self.reads, fq_recs, contigBuffer)
 
     def set_kmers(self, kmer_seqs):
         """Wrapper function to Builder class set_kmers function.
@@ -791,10 +793,10 @@ class Contig:
         logger = logging.getLogger('breakmer.assembly.contig')
         if not self.setup:
             self.set_kmers(kmerTracker.kmerSeqs)
-        new_kmers = self.refresh_kmers()
-        while len(new_kmers) > 0:
+        newKmers = self.refresh_kmers()
+        while len(newKmers) > 0:
             iter = 0
-            for kmer_lst in new_kmers:
+            for kmer_lst in newKmers:
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
                 reads = self.get_kmer_reads(kmer_lst, fqRecs.items())
                 contigBuffer.add_used_mer(kmerSeq)
