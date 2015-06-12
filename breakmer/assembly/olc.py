@@ -196,9 +196,7 @@ class AlignManager:
             returnVal = alignment.prei
         return returnVal
 
-
     def get_kmer_align_indices(self, align_index, kmer_seq):
-        """Return the alignment index of the kmer sequence with the
-        sequences.
+        """Return the alignment index of the kmer sequence with the sequences.
         """
         return (self.aligns[align_index].align1.replace('-', '').find(kmer_seq), self.aligns[align_index].align2.replace('-', '').find(kmer_seq))

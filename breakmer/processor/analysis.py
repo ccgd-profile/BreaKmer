@@ -51,7 +51,6 @@ class RunTracker:
     Returns:
         None
     """
-
     def __init__(self, params):
         self.params = params
         self.results = []
@@ -70,7 +69,6 @@ class RunTracker:
         Returns
             None
         """
-
         startTime = time.clock()
         targetAnalysisList = self.create_targets()
 
@@ -102,7 +100,6 @@ class RunTracker:
             trgtGroups: List of lists of target objects. Each list is
                         analyzed by a processor.
         """
-
         nprocs = int(self.params.get_param('nprocs'))
         multiprocs = nprocs > 1
         ngroups = nprocs
