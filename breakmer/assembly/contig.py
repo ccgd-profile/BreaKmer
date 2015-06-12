@@ -302,14 +302,14 @@ class Builder:
             self.read_batch.delete.add(readAlignValues['read'])
         return hit
 
-    def check_align(self, kmer_values, readAlignValues, alignType='setup'):
+    def check_align(self, kmerObj, readAlignValues, alignType='setup'):
         """Check the alignment of the read sequence to the contig sequence.
         The read sequence must match at least 25% of the shortest sequence between
         the contig and the read and an identity at least 90%. If there is clear
         alignment between the read sequence and the contig sequence, then the
         assembly consensus sequence is appropriately changed.
         Args:
-            kmer_values: Dictionary containing:
+            kmerObj: Dictionary containing:
                          - 'seq': String kmer sequence value.
                          - 'counts': Integer of reads containing kmer sequence.
                          - 'kmer_set': Set with all kmer sequences.
@@ -349,33 +349,33 @@ class Builder:
                 self.set_superseq(queryRead, readAlignValues['nreads'], alignManager.get_alignment_values(0, 'i'), alignManager.get_alignment_values(0, 'prei'))
                 if alignType == 'grow':
                     # Contig sequence has changed, set the kmers.
-                    self.set_kmers(kmer_values['kmer_set'])
+                    self.set_kmers(kmerObj.kmerSeqSet)
             # Check if the contig sequence full contains the read sequence.
             elif alignManager.read_is_subseq():
                 self.add_subseq(alignManager.get_alignment_values(1, 'i'), alignManager.get_alignment_values(1, 'prei'), readAlignValues['nreads'], queryRead.indel_only)
             # There appears to be overlap, figure out how to assemble.
             else:
                 match = False
-                indx1 = alignManager.get_kmer_align_index(0, kmer_vals['seq'])
-                indx2 = alignManager.get_kmer_align_index(1, kmer_vals['seq'])
+                indx1 = alignManager.get_kmer_align_index(0, kmerObj.seq)
+                indx2 = alignManager.get_kmer_align_index(1, kmerObj.seq)
                 if indx1[0] > -1 and indx1[1] > -1:
                     # Read overlaps off front of contig sequence.
                     if (indx2[0] == -1 and indx2[1] == -1) or (abs(indx2[0] - indx2[1]) > abs(indx1[0] - indx1[1])):
                         match = True
-                        self.contig_overlap_read(alignManager.get_alignment(0), queryRead, readAlignValues['nreads'], kmer_values['kmer_set'], alignType)
+                        self.contig_overlap_read(alignManager.get_alignment(0), queryRead, readAlignValues['nreads'], kmerObj.kmerSeqSet, alignType)
                 elif indx2[0] > -1 and indx2[1] > -1:
                     # Read overlaps off end of contig sequence.
                     if (indx1[0] == -1 and indx1[1] == -1) or (abs(indx2[0] - indx2[1]) < abs(indx1[0] - indx1[1])):
                         match = True
-                        self.read_overlap_contig(alignManager.get_alignment(1), queryRead, readAlignValues['nreads'], kmer_values['kmer_set'], alignType)
+                        self.read_overlap_contig(alignManager.get_alignment(1), queryRead, readAlignValues['nreads'], kmerObj.kmerSeqSet, alignType)
         # Read sequence overlaps off the front of the contig sequence.
         elif alignManager.better_align():
             match = True
-            self.contig_overlap_read(alignManager.get_alignment(0), queryRead, readAlignValues['nreads'], kmer_values['kmer_set'], alignType)
+            self.contig_overlap_read(alignManager.get_alignment(0), queryRead, readAlignValues['nreads'], kmerObj.kmerSeqSet, alignType)
         # Read sequence overlaps off the end of the contig sequence.
         else:
             match = True
-            self.read_overlap_contig(alignManager.get_alignment(1), queryRead, readAlignValues['nreads'], kmer_values['kmer_set'], alignType)
+            self.read_overlap_contig(alignManager.get_alignment(1), queryRead, readAlignValues['nreads'], kmerObj.kmerSeqSet, alignType)
         return match
 
     def set_superseq(self, read, nreads, start, end):

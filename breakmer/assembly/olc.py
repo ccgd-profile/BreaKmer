@@ -182,6 +182,21 @@ class AlignManager:
         """Return align object"""
         return self.aligns[index]
 
+    def get_alignment_values(self, index, value):
+        """Return a specific value from the alignment results
+        Args:
+            index: Integer index of the alignment - 0,1
+            value: String value for the alignment value - i, prei
+        """
+        returnVal = None
+        alignment = self.aligns[index]
+        if value == 'i':
+            returnVal = alignment.i
+        elif value == 'prei':
+            returnVal = alignment.prei
+        return returnVal
+
+
     def get_kmer_align_indices(self, align_index, kmer_seq):
         """Return the alignment index of the kmer sequence with the
         sequences.

@@ -315,33 +315,33 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size):
             logger.info('%s does not exist.' % fa_fn)
             dump_fn = None
             return dump_fn
-
-        cmd = '%s --version'%jellyfish
+        cmd = '%s --version' % jellyfish
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
         jfish_version = int(output.split()[1].split('.')[0])
-        logger.info('Using jellyfish version %d'%jfish_version)
+        logger.info('Using jellyfish version %d' % jfish_version)
 
         count_fn = os.path.join(file_path, file_base + "_" + str(kmer_size) + "mers_counts")
-        logger.info('Running %s on file %s to determine kmers'%(jellyfish,fa_fn)) 
-        cmd = '%s count -m %d -s %d -t %d -o %s %s'%(jellyfish,kmer_size,100000000,8,count_fn,fa_fn)
-        logger.info('Jellyfish counts system command %s'%cmd)
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        logger.info('Running %s on file %s to determine kmers' % (jellyfish, fa_fn)) 
+        cmd = '%s count -m %d -s %d -t %d -o %s %s' % (jellyfish, kmer_size, 100000000, 8, count_fn, fa_fn)
+        logger.info('Jellyfish counts system command %s' % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        logger.info('Jellyfish count output %s'%output)
-        logger.info('Jellyfish count errors %s'%errors)
+        logger.info('Jellyfish count output %s' % output)
+        logger.info('Jellyfish count errors %s' % errors)
 
-        if jfish_version < 2: count_fn += '_0'
-        cmd = '%s dump -c -o %s %s'%(jellyfish,dump_fn,count_fn)
-        logger.info('Jellyfish dump system command %s'%cmd)
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        if jfish_version < 2:
+            count_fn += '_0'
+        cmd = '%s dump -c -o %s %s' % (jellyfish, dump_fn, count_fn)
+        logger.info('Jellyfish dump system command %s' % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        logger.info('Jellyfish dump output %s'%output)
-        logger.info('Jellyfish dump errors %s'%errors)
-        cmd = 'touch %s'%dump_marker_fn
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-        output, errors = p.communicate()  
-        logger.info('Completed jellyfish dump %s, touching marker file %s'%(dump_fn,dump_marker_fn))
+        logger.info('Jellyfish dump output %s' % output)
+        logger.info('Jellyfish dump errors %s' % errors)
+        cmd = 'touch %s' % dump_marker_fn
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        output, errors = p.communicate()
+        logger.info('Completed jellyfish dump %s, touching marker file %s' % (dump_fn, dump_marker_fn))
         count_fns = glob.glob(os.path.join(file_path, "*mers_counts*"))
         for cf in count_fns:
             os.remove(cf)
@@ -351,54 +351,52 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size):
 
 
 def setup_ref_data(setup_params):
-     genes = setup_params[0]
-     rep_mask, ref_fa, altref_fa_fns, ref_path, jfish_path, blat_path, kmer_size = setup_params[1]
+    genes = setup_params[0]
+    rep_mask, ref_fa, altref_fa_fns, ref_path, jfish_path, blat_path, kmer_size = setup_params[1]
+    logger = logging.getLogger('breakmer.utils')
 
-     logger = logging.getLogger('root')
+    for gene in genes:
+        chr, bp1, bp2, name, intvs = gene
+        gene_ref_path = os.path.join(ref_path, name)
+        if rep_mask:
+            logger.info('Extracting repeat mask regions for target gene %s.' % name)
+            setup_rmask(gene, gene_ref_path, rep_mask)
 
-     for gene in genes:
-         chr, bp1, bp2, name, intvs = gene
-         gene_ref_path = os.path.join(ref_path,name)
-         if rep_mask: 
-             logger.info('Extracting repeat mask regions for target gene %s.'%name)
-             setup_rmask(gene, gene_ref_path, rep_mask)
-         
-         logger.info('Extracting refseq sequence for %s, %s:%d-%d'%(name, chr, bp1, bp2))
-         directions = ['forward', 'reverse']
-         for dir in directions:
-             target_fa_fn = os.path.join(gene_ref_path, name + '_' + dir + '_refseq.fa')
-             ref_fn = extract_refseq_fa(gene, gene_ref_path, ref_fa, dir, target_fa_fn)
-             run_jellyfish(ref_fn, jfish_path, kmer_size)
+        logger.info('Extracting refseq sequence for %s, %s:%d-%d' % (name, chr, bp1, bp2))
+        directions = ['forward', 'reverse']
+        for dir in directions:
+            target_fa_fn = os.path.join(gene_ref_path, name + '_' + dir + '_refseq.fa')
+            ref_fn = extract_refseq_fa(gene, gene_ref_path, ref_fa, dir, target_fa_fn)
+            run_jellyfish(ref_fn, jfish_path, kmer_size)
+        if altref_fa_fns:
+            if not create_ref_test_fa(os.path.join(gene_ref_path, name + '_forward_refseq.fa'), os.path.join(gene_ref_path, name + '_start_end_refseq.fa')):
+                return
 
-         if altref_fa_fns: 
-             if not create_ref_test_fa(os.path.join(gene_ref_path, name + '_forward_refseq.fa'), os.path.join(gene_ref_path, name + '_start_end_refseq.fa')):
-                 return
+            altref_fns = []
+            alt_iter = 1
+            altref_fas = altref_fa_fns.split(',')
+            for altref in altref_fas:
+                for dir in directions:
+                    fn = os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
+                    marker_fn = get_marker_fn(fn) 
+                    if not os.path.isfile(marker_fn):
+                        altref_fns.append((altref, fn, alt_iter))
+                alt_iter += 1
 
-             altref_fns = []
-             alt_iter = 1
-             altref_fas = altref_fa_fns.split(',')
-             for altref in altref_fas:
-                 for dir in directions:
-                        fn = os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
-                        marker_fn = get_marker_fn(fn) 
-                        if not os.path.isfile(marker_fn):
-                            altref_fns.append((altref, fn, alt_iter))
-                 alt_iter += 1
-            
-             if len(altref_fns) > 0:
-                 altref_fas = altref_fa_fns.split(',')
-                 alt_iter = 1
-                 for i in range(len(altref_fns)):
-                     alt_gene_coords = get_altref_genecoords(blat_path, altref_fns[i][0], os.path.join(gene_ref_path, name + '_start_end_refseq.fa'), chr, os.path.join(gene_ref_path, name + '_altref_blat_' + str(altref_fns[i][2]) + '.psl'))
-                     if not alt_gene_coords[2]:
-                         logger.info("No sequence for target gene %s in %s, no reference kmers extracted."%(name, altref_fns[i][0]))
-                         alt_iter += 1
-                         continue
-                     gene = (chr, alt_gene_coords[0][1], alt_gene_coords[1][1], name, intvs)
-                     target_fa_fn = altref_fns[i][1] #os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
-                     ref_fn = extract_refseq_fa(gene, gene_ref_path, altref_fns[i][0], dir, target_fa_fn)
-                     run_jellyfish(ref_fn, jfish_path, kmer_size)
-                 os.remove(os.path.join(gene_ref_path, name + '_start_end_refseq.fa'))
+            if len(altref_fns) > 0:
+                altref_fas = altref_fa_fns.split(',')
+                alt_iter = 1
+                for i in range(len(altref_fns)):
+                    alt_gene_coords = get_altref_genecoords(blat_path, altref_fns[i][0], os.path.join(gene_ref_path, name + '_start_end_refseq.fa'), chr, os.path.join(gene_ref_path, name + '_altref_blat_' + str(altref_fns[i][2]) + '.psl'))
+                    if not alt_gene_coords[2]:
+                        logger.info("No sequence for target gene %s in %s, no reference kmers extracted." % (name, altref_fns[i][0]))
+                        alt_iter += 1
+                        continue
+                    gene = (chr, alt_gene_coords[0][1], alt_gene_coords[1][1], name, intvs)
+                    target_fa_fn = altref_fns[i][1] #os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
+                    ref_fn = extract_refseq_fa(gene, gene_ref_path, altref_fns[i][0], dir, target_fa_fn)
+                    run_jellyfish(ref_fn, jfish_path, kmer_size)
+                os.remove(os.path.join(gene_ref_path, name + '_start_end_refseq.fa'))
 
 
 def get_fastq_reads(fn, sv_reads):
@@ -408,39 +406,40 @@ def get_fastq_reads(fn, sv_reads):
     fq_recs = {}
 #  f = open(fn,'r')
 #  fq_recs = list(SeqIO.parse(f,'fastq'))
-    for header,seq,qual in FastqFile(fn): 
+    for header, seq, qual in FastqFile(fn):
         qname_split = header.lstrip("@").split("_")
         indel_only = qname_split[-1]
-        qname = "_".join(qname_split[0:len(qname_split)-1])
-        if qname in sv_reads: 
+        qname = "_".join(qname_split[0:len(qname_split) - 1])
+        if qname in sv_reads:
             oseq, sc_seqs, clip_coords, indel_meta = sv_reads[qname]
-            cleaned_seq = seq 
+            cleaned_seq = seq
             old_seq = oseq.seq
             add = True
             if str(cleaned_seq) != str(old_seq) and sc_seqs:
                 sc_clips = sc_seqs['clipped']
                 idx = old_seq.find(cleaned_seq)
                 trimmed_seq = ''
-                if idx == 0: 
+                if idx == 0:
                     trimmed_seq = old_seq[len(cleaned_seq):len(old_seq)]
-                else: trimmed_seq = old_seq[0:idx]    
+                else:
+                    trimmed_seq = old_seq[0:idx]
                 sc_lens = 0
-                for sc_seq in sc_clips: 
+                for sc_seq in sc_clips:
                     sc_lens += len(sc_seq)
-                    if trimmed_seq.find(sc_seq) > -1: 
+                    if trimmed_seq.find(sc_seq) > -1:
                         add = False
                 if len(cleaned_seq) == (len(old_seq) - sc_lens):
-                    for sc_seq in sc_clips: 
+                    for sc_seq in sc_clips:
                         if cleaned_seq.find(sc_seq) == -1:
                             # Don't add, just trimmed clipped portion.
                             add = False
 #    else: print qname, 'not in sv reads'
         if add:
-            filt_fq.write(header + "\n" + seq + "\n+\n" + qual + "\n") 
+            filt_fq.write(header + "\n" + seq + "\n+\n" + qual + "\n")
             fr = fq_read(header, seq, qual, indel_meta)
-            read_len = max(read_len, len(fr.seq)) 
+            read_len = max(read_len, len(fr.seq))
             seq = fr.seq
-            if seq not in fq_recs: 
+            if seq not in fq_recs:
                 fq_recs[seq] = []
             fq_recs[seq].append(fr)
     filt_fq.close()
@@ -450,35 +449,36 @@ def get_fastq_reads(fn, sv_reads):
 def get_fastq_reads_old(fn, sv_reads):
     read_len = 0
     fq_recs = {}
-    f = open(fn,'r')
+    f = open(fn, 'r')
 #  fq_recs = list(SeqIO.parse(f,'fastq'))
-    for header,seq,qual in FastqFile(fn): 
+    for header, seq, qual in FastqFile(fn):
         qname = header.lstrip("@")
-        if qname in sv_reads: 
+        if qname in sv_reads:
             oseq, sc_seqs, clip_coords = sv_reads[qname]
-            cleaned_seq = seq 
+            cleaned_seq = seq
             old_seq = oseq.seq
             add = True
             if str(cleaned_seq) != str(old_seq) and sc_seqs:
                 idx = old_seq.find(cleaned_seq)
                 trimmed_seq = ''
-                if idx == 0: 
+                if idx == 0:
                     trimmed_seq = old_seq[len(cleaned_seq):len(old_seq)]
-                else: trimmed_seq = old_seq[0:idx]    
+                else:
+                    trimmed_seq = old_seq[0:idx]
                 sc_lens = 0
-                for sc_seq in sc_seqs: 
+                for sc_seq in sc_seqs:
                     sc_lens += len(sc_seq)
-                    if trimmed_seq.find(sc_seq) > -1: 
+                    if trimmed_seq.find(sc_seq) > -1:
                         add = False
                 if len(cleaned_seq) == (len(old_seq) - sc_lens):
-                    for sc_seq in sc_seqs: 
+                    for sc_seq in sc_seqs:
                         if cleaned_seq.find(sc_seq) == -1:
                             # Don't add, just trimmed clipped portion.
                             add = False
 #    else: print qname, 'not in sv reads'
         if add:
             fr = fq_read(header, seq, qual)
-            read_len = max(read_len, len(fr.seq))   
+            read_len = max(read_len, len(fr.seq))
             fq_recs[fr.id] = fr
     return fq_recs, read_len
 
@@ -503,14 +503,15 @@ def setup_rmask_all(rmask_fn):
     logger = logging.getLogger('root')
 
     rmask = {}
-    f = open(rmask_fn,'rU')
+    f = open(rmask_fn, 'rU')
     flines = f.readlines()
     for line in flines:
         line = line.strip()
-        rchr,rbp1,rbp2,rname = line.split("\t")[0:4]
-        rchr = rchr.replace('chr','')
-        if rchr not in rmask: rmask[rchr] = []
-        rmask[rchr].append((rchr,int(rbp1),int(rbp2),rname))
+        rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
+        rchr = rchr.replace('chr', '')
+        if rchr not in rmask:
+            rmask[rchr] = []
+        rmask[rchr].append((rchr, int(rbp1), int(rbp2), rname))
     return rmask
 
 
@@ -682,7 +683,7 @@ def get_read_kmers(seq,l,skmers):
     return list(set(kmers)&set(skmers))
 
 
-def get_overlap_index(a,b):
+def get_overlap_index(a, b):
     i = 0
     nmismatch = 10
     while nmismatch > 1:
@@ -692,19 +693,20 @@ def get_overlap_index(a,b):
         i += 1
 #  while a[i:] != b[:len(a[i:])]:
 #    i += 1
-    return i-1
+    return i - 1
 
 
 def server_ready(f):
     logger = logging.getLogger('root')
     while not os.path.exists(f):
-        logger.info("Waiting for log file %s"%f)
+        logger.info("Waiting for log file %s" % f)
         time.sleep(10)
     ready = False
-    f = open(f,'r')
+    f = open(f, 'r')
     flines = f.readlines()
     for line in flines: 
-        if line.find('Server ready for queries') > -1: ready = True
+        if line.find('Server ready for queries') > -1:
+            ready = True
     return ready
 
 
@@ -743,12 +745,12 @@ class FastqFile(object):
             y, end = y.split('/')
         if y.find('#') > -1:
             y, bc = y.split('#')
-        header_dict = {'inst':inst,
-                       'lane':int(lane),
-                       'tile':int(tile),
-                       'x':int(x),
-                       'y':int(y),
-                       'end':end,
+        header_dict = {'inst': inst,
+                       'lane': int(lane),
+                       'tile': int(tile),
+                       'x': int(x),
+                       'y': int(y),
+                       'end': end,
                        'bc': bc}
         return (header, seq, qual)
 
@@ -759,8 +761,8 @@ class Annotation:
         self.logging_name = 'breakmer.utils.Annotation'
 
     def add_genes(self, gene_fn):
-        log(self.logging_name, 'info', 'Adding gene annotations from %s'%gene_fn)
-        gene_f = open(gene_fn,'r')
+        log(self.logging_name, 'info', 'Adding gene annotations from %s' % gene_fn)
+        gene_f = open(gene_fn, 'r')
         gene_flines = gene_f.readlines()
         for line in gene_flines[1:]:
             line = line.strip()
@@ -770,8 +772,10 @@ class Annotation:
             end = int(linesplit[5])
             geneid = linesplit[12]
             if geneid in self.genes:
-                if start <= self.genes[geneid][1] and end >= self.genes[geneid][2]: self.genes[geneid] = [chrom,start,end]
-            else: self.genes[geneid] = [chrom,start,end]
+                if start <= self.genes[geneid][1] and end >= self.genes[geneid][2]:
+                    self.genes[geneid] = [chrom, start, end]
+            else:
+                self.genes[geneid] = [chrom, start, end]
         gene_f.close()
 
     def add_regions(self, regions_bed_fn):
@@ -780,12 +784,14 @@ class Annotation:
         for line in region_lines:
             line = line.strip()
             chrom, start, end, name = line.split()
-            if name not in self.genes: self.genes[name] = [chrom,int(start),int(end)]
-        log(self.logging_name, 'info', 'Adding in %d other target regions'%len(region_lines))
-    
+            if name not in self.genes:
+                self.genes[name] = [chrom, int(start), int(end)]
+        log(self.logging_name, 'info', 'Adding in %d other target regions' % len(region_lines))
+
     def set_gene(self, chrom, pos):
         ann_genes = []
-        if chrom.find('chr') == -1: chrom = 'chr'+str(chrom) 
+        if chrom.find('chr') == -1:
+            chrom = 'chr' + str(chrom)
         for g in self.genes:
             gs = self.genes[g][1]
             ge = self.genes[g][2]
@@ -798,5 +804,6 @@ class Annotation:
                     # Find genes between pos1 and pos2
                     if (int(pos[0]) >= gs and int(pos[0]) <= ge) or (int(pos[1]) >= gs and int(pos[1]) <= ge):
                         ann_genes.append(g)
-        if len(ann_genes) == 0: ann_genes = ['intergenic']
+        if len(ann_genes) == 0:
+            ann_genes = ['intergenic']
         return ",".join(ann_genes)
