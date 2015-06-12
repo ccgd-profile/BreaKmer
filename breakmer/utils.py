@@ -61,8 +61,8 @@ def create_ref_test_fa(target_fa_in, test_fa_out):
                 record = SeqIO.read(fa_in, "fasta")
                 ref_target_seq = str(record.seq)
                 end = min(len(ref_target_seq), 1500)
-                start = max(0, len(ref_target_seq)-1500)
-                fa_out.write(">"+record.id + "_start\n" + ref_target_seq[0:end] + "\n>" + record.id + "_end\n" + ref_target_seq[start:len(ref_target_seq)] + "\n")
+                start = max(0, len(ref_target_seq) - 1500)
+                fa_out.write(">" + record.id + "_start\n" + ref_target_seq[0:end] + "\n>" + record.id + "_end\n" + ref_target_seq[start:len(ref_target_seq)] + "\n")
                 fa_out.close()
 
                 cmd = 'touch %s' % get_marker_fn(test_fa_out)
@@ -167,11 +167,11 @@ def which(program):
 def calc_contig_complexity(seq, N=3, w=6):
     cmers = []
     for i in range(len(seq)):
-        s = max(0, i-w)
-        e = min(len(seq), i+w)
+        s = max(0, i - w)
+        e = min(len(seq), i + w)
         cmer = count_nmers(seq[s:e], N)
         n = len(cmer)
-        nmod = float(n) / float(e-s)
+        nmod = float(n) / float(e - s)
         cmers.append(round(nmod, 2))
     cmers_mean = sum(cmers) / len(cmers)
     return cmers_mean, cmers
@@ -180,7 +180,7 @@ def calc_contig_complexity(seq, N=3, w=6):
 def count_nmers(seq, N):
     nmers = {}
     for i in range(len(seq) - (N - 1)):
-        mer = str(seq[i:i+N]).upper()
+        mer = str(seq[i:i + N]).upper()
         if mer not in nmers:
             nmers[mer] = 0
         nmers[mer] += 1
@@ -279,7 +279,7 @@ def check_repeat_regions(coords, repeat_locs):
     """
     """
     start, end = coords
-    seg_len = float(end-start)
+    seg_len = float(end - start)
     in_repeat = False
     rep_overlap = 0.0
     rep_coords = []
@@ -288,7 +288,7 @@ def check_repeat_regions(coords, repeat_locs):
         rchr, rbp1, rbp2, rname = rloc
         if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
             in_repeat = True
-            rep_overlap += float(min(rbp2, end)-max(rbp1, start))
+            rep_overlap += float(min(rbp2, end) - max(rbp1, start))
             rep_coords.append((rbp1, rbp2))
             # Simple or low complexity seq repeat for filtering
             if rname.find(")n") > -1 or rname.find("_rich") > -1:
@@ -301,7 +301,7 @@ def check_repeat_regions(coords, repeat_locs):
 
 
 def get_marker_fn(fn):
-    return os.path.join(os.path.split(fn)[0], "."+os.path.basename(fn))
+    return os.path.join(os.path.split(fn)[0], "." + os.path.basename(fn))
 
 
 def run_jellyfish(fa_fn, jellyfish, kmer_size):
@@ -312,7 +312,7 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size):
     dump_marker_fn = get_marker_fn(dump_fn)
     if not os.path.isfile(dump_marker_fn):
         if not os.path.exists(fa_fn):
-            logger.info('%s does not exist.'%fa_fn)
+            logger.info('%s does not exist.' % fa_fn)
             dump_fn = None
             return dump_fn
 

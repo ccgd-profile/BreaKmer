@@ -131,12 +131,12 @@ class Align:
 class AlignManager:
     """
     """
-    def __init__(self, seq1, seq2, score_thresh, ident_thresh):
+    def __init__(self, seq1, seq2, scoreThresh, identThresh):
         self.seq1 = seq1
         self.seq2 = seq2
-        self.score_thresh = score_thresh
-        self.ident_thresh = ident_thresh
-        self.align = None
+        self.scoreThresh = scoreThresh
+        self.identThresh = identThresh
+        self.aligns = None
         self.align_seqs()
 
     def align_seqs(self):
@@ -145,15 +145,14 @@ class AlignManager:
         self.aligns = (Align(self.seq1, self.seq2), Align(self.seq2, self.seq1))
 
     def check_align_thresholds(self):
-        align1_check = self.aligns[0].max < self.score_thresh or self.aligns[0].ident < self.ident_thresh
-        align2_check = self.aligns[1].max < self.score_thresh or self.aligns[1].ident < self.ident_thresh
-        return align1_check and align2_check
+        align1Check = self.aligns[0].max < self.scoreThresh or self.aligns[0].ident < self.identThresh
+        align2Check = self.aligns[1].max < self.scoreThresh or self.aligns[1].ident < self.identThresh
+        return align1Check and align2Check
 
     def same_seqs(self):
-        same_max_score = self.aligns[0].max == self.aligns[1].max
-        hit_ends = self.aligns[0].j == 0 and self.aligns[0].i == 0
-        equal_lens = len(self.seq1) == len(self.seq2)
-        return same_max_score and hit_ends and equal_lens
+        hitEnds = self.aligns[0].j == 0 and self.aligns[0].i == 0
+        equalLens = len(self.seq1) == len(self.seq2)
+        return self.same_max_scores() and hitEnds and equalLens
 
     def same_max_scores(self):
         return self.aligns[0].max == self.aligns[1].max
@@ -165,7 +164,7 @@ class AlignManager:
         Args: None
         Return: Boolean of check
         """
-        return len(self.seq1) < len(self.seq2) or (self.aligns[0].prej == len(self.seq1) and self.aligns[0]j == 0)
+        return len(self.seq1) < len(self.seq2) or (self.aligns[0].prej == len(self.seq1) and self.aligns[0].j == 0)
 
     def read_is_subseq(self):
         """Check if seq2 is a subseq of seq1
