@@ -869,3 +869,8 @@ class Contig:
     def has_fa_fn(self):
         """Check if fasta file has been written for contig."""
         return self.meta.fa_fn
+
+    def get_path(self):
+        """Return file path to contig results"""
+        return self.meta.path
+

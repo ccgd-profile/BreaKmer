@@ -46,7 +46,7 @@ class Realignment:
     """
     def __init__(self, params, target, contig):
         self.scope = None
-        self.result_manager = None
+        self.results = None
         self.contig = contig
         self.alignParams = AlignParams(params, target)
 
@@ -57,7 +57,9 @@ class Realignment:
         # update
         self.logger.info('Running blat %s, storing results in %s' % (self.params.opts['gfclient'], self.query_res_fn))
 
-        self.result_fn = os.path.join(path, '%s_res.%s.%s' % (self.alignParams.program, scope, self.alignParams.extension))
+        resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (self.alignParams.program, scope, self.alignParams.extension))
+        self.results = AlignResults(self.alignParams.program, scope, resultFn)
+
         if self.alignParams.program == 'blast':
             cmd = ''
         elif self.alignParams.program == 'blat':
@@ -109,24 +111,25 @@ class Realignment:
     else : self.logger.info('Blat already run, results file %s exists, continuing'%self.query_res_fn)
 """
 
+
 class AlignResults:
-    def __init__(self, align_result_fn, program, scope):
-        self.result_fn = align_result_fn
+    def __init__(self, program, scope, alignResultFn):
+        self.resultFn = alignResultFn
         self.program = program
         self.scope = scope
         self.query_size = 0
         self.alignment_freq = []
         self.nmismatches = 0
         self.ngaps = 0
-        self.has_results = True
+        self.hasResults = True
         self.results = []
         self.set_values()
 
     def set_values(self):
-        if not self.result_fn:
-            self.has_results = False
-        elif len(open(self.result_fn, 'rU').readlines()) == 0:
-            self.has_results = False
+        if not self.resultFn:
+            self.hasResults = False
+        elif len(open(self.resultFn, 'rU').readlines()) == 0:
+            self.hasResults = False
         else:
             self.parse_result_file()
 
@@ -137,7 +140,7 @@ class AlignResults:
             self.parse_blast_results()
 
     def parse_blat_results(self):
-        for line in open(self.result_fn, 'rU').readlines():
+        for line in open(self.resultFn, 'rU').readlines():
             line = 
 
 
