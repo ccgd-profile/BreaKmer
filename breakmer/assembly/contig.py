@@ -267,7 +267,7 @@ class Builder:
         """
         self.read_batch = ReadBatch(readAlignValues['read'], readAlignValues['align_pos'])
         self.seq = readAlignValues['read'].seq
-        self.counts = ContigCounts(readAlignValues['read'], readAlignValues['nread'])
+        self.counts = ContigCounts(readAlignValues['read'], readAlignValues['nreads'])
         self.checked_kmers = [kmerObj.seq]
         self.kmerLen = kmerObj.len
         self.kmers = []
@@ -297,7 +297,7 @@ class Builder:
             readAlignValues['read'].used = True
             self.read_batch.set_last_read_aligned()
         elif kmerObj.count > 2 and not readAlignValues['read'].used:
-            self.read_batch.alt.append((readAlignValues['read'], readAlignValues['nread']))
+            self.read_batch.alt.append((readAlignValues['read'], readAlignValues['nreads']))
         else:
             self.read_batch.delete.add(readAlignValues['read'])
         return hit

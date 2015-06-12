@@ -94,7 +94,6 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     #   5. Number of reads with this sequence.
     kmerReads = find_reads(kmerSeq, fqRecs.items(), set())
     contigBuffer.add_used_mer(kmerSeq)
-
     kmerObj = Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, kmerLen)
     for readVals in kmerReads:
         read, kmerPos, matchFound, seqLen, nReadsWithSeq = readVals
