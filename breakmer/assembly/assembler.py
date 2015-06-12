@@ -70,6 +70,7 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
         # Clean up the data to free up memory.
         contigBuffer.remove_kmers(kmerTracker)
         contigBuffer.remove_reads(fqRecs)
+    print 'breakmer.assembly.assembler init_assembly()', contigs, len(contigs)
     return contigs
 
 
