@@ -715,7 +715,7 @@ class Contig:
         if source == 'setup':
             self.set_kmers(kmerTracker.kmerSeqs)
         # Get alternate read kmers and see if any are different from contig kmers.
-        new_contigs = self.builder.check_alternate_reads(kmerTracker, contig_buffer)
+        new_contigs = self.builder.check_alternate_reads(kmerTracker, contig_buffer, self.kmers)
         for new_contig in new_contigs:
             contig_buffer.add_contig(new_contig[0], new_contig[1])
         self.reads = self.builder.finalize_reads(self.reads, fq_recs, contig_buffer)
