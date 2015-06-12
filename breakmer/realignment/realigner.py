@@ -12,14 +12,14 @@ __license__ = "MIT"
 class AlignParams:
     """
     """
-    def __init__(self, params, target) :
-        self.program = {'target':'blat', 'genome':'blat'}
-        self.extension = {'target':'psl', 'genome':'psl'}
-        self.binary = {'target':None, 'genome':None}
-        self.ref = {'target':None, 'genome':None}
+    def __init__(self, params, target):
+        self.program = {'target': 'blat', 'genome': 'blat'}
+        self.extension = {'target': 'psl', 'genome': 'psl'}
+        self.binary = {'target': None, 'genome': None}
+        self.ref = {'target': None, 'genome': None}
         self.set_values(params, target)
 
-    def set_values(self, params, target) :
+    def set_values(self, params, target):
         blast = params.get_param('blast')
         if blast :
             self.program['target'] = 'blast'

@@ -111,7 +111,7 @@ class Align:
     """
     """
     def __init__(self, seq1, seq2):
-        self.seq1 = se1
+        self.seq1 = seq1
         self.seq2 = seq2
         self.align1 = None
         self.align2 = None
