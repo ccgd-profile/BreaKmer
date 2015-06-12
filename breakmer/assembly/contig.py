@@ -269,7 +269,7 @@ class Builder:
         self.seq = readAlignValues['read'].seq
         self.counts = ContigCounts(readAlignValues['read'], readAlignValues['nreads'])
         self.checked_kmers = [kmerObj.seq]
-        self.kmerLen = kmerObj.len
+        self.kmerLen = kmerObj.kmerLen
         self.kmers = []
         self.kmer_locs = []
 
