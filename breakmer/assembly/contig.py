@@ -768,7 +768,7 @@ class Contig:
         kmer, kmerPos, lessThanHalf, dist_half, order = kmer_values
         read_order = 'for'
         if order == 'mid':
-            if less_than_half == 0:
+            if lessThanHalf == 0:
                 read_order = 'rev'
         elif order == 'for':
             read_order = 'rev'
