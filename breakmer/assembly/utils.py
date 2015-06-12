@@ -10,6 +10,7 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+
 def find_reads(kmerSeq, readItems, usedReads, order='for'):
     """Return a list of tuples containing information from reads with the kmer sequence.
     First search all the read sequences for the given kmer sequence. Then,
@@ -67,3 +68,4 @@ def read_search(kmerSeq, readItems):
     if x:
         searchResult = (reads[0], x.start(), True, len(reads[0].seq), len(reads))
     return searchResult
+    

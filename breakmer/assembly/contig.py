@@ -773,7 +773,7 @@ class Contig:
                 read_order = 'rev'
         elif order == 'for':
             read_order = 'rev'
-        reads = assemblyUtils.find_reads.(kmer, read_items, self.buffer, read_order)
+        reads = assemblyUtils.find_reads(kmer, read_items, self.buffer, read_order)
         return reads
 
     def grow(self, fq_recs, kmerTracker, kmerLen, contig_buffer):
