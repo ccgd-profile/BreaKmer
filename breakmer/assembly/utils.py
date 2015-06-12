@@ -11,6 +11,18 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+class Kmer:
+    """Class to track value associated with a particular kmer sequence.
+    Attributes:
+
+    """
+    def __init__(self, seq, counts, kmerSeqSet, kmerLen):
+        self.seq = seq
+        self.counts = counts
+        self.kmerSeqSet = kmerSeqSet
+        self.kmerLen = kmerLen
+
+
 def find_reads(kmerSeq, readItems, usedReads, order='for'):
     """Return a list of tuples containing information from reads with the kmer sequence.
     First search all the read sequences for the given kmer sequence. Then,
@@ -68,4 +80,3 @@ def read_search(kmerSeq, readItems):
     if x:
         searchResult = (reads[0], x.start(), True, len(reads[0].seq), len(reads))
     return searchResult
-    

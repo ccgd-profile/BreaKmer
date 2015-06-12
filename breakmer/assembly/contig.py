@@ -776,16 +776,16 @@ class Contig:
         reads = assemblyUtils.find_reads(kmer, read_items, self.buffer, read_order)
         return reads
 
-    def grow(self, fq_recs, kmerTracker, kmerLen, contig_buffer):
+    def grow(self, fqRecs, kmerTracker, kmerLen, contigBuffer):
         """Iterates through new sample only kmers in a contig assembly and tries to
         add more relevant reads to extend the contig assembly sequence.
         For each 'new' kmer, assess the reads that have the kmer. When this function
         is complete, the contig is done assemblying.
         Args:
-            fq_recs: Dictionary of fq_read objects key = sequence, value = list of fq_reads
-            kmerTracker: KmerTracker object containing all the kmer sequences.
-            kmerLen: Integer of kmer size.
-            contig_buffer: ContigBuffer object.
+            fqRecs:         Dictionary of fq_read objects key = sequence, value = list of fq_reads
+            kmerTracker:    KmerTracker object containing all the kmer sequences.
+            kmerLen:        Integer of kmer size.
+            contigBuffer:   ContigBuffer object.
         Return: None
         """
         logger = logging.getLogger('breakmer.assembly.contig')
@@ -796,21 +796,23 @@ class Contig:
             iter = 0
             for kmer_lst in new_kmers:
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
-                reads = self.get_kmer_reads(kmer_lst, fq_recs.items())
-                contig_buffer.add_used_mer(kmerSeq)
-                kmer_values = {'seq': kmerSeq, 'counts': kmerTracker.get_count(kmerSeq), 'kmer_set': kmerTracker.kmerSeqs, 'len': kmerLen}
+                reads = self.get_kmer_reads(kmer_lst, fqRecs.items())
+                contigBuffer.add_used_mer(kmerSeq)
+                kmerObj = assemblyUtils.Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, kmerLen)
                 for read_lst in reads:
                     read, kmerPos, bool, rlen, nreads = read_lst
-                    contig_buffer.add_used_read(read.id)
-                    read_align_values = {'read': read, 'align_pos': kmerPos, 'nreads': nreads}
-                    hit = self.check_read(kmer_values, read_align_values, 'grow')
+                    contigBuffer.add_used_read(read.id)
+                    readAlignValues = {'read': read,
+                                       'align_pos': kmerPos,
+                                       'nreads': nreads}
+                    hit = self.check_read(kmerObj, readAlignValues, 'grow')
                     if hit == 'remove':
-                        contig_buffer.remove_contig(read.id)
-                self.finalize(fq_recs, kmerTracker, contig_buffer, 'grow')
+                        contigBuffer.remove_contig(read.id)
+                self.finalize(fqRecs, kmerTracker, contigBuffer, 'grow')
                 self.builder.checked_kmers.append(kmerSeq)
                 iter += 1
-            new_kmers = self.refresh_kmers()
-            logger.debug("%d kmers left to check" % len(new_kmers))
+            newKmers = self.refresh_kmers()
+            logger.debug("%d kmers left to check" % len(newKmers))
         self.set_kmer_locs()
         self.set_final_values()
         logger.info('Contig done with contig seq %s. Supported by %d read(s).' % (self.seq, len(self.reads)))

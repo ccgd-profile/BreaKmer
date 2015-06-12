@@ -95,7 +95,7 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     #   5. Number of reads with this sequence.
     kmerReads = assemblyUtils.find_reads(kmerSeq, fqRecs.items(), set())
     contigBuffer.add_used_mer(kmerSeq)
-    kmerObj = Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, kmerLen)
+    kmerObj = assemblyUtils.Kmer(kmerSeq, kmerTracker.get_count(kmerSeq), kmerTracker.kmerSeqs, kmerLen)
     for readVals in kmerReads:
         read, kmerPos, matchFound, seqLen, nReadsWithSeq = readVals
         readAlignValues = {'read': read,
@@ -111,18 +111,6 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
             contig.check_read(kmerObj, readAlignValues, 'setup')
     if contig:
         contig.finalize(fqRecs, kmerTracker, contigBuffer, 'setup')
-
-
-class Kmer:
-    """Class to track value associated with a particular kmer sequence.
-    Attributes:
-
-    """
-    def __init__(self, seq, counts, kmerSeqSet, kmerLen):
-        self.seq = seq
-        self.counts = counts
-        self.kmerSeqSet = kmerSeqSet
-        self.kmerLen = kmerLen
 
 
 class ContigBuffer:
