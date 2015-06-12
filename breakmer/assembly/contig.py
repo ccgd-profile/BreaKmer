@@ -794,7 +794,9 @@ class Contig:
         if not self.setup:
             self.set_kmers(kmerTracker.kmerSeqs)
         newKmers = self.refresh_kmers()
+        print 'breakmer.assembly.contig grow()'
         while len(newKmers) > 0:
+            print 'New kmers to test', len(newKmers)
             iter = 0
             for kmer_lst in newKmers:
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
@@ -815,7 +817,9 @@ class Contig:
                 iter += 1
             newKmers = self.refresh_kmers()
             logger.debug("%d kmers left to check" % len(newKmers))
+        # 
         self.set_kmer_locs()
+        # 
         self.set_final_values()
         logger.info('Contig done with contig seq %s. Supported by %d read(s).' % (self.seq, len(self.reads)))
         logger.info('Read IDs: %s' % (",".join([x.id for x in list(self.reads)])))
