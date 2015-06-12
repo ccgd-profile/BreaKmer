@@ -32,8 +32,6 @@ def load_kmers(fns, kmers):
 class Variation:
     """This class handles the storage and interaction of all the variant reads that could
     be contributing to the support of a structural variant.
-
-
     """
     def __init__(self, params):
         self.params = params
@@ -222,7 +220,7 @@ class Variation:
         self.files['kmer_clusters'] = os.path.join(kmerPath, name + "_sample_kmers_merged.out")
         utils.log(self.loggingName, 'info', 'Writing kmer clusters to file %s' % self.files['kmer_clusters'])
 
-        self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], kmer_size, self.params.get_sr_thresh('min'), readLen)
+        self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], self.params.get_kmer_size(), self.params.get_sr_thresh('min'), readLen)
         self.clear_cleaned_reads()
         self.kmers['case_only'] = {}
 
@@ -249,7 +247,6 @@ class TargetManager:
         regionBuffer: Integer for base pairs to add or subtract from the target region end and
                        start locations.
     """
-
     def __init__(self, name, params):
         self.params = params
         self.loggingName = 'breakmer.processor.target'
@@ -294,9 +291,7 @@ class TargetManager:
             self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
             self.add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
             self.add_path('output', os.path.join(self.params.paths['output'], self.name))
-
         self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa')]
-
         ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
         ref_fa_marker_f.write(self.params.opts['reference_fasta'])
         ref_fa_marker_f.close()
@@ -312,7 +307,6 @@ class TargetManager:
                 alt_ref_fa_marker_f.write(altref + '\n')
             alt_ref_fa_marker_f.close()
         """
-
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
     def add_path(self, key, path):
@@ -324,6 +318,8 @@ class TargetManager:
             os.makedirs(self.paths[key])
 
     def set_ref_data(self):
+        """
+        """
         # Write rmask bed file if needed.
         if not self.params.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.params.opts:
             utils.log(self.loggingName, 'info', 'Extracting repeat mask regions for target gene %s.' % self.name)
