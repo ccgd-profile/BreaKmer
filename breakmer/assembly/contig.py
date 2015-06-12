@@ -5,6 +5,7 @@ import os
 import logging
 import breakmer.assembly.olc as olcAssembly
 import breakmer.assembly.utils as assemblyUtils
+import breakmer.realignment.realigner as realigner
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -847,12 +848,13 @@ class Contig:
         self.kmers = self.builder.get_kmers()
         self.kmer_locs = self.builder.get_kmer_locs()
 
-    def query_ref(self, target_ref_fn):
+    def query_ref(self, targetRefFns):
         """
         Args:
         Return:
         """
-        print x
+        realignManager = realigner.RealigManager(self.params, targetRefFns)
+        realignManager.realign(self)
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
@@ -873,4 +875,3 @@ class Contig:
     def get_path(self):
         """Return file path to contig results"""
         return self.meta.path
-

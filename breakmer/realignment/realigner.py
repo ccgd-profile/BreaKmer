@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+import breakmer.realignment.blat_result as blat_result
+import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -13,14 +14,14 @@ __license__ = "MIT"
 class AlignParams:
     """
     """
-    def __init__(self, params, target):
+    def __init__(self, params, targetrefFns):
         self.program = {'target': 'blat', 'genome': 'blat'}
         self.extension = {'target': 'psl', 'genome': 'psl'}
         self.binary = {'target': None, 'genome': None}
         self.ref = {'target': None, 'genome': None}
-        self.set_values(params, target)
+        self.set_values(params, targetRefFns)
 
-    def set_values(self, params, target):
+    def set_values(self, params, targetRefFns):
         """
         """
         blast = params.get_param('blast')
@@ -34,95 +35,92 @@ class AlignParams:
                                  'hostname': params.get_param('blat_hostname'),
                                  'port': params.get_param('blat_port')
                                  }
-        self.ref['target'] = target.files['target_ref_fn']
+        # Use the forward sequence for blatting targeted sequences
+        self.ref['target'] = targetRefFns[0]
         self.ref['genome'] = params.get_param('reference_fasta_dir')
 
     def get_values(self, type):
         return (self.program[type], self.extension[type], self.binary[type])
 
 
+class RealignManager:
+    """
+    """
+    def __init__(self, params, targetRefFns):
+        self.realignment_scope = None
+        self.alignParams = AlignParams(params, targetRefFns)
+
+    def realign(contig):
+        """
+        """
+        if not contig.has_fa_fn():
+            return
+
+        realignment = Realignment(contig)
+        if not realignment.align(self.alignParams.get_values('target'), 'target'):
+            # Log
+            return
+        if not realignment.target_aligned():
+            realignment.align(self.alignParams.get_values('genome'), 'genome')
+
+
 class Realignment:
     """
     """
-    def __init__(self, params, target, contig):
+    def __init__(self, contig):
         self.scope = None
         self.results = None
         self.contig = contig
-        self.alignParams = AlignParams(params, target)
 
-    def align(self, scope):
+    def align(self, alignParams, scope):
         """
         """
+        alignProgram, alignExt, alignBinary = alignParams
         self.scope = scope
         # update
         self.logger.info('Running blat %s, storing results in %s' % (self.params.opts['gfclient'], self.query_res_fn))
 
-        resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (self.alignParams.program, scope, self.alignParams.extension))
-        self.results = AlignResults(self.alignParams.program, scope, resultFn)
+        resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (alignprogram, scope, alignExt))
+        self.results = AlignResults(alignProgram, scope, resultFn)
 
-        if self.alignParams.program == 'blast':
+        cmd = ''
+        if alignprogram == 'blast':
             cmd = ''
-        elif self.alignParams.program == 'blat':
-            # all blat server
-            cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (self.params.opts['gfclient'], self.params.opts['blat_port'], self.params.opts['reference_fasta_dir'], self.contig_fa_fn, self.query_res_fn)
-            # target
-            cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (self.params.opts['blat'], db, self.contig_fa_fn, self.query_res_fn)
+        elif self.alignprogram == 'blat':
+            if scope == 'target':
+                # all blat server
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (self.params.opts['gfclient'], self.params.opts['blat_port'], self.params.opts['reference_fasta_dir'], self.contig_fa_fn, self.query_res_fn)
+            elif scope == 'genome':
+                # target
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (self.params.opts['blat'], db, self.contig_fa_fn, self.query_res_fn)
 
         # update
-        self.logger.info('Blat system command %s' % cmd)
+        utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        self.logger.info('Blat output %s' % output)
+        utils.log(self.loggingName, 'info', 'Realignment output file %s' % output)
         if errors != '':
-            self.logger.info('Blat errors %s' % errors)
+            utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
 
-        if not os.path.isfile(self.result_fn):
+        if not os.path.isfile(resultFn):
             return False
         else:
-            self.result_manager = AlignResults(self.result_fn, self.alignParams.program, scope)
-
-"""
-    if self.contig_fa_fn :
-      self.run_blat(target_ref_fn, 'target') # Run blat against target reference sequence first for speed.
-      if not self.query_res_fn :
-        self.logger.info('No blat results file %s, no calls for %s.'%(self.query_res_fn, self.id))
-        return
-      if not self.check_target_blat(query_region) :
-        # Blat against whole genome reference fasta
-        self.run_blat(self.params.opts['reference_fasta'], 'all')
-  #*********************************************************
-
-  #*********************************************************
-  def run_blat(self, db, name) :
-    self.query_res_fn = os.path.join(self.path,'blat_res.'+name+'.psl')
-    if not os.path.isfile(self.query_res_fn) :
-      if name == 'all' : 
-        self.logger.info('Running blat %s, storing results in %s'%(self.params.opts['gfclient'],self.query_res_fn))
-        cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s'%(self.params.opts['gfclient'],self.params.opts['blat_port'], self.params.opts['reference_fasta_dir'], self.contig_fa_fn, self.query_res_fn)
-      else :
-        self.logger.info('Running blat %s, storing results in %s'%(self.params.opts['blat'],self.query_res_fn))
-        cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s'%(self.params.opts['blat'], db, self.contig_fa_fn, self.query_res_fn)
-
-      self.logger.info('Blat system command %s'%cmd)
-      p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-      output, errors = p.communicate()
-      self.logger.info('Blat output %s'%output)
-      if errors != '' : self.logger.info('Blat errors %s'%errors)
-    else : self.logger.info('Blat already run, results file %s exists, continuing'%self.query_res_fn)
-"""
+            self.results = AlignResults(alignProgram, scope, resultFn)
 
 
 class AlignResults:
     def __init__(self, program, scope, alignResultFn):
+        self.loggingName = 'breakmer.realignment.realigner'
         self.resultFn = alignResultFn
         self.program = program
         self.scope = scope
-        self.query_size = 0
-        self.alignment_freq = []
+        self.querySize = 0
+        self.alignmentFreq = []
         self.nmismatches = 0
         self.ngaps = 0
         self.hasResults = True
         self.results = []
+        self.clippedQs = []
         self.set_values()
 
     def set_values(self):
@@ -135,33 +133,34 @@ class AlignResults:
 
     def parse_result_file(self):
         if self.program == 'blat':
-
+            self.parse_blat_results()
         elif self.program == 'blast':
             self.parse_blast_results()
 
     def parse_blat_results(self):
-        for line in open(self.resultFn, 'rU').readlines():
-            line = 
-
-
-class RealignManager:
-    """
-    """
-
-    def __init__(self, params, target):
-        self.realignment_scope = None
-        self.align_params = AlignParams(params, target)
-
-    def realign(contig, params):
         """
         """
+        for line in open(self.resultFn, 'r'):
+            line = line.strip()
+            parsedBlatResult = blat_result.BlatResult(line.split('\t'))
+            self.process_blat_result(parsedBlatResult)
 
-        if not contig.has_fa_fn():
-            return
+            score_raw = br.get_nmatch_total()
+            ngaps = br.get_ngap_total()
+            in_target = 1 if br.in_target else 0
+            score_frac = float(score_raw) / float(br.get_size('query'))
+            score = score_raw + score_frac
+            perc_ident = br.perc_ident
+            self.results.append(parsedBlatResults) #(score, ngaps, in_target, br, perc_ident))
+        self.blat_results = sorted(self.blat_results, key=lambda blat_results: (-blat_results[0], -blat_results[4], blat_results[1]))
 
-        realignment = Realignment(contig)
-        if not realignment.align(self.align_params.get_values('target'), 'target'):
-            # Log
-            return
-        if not realignment.target_aligned():
-            realignment.align(self.align_params.get_values('genome'), 'genome')
+    def process_blat_result(self, blatResultObj):
+        """
+        """
+        self.nmismatches += blatResultObj.get_nmatches('mis')
+        self.ngaps += blatResultObj.get_num_gaps()
+        if not self.querySize:
+            self.querySize = blatResultObj.get_size('query')
+            self.alignmentFreq = [0] * self.querySize
+        for i in range(blatResultObj.qstart(), blatResultObj.qend()):
+            self.alignmentFreq[i] += 1
