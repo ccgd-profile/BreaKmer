@@ -702,21 +702,20 @@ class Contig:
         else:
             return False
 
-    def finalize(self, fq_recs, kmer_tracker, contig_buffer, source='setup'):
+    def finalize(self, fq_recs, kmerTracker, contig_buffer, source='setup'):
         """Finish an assembly and add the buffered contigs that were created from
         non-aligned reads to the contig_buffer.
         Args:
             fq_recs: Dicionary of fq_read objects.
-            kmer_tracker: KmerTracker object with all kmer sequence values.
+            kmerTracker: KmerTracker object with all kmer sequence values.
             contig_buffer: ContigBuffer object.
             source: String for the source of function call.
         Return: None
         """
         if source == 'setup':
-            self.set_kmers(kmer_tracker.kmer_seqs)
-
+            self.set_kmers(kmerTracker.kmerSeqs)
         # Get alternate read kmers and see if any are different from contig kmers.
-        new_contigs = self.builder.check_alternate_reads(kmer_tracker, contig_buffer)
+        new_contigs = self.builder.check_alternate_reads(kmerTracker, contig_buffer)
         for new_contig in new_contigs:
             contig_buffer.add_contig(new_contig[0], new_contig[1])
         self.reads = self.builder.finalize_reads(self.reads, fq_recs, contig_buffer)
