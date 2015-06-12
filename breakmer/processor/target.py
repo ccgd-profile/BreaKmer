@@ -427,7 +427,7 @@ class TargetManager:
     def compare_kmers(self):
         """Obtain the sample only kmers and initiate assembly of reads with these kmers.
         """
-        self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len)
+        self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len, self.files['target_ref_fn'])
         """
         kmer_dict = self.variation.kmers
         jellyfish = self.params.get_param('jellyfish')

@@ -518,7 +518,7 @@ def setup_rmask_all(rmask_fn):
 def setup_rmask(gene_coords, ref_path, rmask_fn):
     logger = logging.getLogger('root')
     chrom, s, e, name, intervals = gene_coords
-    mask_out_fn = os.path.join(ref_path,name+'_rep_mask.bed')
+    mask_out_fn = os.path.join(ref_path, name + '_rep_mask.bed')
     marker_fn = get_marker_fn(mask_out_fn)
 
     rmask = []
@@ -542,7 +542,7 @@ def setup_rmask(gene_coords, ref_path, rmask_fn):
         output, errors = p.communicate()  
         logger.info('Completed writing repeat mask file %s, touching marker file %s'%(mask_out_fn,marker_fn))
     else:
-        rep_f = open(mask_out_fn,'rU')
+        rep_f = open(mask_out_fn, 'rU')
         rep_flines = rep_f.readlines()
         for line in rep_flines:
             line = line.strip()
@@ -574,47 +574,50 @@ def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
         output, errors = p.communicate()
         logger.info('Completed writing refseq fasta file %s, touching marker file %s'%(target_fa_fn, marker_fn))
     else:
-        logger.info('Refseq sequence fasta (%s) exists already'%target_fa_fn)
+        logger.info('Refseq sequence fasta (%s) exists already' % target_fa_fn)
     return target_fa_fn 
 
 
 def seq_trim(qual_str, min_qual):
     counter = 0
-    while ord(qual_str[counter])-33 < min_qual:
+    while ord(qual_str[counter]) - 33 < min_qual:
         counter += 1
-        if counter == len(qual_str): break
-    return counter  
+        if counter == len(qual_str):
+            break
+    return counter
 
 
 def get_seq_readname(read):
     end = '1'
-    if read.is_read2: end = '2'
+    if read.is_read2:
+        end = '2'
     return read.qname + "/" + end
 
 
 def trim_coords(qual_str, min_qual):
     q = []
-    coords = [0,len(qual_str)]
+    coords = [0, len(qual_str)]
     start = seq_trim(qual_str, min_qual)
     if start == len(qual_str):
-        return (0,0,0)
+        return (0, 0, 0)
     else:
         end = len(qual_str) - seq_trim(qual_str[::-1], min_qual)
         lngth = end - start
-        return (start,end,lngth)
+        return (start, end, lngth)
 
 
 def trim_qual(read, min_qual, min_len):
     qual_str = read.qual
     q = []
-    coords = [0,len(qual_str)]
+    coords = [0, len(qual_str)]
     start = seq_trim(qual_str, min_qual)
     if start == len(qual_str):
         return None
     else:
         end = len(qual_str) - seq_trim(qual_str[::-1], min_qual)
         lngth = end - start
-        if lngth < min_len: return None
+        if lngth < min_len:
+            return None
         nseq = read.seq[start:end]
         nqual = qual_str[start:end]
         read.seq = nseq
@@ -624,15 +627,17 @@ def trim_qual(read, min_qual, min_len):
 
 def fq_line(read, indel_only, min_len, trim=True):
     add_val = '0'
-    if indel_only: add_val = '1'
+    if indel_only:
+        add_val = '1'
     lineout = None
-    if trim: read = trim_qual(read, 5, min_len)
-    if read: 
-        lineout = "@"+get_seq_readname(read) + "_" + add_val + "\n" + read.seq + "\n+\n" + read.qual + "\n"
+    if trim:
+        read = trim_qual(read, 5, min_len)
+    if read:
+        lineout = "@" + get_seq_readname(read) + "_" + add_val + "\n" + read.seq + "\n+\n" + read.qual + "\n"
     return lineout
 
 
-def get_overlap_index_nomm(a,b):
+def get_overlap_index_nomm(a, b):
     i = 0
     while a[i:] != b[:len(a[i:])]:
         i += 1
@@ -643,44 +648,44 @@ def seq_complexity(seq, N):
     nmers = {}
     total_possible = len(seq) - 2
     for i in range(len(seq) - (N - 1)):
-        nmers[str(seq[i:i+N]).upper()] = True
-    complexity = round((float(len(nmers))/float(total_possible))*100,4)
+        nmers[str(seq[i:i + N]).upper()] = True
+    complexity = round((float(len(nmers)) / float(total_possible)) * 100, 4)
     return complexity
 
 
 def get_overlap_index_mm(a, b):
     i = 0
-    nmismatch = [0,0]
+    nmismatch = [0, 0]
     match = False
     while i < len(a) and not match:
-        nmismatch = [0,0]
+        nmismatch = [0, 0]
         c = 0
         match_len = min(len(a[i:]), len(b[:len(a[i:])]))
-        for aa,bb in zip(a[i:],b[:len(a[i:])]):
-            if aa != bb: 
+        for aa, bb in zip(a[i:],b[:len(a[i:])]):
+            if aa != bb:
                 nmismatch[0] += 1
                 nmismatch[1] += 1
             else:
                 nmismatch[0] = 0
-            if nmismatch[0] > 1 or nmismatch[1] > 3: 
-                break  
+            if nmismatch[0] > 1 or nmismatch[1] > 3:
+                break
             c += 1
 #    print c, match_len, i, c== match_len, a[i:], b[:len(a[i:])]
-        if c == match_len: 
+        if c == match_len:
             match = True
         i += 1
-    return i-1
+    return i - 1
 
 
-def get_read_kmers(seq,l,skmers):
+def get_read_kmers(seq, l, skmers):
     kmers = []
     i = 0
-    while (i+l) <= len(seq):
-        k = seq[i:i+l]
-        #if k in skmers:
+    while (i + l) <= len(seq):
+        k = seq[i:i + l]
+        # if k in skmers:
         kmers.append(k)
         i += 1
-    return list(set(kmers)&set(skmers))
+    return list(set(kmers) & set(skmers))
 
 
 def get_overlap_index(a, b):
@@ -688,8 +693,9 @@ def get_overlap_index(a, b):
     nmismatch = 10
     while nmismatch > 1:
         nmismatch = 0
-        for aa,bb in zip(a[i:],b[:len(a[i:])]):
-            if aa != bb: nmismatch += 1
+        for aa,bb in zip(a[i:], b[:len(a[i:])]):
+            if aa != bb:
+                nmismatch += 1
         i += 1
 #  while a[i:] != b[:len(a[i:])]:
 #    i += 1
@@ -704,7 +710,7 @@ def server_ready(f):
     ready = False
     f = open(f, 'r')
     flines = f.readlines()
-    for line in flines: 
+    for line in flines:
         if line.find('Server ready for queries') > -1:
             ready = True
     return ready
