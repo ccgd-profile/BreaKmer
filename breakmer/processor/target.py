@@ -514,8 +514,7 @@ class TargetManager:
 
     def get_values(self):
         """Return the defined features of this target"""
-
-        return(self.chrom, self.start, self.end, self.name, self.get_target_intervals())
+        return(self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
 
     def get_sv_reads(self, type):
         """ """

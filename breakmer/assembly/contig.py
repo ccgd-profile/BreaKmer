@@ -596,7 +596,11 @@ class Meta:
         self.params = None
         self.path = None
         self.id = None
-        self.target_region = None
+        self.chr = None
+        self.start = None
+        self.end = None
+        self.targetName = None
+        self.regionBuffer = 0
         self.fq_fn = None
         self.fa_fn = None
 
@@ -612,8 +616,11 @@ class Meta:
         """
         self.params = params
         self.id = contig_id
-        self.target_region = query_region_values
-
+        self.chr = query_region_values[0]
+        self.start = query_region_values[1]
+        self.end = query_region_values[2]
+        self.targetName = query_region_values[3]
+        self.regionBuffer = query_region_values[5]
         self.path = os.path.join(contig_path, self.id)
         logger = logging.getLogger('breakmer.assembly.contig')
         logger.info('Setting up contig path %s' % self.path)
@@ -853,8 +860,14 @@ class Contig:
         Args:
         Return:
         """
-        realignManager = realigner.RealigManager(self.params, targetRefFns)
+        realignManager = realigner.RealignManager(self.params, targetRefFns)
         realignManager.realign(self)
+        # This needs to be stored to make calls from it.
+
+    def make_calls(self):
+        """
+        """
+        print 'Make calls'
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
