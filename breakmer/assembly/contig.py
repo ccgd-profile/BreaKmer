@@ -680,6 +680,7 @@ class Contig:
         self.kmer_locs = None
         self.reads = set()
         self.buffer = set([readAlignValues['read'].id])
+        self.realignment = None
 
     def check_read(self, kmerObj, readAlignValues, fncType='setup'):
         """Check if the read passed in can be added to the current contig.
@@ -860,9 +861,8 @@ class Contig:
         Args:
         Return:
         """
-        realignManager = realigner.RealignManager(self.params, targetRefFns)
-        realignManager.realign(self)
-        # This needs to be stored to make calls from it.
+        self.realignment = realigner.RealignManager(self.params, targetRefFns)
+        self.realignment.realign(self)
 
     def make_calls(self):
         """

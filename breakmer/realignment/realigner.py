@@ -107,6 +107,23 @@ class Realignment:
         else:
             self.results = AlignResults(alignProgram, scope, resultFn)
 
+    def target_aligned(self):
+        """
+        """
+        noAlignmentResults = False
+        targetHit = False
+        if not self.results:
+            noAlignmentResults = True
+        else:
+            self.results.modify_blat_result_file()
+            if self.results.target_hit():
+                targetHit = True
+                utils.log(self.loggingName, 'debug', 'Top hit contains whole query sequence, indicating an indel variant.')
+
+        # If there was a sufficient target hit or no alignment at all then return True
+        # this effectively prevents a genome alignment.
+        return targetHit or noAlignmentResults
+
 
 class AlignResults:
     def __init__(self, program, scope, alignResultFn):
@@ -124,6 +141,7 @@ class AlignResults:
         self.set_values()
 
     def set_values(self):
+        """ """
         if not self.resultFn:
             self.hasResults = False
         elif len(open(self.resultFn, 'rU').readlines()) == 0:
@@ -131,15 +149,29 @@ class AlignResults:
         else:
             self.parse_result_file()
 
+    def modify_blat_result_file(self):
+        """ """
+        blatFile = open(self.resultFn + '.mod', 'w')
+        for result in self.results:
+            blatFile.write(result.get_blat_output() + "\n")
+        blatFile.close()
+        self.resultFn = self.resultFn + '.mod'
+
+    def target_hit(self):
+        """ """
+        indelHit = self.results[0].spans_query() or (len(self.results) == 1 and self.get_query_coverage() >= 90.0)
+        utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % indelHit)
+        return indelHit
+
     def parse_result_file(self):
+        """ """
         if self.program == 'blat':
             self.parse_blat_results()
         elif self.program == 'blast':
             self.parse_blast_results()
 
     def parse_blat_results(self):
-        """
-        """
+        """ """
         refName = None
         offset = None
         if self.scope == 'target':

@@ -187,7 +187,6 @@ class BlatResult:
         blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
         return blatResultValues
 
-
         # self.matches['match'] = int(self.values[0])
         # self.matches['mis'] = int(self.values[1])
         # self.matches['rep'] = int(self.values[2])
@@ -450,3 +449,44 @@ class BlatResult:
                 ann_genes = ['intergenic']
                 self.valid = False
             self.genes = ",".join(ann_genes)
+
+
+class blat_repeat_manager:
+    def __init__(self):
+        # Booleans for both breakpoints and whether they land in simple repeats
+        self.breakpoint_in_rep = [False, False]
+        self.total_rep_overlap = 0.0
+        self.simple_rep_overlap = 0.0
+        self.other_values = [False, 0.0, [], [False, False]]
+
+    def setup(self, coords, repeat_locs):
+        self.check_repeat_regions(coords, repeat_locs)
+
+    def check_repeat_regions(self, coords, repeat_locs):
+        start, end = coords
+        seg_len = float(end-start)
+        in_repeat = False
+        rep_overlap = 0.0
+        simple_overlap = 0.0
+        rep_coords = []
+        filter_reps_edges = [False, False]
+        for rloc in repeat_locs:
+            rchr, rbp1, rbp2, rname = rloc
+            if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
+                in_repeat = True
+                rep_overlap += float(min(rbp2, end)-max(rbp1, start))
+                rep_coords.append((rbp1, rbp2))
+                # Simple or low complexity seq repeat for filtering
+                if rname.find(")n") > -1 or rname.find("_rich") > -1:
+                    simple_overlap += float(min(rbp2,end)-max(rbp1, start))
+                    if (rbp1 <= start and rbp2 >= start):
+                        filter_reps_edges[0] = True
+                    elif (rbp1 <= end and rbp2 >= end):
+                        filter_reps_edges[1] = True
+#        if rep_overlap >= seg_len :
+#          break
+        roverlap = round((float(min(rep_overlap, seg_len)) / float(seg_len)) * 100, 2)
+        self.total_rep_overlap = roverlap
+        self.simple_rep_overlap = round((float(min(simple_overlap, seg_len)) / float(seg_len)) * 100, 2)
+        self.breakpoint_in_rep = filter_reps_edges
+        self.other_values = [in_repeat, roverlap, rep_coords, filter_reps_edges]
