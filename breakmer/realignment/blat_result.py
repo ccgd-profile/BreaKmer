@@ -109,7 +109,7 @@ class AlignValues:
             index:      Integer indicating the start(0) or end(1)
         """
         coord = self.ref['alignCoords'][index]
-        if alignType == 'ref':
+        if alignType == 'query':
             coord = self.query['alignCoords'][index]
         return coord
 
@@ -117,7 +117,7 @@ class AlignValues:
         """
         """
         name = str(self.ref['seqName'])
-        if alignType == 'ref':
+        if alignType == 'query':
             name = str(self.query['seqName'])
         return name
 
@@ -125,7 +125,7 @@ class AlignValues:
         """
         """
         size = str(self.ref['seqSize'])
-        if alignType == 'ref':
+        if alignType == 'query':
             size = str(self.query['seqSize'])
         return size
 
@@ -134,6 +134,7 @@ class BlatResult:
     """
     """
     def __init__(self, blatResultValues, refName, offset):
+        self.loggingName = 'breakmer.realignment.blat_result'
         self.values = self.set_values(blatResultValues, refName, offset)
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
@@ -255,6 +256,9 @@ class BlatResult:
             badAlign = (1000 * (self.matches.get_mismatches() + insertFactor + round(3 * math.log(1 + sizeDif)))) / totalMatches
         return badAlign * 0.1
 
+    def set_mean_cov(self, meanCov):
+        self.meanCov = meanCov
+
     def set_segment_overlap(self, right, left):
         self.seg_overlap = [left, right]
 
@@ -275,7 +279,7 @@ class BlatResult:
         return self.alignVals.get_seqname(alignType)
 
     def get_seq_size(self, alignType):
-        return self.alignVals.get_align_size(alignType)
+        return self.alignVals.get_seq_size(alignType)
 
     def get_query_span(self):
         """Length of query sequence alignment to reference.
@@ -284,7 +288,7 @@ class BlatResult:
 
     def get_query_coverage(self):
         """Return percentage of query sequence realigned to reference"""
-        return round((float(self.get_query_span())/float(self.get_seq_size('query'))) * 100, 2)
+        return round((float(self.get_query_span()) / float(self.get_seq_size('query'))) * 100, 2)
 
     def spans_query(self):
         """Return boolean whether full query sequence is aligned"""
@@ -310,7 +314,7 @@ class BlatResult:
                 m_indxs.append(i)
         for indx in m_indxs:
             nmatch = ''
-            windx = indx-1
+            windx = indx - 1
             while windx > -1 and is_number(flank_str[windx]):
                 nmatch = flank_str[windx] + nmatch
                 windx = windx - 1
@@ -327,7 +331,7 @@ class BlatResult:
 
     def set_indel_locs(self):
         chrom = 'chr' + self.get_seqname('reference')
-        for i in range(self.fragments['count']-1):
+        for i in range(self.fragments['count'] - 1):
             if i == 0 and self.fragments['query'][i][0] > 0:
                 self.cigar = str(self.fragments['query'][i][0]) + "S"
             qend1 = int(self.fragments['query'][i][1])
@@ -437,7 +441,7 @@ class BlatResult:
             chrom = self.get_name('hit')
             pos = self.get_coords('hit')
             if chrom.find('chr') == -1:
-                chrom = 'chr'+str(chrom)
+                chrom = 'chr' + str(chrom)
             for g in annotations.genes:
                 gs = annotations.genes[g][1]
                 ge = annotations.genes[g][2]
@@ -449,6 +453,46 @@ class BlatResult:
                 ann_genes = ['intergenic']
                 self.valid = False
             self.genes = ",".join(ann_genes)
+
+    def check_indel(self, indelSizeThresh, nBlatResults):
+        indel = False
+        utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
+        if self.spans_query() or (nBlatResults == 1 and br.in_target):
+            utils.log(self.loggingName, 'info', 'Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (self.spans_query(), (nBlatResults == 1), self.in_target))
+            indel = True
+        return indel
+
+        # indel = False
+        # indel_size_thresh = int(self.meta_dict['params'].opts['indel_size'])
+        # self.logger.info('Checking if blat result contains an indel variant')
+        # nhits = 0
+        # for i in self.hit_freq:
+        #     if i > 0:
+        #         nhits += 1
+        # if br.spans_query() or (len(self.blat_results) == 1 and br.in_target):
+        #     self.logger.info('Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (br.spans_query(), (len(self.blat_results) == 1), br.in_target))
+        #     indel = True
+        #     keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.indel_maxevent_size[0] >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
+        #     self.logger.debug('Keep blat result %r' % keep_br)
+        #     if keep_br:
+        #         brkpt_cov = [self.meta_dict['contig_vals'][1].get_counts(x, x, 'indel') for x in br.query_brkpts]
+        #         low_cov = min(brkpt_cov) < self.meta_dict['params'].get_sr_thresh('indel')
+        #         flank_match_thresh = True
+        #         for fm in br.indel_flank_match:
+        #             fm_perc = round((float(fm) / float(br.get_size('query'))) * 100, 2)
+        #             if fm_perc < 10.0:
+        #                 flank_match_thresh = False
+        #             self.logger.info('Indel result has matching flanking sequence of largest indel event of %d (%d of query)' % (fm, fm_perc))
+        #         self.logger.info('Indel result has matching flanking sequence of largest indel event (10 perc of query) on both sides (%r)' % flank_match_thresh)
+        #         in_ff, span_ff = filter_by_feature(br.get_brkpt_locs(), self.meta_dict['query_region'], self.meta_dict['params'].opts['keep_intron_vars'])
+        #         if not in_ff and not low_cov and flank_match_thresh:
+        #             self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'], self.meta_dict['sbam'])
+        #             self.logger.debug('Top hit contains whole query sequence, indel variant')
+        #         else:
+        #             self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.' % (in_ff, low_cov, min(br.query_blocksizes)))
+        #     else:
+        #         self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r' % (br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.indel_maxevent_size[0] < indel_size_thresh))
+        # return indel
 
 
 class blat_repeat_manager:
@@ -464,7 +508,7 @@ class blat_repeat_manager:
 
     def check_repeat_regions(self, coords, repeat_locs):
         start, end = coords
-        seg_len = float(end-start)
+        seg_len = float(end - start)
         in_repeat = False
         rep_overlap = 0.0
         simple_overlap = 0.0
@@ -474,11 +518,11 @@ class blat_repeat_manager:
             rchr, rbp1, rbp2, rname = rloc
             if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
                 in_repeat = True
-                rep_overlap += float(min(rbp2, end)-max(rbp1, start))
+                rep_overlap += float(min(rbp2, end) - max(rbp1, start))
                 rep_coords.append((rbp1, rbp2))
                 # Simple or low complexity seq repeat for filtering
                 if rname.find(")n") > -1 or rname.find("_rich") > -1:
-                    simple_overlap += float(min(rbp2,end)-max(rbp1, start))
+                    simple_overlap += float(min(rbp2, end) - max(rbp1, start))
                     if (rbp1 <= start and rbp2 >= start):
                         filter_reps_edges[0] = True
                     elif (rbp1 <= end and rbp2 >= end):

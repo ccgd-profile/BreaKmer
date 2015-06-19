@@ -137,8 +137,7 @@ class ParamManager:
             utils.log(self.logging_name, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
             self.repeat_mask = utils.setup_rmask_all(self.opts['repeat_mask_file'])
 
-        if self.get_param('filterList'):
-            self.filter = resultfilter.ResultFilter(self.get_param('filterList'))
+        self.filter = resultfilter.ResultFilter(self.get_param('filterList'))
 
     def parse_opts(self, arguments):
         """Formats input parameters into dictionary, self.opts
@@ -380,7 +379,6 @@ class ParamManager:
             required and not found the program will exit. If the parameter is
             not required and not found, it will return None.
         """
-
         value = None
         if key in self.opts:
             value = self.opts[key]

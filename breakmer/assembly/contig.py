@@ -6,6 +6,8 @@ import logging
 import breakmer.assembly.olc as olcAssembly
 import breakmer.assembly.utils as assemblyUtils
 import breakmer.realignment.realigner as realigner
+import breakmer.caller.sv_caller as sv_caller
+import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -593,6 +595,7 @@ class Meta:
     """
 
     def __init__(self):
+        self.loggingName = 'breakmer.assembly.contig'
         self.params = None
         self.path = None
         self.id = None
@@ -655,6 +658,33 @@ class Meta:
         blat_f.write('>' + self.id + '\n' + seq)
         blat_f.close()
 
+    def write_result(self, result, outputPath):
+        resultFn = os.path.join(self.path, self.id + "_svs.out")
+        utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (self.id, resultFn))
+        resultFile = open(resultFn, 'w')
+        resultFile.write("\t".join([str(x) for x in self.result]))
+        resultFile.close()
+        shutil.copyfile(resultFn, os.path.join(outputPath, self.id + "_svs.out"))
+
+    def write_bam(self, outputPath, svBamReadsFn):
+        bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
+        utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
+        bam_out_sorted_fn = os.path.join(path, self.id + "_reads.sorted.bam")
+        bamFile = Samfile(svBamReadsFn, 'rb')
+        bam_out_f = Samfile(bamOutFn, 'wb', template=bamFile)
+        for bam_read in bamf.fetch():
+            for read in self.reads:
+                rid, idx = read.id.lstrip("@").split("/")
+                ridx, indel_only_read = idx.split("_")
+                if (bam_read.qname == rid) and ((ridx == '2' and bam_read.is_read2) or (ridx == '1' and bam_read.is_read1)):
+                    bam_out_f.write(bam_read)
+        bamf.close()
+        bam_out_f.close()
+        self.logger.info('Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
+        sort(bamOutFn,bam_out_sorted_fn.replace('.bam',''))
+        self.logger.info('Indexing bam file %s'%bam_out_sorted_fn)
+        index(bam_out_sorted_fn)
+
 
 class Contig:
     """Interface class to assemble a contig and store data all the relevant data
@@ -680,6 +710,7 @@ class Contig:
         self.kmer_locs = None
         self.reads = set()
         self.buffer = set([readAlignValues['read'].id])
+        self.svEventResult = None
         self.realignment = None
 
     def check_read(self, kmerObj, readAlignValues, fncType='setup'):
@@ -825,9 +856,7 @@ class Contig:
                 iter += 1
             newKmers = self.refresh_kmers()
             logger.debug("%d kmers left to check" % len(newKmers))
-        # 
         self.set_kmer_locs()
-        # 
         self.set_final_values()
         logger.info('Contig done with contig seq %s. Supported by %d read(s).' % (self.seq, len(self.reads)))
         logger.info('Read IDs: %s' % (",".join([x.id for x in list(self.reads)])))
@@ -866,8 +895,25 @@ class Contig:
 
     def make_calls(self):
         """
+
         """
         print 'Make calls'
+        contigCaller = sv_caller.ContigCaller(self.realignment)
+        self.svEventResult = contigCaller.call_svs(self.get_id())
+        self.filter_calls()
+
+    def filter_calls(self):
+        """
+        """
+        if self.svEventResult:
+            svFilter = self.meta.params.filter
+            svFilter.check_filters(self.svEventResult)
+
+    def output_calls(self, outputPath, svReadsBamFn):
+        """ """
+        if self.result:
+            self.meta.write_result(self.result, outputPath)
+            self.meta.write_bam(outputPath, svReadsBamFn)
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
@@ -888,3 +934,11 @@ class Contig:
     def get_path(self):
         """Return file path to contig results"""
         return self.meta.path
+
+    def get_id(self):
+        """Return contig id"""
+        return self.meta.id
+
+    def get_contig_count_tracker(self):
+        """ """
+        return self.builder.counts
