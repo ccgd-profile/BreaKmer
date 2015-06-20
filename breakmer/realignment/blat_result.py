@@ -89,6 +89,17 @@ class Breakpoints:
         self.contigBreakpoints = []
         self.genomicBreakpoints = []
 
+    def add_brkpts(self, which, bp):
+        """ """
+        if which == 'contig':
+            self.contigBreakpoints.append(bp)
+        else:
+            self.genomicBreakpoints.append(bp)
+
+    def reverse_breakpts(self, querySeqSize):
+        for i in range(len(self.contigBreakpoints)):
+            self.contigBreakpoints[i] = querySeqSize - self.contigBreakpoints[i]
+
 
 class AlignValues:
     """
@@ -307,6 +318,7 @@ class BlatResult:
         return self.matches.get_value(matchType)
 
     def sum_indel_flank_matches(self, flank_str):
+        """ """
         m_indxs = []
         match_sum = 0
         for i in range(len(flank_str)):
@@ -322,6 +334,7 @@ class BlatResult:
         return match_sum
 
     def set_indel_flank_matches(self):
+        """ """
         if self.indel_maxevent_size[0] > 0:
             csplit = self.cigar.split(str(self.indel_maxevent_size[0]) + self.indel_maxevent_size[1])
             lflank = csplit[0]
@@ -330,51 +343,53 @@ class BlatResult:
             self.indel_flank_match[1] += self.sum_indel_flank_matches(rflank)
 
     def set_indel_locs(self):
+        """ """
         chrom = 'chr' + self.get_seqname('reference')
-        for i in range(self.fragments['count'] - 1):
-            if i == 0 and self.fragments['query'][i][0] > 0:
-                self.cigar = str(self.fragments['query'][i][0]) + "S"
-            qend1 = int(self.fragments['query'][i][1])
-            qstart2 = int(self.fragments['query'][i + 1][0])
-            tend1 = int(self.fragments['hit'][i][1])
-            tstart2 = int(self.fragments['hit'][i + 1][0])
+        for i in range(self.fragments.count - 1):
+            if i == 0 and self.fragments.query[i][0] > 0:
+                self.cigar = str(self.fragments.query[i][0]) + "S"
+            qend1 = int(self.fragments.query[i][1])
+            qstart2 = int(self.fragments.query[i + 1][0])
+            tend1 = int(self.fragments.ref[i][1])
+            tstart2 = int(self.fragments.ref[i + 1][0])
             ins_bp = qstart2 - qend1
             del_bp = tstart2 - tend1
             bp1 = tend1
             bp2 = tstart2
-            self.cigar += str(self.query_blocksizes[i]) + "M"
+            self.cigar += str(self.fragments.blocksizes[i]) + "M"
             if ins_bp > 0:
-                self.breakpts.append([bp1])
+                self.breakpts.add_brkpts('genomic', [bp1])
                 self.indel_sizes.append("I" + str(ins_bp))
-                self.add_query_brkpt(qend1)
-                self.add_query_brkpt(qstart2)
+                self.breakpts.add_brkpts('contig', qend1)
+                self.breakpts.add_brkpts('contig', qstart2)
                 self.cigar += str(ins_bp) + "I"
                 if ins_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [ins_bp, "I"]
             if del_bp > 0:
-                self.breakpts.append([bp1, bp2])
+                self.breakpts.add_brkpts('genomic', [bp1, bp2])
                 self.indel_sizes.append("D" + str(del_bp))
-                self.add_query_brkpt(qend1)
+                self.breakpts.add_brkpts('contig', qend1)
                 self.cigar += str(del_bp) + "D"
                 if del_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [del_bp, "D"]
 
-        self.cigar += str(self.query_blocksizes[-1]) + "M"
-        end_clipped = self.get_seq_size('query') - self.qend()
-        if end_clipped > 0:
-            self.cigar += str(end_clipped) + "S"
+        self.cigar += str(self.fragments.blocksizes[-1]) + "M"
+        endClipped = self.get_seq_size('query') - self.qend()
+        if endClipped > 0:
+            self.cigar += str(endClipped) + "S"
 
         self.set_indel_flank_matches()
 
         if self.strand == "-":
-            for i in range(len(self.query_brkpts)):
-                self.query_brkpts[i] = self.get_size('query') - self.query_brkpts[i]
+            self.breakpts.adjust_breakpts(self.get_seq_size('query'))
 
-    def add_query_brkpt(self, brkpt):
-        if brkpt not in self.query_brkpts:
-            self.query_brkpts.append(brkpt)
+    # def add_query_brkpt(self, brkpt):
+    #     """ """
+    #     if brkpt not in self.query_brkpts:
+    #         self.query_brkpts.append(brkpt)
 
     def get_brkpt_str(self, with_sizes=False):
+        """ """
         brkpt_out = []
         bp_str = []
         chrm = 'chr' + str(self.get_name('hit'))
