@@ -606,32 +606,34 @@ class Meta:
         self.regionBuffer = 0
         self.fq_fn = None
         self.fa_fn = None
+        self.readVariation = None
 
-    def set_values(self, contig_id, params, query_region_values, contig_path):
+    def set_values(self, contigId, params, queryRegionValues, contigPath, readVariation):
         """Sets the contig values after contig has been compeleted and ready for
         realignment.
         Args:
-            contig_id: String containing contid ID.
-            params: Param object.
-            query_region_values: Tuple containing the target region information
-            contig_path: String of the path to the contig directory to store files.
+            contigId:           String containing contid ID.
+            params:             Param object.
+            queryRegionValues:  Tuple containing the target region information
+            contigPath:         String of the path to the contig directory to store files.
         Return: None
         """
         self.params = params
-        self.id = contig_id
-        self.chr = query_region_values[0]
-        self.start = query_region_values[1]
-        self.end = query_region_values[2]
-        self.targetName = query_region_values[3]
-        self.regionBuffer = query_region_values[5]
-        self.path = os.path.join(contig_path, self.id)
+        self.id = contigId
+        self.readVariation = readVariation
+        self.chr = queryRegionValues[0]
+        self.start = queryRegionValues[1]
+        self.end = queryRegionValues[2]
+        self.targetName = queryRegionValues[3]
+        self.regionBuffer = queryRegionValues[5]
+        self.path = os.path.join(contigPath, self.id)
         logger = logging.getLogger('breakmer.assembly.contig')
-        logger.info('Setting up contig path %s' % self.path)
+        utils.log(self.loggingName, 'info', 'Setting up contig path %s' % self.path)
 
         if not os.path.exists(self.path):
             os.makedirs(self.path)
-        self.fq_fn = os.path.join(contig_path, self.id, self.id + '.fq')
-        self.fa_fn = os.path.join(contig_path, self.id, self.id + '.fa')
+        self.fq_fn = os.path.join(contigPath, self.id, self.id + '.fq')
+        self.fa_fn = os.path.join(contigPath, self.id, self.id + '.fa')
 
     def write_files(self, cluster_fn, kmers, reads, seq):
         """Write cluster, read fastq, and contig fasta files.
@@ -681,7 +683,7 @@ class Meta:
         bamf.close()
         bam_out_f.close()
         self.logger.info('Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
-        sort(bamOutFn,bam_out_sorted_fn.replace('.bam',''))
+        sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         self.logger.info('Indexing bam file %s'%bam_out_sorted_fn)
         index(bam_out_sorted_fn)
 
@@ -942,3 +944,11 @@ class Contig:
     def get_contig_count_tracker(self):
         """ """
         return self.builder.counts
+
+    def get_disc_reads(self):
+        """ """
+        return self.readVariation.get_disc_reads()
+
+    def get_variant_read_tracker(self):
+        """ """
+        return self.readVariation

@@ -244,7 +244,7 @@ class VariantReadTracker:
         bam: BAM file source the reads came from.
     """
 
-    def __init__(self, bam_f):
+    def __init__(self, bamFile):
         self.pair_indices = {}
         self.valid = []
         self.disc = {}
@@ -254,7 +254,7 @@ class VariantReadTracker:
         self.td = []
         self.other = []
         self.sv = {}
-        self.bam = bam_f
+        self.bam = bamFile
 
     def check_read(self, read):
         """ """
@@ -408,3 +408,9 @@ class VariantReadTracker:
 
     def clear_sv_reads(self):
         self.sv = None
+
+    def get_disc_reads(self):
+        """ """
+        return self.disc
+
+

@@ -39,6 +39,9 @@ class ResultFilter:
             # nMissingQueryCoverage = len(filter(lambda y: y, map(lambda x: x == 0, self.queryCoverage)))
             # if nMissingQueryCoverage < self.meta_dict['params'].get_min_segment_length('trl'):
             #     valid = True
+# 2. Contig complexity 
+        # avg_comp, comp_vec = calc_contig_complexity(self.contig_seq)
+
 
     def check_filters(self, svEvent):
         """
