@@ -12,7 +12,8 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
-class IndelResult:
+class FilterValues:
+    # Filter indel
         # indel_size_thresh = int(self.meta_dict['params'].opts['indel_size'])
         # self.logger.info('Checking if blat result contains an indel variant')
         # nhits = 0
@@ -42,15 +43,8 @@ class IndelResult:
         #             self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.' % (in_ff, low_cov, min(br.query_blocksizes)))
         #     else:
         #         self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r' % (br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.indel_maxevent_size[0] < indel_size_thresh))
-    def __init__(self):
-        self.maxEventSize = 0
-        self.resultMeanHitFreq = 0
-        self.brkptCoverage = 0
-        self.flankMatch = 0
-
-
-class trlResult:
-#         filter = br_valid[1] or (max(brkpt_counts['d']) < params.get_sr_thresh('trl'))
+    # Filter TRL 
+    #         filter = br_valid[1] or (max(brkpt_counts['d']) < params.get_sr_thresh('trl'))
 #         self.logger.debug('Check translocation filter')
 #         self.logger.debug('All blat result segments are within annotated or pre-specified regions %r' % br_valid[0])
 #         self.logger.debug('All blat result segments are within simple repeat regions that cover > 75.0 percent of the segment %r'%br_valid[1])
@@ -89,21 +83,87 @@ class trlResult:
 #                         self.logger.info('Two or more filter checks, setting filtering to true for contig')
 #                         filter = True
     def __init__(self):
-        self.minSegmentLen = 0
-        self.brkptKmers = 0
-        self.seqComplexity = 0
-        self.missingQueryCoverage = 0
-        self.maxSegmentOverlap = 0
-        self.maxMeanCoverage = 0
-        self.nReadStrands = 0
-        self.realignmentGaps = 0
+        self.maxEventSize = None
+        self.resultMeanHitFreq = None
+        self.brkptCoverages = None
+        self.flankMatchPercents = None
+        self.minSegmentLen = None
+        self.minBrkptKmers = None
+        self.seqComplexity = None
+        self.missingQueryCoverage = None
+        self.maxSegmentOverlap = None
+        self.maxMeanCoverage = None
+        self.nReadStrands = None
+        self.realignmentGaps = None
 
+    def set_indel_values(self, blatResult, brkptCoverages):
+        self.resultMeanHitFreq = blatResult.meanCov
+        self.maxEventSize = blatResult.indel_maxevent_size[0]
+        self.brkptCoverages = [min(brkptCoverages), max(brkptCoverages)]
+        self.flankMatchPercents = []
+        for flankMatch in blatResult.indel_flank_match:
+            self.flankMatchPercents.append(round((float(flankMatch) / float(blatResult.get_seq_size('query'))) * 100, 2))
 
-class RearrResult:
-    def __init__(self):
-        self.brkptKmers = 0
-        self.minSegmentLen = 0
+    def set_trl_values(self, blatResult, breakpoints):
+        self.minSegmentLen = blatResult.get_nmatch_total()
+        # Set the min to be the surrounding area of breakpoints, and max to be the direct breakpoints
+        self.brkptCoverages = [min(brkptCoverages.counts['n']), max(brkptCoverages.counts['d'])]
+        self.minBrkptKmers = min(brkptCoverages.kmers)
+        nmers = {}
+        total_possible = len(seq) - 2
+        for i in range(len(seq) - (N - 1)):
+            nmers[str(seq[i:i+N]).upper()] = True
+        self.seqComplexity = round((float(len(nmers))/float(total_possible))*100, 4)
+        self.missingQueryCoverage = 
 
+    # def check_uniqueness(self):
+    #     low_unique = False
+    #     for br_vals in self.blatResultsSorted :
+    #         if not br_vals[0].in_target :
+    #             if br_vals[0].mean_cov > 4 : low_unique = True
+    #         else :
+    #             if br_vals[0].mean_cov > 10 : low_unique = True
+    #     return low_unique
+
+    # def check_read_strands(self):
+    #     same_strand = False
+    #     strands = []
+    #     for read in self.contig_reads :
+    #         strand = read.id.split("/")[1] 
+    #         strands.append(strand)
+    #     if len(set(strands)) == 1 :
+    #         same_strand = True
+    #     self.logger.debug('Checking read strands for contig reads %s'%(",".join([read.id for read in self.contig_reads])))
+    #     self.logger.debug('Reads are on same strand: %r'%same_strand)
+    #     return same_strand
+
+    # def minseq_complexity(self, seq, N) :
+    #     self.logger.debug('Checking sequence complexity of blat result segment %s using %d-mers'%(seq,N))
+    #     nmers = {}
+    #     total_possible = len(seq) - 2
+    #     for i in range(len(seq) - (N - 1)) :
+    #         nmers[str(seq[i:i+N]).upper()] = True
+    #     complexity = round((float(len(nmers))/float(total_possible))*100,4)
+    #     self.logger.debug('Complexity measure %f, based on %d unique %d-mers observed out of a total of %d %d-mers possible'%(complexity,len(nmers),N,total_possible,N))
+    #     return complexity
+
+    # def missing_query_coverage(self) :
+    #     missing_cov = 0
+    #     for i in self.queryCoverage :
+    #         if i == 0 :
+    #             missing_cov += 1
+    #         else :
+    #             break
+
+    #     for i in reversed(self.queryCoverage) :
+    #         if i == 0 :
+    #             missing_cov += 1
+    #         else : 
+    #             break
+
+    #     perc_missing = round((float(missing_cov)/float(len(self.contig_seq)))*100, 4)
+    #     self.logger.debug('Calculated %f missing coverage of blat query sequence at beginning and end'%perc_missing)
+    #     return perc_missing
 
 class SVResult:
     def __init__(self):
@@ -120,6 +180,7 @@ class SVResult:
         self.discReadCount = None
         self.contigId = None
         self.breakpointCoverages = None
+        self.filterValues = FilterValues()
 
     def format_event_values(self, svEvent):
         """ """
@@ -138,13 +199,14 @@ class SVResult:
         self.alignCigar = blatResult.cigar
         self.svType['type'] = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
-        self.splitReadCount = ",".join([str(contigCountTracker.get_counts(x, x, 'indel')) for x in blatResult.query_brkpts])
+        self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in blatResult.contigBreakpoints]
+        self.filterValues.set_indel_values(blatResult, self.splitReadCount)
 
     def format_rearrangement_values(self, svEvent):
         """ """
         utils.log(self.loggingName, 'info', 'Resolving SVs call from blat results')
-        # Sort the stored blat results by the start coordinate
-        blatResSorted = sorted(self.blatResults, key=lambda x: x[0])
+        # Sort the stored blat results by the number of matches to the reference sequence.
+        blatResSorted = sorted(self.blatResults, key=lambda x: x[1])
         # brkpts = SVBreakpoints() # {'t':{'in_target':None, 'other':None }, 'formatted':[], 'r':[], 'q': [[0,0],[]], 'chrs':[], 'brkpt_str':[], 'tcoords':[], 'f': []}
         # res_values = {'target_breakpoints':[], 'align_cigar':[], 'sv_type':'', 'strands':[], 'mismatches':[], 'repeat_matching':[], 'anno_genes': [], 'disc_read_count': 0}
         resultValid = {'valid': True, 'repeatValid': True}
@@ -172,6 +234,7 @@ class SVResult:
             svEvent.set_brkpt_counts('trl')
             self.discReadCount = svEvent.get_disc_read_count()
             self.svType['type'] = ['trl']
+            self.filterValues.set_trl_values()
             # self.targetBreakpoints = svEvent.get_brkpt_str() # brkpts['brkpt_str']
             # self.splitReadCount = svEvent.get_splitread_count() # brkpt_counts['b']
         else:

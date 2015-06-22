@@ -158,7 +158,7 @@ class BlatResult:
         self.alignScore = self.get_nmatch_total() + float(self.rawScore) / float(self.get_seq_size('query'))
         self.ngaps = self.get_total_num_gaps()
 
-        self.mean_cov = 0.0
+        self.meanCov = 0.0
         self.seg_overlap = [0, 0]
         self.cigar = ''
 
@@ -472,7 +472,7 @@ class BlatResult:
     def check_indel(self, indelSizeThresh, nBlatResults):
         indel = False
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
-        if self.spans_query() or (nBlatResults == 1 and br.in_target):
+        if self.spans_query() or (nBlatResults == 1 and self.in_target):
             utils.log(self.loggingName, 'info', 'Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (self.spans_query(), (nBlatResults == 1), self.in_target))
             indel = True
         return indel
