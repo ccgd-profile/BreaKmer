@@ -27,7 +27,7 @@ class filter():
         return (filterCheck and descMatch)
 
 
-class filters() :
+class filters():
     def __init__(self, filterFn) :
         self.filterFn = filterFn
         self.filters = []
@@ -48,7 +48,7 @@ class filters() :
         keepIndel = True
         if rec.type == "indel" :
             #print rec.values
-            #print rec.segments[0].annoVals, abs(int(rec.segments[0].annoVals['exon'][1])) 
+            #print rec.segments[0].annoVals, abs(int(rec.segments[0].annoVals['exon'][1]))
             #print rec.svDescription, rec.svDescription.find(',')
             if abs(int(rec.segments[0].annoVals['exon'][1])) > 0 and rec.svDescription.find(',') == -1 :
                 keepIndel = False    
@@ -119,7 +119,7 @@ class segment() :
         return geneName
 
 class breakmerRec() :
-    def __init__(self, subProjId, sampleId, recIter, values) :
+    def __init__(self, subProjId, sampleId, recIter, values):
         '''
         1. genes - comma-delimited list
         2. target_breakpoints - comma delimited list
@@ -157,14 +157,14 @@ class breakmerRec() :
         self.svDescription = None
         self.format_results()
 
-    def get_target_name(self) :
+    def get_target_name(self):
         # Suffers from annotation issue, if breakpoint lands outside of any
         # target capture regions it won't hit any of the target regions and
         # therefore will not have a target name associated.
         # For now this function is deprecated
         tName = ''
-        for seg in self.segments :
-            if 'target' in seg.annoVals :
+        for seg in self.segments:
+            if 'target' in seg.annoVals:
                 tName = seg.annoVals['target'][0]
         return tName
 
@@ -697,7 +697,7 @@ def format_results(sampleListFn, sampleType, filterList) :
 
     fbed = open('brkpts.%s.bed' % sampleType, 'w')
     for sid in resD :
-        for rec in resD[sid]['recs'] :
+        for rec in resD[sid]['recs']:
             rec.write_brkpt_bed(fbed)
     fbed.close()
 
@@ -706,7 +706,7 @@ def format_results(sampleListFn, sampleType, filterList) :
 
     if sampleType == "normal" :
         for sid in resD :
-            for rec in resD[sid]['recs'] :
+            for rec in resD[sid]['recs']:
                 descriptions = rec.svDescription
                 if rec.type.find("rearr") > -1:
                     descriptions = rec.format_trl_str()

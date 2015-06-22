@@ -523,59 +523,59 @@ def setup_rmask(gene_coords, ref_path, rmask_fn):
 
     rmask = []
     if not os.path.isfile(marker_fn):
-        fout = open(mask_out_fn,'w')
-        f = open(rmask_fn,'rU')
+        fout = open(mask_out_fn, 'w')
+        f = open(rmask_fn, 'rU')
         flines = f.readlines()
         for line in flines:
             line = line.strip()
-            rchr,rbp1,rbp2,rname = line.split("\t")[0:4]
-            rchr = rchr.replace('chr','')
+            rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
+            rchr = rchr.replace('chr', '')
             if rchr == chrom:
-                if int(rbp1) >= int(s) and int(rbp2) <= int(e): 
-                    fout.write("\t".join([str(x) for x in [rchr,int(rbp1),int(rbp2),rname]])+"\n")
-                    rmask.append((rchr,int(rbp1),int(rbp2),rname))
+                if int(rbp1) >= int(s) and int(rbp2) <= int(e):
+                    fout.write("\t".join([str(x) for x in [rchr, int(rbp1), int(rbp2), rname]]) + "\n")
+                    rmask.append((rchr, int(rbp1), int(rbp2), rname))
         f.close()
         fout.close()
-
-        cmd = 'touch %s'%marker_fn
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-        output, errors = p.communicate()  
-        logger.info('Completed writing repeat mask file %s, touching marker file %s'%(mask_out_fn,marker_fn))
+        cmd = 'touch %s' % marker_fn
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        output, errors = p.communicate()
+        logger.info('Completed writing repeat mask file %s, touching marker file %s' % (mask_out_fn, marker_fn))
     else:
         rep_f = open(mask_out_fn, 'rU')
         rep_flines = rep_f.readlines()
         for line in rep_flines:
             line = line.strip()
-            rchr,rbp1,rbp2,rname = line.split()
-            rmask.append((rchr,int(rbp1),int(rbp2),rname))
+            rchr, rbp1, rbp2, rname = line.split()
+            rmask.append((rchr, int(rbp1), int(rbp2), rname))
     return rmask
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
     logger = logging.getLogger('root')
-
-    chrom, s, e, name, intervals = gene_coords
-#  fa_fn = os.path.join(ref_path, name+'_'+direction+'_refseq.fa')
-    marker_fn = get_marker_fn(target_fa_fn) 
+    chrom = gene_coords[0]
+    start = gene_coords[1]
+    end = gene_coords[2]
+    name = gene_coords[3]
+    marker_fn = get_marker_fn(target_fa_fn)
 
     if not os.path.isfile(marker_fn):
         ref_d = SeqIO.to_dict(SeqIO.parse(ref_fa, 'fasta'))
         seq_str = ''
-        seq = ref_d[chrom].seq[(s-200):(e+200)]
+        seq = ref_d[chrom].seq[(start - 200):(end + 200)]
         if direction == "reverse":
             seq_str = str(seq.reverse_complement())
         else:
             seq_str = str(seq)
-        fa = open(target_fa_fn,'w')
-        fa.write(">"+name+"\n"+seq_str+"\n")
+        fa = open(target_fa_fn, 'w')
+        fa.write('>' + name + '\n' + seq_str + '\n')
         fa.close()
-        cmd = 'touch %s'%marker_fn
-        p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        cmd = 'touch %s' % marker_fn
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        logger.info('Completed writing refseq fasta file %s, touching marker file %s'%(target_fa_fn, marker_fn))
+        logger.info('Completed writing refseq fasta file %s, touching marker file %s' % (target_fa_fn, marker_fn))
     else:
         logger.info('Refseq sequence fasta (%s) exists already' % target_fa_fn)
-    return target_fa_fn 
+    return target_fa_fn
 
 
 def seq_trim(qual_str, min_qual):
