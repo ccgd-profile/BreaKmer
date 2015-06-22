@@ -894,7 +894,7 @@ class Contig:
         Args:
         Return:
         """
-        self.realignment = realigner.RealignManager(self.params, targetRefFns)
+        self.realignment = realigner.RealignManager(self.meta.params, targetRefFns)
         self.realignment.realign(self)
 
     def make_calls(self):
