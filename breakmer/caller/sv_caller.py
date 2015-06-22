@@ -12,6 +12,99 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+class IndelResult:
+        # indel_size_thresh = int(self.meta_dict['params'].opts['indel_size'])
+        # self.logger.info('Checking if blat result contains an indel variant')
+        # nhits = 0
+        # for i in self.hit_freq:
+        #     if i > 0:
+        #         nhits += 1
+        # if br.spans_query() or (len(self.blat_results) == 1 and br.in_target):
+        #     self.logger.info('Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (br.spans_query(), (len(self.blat_results) == 1), br.in_target))
+        #     indel = True
+        #     keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.indel_maxevent_size[0] >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
+        #     self.logger.debug('Keep blat result %r' % keep_br)
+        #     if keep_br:
+        #         brkpt_cov = [self.meta_dict['contig_vals'][1].get_counts(x, x, 'indel') for x in br.query_brkpts]
+        #         low_cov = min(brkpt_cov) < self.meta_dict['params'].get_sr_thresh('indel')
+        #         flank_match_thresh = True
+        #         for fm in br.indel_flank_match:
+        #             fm_perc = round((float(fm) / float(br.get_size('query'))) * 100, 2)
+        #             if fm_perc < 10.0:
+        #                 flank_match_thresh = False
+        #             self.logger.info('Indel result has matching flanking sequence of largest indel event of %d (%d of query)' % (fm, fm_perc))
+        #         self.logger.info('Indel result has matching flanking sequence of largest indel event (10 perc of query) on both sides (%r)' % flank_match_thresh)
+        #         in_ff, span_ff = filter_by_feature(br.get_brkpt_locs(), self.meta_dict['query_region'], self.meta_dict['params'].opts['keep_intron_vars'])
+        #         if not in_ff and not low_cov and flank_match_thresh:
+        #             self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'], self.meta_dict['sbam'])
+        #             self.logger.debug('Top hit contains whole query sequence, indel variant')
+        #         else:
+        #             self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.' % (in_ff, low_cov, min(br.query_blocksizes)))
+        #     else:
+        #         self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r' % (br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.indel_maxevent_size[0] < indel_size_thresh))
+    def __init__(self):
+        self.maxEventSize = 0
+        self.resultMeanHitFreq = 0
+        self.brkptCoverage = 0
+        self.flankMatch = 0
+
+
+class trlResult:
+#         filter = br_valid[1] or (max(brkpt_counts['d']) < params.get_sr_thresh('trl'))
+#         self.logger.debug('Check translocation filter')
+#         self.logger.debug('All blat result segments are within annotated or pre-specified regions %r' % br_valid[0])
+#         self.logger.debug('All blat result segments are within simple repeat regions that cover > 75.0 percent of the segment %r'%br_valid[1])
+#         self.logger.debug('The maximum read count support around breakpoints %d meets split read threshold %d'%(max(brkpt_counts['d']),params.get_sr_thresh('trl')))
+#         self.logger.debug('The minimum number of kmers at breakpoints %d' % min(brkpt_kmers))
+#         self.logger.debug('The maximum repeat overlap by a blat result: %f' % max_repeat)
+#         if not filter:
+#             self.logger.debug('Filter %r, checking discordant read counts %d' % (filter, disc_read_count))
+#             if disc_read_count < 2:
+# #        print 'Filter due to repeat', rep_filt
+#                 if (self.blatResultsSorted[0][1] < params.get_min_segment_length('trl')) or (min(brkpt_counts['n']) < params.get_sr_thresh('trl')) or (min(brkpt_kmers) == 0) or rep_filt:
+#                     self.logger.debug('Shortest segment is < %d bp with %d discordant reads. Filtering.'%(params.get_min_segment_length('trl'), disc_read_count))
+#                     self.logger.debug('The minimum read count support for breakpoints %d meets split read threshold %d'%(min(brkpt_counts['n']),params.get_sr_thresh('trl')))
+#                     self.logger.debug('The minimum number of kmers at breakpoints %d'%min(brkpt_kmers))
+#                     filter = True
+#                 elif disc_read_count == 0:
+#                     # Check a number of metrics for shortest blat segment
+#                     br_qs = self.blatResultsSorted[0][0].qstart()
+#                     br_qe = self.blatResultsSorted[0][0].qend()
+#                     low_complexity = self.minseq_complexity(self.contig_seq[br_qs:br_qe],3) < 25.0 # Complexity of blat segment
+#                     missing_qcov = self.missing_query_coverage() > 5.0
+#                     short = self.blatResultsSorted[0][1] <= round(float(len(self.contig_seq))/float(4.0))
+#                     self.logger.debug('Checking length of shortest sequence, considered too short %r, %d, %f'%(short, self.blatResultsSorted[0][1], round(float(len(self.contig_seq))/float(4.0))) )
+#                     overlap = max(self.blatResultsSorted[0][0].seg_overlap) > 5
+#                     gaps_exist = max(self.blatResultsSorted[0][0].gaps['query'][0], self.blatResultsSorted[0][0].gaps['hit'][0]) > 0
+#                     low_uniqueness = self.check_uniqueness()
+#                     intergenic_regions = 'intergenic' in anno_genes
+#                     read_strand_bias = self.check_read_strands()
+#                     check_values = [low_complexity, missing_qcov, short, overlap, gaps_exist, low_uniqueness, read_strand_bias, intergenic_regions]
+#                     self.logger.debug('Discordant read count of 0 checks %s'%(",".join([str(x) for x in check_values])))
+#                     num_checks = 0
+#                     for check in check_values:
+#                         if check:
+#                             num_checks += 1
+#                     if num_checks > 1:
+#                         self.logger.info('Two or more filter checks, setting filtering to true for contig')
+#                         filter = True
+    def __init__(self):
+        self.minSegmentLen = 0
+        self.brkptKmers = 0
+        self.seqComplexity = 0
+        self.missingQueryCoverage = 0
+        self.maxSegmentOverlap = 0
+        self.maxMeanCoverage = 0
+        self.nReadStrands = 0
+        self.realignmentGaps = 0
+
+
+class RearrResult:
+    def __init__(self):
+        self.brkptKmers = 0
+        self.minSegmentLen = 0
+
+
 class SVResult:
     def __init__(self):
         self.loggingName = 'breakmer.caller.sv_caller'

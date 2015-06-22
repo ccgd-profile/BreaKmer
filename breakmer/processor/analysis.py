@@ -84,6 +84,10 @@ class RunTracker:
             analyze_targets(targetAnalysisList)
 
 #        self.write_output()
+
+        # Perform any post-primary analysis scripts here.
+
+
         self.logger.info('Analysis complete in %s' % str(time.clock() - startTime))
 
         if not self.params.get_param('keep_blat_server'):

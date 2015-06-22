@@ -684,7 +684,7 @@ class Meta:
         bam_out_f.close()
         self.logger.info('Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
         sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
-        self.logger.info('Indexing bam file %s'%bam_out_sorted_fn)
+        self.logger.info('Indexing bam file %s' % bam_out_sorted_fn)
         index(bam_out_sorted_fn)
 
 

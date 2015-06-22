@@ -224,6 +224,10 @@ class Variation:
         self.clear_cleaned_reads()
         self.kmers['case_only'] = {}
 
+    def get_disc_reads(self):
+        """ """
+        return self.var_reads['sv'].get_disc_reads()
+
 
 class TargetManager:
     """TargetManager class handles all the high level information relating to a target.
@@ -489,7 +493,7 @@ class TargetManager:
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
             utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
-            contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'])
+            contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.)
             contig.query_ref(self.files['target_ref_fn'])
             contig.make_calls()
             contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])

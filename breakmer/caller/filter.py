@@ -45,7 +45,6 @@ class ResultFilter:
                     # brkpt_rep_filt = brkpt_rep_filt or (comp_vec[qb[0]] < (avg_comp / 2))
                 # brkpt_rep_filt = brkpt_rep_filt or (len(filter(lambda x: x, brkpts['f'])) > 0)
 
-
     def check_filters(self, svEvent):
         """
         """
@@ -69,11 +68,11 @@ class ResultFilter:
         self.logger.debug('The maximum read count support around breakpoints %d meets split read threshold %d'%(max(brkpt_counts['d']),params.get_sr_thresh('trl')))
         self.logger.debug('The minimum number of kmers at breakpoints %d' % min(brkpt_kmers))
         self.logger.debug('The maximum repeat overlap by a blat result: %f' % max_repeat)
-        if not filter :
+        if not filter:
             self.logger.debug('Filter %r, checking discordant read counts %d' % (filter, disc_read_count))
-            if disc_read_count < 2 :
+            if disc_read_count < 2:
 #        print 'Filter due to repeat', rep_filt
-                if (self.blatResultsSorted[0][1] < params.get_min_segment_length('trl')) or (min(brkpt_counts['n']) < params.get_sr_thresh('trl')) or (min(brkpt_kmers)==0) or rep_filt :
+                if (self.blatResultsSorted[0][1] < params.get_min_segment_length('trl')) or (min(brkpt_counts['n']) < params.get_sr_thresh('trl')) or (min(brkpt_kmers) == 0) or rep_filt:
                     self.logger.debug('Shortest segment is < %d bp with %d discordant reads. Filtering.'%(params.get_min_segment_length('trl'), disc_read_count))
                     self.logger.debug('The minimum read count support for breakpoints %d meets split read threshold %d'%(min(brkpt_counts['n']),params.get_sr_thresh('trl')))
                     self.logger.debug('The minimum number of kmers at breakpoints %d'%min(brkpt_kmers))
@@ -94,10 +93,10 @@ class ResultFilter:
                     check_values = [low_complexity, missing_qcov, short, overlap, gaps_exist, low_uniqueness, read_strand_bias, intergenic_regions]
                     self.logger.debug('Discordant read count of 0 checks %s'%(",".join([str(x) for x in check_values])))
                     num_checks = 0
-                    for check in check_values :
-                        if check : 
+                    for check in check_values:
+                        if check:
                             num_checks += 1
-                    if num_checks > 1 : 
+                    if num_checks > 1:
                         self.logger.info('Two or more filter checks, setting filtering to true for contig')
                         filter = True
         return filter
@@ -131,8 +130,8 @@ class ResultFilter:
         total_possible = len(seq) - 2
         for i in range(len(seq) - (N - 1)):
             nmers[str(seq[i:i+N]).upper()] = True
-        complexity = round((float(len(nmers))/float(total_possible))*100,4)
-        self.logger.debug('Complexity measure %f, based on %d unique %d-mers observed out of a total of %d %d-mers possible'%(complexity,len(nmers),N,total_possible,N))
+        complexity = round((float(len(nmers))/float(total_possible))*100, 4)
+        self.logger.debug('Complexity measure %f, based on %d unique %d-mers observed out of a total of %d %d-mers possible' % (complexity,len(nmers),N,total_possible,N))
         return complexity
 
     def missing_query_coverage(self):
@@ -166,9 +165,9 @@ class ResultFilter:
 
     def dup_gene_names(self, anno_genes):
         found_dup = False
-        for i in range(len(anno_genes)-1) :
+        for i in range(len(anno_genes)-1):
             g1 = anno_genes[i]
-            for g2 in anno_genes[(i+1):] :
-                if (g1.find(g2) > -1) or (g2.find(g1) > -1) :
+            for g2 in anno_genes[(i+1):]:
+                if (g1.find(g2) > -1) or (g2.find(g1) > -1):
                     found_dup = True
-        return found_dup 
+        return found_dup
