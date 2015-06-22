@@ -40,7 +40,7 @@ class AlignParams:
         self.ref['genome'] = params.get_param('reference_fasta_dir')
 
     def get_values(self, type):
-        return (self.program[type], self.extension[type], self.binary[type])
+        return (self.program[type], self.extension[type], self.binary[type], self.ref[type])
 
 
 class RealignManager:
@@ -100,10 +100,10 @@ class Realignment:
     def align(self, alignParams, scope):
         """
         """
-        alignProgram, alignExt, alignBinary = alignParams
+        alignProgram, alignExt, alignBinary, alignRef = alignParams
         self.scope = scope
         # update
-        utils.log(self.loggingName, 'info', 'Running blat %s, storing results in %s' % (self.params.opts['gfclient'], self.query_res_fn))
+        utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.query_res_fn))
 
         resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
         self.results = AlignResults(alignProgram, scope, resultFn)
@@ -114,10 +114,10 @@ class Realignment:
         elif self.alignprogram == 'blat':
             if scope == 'target':
                 # all blat server
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (self.params.opts['gfclient'], self.params.opts['blat_port'], self.params.opts['reference_fasta_dir'], self.contig_fa_fn, self.query_res_fn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (alignProgram, alignBinary['blat_port'], alignRef, self.contig.meta.fa_fn, resultFn)
             elif scope == 'genome':
                 # target
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (self.params.opts['blat'], db, self.contig_fa_fn, self.query_res_fn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignProgram, db, self.contig.meta.fa_fn, resultFn)
 
         # update
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
