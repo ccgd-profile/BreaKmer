@@ -877,8 +877,7 @@ class Contig:
             kmer_cluster_fn: String of the path to write the kmer clustering information to.
         Return: None
         """
-
-        self.meta.set_values(contig_id, params, query_region_values, contig_path)
+        self.meta.set_values(contig_id, params, query_region_values, contig_path, readVariation)
         self.meta.write_files(kmer_cluster_fn, self.kmers, self.reads, self.seq)
 
     def set_final_values(self):
