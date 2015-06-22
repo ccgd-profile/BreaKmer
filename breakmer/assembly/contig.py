@@ -660,11 +660,14 @@ class Meta:
         blat_f.write('>' + self.id + '\n' + seq)
         blat_f.close()
 
-    def write_result(self, result, outputPath):
+    def write_result(self, svEventResult, outputPath):
         resultFn = os.path.join(self.path, self.id + "_svs.out")
         utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (self.id, resultFn))
         resultFile = open(resultFn, 'w')
-        resultFile.write("\t".join([str(x) for x in self.result]))
+
+        # A string of output values for writing to file.
+        headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
+        resultFile.write(headerStr + '\n' + formattedResultValues + '\n')
         resultFile.close()
         shutil.copyfile(resultFn, os.path.join(outputPath, self.id + "_svs.out"))
 
@@ -897,7 +900,6 @@ class Contig:
 
     def make_calls(self):
         """
-
         """
         print 'Make calls'
         contigCaller = sv_caller.ContigCaller(self.realignment)
@@ -913,8 +915,8 @@ class Contig:
 
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
-        if self.result:
-            self.meta.write_result(self.result, outputPath)
+        if self.svEventResult:
+            self.meta.write_result(self.svEventResult, outputPath)
             self.meta.write_bam(outputPath, svReadsBamFn)
 
     def get_total_read_support(self):
@@ -941,6 +943,10 @@ class Contig:
         """Return contig id"""
         return self.meta.id
 
+    def get_target_name(self):
+        """ """
+        return self.meta.targetName
+
     def get_contig_count_tracker(self):
         """ """
         return self.builder.counts
@@ -952,3 +958,7 @@ class Contig:
     def get_variant_read_tracker(self):
         """ """
         return self.readVariation
+
+    def get_sample_bam_fn(self):
+        """ """
+        return self.meta.params.get_param('sample_bam_file')

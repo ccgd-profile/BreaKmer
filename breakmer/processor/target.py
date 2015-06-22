@@ -224,9 +224,21 @@ class Variation:
         self.clear_cleaned_reads()
         self.kmers['case_only'] = {}
 
-    def get_disc_reads(self):
+    def get_disc_reads(self,):
         """ """
         return self.var_reads['sv'].get_disc_reads()
+
+    def write_results(self, outputPath, targetName):
+        resultFn = os.path.join(outputPath, targetName + "_svs.out")
+        utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
+        resultFile = open(resultFn, 'w')
+
+        for i, result in enumerate(self.results):
+            headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
+            if i == 0:
+                resultFile.write(headerStr + '\n')
+            resultFile.write(formattedResultValues + '\n')
+        resultFile.close()
 
 
 class TargetManager:
@@ -493,14 +505,12 @@ class TargetManager:
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
             utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
-            contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.)
+            contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'])
             contig.query_ref(self.files['target_ref_fn'])
-            contig.make_calls()
-            contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
-            # if contig.has_result():
-            #     contig.write_result()
-            #     contig.write_bam()
-            #     self.add_result(result)
+            # contig.make_calls()
+            # if contig.svEventResult:
+            #     contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
+            #     self.add_result(ontig.svEventResult)
             # else:
             #     utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
@@ -512,8 +522,8 @@ class TargetManager:
 
     def complete_analysis(self):
         """ """
-        if len(self.results) > 0:
-            self.write_results()
+        if len(self.variation.results) > 0:
+            self.variation.write_results()
         else:
             self.rm_output_dir()
 
@@ -545,3 +555,12 @@ class TargetManager:
     def add_result(self, result):
         """ """
         self.variation.add_result(result)
+
+    def has_results(self):
+        """ """
+        if len(self.variation.results) > 0:
+            return True
+        else:
+            return False
+
+

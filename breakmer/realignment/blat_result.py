@@ -59,6 +59,10 @@ class Gaps:
         """Return the total bp of gap in the realignment"""
         return self.ref[1] + self.query[1]
 
+    def get_gap_sizes(self):
+        """ """
+        return (self.ref[1], self.query[1])
+
     def get_total_num_gaps(self):
         """Return the total number of gaps in the realignment"""
         return self.ref[0] + self.query[0]
@@ -94,6 +98,9 @@ class Breakpoints:
         if which == 'contig':
             self.contigBreakpoints.append(bp)
         else:
+            # Tuple of coordinates for indel breakpoints with chromosome number as 'chr#'
+            # - Deletion = (chr, bp1, bp2)
+            # - Insertion = (chr, bp1)
             self.genomicBreakpoints.append(bp)
 
     def reverse_breakpts(self, querySeqSize):
@@ -285,9 +292,9 @@ class BlatResult:
     def tend(self):
         return self.alignVals.get_coords('reference', 1)
 
-    def get_seqname(self, alignType):
+    def get_seq_name(self, alignType):
         """Return the seq name of the query or reference. Typically the chromosome number"""
-        return self.alignVals.get_seqname(alignType)
+        return self.alignVals.get_seq_name(alignType)
 
     def get_seq_size(self, alignType):
         return self.alignVals.get_seq_size(alignType)
@@ -358,7 +365,7 @@ class BlatResult:
             bp2 = tstart2
             self.cigar += str(self.fragments.blocksizes[i]) + "M"
             if ins_bp > 0:
-                self.breakpts.add_brkpts('genomic', [bp1])
+                self.breakpts.add_brkpts('genomic', (chrom, bp1))
                 self.indel_sizes.append("I" + str(ins_bp))
                 self.breakpts.add_brkpts('contig', qend1)
                 self.breakpts.add_brkpts('contig', qstart2)
@@ -366,7 +373,7 @@ class BlatResult:
                 if ins_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [ins_bp, "I"]
             if del_bp > 0:
-                self.breakpts.add_brkpts('genomic', [bp1, bp2])
+                self.breakpts.add_brkpts('genomic', (chrom, bp1, bp2))
                 self.indel_sizes.append("D" + str(del_bp))
                 self.breakpts.add_brkpts('contig', qend1)
                 self.cigar += str(del_bp) + "D"
@@ -387,6 +394,10 @@ class BlatResult:
     #     """ """
     #     if brkpt not in self.query_brkpts:
     #         self.query_brkpts.append(brkpt)
+
+    def get_genomic_brkpts(self):
+        """ """
+        return self.breakpts.genomicBreakpoints
 
     def get_brkpt_str(self, with_sizes=False):
         """ """

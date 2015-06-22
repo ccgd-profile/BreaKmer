@@ -15,6 +15,28 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+def check_status(results):
+    notready = 0
+    for r in results:
+        if not r.ready():
+            notready += 1
+    return (notready)
+
+
+def wait(results):
+    njobs = check_status(results)
+
+    while njobs > 0:
+        time.sleep(5)
+        jobs = check_status(results)
+        if jobs < njobs:
+            print '\n', jobs, '/', total_jobs, " jobs not complete."
+            njobs = jobs
+        else:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+
+
 def analyze_targets(targetList):
     """Analyze a list of targets.
     A list of TargetManager objects are passed in to be analyzed independently.
@@ -25,7 +47,7 @@ def analyze_targets(targetList):
     Returns:
         None
     """
-
+    aggregateResults = []
     for targetRegion in targetList:
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
@@ -38,7 +60,10 @@ def analyze_targets(targetList):
             continue
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
-        # targetRegion.complete_analysis()
+        if targetRegion.has_results():
+            aggregatedResults.extend(targetRegion.results)
+        targetRegion.complete_analysis()
+    return aggregatedResults
 
 
 class RunTracker:
@@ -75,18 +100,24 @@ class RunTracker:
         if not self.params.get_param('preset_ref_data'):
             self.params.start_blat_server()
 
+        aggResults = []
         nprocs = int(self.params.get_param('nprocs'))
         if nprocs > 1:
             self.logger.info('Creating all reference data.')
             p = multiprocessing.Pool(nprocs)
-            p.map(analyze_targets, targetAnalysisList)
+            # p.map(analyze_targets, targetAnalysisList)
+            multiprocResults = []
+            for targetList in targetAnalysisList:
+                multiprocResults.append(pool.apply_async(analyze_targets, (targetList, )))
+            wait(multiprocResults)
+            for multiprocResult in multiprocResults:
+                aggResults.extend(multiprocResult.get())
         else:
-            analyze_targets(targetAnalysisList)
+            aggResults = analyze_targets(targetAnalysisList)
 
-#        self.write_output()
+        self.write_aggregated_output(aggResults)
 
         # Perform any post-primary analysis scripts here.
-
 
         self.logger.info('Analysis complete in %s' % str(time.clock() - startTime))
 
@@ -135,7 +166,7 @@ class RunTracker:
                 trgtGroups.append(trgtGroup)
         return trgtGroups
 
-    def write_output(self):
+    def write_aggregated_output(self, aggregateResults):
         """Write the information for all results to file.
         Header is written at the top of the file if option to remove is not
         specified.
@@ -144,21 +175,31 @@ class RunTracker:
         Returns:
             None
         """
+        resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
+        utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
+        resultFile = open(resultFn, 'w')
 
-        resultFiles = {}
-        for res in self.results:
-            tag = res[6]
-            if tag not in resultFiles:
-                header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
-                res_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_" + tag + "_svs.out")
-                self.logger.info('Writing %s output file %s' % (tag, res_fn))
-                resultFiles[tag] = open(res_fn, 'w')
-                if not self.params.opts['no_output_header']:
-                    resultFiles[tag].write(header)
-            resultFiles[tag].write("\t".join([str(x) for x in res]) + "\n")
+        for i, svEventResult in enumerate(aggregateResults):
+            headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
+            if not self.params.get_param('no_output_header') and i == 0:
+                resultFile.write(headerStr + '\n')
+            resultFile.write(formattedResultValues + '\n')
+        resultFile.close()
 
-        for f in resultFiles:
-            resultFiles[f].close()
+        # resultFiles = {}
+        # for res in self.results:
+        #     tag = res[6]
+        #     if tag not in resultFiles:
+        #         header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
+        #         res_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_" + tag + "_svs.out")
+        #         self.logger.info('Writing %s output file %s' % (tag, res_fn))
+        #         resultFiles[tag] = open(res_fn, 'w')
+        #         if not self.params.opts['no_output_header']:
+        #             resultFiles[tag].write(header)
+        #     resultFiles[tag].write("\t".join([str(x) for x in res]) + "\n")
+
+        # for f in resultFiles:
+        #     resultFiles[f].close()
 
 #        summary_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name']+"_summary.out")
 #        summary_f = open(summary_fn,'w')
