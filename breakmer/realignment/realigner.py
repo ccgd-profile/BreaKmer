@@ -92,6 +92,7 @@ class Realignment:
     """
     """
     def __init__(self, contig):
+        self.loggingName = 'breakmer.realignment.realigner'
         self.scope = None
         self.results = None
         self.contig = contig
@@ -102,7 +103,7 @@ class Realignment:
         alignProgram, alignExt, alignBinary = alignParams
         self.scope = scope
         # update
-        self.logger.info('Running blat %s, storing results in %s' % (self.params.opts['gfclient'], self.query_res_fn))
+        utils.log(self.loggingName, 'info', 'Running blat %s, storing results in %s' % (self.params.opts['gfclient'], self.query_res_fn))
 
         resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
         self.results = AlignResults(alignProgram, scope, resultFn)
