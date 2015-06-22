@@ -45,6 +45,37 @@ class ResultFilter:
                     # brkpt_rep_filt = brkpt_rep_filt or (comp_vec[qb[0]] < (avg_comp / 2))
                 # brkpt_rep_filt = brkpt_rep_filt or (len(filter(lambda x: x, brkpts['f'])) > 0)
 
+# 3. Indel check
+        # indel_size_thresh = int(self.meta_dict['params'].opts['indel_size'])
+        # self.logger.info('Checking if blat result contains an indel variant')
+        # nhits = 0
+        # for i in self.hit_freq:
+        #     if i > 0:
+        #         nhits += 1
+        # if br.spans_query() or (len(self.blat_results) == 1 and br.in_target):
+        #     self.logger.info('Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (br.spans_query(), (len(self.blat_results) == 1), br.in_target))
+        #     indel = True
+        #     keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.indel_maxevent_size[0] >= indel_size_thresh) and (not br.rep_man.breakpoint_in_rep[0] and not br.rep_man.breakpoint_in_rep[1])
+        #     self.logger.debug('Keep blat result %r' % keep_br)
+        #     if keep_br:
+        #         brkpt_cov = [self.meta_dict['contig_vals'][1].get_counts(x, x, 'indel') for x in br.query_brkpts]
+        #         low_cov = min(brkpt_cov) < self.meta_dict['params'].get_sr_thresh('indel')
+        #         flank_match_thresh = True
+        #         for fm in br.indel_flank_match:
+        #             fm_perc = round((float(fm) / float(br.get_size('query'))) * 100, 2)
+        #             if fm_perc < 10.0:
+        #                 flank_match_thresh = False
+        #             self.logger.info('Indel result has matching flanking sequence of largest indel event of %d (%d of query)' % (fm, fm_perc))
+        #         self.logger.info('Indel result has matching flanking sequence of largest indel event (10 perc of query) on both sides (%r)' % flank_match_thresh)
+        #         in_ff, span_ff = filter_by_feature(br.get_brkpt_locs(), self.meta_dict['query_region'], self.meta_dict['params'].opts['keep_intron_vars'])
+        #         if not in_ff and not low_cov and flank_match_thresh:
+        #             self.se = sv_event(br, self.meta_dict['query_region'], self.meta_dict['contig_vals'], self.meta_dict['sbam'])
+        #             self.logger.debug('Top hit contains whole query sequence, indel variant')
+        #         else:
+        #             self.logger.debug('Indel in intron (%r) or low coverage at breakpoints (%r) or minimum segment size < 20 (%r), filtering out.' % (in_ff, low_cov, min(br.query_blocksizes)))
+        #     else:
+        #         self.logger.debug('Indel failed checking criteria: in annotated gene: %r, mean query coverage < 2: %r, in target: %r, in repeat: %r, indel size < %d: %r' % (br.valid, br.mean_cov, br.in_target, ",".join([str(x) for x in br.rep_man.breakpoint_in_rep]), indel_size_thresh, br.indel_maxevent_size[0] < indel_size_thresh))
+
     def check_filters(self, svEvent):
         """
         """
