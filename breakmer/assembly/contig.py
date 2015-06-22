@@ -866,7 +866,7 @@ class Contig:
         logger.info('Contig done with contig seq %s. Supported by %d read(s).' % (self.seq, len(self.reads)))
         logger.info('Read IDs: %s' % (",".join([x.id for x in list(self.reads)])))
 
-    def set_meta_information(self, contig_id, params, query_region_values, contig_path, kmer_cluster_fn):
+    def set_meta_information(self, contig_id, params, query_region_values, contig_path, kmer_cluster_fn, readVariation):
         """Sets the contig ID, params, target region values and contig path variables for later use.
         Output files are also written with the contig assembly information.
         Args:
