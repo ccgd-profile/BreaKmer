@@ -7,7 +7,7 @@ import random
 import subprocess
 import time
 import breakmer.utils as utils
-import breakmer.caller.filter as resfilter
+import breakmer.caller.filter as resultfilter
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -137,7 +137,7 @@ class ParamManager:
             utils.log(self.logging_name, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
             self.repeat_mask = utils.setup_rmask_all(self.opts['repeat_mask_file'])
 
-        self.filter = resultfilter.ResultFilter(self.get_param('filterList'))
+        self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)
 
     def parse_opts(self, arguments):
         """Formats input parameters into dictionary, self.opts
