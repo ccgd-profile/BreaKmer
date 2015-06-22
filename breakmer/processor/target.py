@@ -339,7 +339,7 @@ class TargetManager:
         # Write rmask bed file if needed.
         if not self.params.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.params.opts:
             utils.log(self.loggingName, 'info', 'Extracting repeat mask regions for target gene %s.' % self.name)
-            self.repeat_mask = utils.setup_rmask(self.get_values(), self.paths['ref_data'], self.params.opts['repeat_mask_file'])
+            self.repeat_mask = utils.setup_rmask(self.get_values()[0:5], self.paths['ref_data'], self.params.opts['repeat_mask_file'])
 
         # Write reference fasta file if needed.
         for i in range(len(self.files['target_ref_fn'])):
@@ -562,5 +562,3 @@ class TargetManager:
             return True
         else:
             return False
-
-
