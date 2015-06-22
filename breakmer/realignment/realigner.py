@@ -14,7 +14,7 @@ __license__ = "MIT"
 class AlignParams:
     """
     """
-    def __init__(self, params, targetrefFns):
+    def __init__(self, params, targetRefFns):
         self.program = {'target': 'blat', 'genome': 'blat'}
         self.extension = {'target': 'psl', 'genome': 'psl'}
         self.binary = {'target': None, 'genome': None}
