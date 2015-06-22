@@ -50,7 +50,7 @@ class RealignManager:
         self.realignment = None
         self.alignParams = AlignParams(params, targetRefFns)
 
-    def realign(contig):
+    def realign(self, contig):
         """
         """
         if not contig.has_fa_fn():
