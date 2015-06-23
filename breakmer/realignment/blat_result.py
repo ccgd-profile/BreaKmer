@@ -397,7 +397,7 @@ class BlatResult:
         self.set_indel_flank_matches()
 
         if self.strand == "-":
-            self.breakpts.adjust_breakpts(self.get_seq_size('query'))
+            self.breakpts.reverse_breakpts(self.get_seq_size('query'))
 
     # def add_query_brkpt(self, brkpt):
     #     """ """
