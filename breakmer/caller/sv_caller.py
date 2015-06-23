@@ -110,6 +110,7 @@ class SVResult:
         self.nKmers = None
         self.discReadCount = None
         self.contigId = None
+        self.contigSeq = None
         self.targetName = None
         self.breakpointCoverageDepth = None
         self.description = ''
@@ -123,6 +124,7 @@ class SVResult:
         """ """
         self.targetName = svEvent.contig.get_target_name()
         self.contigId = svEvent.contig.get_id()
+        self.contigSeq = svEvent.contig.seq
         if svEvent.svType == 'indel':
             self.format_indel_values(svEvent)
         else:
@@ -243,7 +245,7 @@ class SVResult:
                    self.totalMismatches,
                    self.totalMatching,
                    self.contigId,
-                   self.contig.seq,
+                   self.contigSeq,
                    self.filtered['status'],
                    self.filtered['reason']
                    ]
