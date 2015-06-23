@@ -640,7 +640,7 @@ class SVEvent:
 
     def set_brkpt_counts(self, svType):
         """ """
-        self.brkpts.set_counts(svType)
+        self.brkpts.set_counts(svType, self.contig)
 
     def check_overlap(self, coord1, coord2):
         contained = False
