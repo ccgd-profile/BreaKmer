@@ -71,11 +71,11 @@ def pile_reads(reads, contigSeq):
 def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
     # Determine coordinate constants
     seqPlotSize = (len(orderedSeqs) + 1) * 0.75
-    # cSeq = contigSeq(svRes)
 
     plotHeight = 5 # seqPlotSize*1.5
     if len(orderedSeqs) > 10:
         plotHeight = 15
+
     # Setup figure
     fig = plt.figure(figsize=(30, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
@@ -83,8 +83,11 @@ def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
 
     # Set the y-index for the sequence plotting
     seqYidx = 0 # (len(orderedSeqs)+1)*0.75 + 1.5
+
+    # Start plotting at unit 2 on the x-axis
     xOffset = 2
-    xinc = 1
+    # Increment text by 1 unit
+    xInc = 1
 
     plot_realignment_strands(ax, seqYidx, xOffset, svEventResult)
     plot_contig_seq(ax, seqYidx, xOffset, svEventResult)
@@ -175,7 +178,7 @@ def add_seq_text(ax, x, y, char, color='black'):
 
 
 def plot_contig_seq(ax, seqYidx, xOffset, svEventResult):
-    xinc = 1
+    xInc = 1
     # Add 5' designation to contig sequence.
     add_seq_text(ax, 1, seqYidx, "5'")
     # Iterate over the nucleotides of the contig sequence.
@@ -194,7 +197,7 @@ def plot_contig_seq(ax, seqYidx, xOffset, svEventResult):
 def plot_pileup_seq(ax, seqYidx, xOffset, orderedSeqs):
     yinc = 0.75
     xinc = 1
-    # Iterate through sequences. 
+    # Iterate through sequences.
     for idx, seq in orderedSeqs:
         seqTextOff = xOffset
         seqYidx = seqYidx - yinc
