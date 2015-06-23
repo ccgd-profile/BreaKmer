@@ -166,7 +166,7 @@ class SVResult:
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
-            #resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
+            # resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
             # self.repeatMatching.append(":".join([str(blatResult.repeat_overlap), str(blatResult.get_nmatch_total()), str(round(blatResult.mean_cov, 3))]))
             self.repeatOverlapPercent.append(blatResult.repeat_overlap)

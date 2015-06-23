@@ -330,7 +330,7 @@ class BlatResult:
         return self.matches.get_total_matching()
 
     def get_nmatches(self, matchType):
-        return self.matches.get_value(matchType)
+        return self.matches.get_nmatches(matchType)
 
     def sum_indel_flank_matches(self, flank_str):
         """ """

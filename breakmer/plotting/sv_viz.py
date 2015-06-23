@@ -103,16 +103,14 @@ def plot_pileup(segmentManager, outBaseFn):
     ax.axis('off')
 
     # Set the y-index for the sequence plotting
-    seqYidx = 0 # (len(orderedSeqs)+1)*0.75 + 1.5
-
+    yCoord = 0
     # Start plotting at unit 2 on the x-axis
     xOffset = 2
     # Increment text by 1 unit
     xInc = 1
-
-    plot_realignment_strands(ax, seqYidx, xOffset, segmentManager)
-    plot_contig_seq(ax, seqYidx, xOffset, segmentManager)
-    plot_pileup_seq(ax, cSeq, seqYidx, xOffset, orderedSeqs)
+    plot_realignment_strands(ax, yCoord, xOffset, segmentManager)
+    plot_contig_seq(ax, yCoord, xOffset, segmentManager)
+    plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
 
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
@@ -179,7 +177,7 @@ def plot_pileup(segmentManager, outBaseFn):
 #                 ax.text(offset, annoYidx-(iter*0.8)-0.5, coordText, ha=lr, va='top', size=12)
 #         iter += 1
 
-    ysize = (len(orderedSeqs) + 1) * 0.75 + 1.5 + 10
+    ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 10
     ax.axis([0, len(svRes.contig) + 10, -seqPlotSize - 5, 8])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
