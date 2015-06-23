@@ -382,7 +382,7 @@ class SVBreakpoints:
     def get_brkpt_str(self):
         """ """
         brkptStr = []
-        for genomicBrkpt in self.genomicBrkpts:
+        for genomicBrkpts in self.genomicBrkpts:
             chrom = genomicBrkpts[0]
             bps = genomicBrkpts[1:]
             brkptStr.append(chrom + ':' + '-'.join([str(x) for x in bps]))
