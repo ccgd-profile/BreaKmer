@@ -786,7 +786,7 @@ class ContigCaller:
         hasIndel = False
         blatResults = self.realignment.get_blat_results()
         for i, blatResult in enumerate(blatResults):
-            if i == 0 and blatResult.check_indel(params.get_param('indel_size'), len(blatResults)):
+            if i == 0 and blatResult.check_indel(len(blatResults)):
                 hasIndel = True
                 utils.log(self.loggingName, 'info', 'Contig has indel, returning %r' % has_indel)
                 self.svEvent = SVEvent(blatResult, self.contig, 'indel')

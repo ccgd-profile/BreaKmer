@@ -504,7 +504,7 @@ class BlatResult:
                 self.valid = False
             self.genes = ",".join(ann_genes)
 
-    def check_indel(self, indelSizeThresh, nBlatResults):
+    def check_indel(self, nBlatResults):
         indel = False
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
         if self.spans_query() or (nBlatResults == 1 and self.in_target):
