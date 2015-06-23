@@ -114,6 +114,7 @@ class SVResult:
         self.description = ''
         self.genes = None
         self.repeatOverlapPercent = None
+        self.realignmentUniqueness = None
         self.filtered = {'status': False, 'reason': ''}
         self.filterValues = FilterValues()
 
@@ -131,6 +132,7 @@ class SVResult:
         self.genes = blatResult.get_gene_anno()
         self.repeatOverlapPercent = 0.0
         self.totalMatching = blatResult.get_nmatch_total()
+        self.realignmentUniqueness = blatResult.mean_cov
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
         self.breakpointStr = svEvent.get_brkpt_str()
@@ -153,17 +155,23 @@ class SVResult:
         resultValid = {'valid': True, 'repeatValid': True}
         maxRepeat = 0.0
 
-        self.repeatMatching = []
+        self.totalMatching = []
+        self.repeatOverlapPercent = []
+        self.realignmentUniqueness = []
         self.genes = []
         self.alignCigar = []
         self.strands = []
         self.mismatches = []
+
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
-            resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
+            #resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
-            self.repeatMatching.append(":".join([str(blatResult.repeat_overlap), str(blatResult.get_nmatch_total()), str(round(blatResult.mean_cov, 3))]))
+            # self.repeatMatching.append(":".join([str(blatResult.repeat_overlap), str(blatResult.get_nmatch_total()), str(round(blatResult.mean_cov, 3))]))
+            self.repeatOverlapPercent.append(blatResult.repeat_overlap)
+            self.realignmentUniqueness.append(blatResult.mean_cov)
+            self.totalMatching.append(blatResult.get_nmatch_total())
             self.genes.append(blatResult.get_gene_anno())
             self.alignCigar.append(blatResult.cigar)
             self.strands.append(blatResult.strand)

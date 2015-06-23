@@ -49,6 +49,18 @@ class AlignSegments:
         """ """
         self.orderedSeqs = orderedSeqs
 
+    def get_segment_color(self, nucIter):
+        """ """
+        colors = []
+        for segment in self.segments:
+            if nucIter >= segment.queryCoordinates[0] and nucIter <= segment.queryCoordinates[1]:
+                colors.append(segment.color)
+        if len(colors) > 1:
+            colors = 'black'
+        else:
+            colors = colors[0]
+        return colors
+
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     segmentManager = AlignSegments(svEventResult)
@@ -210,17 +222,12 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     for idx, seq in segmentManager.orderedSeqs:
         seqTextOff = xOffset
         seqYidx = seqYidx - yInc
-        nucIter = 1
         segIdx = 0
         brkIdx = 0
         for nuc in seq:
-            nucColor, brkptColor, segment = cSeq.get_segment(nucIter)
+            nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
-            if nucIter in cSeq.contigBrkpts:
-                add_seq_text(ax, seqTextOff, seqYidx, ' ')
-                seqTextOff += xInc
-            nucIter += 1
 
 # class annotation():
 #     def __init__(self, annoFn):

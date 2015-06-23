@@ -231,7 +231,7 @@ class AlignResults:
             parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
             parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
             #parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
-            parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
+            # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
             self.process_blat_result(parsedBlatResult)
 
             # Move this to blatResult class.
