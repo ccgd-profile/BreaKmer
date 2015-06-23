@@ -417,7 +417,7 @@ class SVBreakpoints:
         # brkpt_kmers = []
         contigCountTracker = contig.get_contig_count_tracker()
         print contig, contig.builder, contig.builder.counts
-        print contig.builder.counts.other
+        print contig.builder.counts.others
         print contigCountTracker
         print contigCountTracker.counts
         for qb in self.q[1]:
