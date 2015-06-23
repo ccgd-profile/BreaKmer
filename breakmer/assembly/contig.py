@@ -959,18 +959,15 @@ class Contig:
 
     def get_contig_count_tracker(self):
         """ """
-        print self.builder
-        print self.builder.counts
-        print self.builder.counts.indel_only
         return self.builder.counts
 
     def get_disc_reads(self):
         """ """
-        return self.readVariation.get_disc_reads()
+        return self.meta.readVariation.get_disc_reads()
 
     def get_variant_read_tracker(self):
         """ """
-        return self.readVariation
+        return self.meta.readVariation
 
     def get_sample_bam_fn(self):
         """ """

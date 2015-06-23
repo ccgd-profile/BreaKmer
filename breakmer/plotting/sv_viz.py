@@ -222,7 +222,7 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
 
 def plot_segments(ax, yCoord, xOffset, segmentManager):
     """ """
-
+    
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     """ """
