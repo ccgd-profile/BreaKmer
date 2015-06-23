@@ -959,6 +959,9 @@ class Contig:
 
     def get_contig_count_tracker(self):
         """ """
+        print self.builder
+        print self.builder.counts
+        print self.builder.counts.indel_only
         return self.builder.counts
 
     def get_disc_reads(self):
