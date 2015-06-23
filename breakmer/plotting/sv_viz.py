@@ -24,6 +24,7 @@ class Segment:
         self.color = segmentColor
         self.queryCoordinates = [alignResult.qstart(), alignResult.qend()]
         self.indelCoordinates = alignResult.breakpts.contigBreakpoints
+        self.indelSizes = alignResult.indel_sizes
         self.strand = alignResult.strand
         self.alignLen = alignResult.get_query_span()
         self.genomicCoords = alignResult.alignVals.get_coords('ref')
@@ -116,6 +117,7 @@ def plot_pileup(segmentManager, outBaseFn):
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
+    plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
 
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
@@ -231,10 +233,25 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
 
+
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
     """ """
     for i, segment in enumerate(segmentManager.segments):
-        
+        indelCoordinates = segment.indelCoordinates
+        for coord in indelCoordinates:
+            xCoord = xOffset + coord[0]
+            yCoord = yCoord + ((i + 1) * 0.5)
+            rectLen = 1
+            indelType = 'D'
+            if len(coord) == 2:
+                rectLen = coord[1] - coord[0]
+                indelType = 'I'
+            rectHeight = 0.5
+            rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
+            ax.add_patch(rect)
+            xCoordLabel = xCoord + (float(rectLen) / float(2))
+            ax.text(xCoordLabel, yCoord + 1, self.indelSizes[i], ha='center', va='top', size=12)
+
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     """ """
