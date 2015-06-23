@@ -807,7 +807,7 @@ class ContigCaller:
             mergedClip = [0, None]
             for i, clippedQs in enumerate(self.clippedQs):
                 qs, qe, blatResult, idx = clippedQs
-                utils.log(self.loggingName, 'debug', 'Blat result with start %d, end %d, chrom %s' % (qs, qe, blatResult.get_name('hit')))
+                utils.log(self.loggingName, 'debug', 'Blat result with start %d, end %d, chrom %s' % (qs, qe, blatResult.get_seq_name('ref')))
                 gaps = self.iter_gaps(gaps, self.clippedQs[i], i)
                 if self.svEvent.qlen > mergedClip[0]:
                     mergedClip = [self.svEvent.qlen, self.svEvent]
