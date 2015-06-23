@@ -76,7 +76,7 @@ class AlignFragments:
         self.ref = []
         self.query = []
         self.count = len(self.blockSizes)
-        self.set_values()
+        self.set_values(values)
 
     def set_values(self, values):
         refStarts = [toffset + int(x) for x in values[20].rstrip(",").split(",")]

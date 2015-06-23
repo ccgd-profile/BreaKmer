@@ -8,6 +8,7 @@ import breakmer.assembly.utils as assemblyUtils
 import breakmer.realignment.realigner as realigner
 import breakmer.caller.sv_caller as sv_caller
 import breakmer.utils as utils
+import breakmer.plotting.sv_viz as svplotter
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -689,6 +690,7 @@ class Meta:
         sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         self.logger.info('Indexing bam file %s' % bam_out_sorted_fn)
         index(bam_out_sorted_fn)
+        return bam_out_sorted_fn
 
 
 class Contig:
@@ -919,9 +921,9 @@ class Contig:
         """ """
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
-            self.meta.write_bam(outputPath, svReadsBamFn)
+            readBamFn = self.meta.write_bam(outputPath, svReadsBamFn)
             if self.meta.params.get_param('generate_image'):
-                svplotter.generate_pileup_img(self.svEventResult)
+                svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
