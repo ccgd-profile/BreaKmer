@@ -422,7 +422,7 @@ class SVBreakpoints:
             self.counts['n'].append(min(bc))
             self.counts['d'].append(min(contigCountTracker.get_counts((qb[0] - 1), (qb[0] + 1), svType)))
             self.counts['b'].append(contigCountTracker.get_counts(qb[0], qb[0], svType))
-            self.kmers.append(self.contig.get_kmer_locs()[qb[0]])
+            self.kmers.append(contig.get_kmer_locs()[qb[0]])
             # brkpt_rep_filt = brkpt_rep_filt or (comp_vec[qb[0]] < (avg_comp / 2))
             utils.log(self.loggingName, 'debug', 'Read count around breakpoint %d : %s' % (qb[0], ",".join([str(x) for x in bc])))
         utils.log(self.loggingName, 'debug', 'Kmer count around breakpoints %s' % (",".join([str(x) for x in self.kmers])))

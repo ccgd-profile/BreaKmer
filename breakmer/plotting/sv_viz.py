@@ -19,6 +19,7 @@ __license__ = "MIT"
 
 class Segment:
     def __init__(self, alignResult, segmentColor):
+        """ """
         self.alignResult = alignResult
         self.color = segmentColor
         self.queryCoordinates = [alignResult.qstart(), alignResult.qend()]
@@ -30,6 +31,7 @@ class Segment:
 
 class AlignSegments:
     def __init__(self, svEventResult):
+        """ """
         self.svEventResult = svEventResult
         self.segments = None
         self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
@@ -63,6 +65,7 @@ class AlignSegments:
 
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
+    """ """
     segmentManager = AlignSegments(svEventResult)
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     segmentManager.set_orderedseqs(pile_reads(bamFile.fetch(), svEventResult.contig.seq))
@@ -70,6 +73,7 @@ def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
 
 
 def pile_reads(reads, contigSeq):
+    """ """
     orderedSeqs = []
     for read in reads:
         idx = contigSeq.find(read.seq)
@@ -90,6 +94,7 @@ def pile_reads(reads, contigSeq):
 
 
 def plot_pileup(segmentManager, outBaseFn):
+    """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
 
@@ -111,6 +116,7 @@ def plot_pileup(segmentManager, outBaseFn):
     plot_realignment_strands(ax, yCoord, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
+    plot_segments(ax, yCoord, xOffset, segmentManager)
 
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
@@ -193,10 +199,12 @@ def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
 
 
 def add_seq_text(ax, x, y, char, color='black'):
+    """ """
     ax.text(x, y, char, ha='center', va='center', size=11, family='monospace', color=color)
 
 
 def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
+    """ """
     xInc = 1
     # Add 5' designation to contig sequence.
     add_seq_text(ax, 1, seqYidx, "5'")
@@ -213,7 +221,12 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
     add_seq_text(ax, xOffset, seqYidx, "3'")
 
 
+def plot_segments(ax, yCoord, xOffset, segmentManager):
+    """ """
+
+
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
+    """ """
     yInc = 0.75
     xInc = 1
     # Iterate through sequences.
@@ -365,7 +378,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
 #                     if int(element[1]) >= int(bp) and self.realignStrand=='-':
 #                         add = True
 #                     elif int(element[0]) <= int(bp) and self.realignStrand=='+':
-#                         add = True   
+#                         add = True
 #                     if add:
 #                         features.append((element[0], element[1], feature+str(eIter)))
 #                 elif self.pos == "last":
@@ -407,7 +420,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
 #         pos = []
 
 #         previousCoord = 0
-#         if self.pos == "last": 
+#         if self.pos == "last":
 #             previousCoord = log(int(bp), 2)
 
 #         intronLen = 0
@@ -657,7 +670,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
 #                 if int(element[1]) >= int(bp) and s=='-':
 #                     add = True
 #                 elif int(element[0]) <= int(bp) and s=='+':
-#                     add = True   
+#                     add = True
 #                 if add:
 #                     features.append((element[0], element[1], feature+str(eIter)))
 #             elif iter == 2:
