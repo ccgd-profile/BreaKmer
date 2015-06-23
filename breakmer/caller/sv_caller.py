@@ -258,7 +258,7 @@ class SVResult:
                 outListStr.append(','.join([str(x) for x in item]))
 
         formattedFilterValsStr = self.filterValues.get_formatted_output_values(self.svType, self.svSubtype)
-        outListStr.append(formattedFilterVals)
+        outListStr.append(formattedFilterValsStr)
         return ('\t'.join(headerStr), '\t'.join(outListStr))
 
     # def format_result(self, values):
