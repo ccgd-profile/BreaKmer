@@ -16,15 +16,17 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
     plot_pileup(orderedSeqs, svEventResult, os.path.join(outPath, contigId))
 
+
 def pile_reads(reads, contigSeq):
     orderedSeqs = []
     for read in reads:
-        idx = contigSeq.find(read.seq) 
+        idx = contigSeq.find(read.seq)
         seq = read.seq
         add = True
         if idx == -1:
@@ -36,14 +38,15 @@ def pile_reads(reads, contigSeq):
                 idx = aln2[5]
                 seq = aln2[0]
         if add:
-            orderedSeqs.append((idx, ' '*idx + seq))
+            orderedSeqs.append((idx, ' ' * idx + seq))
     os = sorted(orderedSeqs, key=lambda x: x[0])
     return os
 
+
 def plot_pileup(orderedSeqs, svEventResult, outBaseFn):
     # Determine coordinate constants
-    seqPlotSize = (len(orderedSeqs)+1)*0.75
-    #cSeq = contigSeq(svRes)
+    seqPlotSize = (len(orderedSeqs) + 1) * 0.75
+    # cSeq = contigSeq(svRes)
 
     plotHeight = 5#seqPlotSize*1.5
     if len(orderedSeqs) > 10:

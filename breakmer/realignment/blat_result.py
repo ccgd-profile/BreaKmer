@@ -316,10 +316,10 @@ class BlatResult:
         return self.get_seq_size('query') == (self.qend() - self.qstart())
 
     def get_total_gap_size(self):
-        return self.gaps.total_gap_size()
+        return self.gaps.get_total_size()
 
     def get_total_num_gaps(self):
-        return self.gaps.total_num_gaps()
+        return self.gaps.get_total_num_gaps()
 
     def get_nmatch_total(self):
         return self.matches.get_total_matching()
