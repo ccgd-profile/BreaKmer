@@ -178,7 +178,7 @@ class SVResult:
             self.totalMismatches.append(blatResult.get_nmatches('mismatch'))
             svEvent.brkpts.update_brkpt_info(blatResult, i, i == (len(blatResSorted) - 1))
 
-        if svEvent.diff_chr():
+        if svEvent.brkpts.diff_chr():
             # translocation event
             svEvent.set_brkpt_counts('trl')
             self.discReadCount = svEvent.get_disc_read_count()
