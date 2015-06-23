@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import subprocess
 import breakmer.realignment.blat_result as blat_result
 import breakmer.utils as utils
 
