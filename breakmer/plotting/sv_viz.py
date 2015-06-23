@@ -25,6 +25,7 @@ class Segment:
         self.indelCoordinates = alignResult.breakpts.contigBreakpoints
         self.strand = alignResult.strand
         self.alignLen = alignResult.get_query_span()
+        self.genomicCoords = [alignResult.alignVals.get_coords('ref', 0), alignResult.alignVals.get_coords('ref', 1)]
 
 
 class AlignSegments:
@@ -39,10 +40,12 @@ class AlignSegments:
         for i, blatResult in enumerate(self.svEventResult.blatResults):
             segment = self.Segment(blatResult, self.colors[i])
 
+
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
+    segmentManager = AlignSegments(svEventResult)
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
-    plot_pileup(orderedSeqs, svEventResult, os.path.join(outPath, contigId))
+    plot_pileup(segmentManager, orderedSeqs, os.path.join(outPath, contigId))
 
 
 def pile_reads(reads, contigSeq):
@@ -65,7 +68,7 @@ def pile_reads(reads, contigSeq):
     return os
 
 
-def plot_pileup(orderedSeqs, svEventResult, outBaseFn):
+def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
     # Determine coordinate constants
     seqPlotSize = (len(orderedSeqs) + 1) * 0.75
     # cSeq = contigSeq(svRes)
@@ -79,7 +82,7 @@ def plot_pileup(orderedSeqs, svEventResult, outBaseFn):
     ax.axis('off')
 
     # Set the y-index for the sequence plotting
-    seqYidx = 0#(len(orderedSeqs)+1)*0.75 + 1.5
+    seqYidx = 0 # (len(orderedSeqs)+1)*0.75 + 1.5
     xOffset = 2
     xinc = 1
 
