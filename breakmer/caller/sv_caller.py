@@ -302,10 +302,10 @@ class SVBreakpoints:
         """Infer the breakpoint information from the blat result for rearrangments.
         """
         chrom = 'chr' + br.get_seq_name('ref')
-        ts, te = br.get_coords('hit')
+        ts, te = br.get_coords('ref')
         qs, qe = br.get_coords('query')
         target_key = 'in_target' if br.in_target else 'other'
-        self.chrs.append(br.get_name('hit'))
+        self.chrs.append(br.get_seq_name('ref'))
         self.tcoords.append((ts, te))
         tbrkpt = []
         filt_rep_start = None
@@ -339,11 +339,11 @@ class SVBreakpoints:
                 tbrkpt = [te, ts]
                 self.genomicBrkpts.append((chrom, te, ts))
 
-        self.brkpt_str.append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
+        self.brkpt_str.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
         self.f.append(filt_rep_start)
-        self.t[target_key] = (br.get_name('hit'), tbrkpt[0])
-        self.formatted.append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
+        self.t[target_key] = (br.get_seq_name('ref'), tbrkpt[0])
+        self.formatted.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
 
     def set_indel_brkpts(self, blatResult):
         """ """

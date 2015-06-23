@@ -230,18 +230,9 @@ class AlignResults:
             line = line.strip()
             parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
             parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
-            #parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
+            # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
             # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
             self.process_blat_result(parsedBlatResult)
-
-            # Move this to blatResult class.
-            # score_raw = br.get_nmatch_total()
-            # ngaps = br.get_ngap_total()
-            # in_target = 1 if br.in_target else 0
-            # score_frac = float(score_raw) / float(br.get_size('query'))
-            # score = score_raw + score_frac
-            # perc_ident = br.perc_ident
-            # (score, ngaps, in_target, br, perc_ident))
             self.results.append(parsedBlatResult)
         # Update to use class attributes as sorting categories
         self.sortedResults = sorted(self.results, key=lambda x: (-x.alignScore, -x.perc_ident, x.get_total_num_gaps()))
