@@ -416,14 +416,14 @@ class SVBreakpoints:
         # brkpt_counts = {'n': [], 'd': [], 'b': []}
         # brkpt_kmers = []
         contigCountTracker = contig.get_contig_count_tracker()
-        print contig, contig.builder, contig.builder.counts
-        print contig.builder.counts.others
-        print contigCountTracker
-        print contigCountTracker.counts
+        print self.q
         for qb in self.q[1]:
             left_idx = qb[0] - min(qb[1], 5)
             right_idx = qb[0] + min(qb[2], 5)
+            print left_idx, right_idx
+            print svType
             bc = contigCountTracker.get_counts(left_idx, right_idx, svType)
+            print bc
             self.counts['n'].append(min(bc))
             self.counts['d'].append(min(contigCountTracker.get_counts((qb[0] - 1), (qb[0] + 1), svType)))
             self.counts['b'].append(contigCountTracker.get_counts(qb[0], qb[0], svType))
