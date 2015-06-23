@@ -674,7 +674,7 @@ class Meta:
     def write_bam(self, outputPath, svBamReadsFn):
         bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
         utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
-        bam_out_sorted_fn = os.path.join(path, self.id + "_reads.sorted.bam")
+        bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
         bamFile = Samfile(svBamReadsFn, 'rb')
         bam_out_f = Samfile(bamOutFn, 'wb', template=bamFile)
         for bam_read in bamf.fetch():
@@ -685,9 +685,9 @@ class Meta:
                     bam_out_f.write(bam_read)
         bamf.close()
         bam_out_f.close()
-        self.logger.info('Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
+        utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
         sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
-        self.logger.info('Indexing bam file %s' % bam_out_sorted_fn)
+        utils.log(self.loggingName, 'info', 'Indexing bam file %s' % bam_out_sorted_fn)
         index(bam_out_sorted_fn)
         return bam_out_sorted_fn
 
