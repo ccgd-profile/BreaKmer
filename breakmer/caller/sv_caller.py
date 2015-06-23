@@ -350,21 +350,21 @@ class SVBreakpoints:
         """ """
         # List of tuples for indel breakpoints parsed from the blat result ('chr#', bp1, bp2)
         self.genomicBrkpts = blatResult.get_genomic_brkpts()
-        brkpt_out = []
-        bp_str = []
-        chrm = 'chr' + str(self.get_name('hit'))
-        if len(self.breakpts) > 0:
-            for b, s in zip(self.breakpts, self.indel_sizes):
-                if len(b) > 1:
-                    bb = "-".join([str(x) for x in b])
-                else:
-                    bb = str(b[0])
-                bstr = chrm + ":" + bb
-                if with_sizes:
-                    bstr += " " + "(" + s + ")"
-                bp_str.append(bstr)
-            brkpt_out.append(",".join(bp_str))
-        return ",".join(brkpt_out)
+        # brkpt_out = []
+        # bp_str = []
+        # chrm = 'chr' + str(blatResult.get_seq_name('ref'))
+        # if len(self.breakpts) > 0:
+        #     for b, s in zip(self.breakpts, self.indel_sizes):
+        #         if len(b) > 1:
+        #             bb = "-".join([str(x) for x in b])
+        #         else:
+        #             bb = str(b[0])
+        #         bstr = chrm + ":" + bb
+        #         if with_sizes:
+        #             bstr += " " + "(" + s + ")"
+        #         bp_str.append(bstr)
+        #     brkpt_out.append(",".join(bp_str))
+        # return ",".join(brkpt_out)
 
     def diff_chr(self):
         """Determine if the stored realignment results are on multiple chromosomes - indicating a
