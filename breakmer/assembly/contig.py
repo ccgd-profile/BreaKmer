@@ -907,7 +907,7 @@ class Contig:
         """
         """
         contigCaller = sv_caller.ContigCaller(self.realignment, self, self.meta.params)
-        self.svEventResult = contigCaller.call_svs(self.get_id())
+        self.svEventResult = contigCaller.call_svs()
 
     def filter_calls(self):
         """
