@@ -3,6 +3,7 @@
 
 import os
 import logging
+import shutil
 import breakmer.assembly.olc as olcAssembly
 import breakmer.assembly.utils as assemblyUtils
 import breakmer.realignment.realigner as realigner
