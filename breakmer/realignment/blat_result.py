@@ -464,8 +464,8 @@ class BlatResult:
         refCoordStart, refCoordEnd = self.get_coords('ref')
         regionStart = targetRegionCoordinates[1] - targetRegionCoordinates[4]
         regionEnd = targetRegionCoordinates[2] + targetRegionCoordinates[4]
-        start_in = br_start >= regionStart and br_start <= regionEnd
-        end_in = br_end <= regionEnd and br_end >= regionStart
+        start_in = refCoordStart >= regionStart and refCoordStart <= regionEnd
+        end_in = refCoordEnd <= regionEnd and refCoordEnd >= regionStart
         if targetRegionCoordinates[0] == self.get_seq_name('reference') and (start_in or end_in):
             self.in_target = True
             self.genes = targetRegionCoordinates[3]

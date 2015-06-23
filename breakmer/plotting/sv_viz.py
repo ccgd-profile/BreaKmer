@@ -33,6 +33,7 @@ class AlignSegments:
         self.svEventResult = svEventResult
         self.segments = None
         self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
+        self.orderedSeqs = None
         self.setup()
 
     def setup(self):
@@ -44,12 +45,16 @@ class AlignSegments:
         """ """
         return self.svEventResult.contig.seq
 
+    def set_orderedseqs(self, orderedSeqs):
+        """ """
+        self.orderedSeqs = orderedSeqs
+
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     segmentManager = AlignSegments(svEventResult)
     bamFile = pysam.Samfile(bamReadsFn, "rb")
-    orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
-    plot_pileup(segmentManager, orderedSeqs, os.path.join(outPath, contigId))
+    segmentManager.set_orderedseqs(pile_reads(bamFile.fetch(), svEventResult.contig.seq))
+    plot_pileup(segmentManager, os.path.join(outPath, contigId))
 
 
 def pile_reads(reads, contigSeq):
@@ -72,9 +77,9 @@ def pile_reads(reads, contigSeq):
     return os
 
 
-def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
+def plot_pileup(segmentManager, outBaseFn):
     # Determine coordinate constants
-    seqPlotSize = (len(orderedSeqs) + 1) * 0.75
+    seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
 
     plotHeight = 5 # seqPlotSize*1.5
     if len(orderedSeqs) > 10:
@@ -188,7 +193,7 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
     # Iterate over the nucleotides of the contig sequence.
     for nucIter, nuc in enumerate(segmentManager.get_contig_seq()):
         add_seq_text(ax, xOffset, seqYidx, nuc)
-        xOffset += xinc
+        xOffset += xInc
         # Insert a pipe character for the breakpoint in the contig seq.
         # if nucIter in cSeq.contigBrkpts:
         #     add_seq_text(ax, xOffset, seqYidx, ' ')
@@ -198,23 +203,23 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
     add_seq_text(ax, xOffset, seqYidx, "3'")
 
 
-def plot_pileup_seq(ax, seqYidx, xOffset, orderedSeqs):
-    yinc = 0.75
-    xinc = 1
+def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
+    yInc = 0.75
+    xInc = 1
     # Iterate through sequences.
-    for idx, seq in orderedSeqs:
+    for idx, seq in segmentManager.orderedSeqs:
         seqTextOff = xOffset
-        seqYidx = seqYidx - yinc
+        seqYidx = seqYidx - yInc
         nucIter = 1
         segIdx = 0
         brkIdx = 0
         for nuc in seq:
             nucColor, brkptColor, segment = cSeq.get_segment(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
-            seqTextOff += xinc
+            seqTextOff += xInc
             if nucIter in cSeq.contigBrkpts:
                 add_seq_text(ax, seqTextOff, seqYidx, ' ')
-                seqTextOff += xinc
+                seqTextOff += xInc
             nucIter += 1
 
 # class annotation():
