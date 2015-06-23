@@ -18,6 +18,7 @@ class AlignParams:
         self.program = {'target': 'blat', 'genome': 'blat'}
         self.extension = {'target': 'psl', 'genome': 'psl'}
         self.binary = {'target': None, 'genome': None}
+        self.binaryParams = {'target': None, 'genome': None}
         self.ref = {'target': None, 'genome': None}
         self.set_values(params, targetRefFns)
 
@@ -30,17 +31,17 @@ class AlignParams:
             self.binary['target'] = blast
             self.extension['target'] = 'xml'
 
-        blat = params.get_param('blat')
-        self.binary['genome'] = {'gfclient': params.get_param('gfclient'),
-                                 'hostname': params.get_param('blat_hostname'),
-                                 'port': params.get_param('blat_port')
-                                 }
+        self.binary['target'] = params.get_param('blat')
+        self.binary['genome'] = params.get_param('gfclient')
+        self.binaryParams['genome'] = {'hostname': params.get_param('blat_hostname'),
+                                       'port': params.get_param('blat_port')
+                                      }
         # Use the forward sequence for blatting targeted sequences
         self.ref['target'] = targetRefFns[0]
         self.ref['genome'] = params.get_param('reference_fasta_dir')
 
     def get_values(self, type):
-        return (self.program[type], self.extension[type], self.binary[type], self.ref[type])
+        return (self.program[type], self.extension[type], self.binary[type], self.binaryParams[type], self.ref[type])
 
 
 class RealignManager:
@@ -100,7 +101,7 @@ class Realignment:
     def align(self, alignParams, scope):
         """
         """
-        alignProgram, alignExt, alignBinary, alignRef = alignParams
+        alignProgram, alignExt, alignBinary, binaryParams, alignRef = alignParams
         self.scope = scope
         # update
         utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.query_res_fn))
@@ -112,12 +113,12 @@ class Realignment:
         if alignprogram == 'blast':
             cmd = ''
         elif self.alignprogram == 'blat':
-            if scope == 'target':
+            if scope == 'genome':
                 # all blat server
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (alignProgram, alignBinary['blat_port'], alignRef, self.contig.meta.fa_fn, resultFn)
-            elif scope == 'genome':
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (alignBinary, binaryParams['port'], alignRef, self.contig.meta.fa_fn, resultFn)
+            elif scope == 'target':
                 # target
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignProgram, db, self.contig.meta.fa_fn, resultFn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
 
         # update
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
