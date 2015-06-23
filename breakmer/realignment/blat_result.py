@@ -54,7 +54,7 @@ class Gaps:
         ngaps = self.ref[0]
         if alignType == 'query':
             ngaps = self.query[0]
-        return ngaps
+        return int(ngaps)
 
     def get_total_size(self):
         """Return the total bp of gap in the realignment"""

@@ -253,7 +253,7 @@ class AlignResults:
         """Summarize metrics from all alignments.
         """
         self.nmismatches += blatResultObj.get_nmatches('mismatch')
-        self.ngaps += blatResultObj.get_num_gaps()
+        self.ngaps += blatResultObj.get_total_num_gaps()
         if not self.querySize:
             self.querySize = blatResultObj.get_seq_size('query')
             self.alignmentFreq = [0] * self.querySize
