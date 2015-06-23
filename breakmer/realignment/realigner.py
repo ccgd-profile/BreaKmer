@@ -104,7 +104,7 @@ class Realignment:
         alignProgram, alignExt, alignBinary, binaryParams, alignRef = alignParams
         self.scope = scope
         # update
-        utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.query_res_fn))
+        utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.contig.meta.fa_fn))
 
         resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
         self.results = AlignResults(alignProgram, scope, resultFn)
@@ -120,7 +120,6 @@ class Realignment:
                 # target
                 cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
 
-        # update
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
