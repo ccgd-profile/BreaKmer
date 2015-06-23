@@ -508,7 +508,7 @@ class TargetManager:
             contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
             contig.query_ref(self.files['target_ref_fn'])
             contig.make_calls()
-            # if contig.svEventResult:
+            if contig.svEventResult:
             #   contig.filter_calls()
             #   contig.annotate_calls()
             #   contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])

@@ -854,7 +854,7 @@ class ContigCaller:
             self.svEvent.check_previous_add(blatResult)
         return new_gaps
 
-    def check_add_br(self, qs, qe, gs, ge, br):
+    def check_add_br(self, qs, qe, gs, ge, blatResult):
         """ """
         utils.log(self.loggingName, 'info', 'Checking to add blat result with start %d, end %d' % (qs, qe))
         add = False

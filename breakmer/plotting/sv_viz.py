@@ -669,20 +669,3 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
 #                     features.append((element[0], element[1], feature+str(eIter)))
 #             eIter += 1
 #     return features
-
-
-
-# if __name__ == "__main__":
-#     args = sys.argv[1:]
-#     bamFn = args[0]
-#     resultFn = args[1]
-#     annotationFn = args[2]
-#     contigId = args[3]
-#     sampleId = args[4]
-
-#     svRes = svResult(resultFn, contigId)
-#     bamFile = pysam.Samfile(bamFn, "rb")
-#     orderedSeqs = pile_reads(bamFile.fetch(), svRes.contig)
-#     annot = annotation(annotationFn)
-#     #annot = None
-#     plot_pileup(orderedSeqs, svRes, annot, 'figs/'+sampleId+"_"+contigId)
