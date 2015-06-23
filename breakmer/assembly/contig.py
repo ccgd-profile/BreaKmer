@@ -666,7 +666,7 @@ class Meta:
 
         # A string of output values for writing to file.
         headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
-        resultFile.write(headerStr + '\n' + formattedResultValues + '\n')
+        resultFile.write(headerStr + '\n' + formattedResultValuesStr + '\n')
         resultFile.close()
         shutil.copyfile(resultFn, os.path.join(outputPath, self.id + "_svs.out"))
 
