@@ -176,7 +176,7 @@ class SVResult:
             self.alignCigar.append(blatResult.cigar)
             self.strands.append(blatResult.strand)
             self.totalMismatches.append(blatResult.get_nmatches('mismatch'))
-            svEvent.update_brkpt_info(blatResult, i, i == (len(blatResSorted) - 1))
+            svEvent.brkpts.update_brkpt_info(blatResult, i, i == (len(blatResSorted) - 1))
 
         if svEvent.diff_chr():
             # translocation event
