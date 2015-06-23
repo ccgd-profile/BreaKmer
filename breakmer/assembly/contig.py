@@ -900,7 +900,6 @@ class Contig:
     def make_calls(self):
         """
         """
-        print 'Make calls'
         contigCaller = sv_caller.ContigCaller(self.realignment)
         self.svEventResult = contigCaller.call_svs(self.get_id())
         self.filter_calls()
@@ -915,7 +914,7 @@ class Contig:
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
         if self.svEventResult:
-            
+
             self.meta.write_result(self.svEventResult, outputPath)
             self.meta.write_bam(outputPath, svReadsBamFn)
             if self.meta.params.get_param('generate_image'):

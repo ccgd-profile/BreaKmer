@@ -109,9 +109,9 @@ class Realignment:
 #        self.results = AlignResults(alignProgram, scope, resultFn)
 
         cmd = ''
-        if alignprogram == 'blast':
+        if alignProgram == 'blast':
             cmd = ''
-        elif self.alignprogram == 'blat':
+        elif alignProgram == 'blat':
             if scope == 'genome':
                 # all blat server
                 cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (alignBinary, binaryParams['port'], alignRef, self.contig.meta.fa_fn, resultFn)
