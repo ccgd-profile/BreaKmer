@@ -505,7 +505,6 @@ class TargetManager:
         iter = 1
         contigs = self.variation.kmers['clusters']
         utils.log(self.loggingName, 'info', 'Resolving structural variants from %d kmer clusters' % len(contigs))
-        print 'breakmer.processor.target resolve_sv()', len(contigs), contigs
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
             utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
