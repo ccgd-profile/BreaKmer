@@ -913,7 +913,7 @@ class Contig:
     def annotate_calls(self):
         """ """
         if self.svEventResult and self.meta.params.get_param(''):
-
+            print 'x'
 
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
