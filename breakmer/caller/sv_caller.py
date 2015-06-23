@@ -662,7 +662,7 @@ class SVEvent:
 
     def define_rearr(self):
         vrt = self.contig.get_variant_read_tracker()
-        strands = self.svResultValues.strands
+        strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords
         svType = 'rearrangement'
