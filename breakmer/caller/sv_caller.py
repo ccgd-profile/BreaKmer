@@ -89,7 +89,7 @@ class FilterValues:
                 outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
 
         outputList = []
-        for key, value in items(outputValues):
+        for key, value in outputValues.items():
             outputList.append(key + '=' + str(value))
         return ','.join(outputList)
 
