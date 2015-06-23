@@ -476,7 +476,7 @@ class SVEvent:
         self.in_target = self.in_target or blatResult.in_target
         self.in_rep = self.in_rep and (blatResult.repeat_overlap > 75.0)
         self.valid = self.valid and blatResult.valid
-        self.blatResultSorted.append((blatResult, blatResult.get_nmatch_total()))
+        self.blatResultsSorted.append((blatResult, blatResult.get_nmatch_total()))
 
     def result_valid(self):
         valid = False
