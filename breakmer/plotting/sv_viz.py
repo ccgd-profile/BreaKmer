@@ -18,10 +18,10 @@ __license__ = "MIT"
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
 	bamFile = pysam.Samfile(bamReadsFn, "rb")
-    orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
+	orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
     plot_pileup(orderedSeqs, svEventResult, os.path.join(outPath, contigId))
 
- def pile_reads(reads, contigSeq):
+def pile_reads(reads, contigSeq):
     orderedSeqs = []
     for read in reads:
         idx = contigSeq.find(read.seq) 
