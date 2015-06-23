@@ -122,17 +122,20 @@ class AlignValues:
                       'seqSize': int(values[10]),
                       'alignCoords': [int(values[11]), int(values[12])]}
 
-    def get_coords(self, alignType, index):
+    def get_coords(self, alignType, index=None):
         """Return the coordinate of the alignment for either the reference
         or the query sequence.
         Args:
             alignType:  String indicating the reference or query
             index:      Integer indicating the start(0) or end(1)
         """
-        coord = self.ref['alignCoords'][index]
+
+        coords = self.ref['alignCoords']
         if alignType == 'query':
-            coord = self.query['alignCoords'][index]
-        return coord
+            coords = self.query['alignCoords']
+        if index:
+            coords = coords[index]
+        return coords
 
     def get_seq_name(self, alignType):
         """
@@ -437,6 +440,10 @@ class BlatResult:
     def get_len(self):
         return self.qend - self.qstart
 
+    def get_coords(self, alignType):
+        """ """
+        return self.alignVals.get_coords(alignType)
+
     def set_repeats(self, target_rep_mask, all_rep_mask):
         self.rep_man = blat_repeat_manager()
         if self.matches['rep'] > 0:
@@ -451,6 +458,17 @@ class BlatResult:
             if rmask:
                 self.rep_man.setup(self.get_coords('hit'), rmask)
                 self.in_repeat, self.repeat_overlap, self.repeat_coords, self.filter_reps_edges = self.rep_man.other_values
+
+    def in_target_region(self, targetRegionCoordinates):
+        """ """
+        refCoordStart, refCoordEnd = self.get_coords('ref')
+        regionStart = targetRegionCoordinates[1] - targetRegionCoordinates[4]
+        regionEnd = targetRegionCoordinates[2] + targetRegionCoordinates[4]
+        start_in = br_start >= regionStart and br_start <= regionEnd
+        end_in = br_end <= regionEnd and br_end >= regionStart
+        if targetRegionCoordinates[0] == self.get_seq_name('reference') and (start_in or end_in):
+            self.in_target = True
+            self.genes = targetRegionCoordinates[3]
 
     def set_gene_annotations(self, targetRegionCoordinates, annotations):
         """

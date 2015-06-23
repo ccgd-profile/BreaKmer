@@ -25,7 +25,7 @@ class Segment:
         self.indelCoordinates = alignResult.breakpts.contigBreakpoints
         self.strand = alignResult.strand
         self.alignLen = alignResult.get_query_span()
-        self.genomicCoords = [alignResult.alignVals.get_coords('ref', 0), alignResult.alignVals.get_coords('ref', 1)]
+        self.genomicCoords = alignResult.alignVals.get_coords('ref')
 
 
 class AlignSegments:
@@ -161,16 +161,18 @@ def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
 
 
-def plot_realignment_strands(ax, seqYidx, xOffset, svEventResult):
-    for blatResult in svEventResult.blatResults:
-        queryStartCoord = blatResult.alignVals.get_coords('query', 0)
-        queryEndCoord = blatResult.alignVals.get_coords('query', 1)
+def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
+    """Plot the strand the segments were realigned to the reference - +/-"""
+    for segment in segmentManager.segments:
+        queryStartCoord, queryEndCoord = segment.queryCoordinates
         midDist = float(abs(queryEndCoord - queryStartCoord)) / float(2)
-        xcoord = xOffset + queryStartCoord + midDist
-        ax.text(xcoord, seqYidx+0.5, blatResult.strand, ha='center', va='bottom', size=14, family='monospace')
+        xCoord = xOffset + queryStartCoord + midDist
+        ax.text(xCoord, seqYidx + 0.5, segment.strand, ha='center', va='bottom', size=14, family='monospace')
+
 
 def add_seq_text(ax, x, y, char, color='black'):
-	ax.text(x, y, char, ha='center', va='center', size=11, family='monospace', color=color)
+    ax.text(x, y, char, ha='center', va='center', size=11, family='monospace', color=color)
+
 
 def plot_contig_seq(ax, seqYidx, xOffset, svEventResult):
     xinc = 1

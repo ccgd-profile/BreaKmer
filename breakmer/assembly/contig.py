@@ -623,8 +623,8 @@ class Meta:
         self.id = contigId
         self.readVariation = readVariation
         self.chr = queryRegionValues[0]
-        self.start = queryRegionValues[1]
-        self.end = queryRegionValues[2]
+        self.start = int(queryRegionValues[1])
+        self.end = int(queryRegionValues[2])
         self.targetName = queryRegionValues[3]
         self.regionBuffer = queryRegionValues[5]
         self.path = os.path.join(contigPath, self.id)
@@ -635,6 +635,10 @@ class Meta:
             os.makedirs(self.path)
         self.fq_fn = os.path.join(contigPath, self.id, self.id + '.fq')
         self.fa_fn = os.path.join(contigPath, self.id, self.id + '.fa')
+
+    def get_target_region_coordinates(self):
+        """ """
+        return (self.chr, self.start, self.end, self.targetName, self.regionBuffer)
 
     def write_files(self, cluster_fn, kmers, reads, seq):
         """Write cluster, read fastq, and contig fasta files.
@@ -968,6 +972,10 @@ class Contig:
     def get_sample_bam_fn(self):
         """ """
         return self.meta.params.get_param('sample_bam_file')
+
+    def get_target_region_coordinates(self):
+        """ """
+        return self.meta.get_target_region_coordinates()
 
     def get_chr(self):
         """ """
