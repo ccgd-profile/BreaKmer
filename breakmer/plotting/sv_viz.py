@@ -155,14 +155,15 @@ def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
 #                 ax.text(offset, annoYidx-(iter*0.8)-0.5, coordText, ha=lr, va='top', size=12)
 #         iter += 1
 
-    ysize = (len(orderedSeqs)+1)*0.75 + 1.5 + 10
-    ax.axis([0, len(svRes.contig)+10, -seqPlotSize-5, 8])
-    plt.savefig(outName+'.pdf', bbox_inches='tight', dpi=300)
-    plt.savefig(outName+'.png', bbox_inches='tight', dpi=300)
+    ysize = (len(orderedSeqs) + 1) * 0.75 + 1.5 + 10
+    ax.axis([0, len(svRes.contig) + 10, -seqPlotSize - 5, 8])
+    plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
+    plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
+
 
 def plot_realignment_strands(ax, seqYidx, xOffset, svEventResult):
     for blatResult in svEventResult.blatResults:
-    	queryStartCoord = blatResult.alignVals.get_coords('query', 0)
+        queryStartCoord = blatResult.alignVals.get_coords('query', 0)
         queryEndCoord = blatResult.alignVals.get_coords('query', 1)
         midDist = float(abs(queryEndCoord - queryStartCoord)) / float(2)
         xcoord = xOffset + queryStartCoord + midDist

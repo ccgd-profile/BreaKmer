@@ -284,10 +284,12 @@ class BlatResult:
         self.seg_overlap = [left, right]
 
     def qstart(self):
-        return self.alignVals.get_coords('query', 0)
+        """Query coordinate start"""
+        return int(self.alignVals.get_coords('query', 0))
 
     def qend(self):
-        return self.alignVals.get_coords('query', 1)
+        """Query coordinate end"""
+        return int(self.alignVals.get_coords('query', 1))
 
     def tstart(self):
         return self.alignVals.get_coords('reference', 0)
@@ -300,7 +302,7 @@ class BlatResult:
         return self.alignVals.get_seq_name(alignType)
 
     def get_seq_size(self, alignType):
-        return self.alignVals.get_seq_size(alignType)
+        return int(self.alignVals.get_seq_size(alignType))
 
     def get_query_span(self):
         """Length of query sequence alignment to reference.
