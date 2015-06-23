@@ -4,6 +4,7 @@
 import os
 import logging
 import shutil
+import pysam
 import breakmer.assembly.olc as olcAssembly
 import breakmer.assembly.utils as assemblyUtils
 import breakmer.realignment.realigner as realigner
@@ -675,8 +676,8 @@ class Meta:
         bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
         utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
-        bamFile = Samfile(svBamReadsFn, 'rb')
-        bam_out_f = Samfile(bamOutFn, 'wb', template=bamFile)
+        bamFile = pysam.Samfile(svBamReadsFn, 'rb')
+        bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
         for bam_read in bamf.fetch():
             for read in self.reads:
                 rid, idx = read.id.lstrip("@").split("/")
@@ -686,9 +687,9 @@ class Meta:
         bamf.close()
         bam_out_f.close()
         utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
-        sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
+        pysam.sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         utils.log(self.loggingName, 'info', 'Indexing bam file %s' % bam_out_sorted_fn)
-        index(bam_out_sorted_fn)
+        pysam.index(bam_out_sorted_fn)
         return bam_out_sorted_fn
 
 
