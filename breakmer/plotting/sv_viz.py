@@ -97,7 +97,6 @@ def plot_pileup(segmentManager, outBaseFn):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-
     plotHeight = 5 # seqPlotSize*1.5
     if len(orderedSeqs) > 10:
         plotHeight = 15
@@ -239,6 +238,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
+
 
 # class annotation():
 #     def __init__(self, annoFn):

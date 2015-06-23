@@ -283,6 +283,7 @@ class SVResult:
 
 class SVBreakpoints:
     def __init__(self):
+        self.loggingName = 'breakmer.caller.sv_caller'
         self.t = {'in_target': None, 'other': None}
         self.formatted = []
         self.r = []
