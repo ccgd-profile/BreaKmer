@@ -82,7 +82,7 @@ class RunTracker:
         self.targets = {}
         self.summary = {}
         self.summary_header = ''
-        self.logger = logging.getLogger('breakmer.processor.analysis')
+        self.loggingName = 'breakmer.processor.analysis'
 
     def run(self):
         """Create and analyze the target regions.
@@ -103,7 +103,7 @@ class RunTracker:
         aggResults = []
         nprocs = int(self.params.get_param('nprocs'))
         if nprocs > 1:
-            self.logger.info('Creating all reference data.')
+            utils.log(self.loggingName, 'info', 'Creating all reference data.')
             p = multiprocessing.Pool(nprocs)
             # p.map(analyze_targets, targetAnalysisList)
             multiprocResults = []
@@ -119,7 +119,7 @@ class RunTracker:
 
         # Perform any post-primary analysis scripts here.
 
-        self.logger.info('Analysis complete in %s' % str(time.clock() - startTime))
+        utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
         if not self.params.get_param('keep_blat_server'):
             cmd = '%s stop localhost %d' % (self.params.opts['gfserver'], int(self.params.get_param('blat_port')))

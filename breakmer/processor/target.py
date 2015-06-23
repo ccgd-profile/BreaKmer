@@ -507,7 +507,7 @@ class TargetManager:
             utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
             contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
             contig.query_ref(self.files['target_ref_fn'])
-            # contig.make_calls()
+            contig.make_calls()
             # if contig.svEventResult:
             #   contig.filter_calls()
             #   contig.annotate_calls()
