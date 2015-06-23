@@ -64,13 +64,11 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
                 logger.info('Contig did not meet the read count threshold %d, with %d or contig length (%d) < readLen (%d)' % (rcThresh, len(contig.reads), len(contig.seq), readLen))
             else:
                 logger.info('Adding contig to buffer')
-                print 'breakmer.assembly.assembler init_assembly()', contig.seq
                 contigs.append(contig)
 
         # Clean up the data to free up memory.
         contigBuffer.remove_kmers(kmerTracker)
         contigBuffer.remove_reads(fqRecs)
-    print 'breakmer.assembly.assembler init_assembly()', contigs, len(contigs)
     return contigs
 
 
