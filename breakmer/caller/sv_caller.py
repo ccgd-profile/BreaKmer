@@ -165,7 +165,7 @@ class SVResult:
 
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
-            print 'Blat result', i, blastResult.get_coords('query')
+            print 'Blat result', i, blatResult.get_coords('query')
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
             # resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
