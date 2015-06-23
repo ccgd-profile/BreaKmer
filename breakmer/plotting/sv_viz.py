@@ -236,6 +236,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         ax.add_patch(rect)
         ax.text(xCoordLabel, yCoord - 0.5, lenText, ha='center', va='top', size=10)
 
+
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
     """ """
     for i, segment in enumerate(segmentManager.segments):
@@ -252,7 +253,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
             rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
-            ax.text(xCoordLabel, yCoord + 1, self.indelSizes[i], ha='center', va='top', size=12)
+            ax.text(xCoordLabel, yCoord + 1, self.indelSizes[i], ha='center', va='top', size=10)
 
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):

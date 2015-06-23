@@ -661,8 +661,8 @@ class SVEvent:
         return contained
 
     def define_rearr(self):
-        vrt = self.contig.get_read_variation()
-        varReads = vrt.get_var_reads('sv')
+        # vrt = self.contig.get_read_variation()
+        varReads = self.contig.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords
