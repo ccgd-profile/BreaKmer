@@ -55,7 +55,7 @@ class FilterValues:
         self.nReadStrands = svEvent.check_read_strands()
         self.maxRealignmentGap = max(blatResult.gaps.get_gap_sizes())
         # Use this value to determine the uniqueness of the realignment
-        self.maxMeanCoverage = svEvent.get_max_mean_coverage()
+        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
 
     def set_rearr_values(self, svEvent):
         """ """
@@ -132,7 +132,7 @@ class SVResult:
         self.genes = blatResult.get_gene_anno()
         self.repeatOverlapPercent = 0.0
         self.totalMatching = blatResult.get_nmatch_total()
-        self.realignmentUniqueness = blatResult.mean_cov
+        self.realignmentUniqueness = blatResult.meanCov
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
         self.breakpointStr = svEvent.get_brkpt_str()
@@ -170,7 +170,7 @@ class SVResult:
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
             # self.repeatMatching.append(":".join([str(blatResult.repeat_overlap), str(blatResult.get_nmatch_total()), str(round(blatResult.mean_cov, 3))]))
             self.repeatOverlapPercent.append(blatResult.repeat_overlap)
-            self.realignmentUniqueness.append(blatResult.mean_cov)
+            self.realignmentUniqueness.append(blatResult.meanCov)
             self.totalMatching.append(blatResult.get_nmatch_total())
             self.genes.append(blatResult.get_gene_anno())
             self.alignCigar.append(blatResult.cigar)
@@ -605,7 +605,7 @@ class SVEvent:
         #     br_valid[0] = br_valid[0] and br.valid
         #     br_valid[1] = br_valid[1] and (br.rep_man.simple_rep_overlap > 75.0)
         #     max_repeat = max(max_repeat, br.repeat_overlap)
-        #     res_values['repeat_matching'].append(":".join([str(br.repeat_overlap), str(br.get_nmatch_total()), str(round(br.mean_cov, 3))]))
+        #     res_values['repeat_matching'].append(":".join([str(br.repeat_overlap), str(br.get_nmatch_total()), str(round(br.meanCov, 3))]))
         #     res_values['anno_genes'].append(br.get_gene_anno())
         #     res_values['align_cigar'].append(br.cigar)
         #     res_values['strands'].append(br.strand)
@@ -698,7 +698,7 @@ class SVEvent:
             rs = max(rs)
         return svType, rs
 
-    def get_max_mean_coverage(self):
+    def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.
         """
         maxMeanCov = 0
