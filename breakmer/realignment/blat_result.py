@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
