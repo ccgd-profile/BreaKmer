@@ -61,9 +61,9 @@ def analyze_targets(targetList):
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
         if targetRegion.has_results():
-            aggregatedResults.extend(targetRegion.results)
+            aggregateResults.extend(targetRegion.results)
         targetRegion.complete_analysis()
-    return aggregatedResults
+    return aggregateResults
 
 
 class RunTracker:
