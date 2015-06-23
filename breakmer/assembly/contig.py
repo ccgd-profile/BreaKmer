@@ -921,7 +921,7 @@ class Contig:
             self.meta.write_result(self.svEventResult, outputPath)
             self.meta.write_bam(outputPath, svReadsBamFn)
             if self.meta.params.get_param('generate_image'):
-                svplotter
+                svplotter.generate_pileup_img(self.svEventResult)
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
@@ -966,3 +966,15 @@ class Contig:
     def get_sample_bam_fn(self):
         """ """
         return self.meta.params.get_param('sample_bam_file')
+
+    def get_chr(self):
+        """ """
+        return self.meta.chr
+
+    def get_target_start(self):
+        """ """
+        return self.meta.start
+
+    def get_target_buffer(self):
+        """ """
+        return self.meta.regionBuffer
