@@ -662,7 +662,7 @@ class SVEvent:
 
     def define_rearr(self):
         vrt = self.contig.get_read_variation()
-        varReads = vrt.get_var_reads()
+        varReads = vrt.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords

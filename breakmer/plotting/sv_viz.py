@@ -230,9 +230,11 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         yCoord = yCoord + ((i + 1) * 0.5)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
         rectHeight = 0.5
+        lenText = str(rectLen) + 'bp'
+        xCoordLabel = xCoord + (float(rectLen) / float(2))
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
-
+        ax.text(xCoordLabel, yCoord - 0.5, lenText, ha='center', va='top', size=10)
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
     """ """
