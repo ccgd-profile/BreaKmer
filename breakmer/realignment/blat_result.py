@@ -165,7 +165,7 @@ class BlatResult:
         self.breakpts = Breakpoints()
         # Sort results based on alignScore, percentIdent, number of gaps
         self.perc_ident = 100.0 - self.calcMilliBad()
-        self.alignScore = self.get_nmatch_total() + float(self.rawScore) / float(self.get_seq_size('query'))
+        self.alignScore = self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
         self.ngaps = self.get_total_num_gaps()
 
         self.meanCov = 0.0

@@ -17,9 +17,9 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
-	bamFile = pysam.Samfile(bamReadsFn, "rb")
-	orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
-	plot_pileup(orderedSeqs, svEventResult, os.path.join(outPath, contigId))
+    bamFile = pysam.Samfile(bamReadsFn, "rb")
+    orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
+    plot_pileup(orderedSeqs, svEventResult, os.path.join(outPath, contigId))
 
 def pile_reads(reads, contigSeq):
     orderedSeqs = []
