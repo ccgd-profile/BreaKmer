@@ -918,7 +918,7 @@ class Contig:
 
     def annotate_calls(self):
         """ """
-        if self.svEventResult and self.meta.params.get_param(''):
+        if self.svEventResult and self.meta.params.get_param('gene_annotation_file'):
             print 'x'
 
     def output_calls(self, outputPath, svReadsBamFn):

@@ -149,7 +149,7 @@ class SVResult:
         """ """
         utils.log(self.loggingName, 'info', 'Resolving SVs call from blat results')
         # Sort the stored blat results by the number of matches to the reference sequence.
-        blatResSorted = sorted(self.blatResults, key=lambda x: x[1])
+        blatResSorted = sorted(svEvent.blatResults, key=lambda x: x[1])
         # brkpts = SVBreakpoints() # {'t':{'in_target':None, 'other':None }, 'formatted':[], 'r':[], 'q': [[0,0],[]], 'chrs':[], 'brkpt_str':[], 'tcoords':[], 'f': []}
         # res_values = {'target_breakpoints':[], 'align_cigar':[], 'sv_type':'', 'strands':[], 'mismatches':[], 'repeat_matching':[], 'anno_genes': [], 'disc_read_count': 0}
         resultValid = {'valid': True, 'repeatValid': True}
