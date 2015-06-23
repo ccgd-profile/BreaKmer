@@ -222,9 +222,13 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
 
 def plot_segments(ax, yCoord, xOffset, segmentManager):
     """ """
-    for segment in segmentManager.segments:
+    for i, segment in enumerate(segmentManager.segments):
         # Plot rectangles for each realignment result
-        rect = patches.Rectangle((segAnnot.segment.coords[0]+exonXoffset+exCoords[0], ycoord), exCoords[1]-exCoords[0], 1, color=segAnnot.segment.color)
+        xCoord = xOffset + segment.queryCoordinates[0]
+        yCoord = yCoord + (i * 0.2)
+        rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
+        rectHeight = 1
+        rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
 
 

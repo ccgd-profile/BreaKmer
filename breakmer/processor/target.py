@@ -56,6 +56,10 @@ class Variation:
             self.cleaned_read_recs = {}
         self.cleaned_read_recs[sampleType] = None
 
+    def get_var_reads(self, sampleType):
+        """ """
+        return self.var_reads[sampleType]
+
     def clear_sv_reads(self, sampleType):
         """
         """

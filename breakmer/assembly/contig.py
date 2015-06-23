@@ -965,7 +965,7 @@ class Contig:
         """ """
         return self.meta.readVariation.get_disc_reads()
 
-    def get_variant_read_tracker(self):
+    def get_read_variation(self):
         """ """
         return self.meta.readVariation
 

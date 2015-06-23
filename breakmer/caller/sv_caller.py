@@ -661,7 +661,8 @@ class SVEvent:
         return contained
 
     def define_rearr(self):
-        vrt = self.contig.get_variant_read_tracker()
+        vrt = self.contig.get_read_variation()
+        varReads = vrt.get_var_reads()
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords
@@ -677,7 +678,7 @@ class SVEvent:
                     utils.log(self.loggingName, 'debug', 'Inversion event identified.')
                     hit = True
                     svType = 'inversion'
-                    for readPair in vrt.inv:
+                    for readPair in varReads.inv:
                         r1p, r2p, r1s, r2s, qname = readPair
                         if r1s == 1 and r2s == 1:
                             if (r1p <= brkpts[0]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
@@ -690,7 +691,7 @@ class SVEvent:
                     hit = True
                     svType = 'tandem_dup'
                     # Tandem dup
-                    for readPair in vrt.td:
+                    for readPair in varReads.td:
                         r1p, r2p, r1s, r2s, qname = readPair
                         if (r1p <= brkpts[0] and r1p >= brkpts[1]) and ():
                             rs += 1
@@ -699,7 +700,7 @@ class SVEvent:
             rs = [0] * len(brkpts)
             for i in range(len(brkpts)):
                 b = brkpts[i]
-                for readPair in vrt.other:
+                for readPair in varReads.other:
                     r1p, r2p, r1s, r2s, qname = readPair
                     if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
                         utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %d, %d and positions %d, %d for breakpoint at %d' % (qname, r1s, s, r1p, r2p, b))
