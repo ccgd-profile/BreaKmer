@@ -716,8 +716,8 @@ class SVEvent:
             strands.append(strand)
         if len(set(strands)) == 1:
             same_strand = True
-        self.logger.debug('Checking read strands for contig reads %s' % (",".join([read.id for read in self.contig_reads])))
-        self.logger.debug('Reads are on same strand: %r' % same_strand)
+        utils.log(self.loggingName, 'debug', 'Checking read strands for contig reads %s' % (",".join([read.id for read in self.contig_reads])))
+        utils.log(self.loggingName, 'debug', 'Reads are on same strand: %r' % same_strand)
         return len(set(strands))
 
     def get_seq_complexity(self):
