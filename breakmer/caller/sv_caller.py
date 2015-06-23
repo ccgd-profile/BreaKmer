@@ -161,7 +161,7 @@ class SVResult:
         self.genes = []
         self.alignCigar = []
         self.strands = []
-        self.mismatches = []
+        self.totalMismatches = []
 
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
