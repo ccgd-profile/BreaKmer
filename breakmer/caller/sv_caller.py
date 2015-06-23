@@ -439,7 +439,7 @@ class SVEvent:
         self.events = []
         self.blatResults = []
         self.blatResultsSorted = []
-        self.sample_bam = sample_bam
+        # self.sample_bam = sample_bam
         self.qlen = 0
         self.nmatch = 0
         self.in_target = False
