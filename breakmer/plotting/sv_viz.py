@@ -224,7 +224,9 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
     """ """
     for segment in segmentManager.segments:
         # Plot rectangles for each realignment result
-        
+        rect = patches.Rectangle((segAnnot.segment.coords[0]+exonXoffset+exCoords[0], ycoord), exCoords[1]-exCoords[0], 1, color=segAnnot.segment.color)
+        ax.add_patch(rect)
+
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     """ """
