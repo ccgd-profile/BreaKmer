@@ -199,8 +199,8 @@ class BlatResult:
         coordOffset = 0
         if offset:
             coordOffset = offset
-        blatResultValues[15] = coordOffset + int(self.values[15])
-        blatResultValues[16] = coordOffset + int(self.values[16])
+        blatResultValues[15] = coordOffset + int(blatResultValues[15])
+        blatResultValues[16] = coordOffset + int(blatResultValues[16])
 
         tstarts = [coordOffset + int(x) for x in blatResultValues[20].rstrip(",").split(",")]
         blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
