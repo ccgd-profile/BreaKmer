@@ -84,7 +84,7 @@ class AlignFragments:
             coordOffset = offset
         refStarts = [coordOffset + int(x) for x in values[20].rstrip(",").split(",")]
         queryStarts = [int(x) for x in values[19].rstrip(",").split(",")]
-        for qstart, tstart, blocksize in zip(qstarts, tstarts, self.query_blocksizes):
+        for qstart, tstart, blocksize in zip(queryStarts, refStarts, self.blockSizes):
             self.ref.append((tstart, tstart + blocksize))
             self.query.append((qstart, qstart + blocksize))
 
