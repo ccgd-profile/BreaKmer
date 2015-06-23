@@ -678,13 +678,13 @@ class Meta:
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
         bamFile = pysam.Samfile(svBamReadsFn, 'rb')
         bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
-        for bam_read in bamf.fetch():
+        for bam_read in bamFile.fetch():
             for read in self.reads:
                 rid, idx = read.id.lstrip("@").split("/")
                 ridx, indel_only_read = idx.split("_")
                 if (bam_read.qname == rid) and ((ridx == '2' and bam_read.is_read2) or (ridx == '1' and bam_read.is_read1)):
                     bam_out_f.write(bam_read)
-        bamf.close()
+        bamFile.close()
         bam_out_f.close()
         utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
         pysam.sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
