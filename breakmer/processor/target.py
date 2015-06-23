@@ -514,10 +514,10 @@ class TargetManager:
             if contig.svEventResult:
                 contig.filter_calls()
             #   contig.annotate_calls()
-            #   contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
-            #   self.add_result(contig.svEventResult)
-            # else:
-            #     utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
+                contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
+                self.add_result(contig.svEventResult)
+            else:
+                utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
 
         # Add code for inferring SVs from discordant reads only.
