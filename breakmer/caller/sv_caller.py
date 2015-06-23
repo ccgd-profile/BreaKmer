@@ -695,7 +695,7 @@ class SVEvent:
                 for readPair in varReads.other:
                     r1p, r2p, r1s, r2s, qname = readPair
                     if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
-                        utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %d, %d and positions %d, %d for breakpoint at %d' % (qname, r1s, s, r1p, r2p, b))
+                        utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %d, %d and positions %d, %d for breakpoint at %d' % (qname, r1s, rs, r1p, r2p, b))
                         rs[i] += 1
             rs = max(rs)
         return svType, rs
