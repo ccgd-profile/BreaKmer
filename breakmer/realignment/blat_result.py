@@ -133,10 +133,8 @@ class AlignValues:
         coords = self.ref['alignCoords']
         if alignType == 'query':
             coords = self.query['alignCoords']
-        print index
-        if index:
+        if index is not None:
             coords = coords[index]
-            print 'index exists', coords
         return coords
 
     def get_seq_name(self, alignType):

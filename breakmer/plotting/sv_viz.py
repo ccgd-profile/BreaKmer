@@ -40,6 +40,10 @@ class AlignSegments:
         for i, blatResult in enumerate(self.svEventResult.blatResults):
             segment = self.Segment(blatResult, self.colors[i])
 
+    def get_contig_seq(self):
+        """ """
+        return self.svEventResult.contig.seq
+
 
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     segmentManager = AlignSegments(svEventResult)
@@ -89,8 +93,8 @@ def plot_pileup(segmentManager, orderedSeqs, outBaseFn):
     # Increment text by 1 unit
     xInc = 1
 
-    plot_realignment_strands(ax, seqYidx, xOffset, svEventResult)
-    plot_contig_seq(ax, seqYidx, xOffset, svEventResult)
+    plot_realignment_strands(ax, seqYidx, xOffset, segmentManager)
+    plot_contig_seq(ax, seqYidx, xOffset, segmentManager)
     plot_pileup_seq(ax, cSeq, seqYidx, xOffset, orderedSeqs)
 
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
@@ -177,13 +181,12 @@ def add_seq_text(ax, x, y, char, color='black'):
     ax.text(x, y, char, ha='center', va='center', size=11, family='monospace', color=color)
 
 
-def plot_contig_seq(ax, seqYidx, xOffset, svEventResult):
+def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
     xInc = 1
     # Add 5' designation to contig sequence.
     add_seq_text(ax, 1, seqYidx, "5'")
     # Iterate over the nucleotides of the contig sequence.
-    nucIter = 1
-    for nuc in svEventResult.contig.seq:
+    for nucIter, nuc in enumerate(segmentManager.get_contig_seq()):
         add_seq_text(ax, xOffset, seqYidx, nuc)
         xOffset += xinc
         # Insert a pipe character for the breakpoint in the contig seq.
@@ -193,6 +196,7 @@ def plot_contig_seq(ax, seqYidx, xOffset, svEventResult):
         nucIter += 1
     # Add 3' designation to contig sequence.
     add_seq_text(ax, xOffset, seqYidx, "3'")
+
 
 def plot_pileup_seq(ax, seqYidx, xOffset, orderedSeqs):
     yinc = 0.75
