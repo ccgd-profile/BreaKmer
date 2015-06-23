@@ -969,6 +969,10 @@ class Contig:
         """ """
         return self.meta.readVariation
 
+    def get_var_reads(self, sampleType):
+        """ """
+        return self.meta.readVariation.get_var_reads(sampleType)
+
     def get_sample_bam_fn(self):
         """ """
         return self.meta.params.get_param('sample_bam_file')

@@ -225,12 +225,16 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
     for i, segment in enumerate(segmentManager.segments):
         # Plot rectangles for each realignment result
         xCoord = xOffset + segment.queryCoordinates[0]
-        yCoord = yCoord + (i * 0.2)
+        yCoord = yCoord + ((i + 1) * 0.5)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
-        rectHeight = 1
+        rectHeight = 0.5
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
 
+def plot_indel_track(ax, yCoord, xOffset, segmentManager):
+    """ """
+    for i, segment in enumerate(segmentManager.segments):
+        
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     """ """
