@@ -4,6 +4,7 @@
 import sys
 import os
 import math
+import pysam
 import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
@@ -391,7 +392,7 @@ class SVBreakpoints:
     def get_brkpt_depths(self, sampleBamFn):
         """ """
         depths = []
-        bamfile = Samfile(sampleBamFn, 'rb')
+        bamfile = pysam.Samfile(sampleBamFn, 'rb')
         for genomicBrkpt in self.genomicBrkpts:
             chrom = genomicBrkpt[0].strip('chr')
             bps = genomicBrkpt[1:]

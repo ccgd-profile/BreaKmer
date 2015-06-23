@@ -335,20 +335,14 @@ class Builder:
         minScore = float(min(len(self.seq), len(queryRead.seq))) / 4.0
         alignManager = olcAssembly.AlignManager(self.seq, queryRead.seq, minScore, 0.90)
 
-        print 'breakmer.assembler.contig.py check_align'
-        print queryRead.seq
-        print self.seq
         if alignManager.check_align_thresholds():
             # Alignment fails thresholds.
-            print 'Missed align thresholds'
             return False
         if alignManager.same_seqs():
             # Read and contigs sequences are the same.
-            print 'Same seqs'
             return True
         if alignManager.same_max_scores():
             # Alignments both ways had equal scores.
-            print 'Same max scores'
             match = True
             if alignManager.read_is_superseq():
                 # Check if the read sequence fully contains the contig sequence.
@@ -844,9 +838,7 @@ class Contig:
         if not self.setup:
             self.set_kmers(kmerTracker.kmerSeqs)
         newKmers = self.refresh_kmers()
-        print 'breakmer.assembly.contig grow()'
         while len(newKmers) > 0:
-            print 'New kmers to test', len(newKmers)
             iter = 0
             for kmer_lst in newKmers:
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
