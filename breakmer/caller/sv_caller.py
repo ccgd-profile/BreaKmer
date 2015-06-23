@@ -60,7 +60,7 @@ class FilterValues:
     def set_rearr_values(self, svEvent):
         """ """
         breakpoints = svEvent.brkpts
-        blatResult = svEvent.blatResSorted[0][0]
+        blatResult = svEvent.blatResultsSorted[0][0]
         self.minBrkptKmers = min(breakpoints.kmers)
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
@@ -165,7 +165,6 @@ class SVResult:
 
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
-            print 'Blat result', i, blatResult.get_coords('query')
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
             # resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
@@ -320,7 +319,6 @@ class SVBreakpoints:
                 tbrkpt = [ts]
                 filt_rep_start = br.filter_reps_edges[0]
             self.genomicBrkpts.append((chrom, tbrkpt[0]))
-            print self.q, i, last_iter
         elif last_iter:
             self.q[1][-1][2] = qe - self.q[1][-1][0]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
@@ -330,8 +328,6 @@ class SVBreakpoints:
             if br.strand == '-':
                 tbrkpt = [te]
                 filt_rep_start = br.filter_reps_edges[1]
-
-            print self.q, i, last_iter
         else:
             self.q[1][-1][2] = qe - self.q[1][-1][1]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
@@ -343,7 +339,6 @@ class SVBreakpoints:
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
                 self.genomicBrkpts.append((chrom, te, ts))
-            print self.q, i, last_iter
 
         self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
@@ -421,14 +416,10 @@ class SVBreakpoints:
         # brkpt_counts = {'n': [], 'd': [], 'b': []}
         # brkpt_kmers = []
         contigCountTracker = contig.get_contig_count_tracker()
-        print self.q
         for qb in self.q[1]:
             left_idx = qb[0] - min(qb[1], 5)
             right_idx = qb[0] + min(qb[2], 5)
-            print left_idx, right_idx
-            print svType
             bc = contigCountTracker.get_counts(left_idx, right_idx, svType)
-            print bc
             self.counts['n'].append(min(bc))
             self.counts['d'].append(min(contigCountTracker.get_counts((qb[0] - 1), (qb[0] + 1), svType)))
             self.counts['b'].append(contigCountTracker.get_counts(qb[0], qb[0], svType))
