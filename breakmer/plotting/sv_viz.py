@@ -112,10 +112,10 @@ def plot_pileup(segmentManager, outBaseFn):
     xOffset = 2
     # Increment text by 1 unit
     xInc = 1
-    plot_realignment_strands(ax, yCoord, xOffset, segmentManager)
+    plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
-    plot_segments(ax, yCoord, xOffset, segmentManager)
+    plot_segments(ax, yCoord + 1, xOffset, segmentManager)
 
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.

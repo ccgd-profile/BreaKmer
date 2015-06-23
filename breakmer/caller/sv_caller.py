@@ -319,6 +319,7 @@ class SVBreakpoints:
                 tbrkpt = [ts]
                 filt_rep_start = br.filter_reps_edges[0]
             self.genomicBrkpts.append((chrom, tbrkpt[0]))
+            print self.q, i, last_iter
         elif last_iter:
             self.q[1][-1][2] = qe - self.q[1][-1][0]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
@@ -328,6 +329,8 @@ class SVBreakpoints:
             if br.strand == '-':
                 tbrkpt = [te]
                 filt_rep_start = br.filter_reps_edges[1]
+
+            print self.q, i, last_iter
         else:
             self.q[1][-1][2] = qe - self.q[1][-1][1]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
@@ -339,6 +342,7 @@ class SVBreakpoints:
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
                 self.genomicBrkpts.append((chrom, te, ts))
+            print self.q, i, last_iter
 
         self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
