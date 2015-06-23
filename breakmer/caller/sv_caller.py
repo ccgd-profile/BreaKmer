@@ -339,7 +339,7 @@ class SVBreakpoints:
                 tbrkpt = [te, ts]
                 self.genomicBrkpts.append((chrom, te, ts))
 
-        self.brkpt_str.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
+        self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
         self.f.append(filt_rep_start)
         self.t[target_key] = (br.get_seq_name('ref'), tbrkpt[0])
