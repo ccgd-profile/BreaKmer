@@ -130,7 +130,7 @@ class Realignment:
         if not os.path.isfile(resultFn):
             return False
         else:
-            self.results = AlignResults(alignProgram, scope, resultFn)
+            self.results = AlignResults(alignProgram, scope, resultFn, self.contig)
 
     def get_result_fn(self):
         """ """
@@ -171,7 +171,7 @@ class Realignment:
 
 
 class AlignResults:
-    def __init__(self, program, scope, alignResultFn):
+    def __init__(self, program, scope, alignResultFn, contig):
         self.loggingName = 'breakmer.realignment.realigner'
         self.resultFn = alignResultFn
         self.program = program
@@ -184,6 +184,7 @@ class AlignResults:
         self.results = []
         self.sortedResults = []
         self.clippedQs = []
+        self.contig = contig
         self.set_values()
 
     def set_values(self):

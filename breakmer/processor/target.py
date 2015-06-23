@@ -509,8 +509,10 @@ class TargetManager:
             contig.query_ref(self.files['target_ref_fn'])
             # contig.make_calls()
             # if contig.svEventResult:
-            #     contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
-            #     self.add_result(ontig.svEventResult)
+            #   contig.filter_calls()
+            #   contig.annotate_calls()
+            #   contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
+            #   self.add_result(contig.svEventResult)
             # else:
             #     utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
@@ -554,7 +556,8 @@ class TargetManager:
 
     def add_result(self, result):
         """ """
-        self.variation.add_result(result)
+        if result:
+            self.variation.add_result(result)
 
     def has_results(self):
         """ """
