@@ -305,13 +305,13 @@ class SVBreakpoints:
         ts, te = br.get_coords('hit')
         qs, qe = br.get_coords('query')
         target_key = 'in_target' if br.in_target else 'other'
-        brkpt_d['chrs'].append(br.get_name('hit'))
-        brkpt_d['tcoords'].append((ts, te))
+        self.chrs.append(br.get_name('hit'))
+        self.tcoords.append((ts, te))
         tbrkpt = []
         filt_rep_start = None
         if i == 0:
-            brkpt_d['q'][0] = [max(0, qs - 1), qe]
-            brkpt_d['q'][1].append([qe, qe - brkpt_d['q'][0][0], None])
+            self.q[0] = [max(0, qs - 1), qe]
+            self.q[1].append([qe, qe - self.q[0][0], None])
             tbrkpt = [te]
             filt_rep_start = br.filter_reps_edges[0]
             if br.strand == '-':
@@ -319,8 +319,8 @@ class SVBreakpoints:
                 filt_rep_start = br.filter_reps_edges[0]
             self.genomicBrkpts.append((chrom, tbrkpt[0]))
         elif last_iter:
-            brkpt_d['q'][1][-1][2] = qe - brkpt_d['q'][1][-1][0]
-            brkpt_d['q'][1].append([qs, qs - brkpt_d['q'][0][0], qe - qs])
+            self.q[1][-1][2] = qe - self.q[1][-1][0]
+            self.q[1].append([qs, qs - self.q[0][0], qe - qs])
             tbrkpt = [ts]
             self.genomicBrkpts.append((chrom, ts))
             filt_rep_start = br.filter_reps_edges[0]
@@ -328,10 +328,10 @@ class SVBreakpoints:
                 tbrkpt = [te]
                 filt_rep_start = br.filter_reps_edges[1]
         else:
-            brkpt_d['q'][1][-1][2] = qe - brkpt_d['q'][1][-1][1]
-            brkpt_d['q'][1].append([qs, qs - brkpt_d['q'][0][0], qe - qs])
-            brkpt_d['q'][1].append([qe, qe - qs, None])
-            brkpt_d['q'][0] = [qs, qe]
+            self.q[1][-1][2] = qe - self.q[1][-1][1]
+            self.q[1].append([qs, qs - self.q[0][0], qe - qs])
+            self.q[1].append([qe, qe - qs, None])
+            self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
             self.genomicBrkpts.append((chrom, ts, te))
             if br.strand == '-':
@@ -339,12 +339,11 @@ class SVBreakpoints:
                 tbrkpt = [te, ts]
                 self.genomicBrkpts.append((chrom, te, ts))
 
-        brkpt_d['brkpt_str'].append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
-        brkpt_d['r'].extend(tbrkpt)
-        brkpt_d['f'].append(filt_rep_start)
-        brkpt_d['t'][target_key] = (br.get_name('hit'), tbrkpt[0])
-        brkpt_d['formatted'].append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
-        return brkpt_d
+        self.brkpt_str.append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
+        self.r.extend(tbrkpt)
+        self.f.append(filt_rep_start)
+        self.t[target_key] = (br.get_name('hit'), tbrkpt[0])
+        self.formatted.append('chr' + str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
 
     def set_indel_brkpts(self, blatResult):
         """ """
