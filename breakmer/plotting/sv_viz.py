@@ -17,6 +17,28 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+class Segment:
+    def __init__(self, alignResult, segmentColor):
+        self.alignResult = alignResult
+        self.color = segmentColor
+        self.queryCoordinates = [alignResult.qstart(), alignResult.qend()]
+        self.indelCoordinates = alignResult.breakpts.contigBreakpoints
+        self.strand = alignResult.strand
+        self.alignLen = alignResult.get_query_span()
+
+
+class AlignSegments:
+    def __init__(self, svEventResult):
+        self.svEventResult = svEventResult
+        self.segments = None
+        self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
+        self.setup()
+
+    def setup(self):
+        """ """
+        for i, blatResult in enumerate(self.svEventResult.blatResults):
+            segment = self.Segment(blatResult, self.colors[i])
+
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     orderedSeqs = pile_reads(bamFile.fetch(), svEventResult.contig.seq)
@@ -48,11 +70,11 @@ def plot_pileup(orderedSeqs, svEventResult, outBaseFn):
     seqPlotSize = (len(orderedSeqs) + 1) * 0.75
     # cSeq = contigSeq(svRes)
 
-    plotHeight = 5#seqPlotSize*1.5
+    plotHeight = 5 # seqPlotSize*1.5
     if len(orderedSeqs) > 10:
         plotHeight = 15
     # Setup figure
-    fig = plt.figure(figsize=(30,plotHeight), frameon=False)
+    fig = plt.figure(figsize=(30, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 

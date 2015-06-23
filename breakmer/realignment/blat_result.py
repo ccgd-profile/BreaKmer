@@ -354,7 +354,7 @@ class BlatResult:
 
     def set_indel_locs(self):
         """ """
-        chrom = 'chr' + self.get_seqname('reference')
+        chrom = 'chr' + self.get_seq_name('reference')
         for i in range(self.fragments.count - 1):
             if i == 0 and self.fragments.query[i][0] > 0:
                 self.cigar = str(self.fragments.query[i][0]) + "S"
@@ -370,8 +370,8 @@ class BlatResult:
             if ins_bp > 0:
                 self.breakpts.add_brkpts('genomic', (chrom, bp1))
                 self.indel_sizes.append("I" + str(ins_bp))
-                self.breakpts.add_brkpts('contig', qend1)
-                self.breakpts.add_brkpts('contig', qstart2)
+                self.breakpts.add_brkpts('contig', (qend1, qstart2))
+                # self.breakpts.add_brkpts('contig', qstart2)
                 self.cigar += str(ins_bp) + "I"
                 if ins_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [ins_bp, "I"]
@@ -462,7 +462,7 @@ class BlatResult:
         regionEnd = targetRegionCoordinates[2] + targetRegionCoordinates[5]
         start_in = br_start >= regionStart and br_start <= regionEnd
         end_in = br_end <= regionEnd and br_end >= regionStart
-        if targetRegionCoordinates[0] == self.get_seqname('reference') and (start_in or end_in):
+        if targetRegionCoordinates[0] == self.get_seq_name('reference') and (start_in or end_in):
             self.in_target = True
             self.genes = targetRegionCoordinates[3]
         else:
