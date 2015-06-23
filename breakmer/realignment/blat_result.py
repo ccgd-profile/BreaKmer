@@ -71,15 +71,18 @@ class Gaps:
 class AlignFragments:
     """
     """
-    def __init__(self, values):
+    def __init__(self, values, offset):
         self.blockSizes = [int(x) for x in values[18].rstrip(",").split(",")]
         self.ref = []
         self.query = []
         self.count = len(self.blockSizes)
-        self.set_values(values)
+        self.set_values(values, offset)
 
-    def set_values(self, values):
-        refStarts = [toffset + int(x) for x in values[20].rstrip(",").split(",")]
+    def set_values(self, values, offset):
+        coordOffset = 0
+        if offset:
+            coordOffset = offset
+        refStarts = [coordOffset + int(x) for x in values[20].rstrip(",").split(",")]
         queryStarts = [int(x) for x in values[19].rstrip(",").split(",")]
         for qstart, tstart, blocksize in zip(qstarts, tstarts, self.query_blocksizes):
             self.ref.append((tstart, tstart + blocksize))
@@ -157,7 +160,7 @@ class BlatResult:
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
         self.alignVals = AlignValues(self.values)
-        self.fragments = AlignFragments(self.values)
+        self.fragments = AlignFragments(self.values, offset)
         self.strand = blatResultValues[8]
         self.breakpts = Breakpoints()
         # Sort results based on alignScore, percentIdent, number of gaps
