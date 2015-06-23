@@ -106,7 +106,7 @@ class Realignment:
         # update
         utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.contig.meta.fa_fn))
 
-        resultFn = os.path.join(contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
+        resultFn = os.path.join(self.contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
         self.results = AlignResults(alignProgram, scope, resultFn)
 
         cmd = ''

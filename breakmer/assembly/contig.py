@@ -915,8 +915,11 @@ class Contig:
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
         if self.svEventResult:
+            
             self.meta.write_result(self.svEventResult, outputPath)
             self.meta.write_bam(outputPath, svReadsBamFn)
+            if self.meta.params.get_param('generate_image'):
+                svplotter
 
     def get_total_read_support(self):
         """Return the total read count supporting assembly."""
