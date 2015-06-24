@@ -238,7 +238,7 @@ class Variation:
         resultFile = open(resultFn, 'w')
 
         for i, result in enumerate(self.results):
-            headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
+            headerStr, formattedResultValuesStr = result.get_formatted_output_values()
             if i == 0:
                 resultFile.write(headerStr + '\n')
             resultFile.write(formattedResultValues + '\n')
