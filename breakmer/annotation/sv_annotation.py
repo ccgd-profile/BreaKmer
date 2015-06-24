@@ -247,13 +247,13 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
                    'upstream': os.path.join(tmpFilePath, 'bedtools.uptream.out'),
                    'downstream': os.path.join(tmpFilePath, 'bedtools.downstream.out')}
     # Intersecting transcripts
-    cmd = 'cat %s | awk %s | grep %s | %s intersect -wo -a %s -b - > %s' % (bedtools, trxSelect, knownGeneSelect, brkptBedFn, annotationFn, outputFiles['intersect'])
+    cmd = 'cat ' + annotationFn + ' | awk ' + trxSelect + ' | grep ' + knownGeneSelect + ' | ' + bedtools + ' intersect -wo -a %s -b - > %s' % (brkptBedFn, outputFiles['intersect'])
     os.system(cmd)
     # Upstream transcripts
-    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -id -a %s -b - > %s' % (bedtools, trxSelect, knownGeneSelect, brkptBedFn, annotationFn, outputFiles['upstream'])
+    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -id -a %s -b - > %s' % (annotationFn, trxSelect, knownGeneSelect, bedtools, brkptBedFn, outputFiles['upstream'])
     os.system(cmd)
     # Downstream transcripts
-    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -iu -a %s -b - > %s' % (bedtools, trxSelect, knownGeneSelect, brkptBedFn, annotationFn, outputFiles['downstream'])
+    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -iu -a %s -b - > %s' % (annotationFn, trxSelect, knownGeneSelect, bedtools, brkptBedFn, outputFiles['downstream'])
     os.system(cmd)
     return outputFiles
 
