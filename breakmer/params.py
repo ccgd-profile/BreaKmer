@@ -110,11 +110,11 @@ class ParamManager:
             return
 
         # TODO - set this as an optional parameter.
-        self.gene_annotations = utils.Annotation()
-        self.gene_annotations.add_genes(self.opts['gene_annotation_file'])
+        # self.gene_annotations = utils.Annotation()
+        # self.gene_annotations.add_genes(self.opts['gene_annotation_file'])
 
-        if 'other_regions_file' in self.opts:
-            self.gene_annotations.add_regions(self.opts['other_regions_file'])
+        # if 'other_regions_file' in self.opts:
+        #     self.gene_annotations.add_regions(self.opts['other_regions_file'])
 
         # Setup analysis directories
         self.paths['analysis'] = os.path.abspath(os.path.normpath(self.opts['analysis_dir']))
