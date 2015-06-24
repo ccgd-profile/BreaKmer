@@ -56,7 +56,7 @@ class Transcript:
     def get_exons(self, annotationFn):
         """ """
         # Grep the exons from the annotationFn
-        exonSelect = '$3 == "transcript"'
+        exonSelect = '$3 == "exon"'
         cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep -v '##' | grep " + self.id
         print cmd
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
