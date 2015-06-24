@@ -57,7 +57,7 @@ class Transcript:
         """ """
         # Grep the exons from the annotationFn
         exonSelect = '$3 == "exon"'
-        cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep -v '##' | grep " + self.id
+        cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "'"
         print cmd
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         handle = grep_handle(cmd)
