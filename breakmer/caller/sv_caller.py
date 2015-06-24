@@ -91,7 +91,7 @@ class FilterValues:
         outputList = []
         for key, value in outputValues.items():
             outputList.append(key + '=' + str(value))
-        return ','.join(outputList)
+        return ';'.join(outputList)
 
 
 class SVResult:
