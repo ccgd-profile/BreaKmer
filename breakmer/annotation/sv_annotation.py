@@ -217,7 +217,7 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     bpIter = 1
     for queryStartCoord, blatResult in blatResults:
         svBreakpoints = blatResult.get_sv_brkpts()
-        for svBreakpoint in svBreakpoint:
+        for svBreakpoint in svBreakpoints:
             chrom = svBreakpoint.chrom
             brkptCoords = sv.Breakpoint.genomicCoords
             # brkptKey = 'BP' + str(bpIter) + '|' + chrom + ':' + '-'.join([str(x) for x in brkptCoords])
