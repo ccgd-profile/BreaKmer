@@ -238,6 +238,10 @@ class BlatResult:
         """ """
         self.breakpts.set_sv_brkpt(coords, svType, targetKey)
 
+    def get_sv_brkpts(self):
+        """ """
+        return self.breakpts.svBreakpoints
+
     def calcMilliBad(self):
         badAlign = 0.0
         queryAlignSize = self.qend() - self.qstart()

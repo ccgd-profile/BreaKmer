@@ -23,6 +23,7 @@ class Segment:
         self.alignResult = alignResult
         self.color = segmentColor
         self.queryCoordinates = [alignResult.qstart(), alignResult.qend()]
+        self.genomicCoordinates = [alignResult.tstart(), alignResult.tend()]
         self.indelCoordinates = alignResult.breakpts.contigBreakpoints
         self.indelSizes = alignResult.indel_sizes
         self.strand = alignResult.strand
@@ -235,6 +236,9 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
         ax.text(xCoordLabel, yCoord - 0.5, lenText, ha='center', va='top', size=10)
+        # Plot genomic coordinates of the segment
+        ax.text(xCoord, yCoord - 0.5, segment.genomicCoordinates[0], ha='center', va='top', size=10)
+        ax.text(xCoord + rectLen, yCoord - 0.5, segment.genomicCoordinates[1], ha='center', va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
