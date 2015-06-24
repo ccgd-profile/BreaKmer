@@ -528,7 +528,7 @@ class TargetManager:
     def complete_analysis(self):
         """ """
         if len(self.variation.results) > 0:
-            self.variation.write_results()
+            self.variation.write_results(self.paths['output'], self.name)
         else:
             self.rm_output_dir()
 

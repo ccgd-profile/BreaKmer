@@ -147,6 +147,8 @@ class SVResult:
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in blatResult.contigBreakpoints]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
+        self.contigSeq = svEvent.get_contig_seq()
+        self.contigId = svEvent.get_contig_id()
 
     def format_rearrangement_values(self, svEvent):
         """ """
@@ -200,6 +202,8 @@ class SVResult:
         self.breakpointStr = svEvent.get_brkpt_str()
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         self.splitReadCount = svEvent.get_splitread_count()
+        self.contigSeq = svEvent.get_contig_seq()
+        self.contigId = svEvent.get_contig_id()
 
     def get_output_type(self):
         """ """
@@ -552,6 +556,14 @@ class SVEvent:
     def get_formatted_output_values(self):
         """ """
         return self.resultValues.get_formatted_output_values()
+
+    def get_contig_seq(self):
+        """ """
+        return self.contig.seq
+
+    def get_contig_id(self):
+        """ """
+        return self.contig.get_id()
 
     # def get_brkpt_info(self, br, brkpt_d, i, last_iter):
     #     ts, te = br.get_coords('hit')
