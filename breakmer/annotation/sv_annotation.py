@@ -23,7 +23,7 @@ class Exon:
         """ """
         print values
         print len(values)
-        self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta, dist = values
+        self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta = values
 
 
 class Transcript:
