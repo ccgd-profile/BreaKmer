@@ -395,7 +395,7 @@ class SVBreakpoints:
             return brkptStr
         else:
             brkptStr = []
-            for genomicBrkpts in self.genomicBrkpts[key]:
+            for genomicBrkpts in self.genomicBrkpts[targetKey]:
                 chrom = genomicBrkpts[0]
                 bps = genomicBrkpts[1:]
                 brkptStr.append(chrom + ':' + '-'.join([str(x) for x in bps]))
