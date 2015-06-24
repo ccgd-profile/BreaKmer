@@ -679,7 +679,7 @@ class Meta:
         bamFile = pysam.Samfile(svBamReadsFn, 'rb')
         bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
         for bam_read in bamFile.fetch():
-            for read in self.reads:
+            for read in reads:
                 rid, idx = read.id.lstrip("@").split("/")
                 ridx, indel_only_read = idx.split("_")
                 if (bam_read.qname == rid) and ((ridx == '2' and bam_read.is_read2) or (ridx == '1' and bam_read.is_read1)):
