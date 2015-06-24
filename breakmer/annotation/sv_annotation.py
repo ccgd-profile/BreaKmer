@@ -40,6 +40,7 @@ class Transcript:
 
     def set_values(self, values):
         """ """
+        print values
         self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta = values
         meta = meta.split(';')
         self.id = meta[1].split(' ')[2].lstrip('"').rstrip('"')

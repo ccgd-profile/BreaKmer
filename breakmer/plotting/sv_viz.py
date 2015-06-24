@@ -40,6 +40,10 @@ class AlignSegments:
         self.orderedSeqs = None
         self.setup()
 
+    def has_annotations(self):
+        """ """
+        return self.svEventResult.has_annotations()
+
     def setup(self):
         """ """
         for i, blatResult in enumerate(self.svEventResult.blatResults):
@@ -119,7 +123,7 @@ def plot_pileup(segmentManager, outBaseFn):
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-
+    plot_annotation_track(ax, yCoord + 3, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
@@ -274,6 +278,12 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
+
+
+def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
+    """ """
+
+
 
 
 # class annotation():
