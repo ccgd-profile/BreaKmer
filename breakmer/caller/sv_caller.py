@@ -65,6 +65,8 @@ class FilterValues:
         self.minBrkptKmers = min(breakpoints.kmers)
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
+        self.maxSegmentOverlap = max(blatResult.seg_overlap)
+
 
     def get_formatted_output_values(self, svType, svSubtype):
         """ """
@@ -79,11 +81,11 @@ class FilterValues:
             outputValues['minBrkptKmers'] = self.minBrkptKmers
             outputValues['minSegmentLen'] = self.minSegmentLen
             outputValues['missingQueryCoverage'] = self.missingQueryCoverage
+            outputValues['maxSegmentOverlap'] = self.maxSegmentOverlap
             if svSubtype == 'trl':
                 outputValues['breakpointCoverages'] = self.brkptCoverages
                 outputValues['sequenceComplexity'] = self.seqComplexity
                 outputValues['startEndMissingQueryCoverage'] = self.startEndMissingQueryCoverage
-                outputValues['maxSegmentOverlap'] = self.maxSegmentOverlap
                 outputValues['nReadStrands'] = self.nReadStrands
                 outputValues['maxRealignmentGapSize'] = self.maxRealignmentGap
                 outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
@@ -229,6 +231,7 @@ class SVResult:
                      'Total_mismatches',
                      'Total_matching',
                      'Contig_ID',
+                     'Contig_length',
                      'Contig_sequence',
                      'Filtered',
                      'Filtered_reason',
@@ -249,6 +252,7 @@ class SVResult:
                    self.totalMismatches,
                    self.totalMatching,
                    self.contigId,
+                   len(self.contigSeq),
                    self.contigSeq,
                    self.filtered['status'],
                    self.filtered['reason']
