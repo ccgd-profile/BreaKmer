@@ -672,7 +672,7 @@ class Meta:
         resultFile.close()
         shutil.copyfile(resultFn, os.path.join(outputPath, self.id + "_svs.out"))
 
-    def write_bam(self, outputPath, svBamReadsFn):
+    def write_bam(self, outputPath, svBamReadsFn, reads):
         bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
         utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
@@ -919,7 +919,7 @@ class Contig:
         """ """
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
-            readBamFn = self.meta.write_bam(outputPath, svReadsBamFn)
+            readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
             if self.meta.params.get_param('generate_image'):
                 svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 
