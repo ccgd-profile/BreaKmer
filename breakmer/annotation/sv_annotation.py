@@ -63,7 +63,7 @@ class Transcript:
 
 
 def grep_handle(cmd, bufsize=-1):
-    p = subprocess.Popen(cmd.split(), stdout=PIPE, stderr=STDOUT, bufsize=bufsize)
+    p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=bufsize)
     return p
 
 

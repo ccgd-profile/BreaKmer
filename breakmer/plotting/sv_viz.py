@@ -31,7 +31,8 @@ class Segment:
         self.genomicCoords = alignResult.alignVals.get_coords('ref')
 
     def get_exons(self):
-        self.alignResult.get_annotated_exons()
+        svBreakpoints = self.alignResult.get_sv_brkpts()
+
 
 class AlignSegments:
     def __init__(self, svEventResult):
