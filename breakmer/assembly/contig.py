@@ -10,7 +10,7 @@ import breakmer.assembly.utils as assemblyUtils
 import breakmer.realignment.realigner as realigner
 import breakmer.caller.sv_caller as sv_caller
 import breakmer.utils as utils
-import breakmer.plotting.sv_viz as svplotter
+# import breakmer.plotting.sv_viz as svplotter
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
@@ -913,7 +913,7 @@ class Contig:
     def annotate_calls(self):
         """ """
         if self.svEventResult and self.meta.params.get_param('gene_annotation_file'):
-            print 'x'
+            annotator.annotate_event(self.svEventResult)
 
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
