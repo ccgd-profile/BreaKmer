@@ -183,7 +183,7 @@ class RunTracker:
             headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
             if not self.params.get_param('no_output_header') and i == 0:
                 resultFile.write(headerStr + '\n')
-            resultFile.write(formattedResultValues + '\n')
+            resultFile.write(formattedResultValuesStr + '\n')
         resultFile.close()
 
         # resultFiles = {}
