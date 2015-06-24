@@ -395,7 +395,7 @@ class SVBreakpoints:
                 if brkptStr == '':
                     brkptStr = outStr
                 elif outStr != '':
-                    brkptStr += ',' outStr
+                    brkptStr += ',' + outStr
             return brkptStr
         else:
             brkptStr = []
