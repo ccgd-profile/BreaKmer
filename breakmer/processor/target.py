@@ -513,7 +513,7 @@ class TargetManager:
             contig.make_calls()
             if contig.svEventResult:
                 contig.filter_calls()
-            #   contig.annotate_calls()
+                contig.annotate_calls()
                 contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
                 self.add_result(contig.svEventResult)
             else:

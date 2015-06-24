@@ -67,7 +67,6 @@ class FilterValues:
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
         self.maxSegmentOverlap = max(blatResult.seg_overlap)
 
-
     def get_formatted_output_values(self, svType, svSubtype):
         """ """
         outputValues = {}
@@ -330,15 +329,17 @@ class SVBreakpoints:
                 tbrkpt = [ts]
                 filt_rep_start = br.filter_reps_edges[0]
             self.genomicBrkpts[targetKey].append((chrom, tbrkpt[0]))
+            br.set_sv_brkpt((chrom, tbrkpt[0]), 'rearrangement', targetKey)
         elif last_iter:
             self.q[1][-1][2] = qe - self.q[1][-1][0]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
             tbrkpt = [ts]
-            self.genomicBrkpts[targetKey].append((chrom, ts))
             filt_rep_start = br.filter_reps_edges[0]
             if br.strand == '-':
                 tbrkpt = [te]
                 filt_rep_start = br.filter_reps_edges[1]
+            self.genomicBrkpts[targetKey].append((chrom, tbrkpt[0]))
+            br.set_sv_brkpt((chrom, tbrkpt[0]), 'rearrangement', targetKey)
         else:
             self.q[1][-1][2] = qe - self.q[1][-1][1]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
@@ -346,10 +347,12 @@ class SVBreakpoints:
             self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
             self.genomicBrkpts[targetKey].append((chrom, ts, te))
+            br.set_sv_brkpt((chrom, ts, te), 'rearrangement', targetKey)
             if br.strand == '-':
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
                 self.genomicBrkpts[targetKey].append((chrom, te, ts))
+                br.set_sv_brkpt((chrom, te, ts), 'rearrangement', targetKey)
 
         self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
@@ -509,6 +512,10 @@ class SVEvent:
             #     valid = True
         return valid
 
+    def get_genomic_brkpts(self):
+        """ """
+        return self.brkpts.genomicBrkpts
+
     def check_previous_add(self, br):
         ncoords = br.get_coords('query')
         prev_br, prev_nmatch = self.blatResultsSorted[-1]
@@ -579,95 +586,6 @@ class SVEvent:
     def get_contig_id(self):
         """ """
         return self.contig.get_id()
-
-    # def get_brkpt_info(self, br, brkpt_d, i, last_iter):
-    #     ts, te = br.get_coords('hit')
-    #     qs, qe = br.get_coords('query')
-    #     target_key = 'in_target' if br.in_target else 'other'
-    #     brkpt_d['chrs'].append(br.get_name('hit'))
-    #     brkpt_d['tcoords'].append((ts, te))
-    #     tbrkpt = []
-    #     filt_rep_start = None
-    #     if i == 0:
-    #         brkpt_d['q'][0] = [max(0, qs - 1), qe]
-    #         brkpt_d['q'][1].append([qe, qe - brkpt_d['q'][0][0], None])
-    #         tbrkpt = [te]
-    #         filt_rep_start = br.filter_reps_edges[0]
-    #         if br.strand == '-':
-    #             tbrkpt = [ts]
-    #             filt_rep_start = br.filter_reps_edges[0]
-    #     elif last_iter:
-    #         brkpt_d['q'][1][-1][2] = qe - brkpt_d['q'][1][-1][0]
-    #         brkpt_d['q'][1].append([qs, qs - brkpt_d['q'][0][0], qe - qs])
-    #         tbrkpt = [ts]
-    #         filt_rep_start = br.filter_reps_edges[0]
-    #         if br.strand == '-' :
-    #             tbrkpt = [te]
-    #             filt_rep_start = br.filter_reps_edges[1]
-    #     else :
-    #         brkpt_d['q'][1][-1][2] = qe - brkpt_d['q'][1][-1][1]
-    #         brkpt_d['q'][1].append([qs,qs-brkpt_d['q'][0][0],qe-qs])
-    #         brkpt_d['q'][1].append([qe, qe-qs, None])
-    #         brkpt_d['q'][0] = [qs, qe]
-    #         tbrkpt = [ts, te]
-    #         if br.strand == "-" :
-    #             filt_rep_start = br.filter_reps_edges[1]
-    #             tbrkpt = [te, ts]
-
-    #     brkpt_d['brkpt_str'].append('chr'+str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
-    #     brkpt_d['r'].extend(tbrkpt)
-    #     brkpt_d['f'].append(filt_rep_start)
-    #     brkpt_d['t'][target_key] = (br.get_name('hit'),tbrkpt[0])
-    #     brkpt_d['formatted'].append( 'chr'+str(br.get_name('hit')) + ":" + "-".join([str(x) for x in tbrkpt]))
-    #     return brkpt_d
-
-    # def get_svs_result(self, query_region, params, disc_reads):
-        # self.logger.info('Resolving SVs call from blat results')
-        # blat_res = self.blatResults
-        # blat_res_sorted = sorted(blat_res, key=lambda blat_res: blat_res[0])
-        # brkpts = {'t':{'in_target':None, 'other':None }, 'formatted':[], 'r':[], 'q': [[0,0],[]], 'chrs':[], 'brkpt_str':[], 'tcoords':[], 'f': []}
-        # res_values = {'target_breakpoints':[], 'align_cigar':[], 'sv_type':'', 'strands':[], 'mismatches':[], 'repeat_matching':[], 'anno_genes': [], 'disc_read_count': 0}
-        # br_valid = [True, True]
-        # max_repeat = 0.0
-
-        # for i in range(len(blat_res_sorted)):
-        #     br = blat_res_sorted[i][1]
-        #     br_valid[0] = br_valid[0] and br.valid
-        #     br_valid[1] = br_valid[1] and (br.rep_man.simple_rep_overlap > 75.0)
-        #     max_repeat = max(max_repeat, br.repeat_overlap)
-        #     res_values['repeat_matching'].append(":".join([str(br.repeat_overlap), str(br.get_nmatch_total()), str(round(br.meanCov, 3))]))
-        #     res_values['anno_genes'].append(br.get_gene_anno())
-        #     res_values['align_cigar'].append(br.cigar)
-        #     res_values['strands'].append(br.strand)
-        #     res_values['mismatches'].append(br.get_nmatches('mis'))
-        #     brkpts = self.get_brkpt_info(br, brkpts, i, i == (len(blat_res_sorted) - 1))
-
-        # result = None
-        # self.blatResultsSorted = sorted(self.blatResultsSorted, key=lambda br: br[1])
-        # if not self.multiple_genes(brkpts['chrs'], brkpts['r'], res_values['anno_genes']):
-        #     brkpt_counts, brkpt_kmers, brkpt_rep_filt = self.get_brkpt_counts_filt(brkpts, 'rearr')
-        #     rearr_type, disc_read_support = self.define_rearr(brkpts['r'], res_values['strands'], brkpts['tcoords'], disc_reads)
-        #     if not self.filter_rearr(query_region, params, brkpts['r'], brkpt_counts, brkpt_kmers, rearr_type, disc_read_support):
-        #         res_values['sv_type'] = 'rearrangement'
-        #         if rearr_type != 'rearrangement':
-        #             res_values['sv_subtype'] = rearr_type
-        #         res_values['disc_read_count'] = disc_read_support
-        #         res_values['anno_genes'] = list(set(res_values['anno_genes']))
-        #         res_values['target_breakpoints'] = brkpts['brkpt_str']
-        #         res_values['split_read_count'] = brkpt_counts['b']
-        #         if 'rearrangement' in params.opts['var_filter']:
-        #             result = self.format_result(res_values)
-        # elif max(self.contig_rcounts.others) >= params.get_sr_thresh('trl'):
-        #     brkpt_counts, brkpt_kmers, brkpt_rep_filt = self.get_brkpt_counts_filt(brkpts, 'trl')
-        #     disc_read_count = self.check_disc_reads(brkpts['t'], query_region, disc_reads['disc'])
-        #     if not self.filter_trl(br_valid, query_region, params, brkpt_counts, brkpt_kmers, disc_read_count, res_values['anno_genes'], max_repeat, brkpt_rep_filt):
-        #         res_values['disc_read_count'] = disc_read_count
-        #         res_values['sv_type'] = ['trl']
-        #         res_values['target_breakpoints'] = brkpts['brkpt_str']
-        #         res_values['split_read_count'] = brkpt_counts['b']
-        #         if 'trl' in params.opts['var_filter']:
-        #             result = self.format_result(res_values)
-        # return result
 
     def set_brkpt_counts(self, svType):
         """ """

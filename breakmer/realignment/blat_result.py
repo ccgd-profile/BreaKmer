@@ -91,12 +91,28 @@ class AlignFragments:
             self.query.append((qstart, qstart + blocksize))
 
 
+class SVBreakpoint:
+    """
+    """
+    def __init__(self, coords, svType, targetKey):
+        self.chrom = coords[0]
+        self.genomicCoords = coords[1:]
+        self.svType = svType
+        self.targetKey = targetKey
+        self.annotated_trxs = {}
+
+    def store_annotation(self, trxList, distList, coordIdx):
+        """ """
+        self.annotated_trxs[coordIdx] = [trxList, distList]
+
+
 class Breakpoints:
     """
     """
     def __init__(self):
         self.contigBreakpoints = []
         self.genomicBreakpoints = []
+        self.svBreakpoints = []
 
     def add_brkpts(self, which, bp):
         """ """
@@ -111,6 +127,10 @@ class Breakpoints:
     def reverse_breakpts(self, querySeqSize):
         for i in range(len(self.contigBreakpoints)):
             self.contigBreakpoints[i] = querySeqSize - self.contigBreakpoints[i]
+
+    def set_sv_brkpt(self, coords, svType, targetKey):
+        """ """
+        self.svBreakpoints.append(SVBreakpoint(coords, svType, targetKey))
 
 
 class AlignValues:
@@ -214,57 +234,9 @@ class BlatResult:
         blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
         return blatResultValues
 
-        # self.matches['match'] = int(self.values[0])
-        # self.matches['mis'] = int(self.values[1])
-        # self.matches['rep'] = int(self.values[2])
-        # self.gaps['hit'] = [int(self.values[6]), int(self.values[7])]
-        # self.gaps['query'] = [int(self.values[4]), int(self.values[5])]
-
-        # tname = self.values[13].replace('chr', '')
-        # if 'tname' in d:
-        #     tname = d['tname']
-        #     self.values[13] = tname
-
-        # toffset = 0
-        # if 'offset' in d:
-        #     toffset = d['offset']
-        # tcoords = [toffset + int(self.values[15]), toffset + int(self.values[16])]
-        # self.values[15] = tcoords[0]
-        # self.values[16] = tcoords[1]
-
-        # self.vals['hit'] = {'name': tname,
-        #                     'size': int(self.values[14]),
-        #                     'coords': tcoords}
-        # self.vals['query'] = {'name': self.values[9],
-        #                       'size': int(self.values[10]),
-        #                       'coords': [int(self.values[11]), int(self.values[12])]}
-        # self.strand = self.values[8]
-        # self.query_blocksizes = [int(x) for x in self.values[18].rstrip(",").split(",")]
-        # tstarts = [toffset + int(x) for x in self.values[20].rstrip(",").split(",")]
-        # self.values[20] = ",".join([str(x) for x in tstarts]) + ","
-        # qstarts = [int(x) for x in self.values[19].rstrip(",").split(",")]
-        # self.fragments['hit'] = []
-        # self.fragments['query'] = []
-        # for qstart, tstart, blocksize in zip(qstarts, tstarts, self.query_blocksizes):
-        #     self.fragments['hit'].append((tstart, tstart + blocksize))
-        #     self.fragments['query'].append((qstart, qstart + blocksize))
-        # self.fragments['count'] = len(self.query_blocksizes)
-
-        # if 'params' in d:
-        #     self.set_gene_anno(d['params'].gene_annotations, d['query_region'])
-            # if 'repeat_mask' in d:
-            #     self.set_repeat(d['repeat_mask'], d['params'].repeat_mask)
-
-    # def set_annotations(self, targetRegionCoordinates, annotations):
-    #     """
-    #     Args:
-    #         targetRegionCoordinates: Tuple containing (chr, start, end, intervals, regionBufferSize)
-    #         annotations:             Object containing gene annotations. If none, then no annotation is done.
-    #     """
-    #     self.set_gene_anno(targetRegionCoordinates, annotations)
-
-    # def set_repeats(self, repeats):
-    #     self.set_repeat(targetRepeats, genomeRepeats)
+    def set_sv_brkpt(self, coords, svType, targetKey):
+        """ """
+        self.breakpts.set_sv_brkpt(coords, svType, targetKey)
 
     def calcMilliBad(self):
         badAlign = 0.0
