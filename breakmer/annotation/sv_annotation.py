@@ -64,7 +64,7 @@ class Transcript:
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         for line in open(outFn, 'r'):
             print line
-            self.exons.append(Exon(line.strip().split()))
+            self.exons.append(Exon(line.strip().split('\t')))
         os.remove(outFn)
 
 
