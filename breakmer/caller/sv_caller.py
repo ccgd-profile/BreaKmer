@@ -464,6 +464,7 @@ class SVEvent:
         self.events = []
         self.blatResults = []
         self.blatResultsSorted = []
+        self.annotated = False
         # self.sample_bam = sample_bam
         self.qlen = 0
         self.nmatch = 0
@@ -511,6 +512,10 @@ class SVEvent:
             # if nMissingQueryCoverage < self.meta_dict['params'].get_min_segment_length('trl'):
             #     valid = True
         return valid
+
+    def has_annotations(self):
+        """ """
+
 
     def get_genomic_brkpts(self):
         """ """

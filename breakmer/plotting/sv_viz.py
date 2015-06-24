@@ -42,7 +42,7 @@ class AlignSegments:
 
     def has_annotations(self):
         """ """
-        return self.svEventResult.has_annotations()
+        return self.svEventResult.annotated
 
     def setup(self):
         """ """
