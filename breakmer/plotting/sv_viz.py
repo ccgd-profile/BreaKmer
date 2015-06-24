@@ -282,6 +282,10 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     """ """
+    if segmentManager.has_annotations():
+        return
+
+    for i, segment in enumerate(segmentManager.segments):
 
 
 

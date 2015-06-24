@@ -249,7 +249,7 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
                    'upstream': os.path.join(tmpFilePath, 'bedtools.uptream.out'),
                    'downstream': os.path.join(tmpFilePath, 'bedtools.downstream.out')}
     # Intersecting transcripts
-    cmd = 'cat ' + annotationFn + ' | awk "' + trxSelect + '" | grep "' + knownGeneSelect + '" | ' + bedtools + ' intersect -wo -a %s -b - > %s' % (brkptBedFn, outputFiles['intersect'])
+    cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' intersect -wo -a %s -b - > %s' % (brkptBedFn, outputFiles['intersect'])
     print cmd
     os.system(cmd)
     # Upstream transcripts
