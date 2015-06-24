@@ -241,7 +241,7 @@ class Variation:
             headerStr, formattedResultValuesStr = result.get_formatted_output_values()
             if i == 0:
                 resultFile.write(headerStr + '\n')
-            resultFile.write(formattedResultValues + '\n')
+            resultFile.write(formattedResultValuesStr + '\n')
         resultFile.close()
 
 
