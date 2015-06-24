@@ -33,8 +33,27 @@ class Segment:
     def get_exons(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
         # Determine the number of transcripts for this segment based on the sv breakpoints
+        trxItems = []
+        trxIds = []
         for svBreakpoint in svBreakpoints:
-            annotatedTrxsDict = svBreakpoint.annotatedTrx
+            annotatedTrxsDict = svBreakpoint.annotated_trxs
+            dKeys = annotatedTrxsDict.keys()
+            dKeys.sort()
+            for dKey in dKeys:
+                trxList, distList = annotatedTrxsDict[dKey]
+                idx = 0
+                for trx, dist in zip(trxList, distList):
+                    if trx.id in trxIds:
+                        continue
+                    trxType = 'intersect'
+                    if len(trxList) > 1:
+                        trxType = 'upstream'
+                        if idx == 0:
+                            trxType = 'downstream'
+                    trxItems.append((trx, dist, trxType))
+                    trxIds.append(trx.id)
+                    idx += 1
+        
 
 
 class AlignSegments:

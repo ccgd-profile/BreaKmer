@@ -53,22 +53,18 @@ class Transcript:
         self.geneStatus = meta[3].split(' ')[2].lstrip('"').rstrip('"')
         self.len = int(self.stop) - int(self.start)
 
-    def get_exons(self, annotationFn):
+    def get_exons(self, annotationFn, tmpFilePath):
         """ """
         # Grep the exons from the annotationFn
         exonSelect = '$3 == "exon"'
-        cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "'"
+        outFn = os.path.join(tmpFilePath, self.id + '.exons')
+        cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "' > " + os.path.join(tmpFilePath, self.id + '.exons')
         print cmd
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
-        handle = grep_handle(cmd)
-        for line in handle.stdout:
+        for line in open(outFn, 'r'):
             print line
             self.exons.append(Exon(line.strip().split()))
-
-
-def grep_handle(cmd, bufsize=-1):
-    p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=bufsize)
-    return p
+        os.remove(outFn)
 
 
 class segAnnot():
@@ -192,10 +188,10 @@ def annotate_event(svEventResult, contigMeta):
     bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
     outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
-    store_annotations(bpMap, trxMap, annotationFn, contigMeta.params)
+    store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
 
 
-def store_annotations(bpMap, trxMap, annotationFn, params):
+def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBreakpoint, coordIdx = bpMap[bpKey]
         if bpKey not in trxMap:
@@ -208,7 +204,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params):
             if intersect is not None:
                 trx, dist = intersect
                 if params.get_param('generate_image') or True:
-                    trx.get_exons(annotationFn)
+                    trx.get_exons(annotationFn, tmpFilePath)
                 svBreakpoint.store_annotation([trx], [dist], coordIdx)
             else:
                 upTrx, upDist = upstream
