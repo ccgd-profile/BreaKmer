@@ -30,7 +30,7 @@ class Segment:
         self.alignLen = alignResult.get_query_span()
         self.genomicCoords = alignResult.alignVals.get_coords('ref')
 
-    def get_exons(self):
+    def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
@@ -53,7 +53,6 @@ class Segment:
                     trxItems.append((trx, dist, trxType))
                     trxIds.append(trx.id)
                     idx += 1
-        
 
 
 class AlignSegments:
@@ -311,7 +310,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         return
 
     for i, segment in enumerate(segmentManager.segments):
-        segExons = segment.get_exons()
+        segTrxs = segment.get_segment_trxs()
 
 
 def map_coding_features(exons):

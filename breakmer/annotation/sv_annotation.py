@@ -60,6 +60,7 @@ class Transcript:
         outFn = os.path.join(tmpFilePath, self.id + '.exons')
         cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "' > " + os.path.join(tmpFilePath, self.id + '.exons')
         print cmd
+        os.system(cmd)
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         for line in open(outFn, 'r'):
             print line
