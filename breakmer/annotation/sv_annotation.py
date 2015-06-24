@@ -204,7 +204,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params):
                 trx, dist = intersect
                 if params.get_param('generate_image'):
                     trx.get_exons(annotationFn)
-                svBreakpoint.store_annotation([trx], [distance], coordIdx)
+                svBreakpoint.store_annotation([trx], [dist], coordIdx)
             else:
                 upTrx, upDist = upstream
                 downTrx, downDist = downstream

@@ -30,6 +30,8 @@ class Segment:
         self.alignLen = alignResult.get_query_span()
         self.genomicCoords = alignResult.alignVals.get_coords('ref')
 
+    def get_exons(self):
+        self.alignResult.get_annotated_exons()
 
 class AlignSegments:
     def __init__(self, svEventResult):
@@ -286,7 +288,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         return
 
     for i, segment in enumerate(segmentManager.segments):
-
+        segExons = segment.get_exons()
 
 
 def map_coding_features(exons):
