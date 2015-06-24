@@ -194,7 +194,7 @@ class SVResult:
             self.genes = list(set(self.genes))
             self.filterValues.set_rearr_values(svEvent)
         self.targetName = svEvent.contig.get_target_name()
-        self.fullBreakpointStr = svEvent.get_brkpt_str(None)
+        self.fullBreakpointStr = svEvent.get_brkpt_str()
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         self.splitReadCount = svEvent.get_splitread_count()
@@ -538,9 +538,9 @@ class SVEvent:
                     discReadCount += 1
         return discReadCount
 
-    def get_brkpt_str(self):
+    def get_brkpt_str(self, targetKey=None):
         """ """
-        return self.brkpts.get_brkpt_str()
+        return self.brkpts.get_brkpt_str(targetKey)
 
     def get_brkpt_depths(self):
         """
