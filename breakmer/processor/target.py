@@ -568,3 +568,8 @@ class TargetManager:
             return True
         else:
             return False
+
+    def get_results(self):
+        """ """
+        return self.variation.results
+

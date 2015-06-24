@@ -61,7 +61,7 @@ def analyze_targets(targetList):
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
         if targetRegion.has_results():
-            aggregateResults.extend(targetRegion.results)
+            aggregateResults.extend(targetRegion.get_results())
         targetRegion.complete_analysis()
     return aggregateResults
 
