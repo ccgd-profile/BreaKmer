@@ -53,7 +53,8 @@ class Transcript:
         """ """
         # Grep the exons from the annotationFn
         exonSelect = '$3 == "transcript"'
-        cmd = 'cat %s | awk %s | grep %s ' % (annotationFn, exonSelect, self.id) # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
+        cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep " + self.id
+        # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         handle = grep_handle(cmd)
         for line in handle.stdout:
             self.exons.append(Exon(line.strip().split()))
@@ -253,11 +254,11 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
     print cmd
     os.system(cmd)
     # Upstream transcripts
-    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -id -a %s -b - > %s' % (annotationFn, trxSelect, knownGeneSelect, bedtools, brkptBedFn, outputFiles['upstream'])
+    cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' closest -D a -id -a %s -b - > %s' % (brkptBedFn, outputFiles['upstream'])
     print cmd
     os.system(cmd)
     # Downstream transcripts
-    cmd = 'cat %s | awk %s | grep %s | %s closest -D a -iu -a %s -b - > %s' % (annotationFn, trxSelect, knownGeneSelect, bedtools, brkptBedFn, outputFiles['downstream'])
+    cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' closest -D a -iu -a %s -b - > %s' % (brkptBedFn, outputFiles['downstream'])
     print cmd
     os.system(cmd)
     return outputFiles

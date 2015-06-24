@@ -286,7 +286,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         return
 
     for i, segment in enumerate(segmentManager.segments):
-
+        
 
 
 
