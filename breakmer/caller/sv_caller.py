@@ -406,7 +406,7 @@ class SVBreakpoints:
         depths = []
         bamfile = pysam.Samfile(sampleBamFn, 'rb')
         for key in self.genomicBrkpts:
-            for genomicBrkpt in self.genomicBrkpts[k]:
+            for genomicBrkpt in self.genomicBrkpts[key]:
                 chrom = genomicBrkpt[0].strip('chr')
                 bps = genomicBrkpt[1:]
                 for bp in bps:

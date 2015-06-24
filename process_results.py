@@ -636,10 +636,9 @@ def collapse_bed(targetBedFn) :
                 geneRegion[2] = int(stop)
     newBed.write("\t".join([str(x) for x in geneRegion]) + "\n")
     newBed.close()
-#------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------
-def run_bedtools(brkptBedFn) :
+
+def run_bedtools(brkptBedFn):
     cytoBandBedFn = '/data/ccgd/reference/human/refseq/GRCh37/annotation/bed/cytoBandIdeo.primary_chrs.bed'
     geneAnnoBedFn = '/data/ccgd/reference/human/refseq/GRCh37/annotation/bed/refseq_refFlat.bed'
     canonTrxAnnoBedFn = '/data/ccgd/reference/human/ensembl/GRCh37-75/annotation/bed/ensembl_GRCh37_canon_trx_anno.v75.primary_chrs.sorted.bed'
@@ -664,32 +663,32 @@ def run_bedtools(brkptBedFn) :
     cmd = 'sort -k1,1 -k2,2n %s | bedtools intersect -wo -a - -b %s > %s' % (brkptBedFn, geneAnnoBedFn, 'brkpt_gene_anno_intersect.bed')
     os.system(cmd)
     # Bedtools upstream genes
-    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -D a -id -a - -b %s > %s' % (brkptBedFn, geneAnnoBedFn, 'brkpt_gene_anno_upstream.bed') 
+    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -D a -id -a - -b %s > %s' % (brkptBedFn, geneAnnoBedFn, 'brkpt_gene_anno_upstream.bed')
     os.system(cmd)
     # Bedtools downstream genes
-    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -D a -iu -a - -b %s > %s' % (brkptBedFn, geneAnnoBedFn, 'brkpt_gene_anno_downstream.bed') 
+    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -D a -iu -a - -b %s > %s' % (brkptBedFn, geneAnnoBedFn, 'brkpt_gene_anno_downstream.bed')
     os.system(cmd)
-    # Cytoband 
-    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -a - -b %s > %s' % (brkptBedFn, cytoBandBedFn, 'brkpt_cytoband_anno.bed') 
+    # Cytoband
+    cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -a - -b %s > %s' % (brkptBedFn, cytoBandBedFn, 'brkpt_cytoband_anno.bed')
     os.system(cmd)
 
-    # Cluster regions 
-    cmd = 'sort -k1,1 -k2,2n %s | bedtools intersect -wo -a - -b %s > %s' % (brkptBedFn, clusterRegionBedFn, 'brkpt_cluster_anno_intersect.bed') 
+    # Cluster regions
+    cmd = 'sort -k1,1 -k2,2n %s | bedtools intersect -wo -a - -b %s > %s' % (brkptBedFn, clusterRegionBedFn, 'brkpt_cluster_anno_intersect.bed')
     os.system(cmd)
 
     # Intersect with Ensembl canonical trxs
     cmd = 'sort -k1,1 -k2,2n %s | bedtools closest -D a -a - -b %s > %s' % (brkptBedFn, canonTrxAnnoBedFn, 'brkpt_exon_anno_intersect.bed')
     os.system(cmd)
     return annoDict
-#------------------------------------------------------------------------------
 
-def format_results(sampleListFn, sampleType, filterList) :
+
+def format_results(sampleListFn, sampleType, filterList):
     resD = {}
-    for line in open(sampleListFn, 'rU') :
+    for line in open(sampleListFn, 'rU'):
         line = line.strip()
         subProjId, sampleId = line.split("\t")
         outFs = glob(jp(resultsDir, sampleId + '*svs.out'))
-        resD[sampleId] = {'recs':[], 'values':[]}
+        resD[sampleId] = {'recs': [], 'values': []}
         recIter = 1
         resD[sampleId]['values'] = [subProjId, sampleId]
         for outF in outFs :
