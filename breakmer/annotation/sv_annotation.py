@@ -173,8 +173,7 @@ def annotate_event(svEventResult, contigMeta):
     # Make sure annotation file is sorted for bedtools use.
     bedtools = contigMeta.params.get_param('bedtools')
     annotationFn = contigMeta.params.get_param('gene_annotation_file')
-    tmpFilePath = os.path.join(contigMeta.path, contigMeta.id)
-    brkptBedFn = os.path.join(tmpFilePath, contigMeta.id + '_breakpoints.bed')
+    brkptBedFn = os.path.join(contigMeta.path, contigMeta.id + '_breakpoints.bed')
 
     # Dictionary with 'targets' and 'other' breakpoint lists
     # Deletions have two breakpoints in reference.
@@ -182,7 +181,7 @@ def annotate_event(svEventResult, contigMeta):
     # Rearrangements have breakpoints for each segment that is rearranged.
     #  genomicBrkpts = svEventResult.get_genomic_brkpts()
     bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
-    outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn)
+    outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params)
 
@@ -237,7 +236,7 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     return bpMap
 
 
-def run_bedtools(bedtools, annotationFn, brkptBedFn):
+def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
     """ """
 
     # Identify the transcripts first
