@@ -58,9 +58,11 @@ class Transcript:
         # Grep the exons from the annotationFn
         exonSelect = '$3 == "transcript"'
         cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep -v '##' | grep " + self.id
+        print cmd
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         handle = grep_handle(cmd)
         for line in handle.stdout:
+            print line
             self.exons.append(Exon(line.strip().split()))
 
 
