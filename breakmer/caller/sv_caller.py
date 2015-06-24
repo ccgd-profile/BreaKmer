@@ -99,13 +99,14 @@ class SVResult:
     """
     def __init__(self):
         self.loggingName = 'breakmer.caller.sv_caller'
-        self.breakpointStr = None
+        self.fullBreakpointStr = None
+        self.targetBreakpointStr = None
         self.alignCigar = None
         self.totalMismatches = None
         self.strands = None
         self.totalMatching = None
         self.svType = ''
-        self.svSubtype = ''
+        self.svSubtype = None
         self.splitReadCount = None
         self.nKmers = None
         self.discReadCount = None
@@ -113,24 +114,17 @@ class SVResult:
         self.contigSeq = None
         self.targetName = None
         self.breakpointCoverageDepth = None
-        self.description = ''
+        self.description = None
         self.genes = None
         self.repeatOverlapPercent = None
         self.realignmentUniqueness = None
         self.filtered = {'status': False, 'reason': ''}
         self.filterValues = FilterValues()
 
-    def format_event_values(self, svEvent):
-        """ """
-        self.targetName = svEvent.contig.get_target_name()
-        self.contigId = svEvent.contig.get_id()
-        self.contigSeq = svEvent.contig.seq
-        if svEvent.svType == 'indel':
-            self.format_indel_values(svEvent)
-        else:
-            self.format_rearrangement_values(svEvent)
-
     def format_indel_values(self, svEvent):
+        self.targetName = svEvent.contig.get_target_name()
+        self.contigSeq = svEvent.get_contig_seq()
+        self.contigId = svEvent.get_contig_id()
         blatResult = svEvent.blatResults[0][1]
         self.genes = blatResult.get_gene_anno()
         self.repeatOverlapPercent = 0.0
@@ -138,7 +132,7 @@ class SVResult:
         self.realignmentUniqueness = blatResult.meanCov
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
-        self.breakpointStr = svEvent.get_brkpt_str()
+        self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         # List of insertion or deletion sizes that coorespond with the breakpoints
         self.description = blatResult.get_indel_sizes()
@@ -147,8 +141,6 @@ class SVResult:
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in blatResult.contigBreakpoints]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
-        self.contigSeq = svEvent.get_contig_seq()
-        self.contigId = svEvent.get_contig_id()
 
     def format_rearrangement_values(self, svEvent):
         """ """
@@ -183,6 +175,8 @@ class SVResult:
             self.totalMismatches.append(blatResult.get_nmatches('mismatch'))
             svEvent.brkpts.update_brkpt_info(blatResult, i, i == (len(blatResSorted) - 1))
 
+        # Sort the blatResultsSorted list by the lowest matching result to the highest matching result
+        svEvent.blatResultsSorted = sorted(svEvent.blatResultsSorted, key=lambda x: x[1])
         if svEvent.brkpts.diff_chr():
             # translocation event
             svEvent.set_brkpt_counts('trl')
@@ -199,18 +193,20 @@ class SVResult:
             self.discReadCount = discReadCount
             self.genes = list(set(self.genes))
             self.filterValues.set_rearr_values(svEvent)
-        self.breakpointStr = svEvent.get_brkpt_str()
+        self.targetName = svEvent.contig.get_target_name()
+        self.fullBreakpointStr = svEvent.get_brkpt_str()
+        self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         self.splitReadCount = svEvent.get_splitread_count()
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
 
-    def get_output_type(self):
-        """ """
-        outputType = self.svType
-        if self.svSubtype != '':
-            outputType += '_' + self.svSubtype
-        return outputType
+    # def get_output_type(self):
+    #     """ """
+    #     outputType = self.svType
+    #     if self.svSubtype != '':
+    #         outputType += '_' + self.svSubtype
+    #     return outputType
 
     def set_filtered(self, filterReason):
         """ """
@@ -221,8 +217,10 @@ class SVResult:
         """ """
         headerStr = ['Target_Name',
                      'SV_type',
+                     'SV_subtype',
                      'Description',
-                     'Genomic_breakpoints',
+                     'All_genomic_breakpoints',
+                     'Target_genomic_breakpoints',
                      'Split_read_counts',
                      'Discordant_read_counts',
                      'Read_depth_at_genomic_breakpoints',
@@ -238,9 +236,11 @@ class SVResult:
                      ]
 
         outList = [self.targetName,
-                   self.get_output_type(),
+                   self.svType,
+                   self.svSubtype,
                    self.description,
-                   self.breakpointStr,
+                   self.fullBreakpointStr,
+                   self.targetBreakpointStr,
                    self.splitReadCount,
                    self.discReadCount,
                    self.breakpointCoverageDepth,
@@ -291,7 +291,7 @@ class SVResult:
 class SVBreakpoints:
     def __init__(self):
         self.loggingName = 'breakmer.caller.sv_caller'
-        self.t = {'in_target': None, 'other': None}
+        self.t = {'target': None, 'other': None}
         self.formatted = []
         self.r = []
         self.q = [[0, 0], []]
@@ -304,7 +304,7 @@ class SVBreakpoints:
         # Standard format for storing genomic breakpoints for outputtting rsults
         # List of tuples containing ('chr#', bp1, bp2), there will be multiple bp for deletions and
         # only one bp for insertions or rearrangment breakpoints.
-        self.genomicBrkpts = []
+        self.genomicBrkpts = {'target': [], 'other': []}
 
     def update_brkpt_info(self, br, i, last_iter):
         """Infer the breakpoint information from the blat result for rearrangments.
@@ -312,7 +312,7 @@ class SVBreakpoints:
         chrom = 'chr' + br.get_seq_name('ref')
         ts, te = br.get_coords('ref')
         qs, qe = br.get_coords('query')
-        target_key = 'in_target' if br.in_target else 'other'
+        targetKey = 'target' if br.in_target else 'other'
         self.chrs.append(br.get_seq_name('ref'))
         self.tcoords.append((ts, te))
         tbrkpt = []
@@ -325,12 +325,12 @@ class SVBreakpoints:
             if br.strand == '-':
                 tbrkpt = [ts]
                 filt_rep_start = br.filter_reps_edges[0]
-            self.genomicBrkpts.append((chrom, tbrkpt[0]))
+            self.genomicBrkpts[targetKey].append((chrom, tbrkpt[0]))
         elif last_iter:
             self.q[1][-1][2] = qe - self.q[1][-1][0]
             self.q[1].append([qs, qs - self.q[0][0], qe - qs])
             tbrkpt = [ts]
-            self.genomicBrkpts.append((chrom, ts))
+            self.genomicBrkpts[targetKey].append((chrom, ts))
             filt_rep_start = br.filter_reps_edges[0]
             if br.strand == '-':
                 tbrkpt = [te]
@@ -341,22 +341,22 @@ class SVBreakpoints:
             self.q[1].append([qe, qe - qs, None])
             self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
-            self.genomicBrkpts.append((chrom, ts, te))
+            self.genomicBrkpts[targetKey].append((chrom, ts, te))
             if br.strand == '-':
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
-                self.genomicBrkpts.append((chrom, te, ts))
+                self.genomicBrkpts[targetKey].append((chrom, te, ts))
 
         self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
         self.r.extend(tbrkpt)
         self.f.append(filt_rep_start)
-        self.t[target_key] = (br.get_seq_name('ref'), tbrkpt[0])
+        self.t[targetKey] = (br.get_seq_name('ref'), tbrkpt[0])
         self.formatted.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
 
     def set_indel_brkpts(self, blatResult):
         """ """
         # List of tuples for indel breakpoints parsed from the blat result ('chr#', bp1, bp2)
-        self.genomicBrkpts = blatResult.get_genomic_brkpts()
+        self.genomicBrkpts['target'] = blatResult.get_genomic_brkpts()
         # brkpt_out = []
         # bp_str = []
         # chrm = 'chr' + str(blatResult.get_seq_name('ref'))
@@ -386,14 +386,20 @@ class SVBreakpoints:
         """ """
         return self.target[key]
 
-    def get_brkpt_str(self):
+    def get_brkpt_str(self, targetKey=None):
         """ """
-        brkptStr = []
-        for genomicBrkpts in self.genomicBrkpts:
-            chrom = genomicBrkpts[0]
-            bps = genomicBrkpts[1:]
-            brkptStr.append(chrom + ':' + '-'.join([str(x) for x in bps]))
-        return ','.join(brkptStr)
+        if targetKey is None:
+            brkptStr = ''
+            for key in self.genomicBrkpts:
+                brkptStr += ',' + self.get_brkpt_str(key)
+            return brkptStr
+        else:
+            brkptStr = []
+            for genomicBrkpts in self.genomicBrkpts[key]:
+                chrom = genomicBrkpts[0]
+                bps = genomicBrkpts[1:]
+                brkptStr.append(chrom + ':' + '-'.join([str(x) for x in bps]))
+            return ','.join(brkptStr)
 
     def get_brkpt_depths(self, sampleBamFn):
         """ """

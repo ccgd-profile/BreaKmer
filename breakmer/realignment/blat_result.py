@@ -390,10 +390,10 @@ class BlatResult:
                 if del_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [del_bp, "D"]
 
-        self.cigar += str(self.fragments.blockSizes[-1]) + "M"
-        endClipped = self.get_seq_size('query') - self.qend()
-        if endClipped > 0:
-            self.cigar += str(endClipped) + "S"
+        # self.cigar += str(self.fragments.blockSizes[-1]) + "M"
+        # endClipped = self.get_seq_size('query') - self.qend()
+        # if endClipped > 0:
+        #     self.cigar += str(endClipped) + "S"
 
         self.set_indel_flank_matches()
 
