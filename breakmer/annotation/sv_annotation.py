@@ -186,7 +186,7 @@ def annotate_event(svEventResult, contigMeta):
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params)
 
 
-def store_annotations(bpMap, trxMap, annotationFn):
+def store_annotations(bpMap, trxMap, annotationFn, params):
     for bpKey in bpMap:
         blatResult, svBreakpoint, coordIdx = bpMap[bpKey]
         if bpKey not in trxMap:
