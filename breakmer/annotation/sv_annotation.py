@@ -48,7 +48,7 @@ class Transcript:
         self.geneId = meta[0].split(' ')[1].lstrip('"').rstrip('"')
         self.geneName = meta[4].split(' ')[2].lstrip('"').rstrip('"')
         self.geneStatus = meta[3].split(' ')[2].lstrip('"').rstrip('"')
-        self.len = int(self.end) - int(self.start)
+        self.len = int(self.stop) - int(self.start)
 
     def get_exons(self, annotationFn):
         """ """
