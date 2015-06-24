@@ -391,7 +391,11 @@ class SVBreakpoints:
         if targetKey is None:
             brkptStr = ''
             for key in self.genomicBrkpts:
-                brkptStr += ',' + self.get_brkpt_str(key)
+                outStr = self.get_brkpt_str(key)
+                if brkptStr == '':
+                    brkptStr = outStr
+                elif outStr != '':
+                    brkptStr += ',' outStr
             return brkptStr
         else:
             brkptStr = []
