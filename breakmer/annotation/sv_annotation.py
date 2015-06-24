@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import subprocess
 import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
@@ -62,7 +63,7 @@ class Transcript:
 
 
 def grep_handle(cmd, bufsize=-1):
-    p = Popen(cmd.split(), stdout=PIPE, stderr=STDOUT, bufsize=bufsize)
+    p = subprocess.Popen(cmd.split(), stdout=PIPE, stderr=STDOUT, bufsize=bufsize)
     return p
 
 
