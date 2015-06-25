@@ -17,8 +17,33 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+class TrxBrkpt:
+    def __init__(self, distToTrx, svBrkpt, brkptIdx):
+        self.dist = distToTrx
+        self.svBrkpt = svBrkpt
+        self.brkptIdx = brkptIdx
+
+
+class AnnoTrx:
+    def __init__(self, trx, trxDist, svBreakpoint, brkptIdx):
+        sefl.trx = trx
+        self.brkpts = [TrxBrkpt(trxDist, svBreakpoint, brkptIdx)]
+
+    def add_brkpt(self, trxDist, svBreakpoint, brkptIdx):
+        self.brkpts.append(TrxBrkpt(trxDist, svBreakpoint, brkptIdx))
+
+
+def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx):
+    if trx.id in trxIds:
+        idx = trxIds.index(trx.id)
+        trxItems[idx].add_brkpt(trxDist, svBreakpoint, brkptIdx)
+    else:
+        trxItems.append(AnnoTrx(trx, trxDist, svBreakpoint, brkptIdx))
+    return trxItems, trxIds
+
+
 class Segment:
-    def __init__(self, alignResult, segmentColor):
+    def __init__(self, alignResult, segmentColor, segmentIdx, nSegments):
         """ """
         self.alignResult = alignResult
         self.color = segmentColor
@@ -28,7 +53,13 @@ class Segment:
         self.indelSizes = alignResult.indel_sizes
         self.strand = alignResult.strand
         self.alignLen = alignResult.get_query_span()
+        self.idx = segmentIdx
+        self.nSegments = nSegments
         self.genomicCoords = alignResult.alignVals.get_coords('ref')
+
+    def get_len(self):
+        """ """
+        return self.queryCoordinates[1] - self.queryCoordinates[0]
 
     def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
@@ -39,20 +70,76 @@ class Segment:
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
-            for dKey in dKeys:
-                trxList, distList = annotatedTrxsDict[dKey]
-                idx = 0
-                for trx, dist in zip(trxList, distList):
-                    if trx.id in trxIds:
-                        continue
-                    trxType = 'intersect'
+            # If svBreakpoint type is 'indel' then there can be two trxs associated with the svBreakpoint
+            # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
+            # strand and the index of the segment.
+            brkptTrxs = []
+
+            if svBreakpoint.svType == 'rearrangement':
+                if len(dKeys) > 1:
+                    # This indicates that the segment is in the middle - key innner transcripts if the breakpoints are intergenic.
+                    leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
+                    rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
+                    keepIdx = 0
+                    if len(leftBpTrxList) > 1:
+                        # Take the inner trxs
+                        keepIdx = 1
+                    # Left
+                    trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0)
+                    # Right
+                    trxItems, trxIds = check_add_trx(rightBpTrxList[0], trxItems, trxIds, rightBpDistList[0], svBreakpoint, 1)
+                else:
+                    trxList, distList = annotatedTrxsDict[0]
                     if len(trxList) > 1:
-                        trxType = 'upstream'
-                        if idx == 0:
-                            trxType = 'downstream'
-                    trxItems.append((trx, dist, trxType))
-                    trxIds.append(trx.id)
-                    idx += 1
+                        # Pick which transcript to keep based on strands
+                        if self.idx == 0:
+                            # First
+                            if self.alignResult.strand == '-':
+                                # Get downstream gene
+                                trx = trxList[1]
+                            else:
+                                trx = trxList[0]
+                        elif self.idx == (self.nSegments - 1):
+                            if self.alignResult.strand == '-':
+                                # Get upstream gene
+                                trx = trxList[0]
+                            else:
+                                trx = trxList[1]
+                        if self.check_add_trx(trx, trxIds):
+                            trxItems.append((trx, trxDist, svBreakpoint, 0))
+                            trxIds.append(trx.id)
+                    else:
+                        if self.check_add_trx(trxList[0], trxIds):
+                            trxItems.append((trxList[0], distList[0], svBreakpoint, 0))
+                            trxIds.append(trxList[0].id)
+            elif svBreakpoint.svType == 'indel':
+                if len(dKeys) == 1:
+                    # Insertion with one genomic breakpoint
+                    trxList, distList = annotatedTrxsDict[0]
+                    if self.check_add_trx(trxList[0], trxIds):
+                        self.append((trxList[0], distList[0], svBreakpoint, 0))
+                        trxIds.append(trxList[0].id)
+                else:
+                    # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
+                    leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
+                    rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
+                    # Take the first trx no matter what
+                    trx = leftBpTrxList[0]
+                    trxDist = leftBpDistList[0]
+                    if self.check_add_trx(trx, trxIds):
+                        trxItems.append((trx, trxDist, svBreakpoint, 0))
+                        trxIds.append(trx.id)
+
+                    keepIdx = 0
+                    if len(rightBpTrxList) > 1:
+                        # Take the outer trx
+                        keepIdx = 1
+                    trx = rightBpTrxList[keepIdx]
+                    trxDist = rightBpDistList[keepIdx]
+                    if self.check_add_trx(trx, trxIds):
+                        trxItems.append((trx, trxDist, svBreakpoint, 1))
+                        trxIds.append(trx.id)
+        return trxItems, trxIds
 
 
 class AlignSegments:
@@ -71,7 +158,7 @@ class AlignSegments:
     def setup(self):
         """ """
         for i, blatResult in enumerate(self.svEventResult.blatResults):
-            segment = self.Segment(blatResult, self.colors[i])
+            segment = self.Segment(blatResult, self.colors[i], i, len(self.svEventResult.blatResults))
 
     def get_contig_seq(self):
         """ """
@@ -147,7 +234,7 @@ def plot_pileup(segmentManager, outBaseFn):
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-    plot_annotation_track(ax, yCoord + 3, xOffset, segmentManager)
+    # plot_annotation_track(ax, yCoord + 3, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
@@ -310,7 +397,35 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         return
 
     for i, segment in enumerate(segmentManager.segments):
-        segTrxs = segment.get_segment_trxs()
+        segTrxs, segTrxIds = segment.get_segment_trxs()
+
+        segLen = segment.get_len()
+        segStart, segEnd = segment.queryCoordinates
+        reverse = False
+
+        if segment.strand == '-':
+            reverse = True
+
+        trxOffset = segStart + xOffset
+        segTrxIter = 0
+        for segTrx in segTrxs:
+            trxOffset += segTrxIter * (float(segLen) / float(len(segTrxs)))
+            trx = segTrx.trx
+            brkpts = segTrx.brkpts
+            exons = sorted(trx.exons, key=lambda x: x.start, reverse=reverse)
+            genomicLen = log(abs(trx.stop - int(trx.start)), 2)
+            bpUnits = float(segLen) / float(genomicLen)
+            for exon in exons:
+                ll = [log(exon.start, 2), log(exon.stop, 2)]
+                e1 = log(max(abs(int(genomicStart) - int(exon.start)), 1), 2) * bpUnits
+                e2 = log(max(abs(int(genomicStart) - int(exon.stop)), 1), 2) * bpUnits
+                eCoords = [e1, e2]
+                eCoords.sort()
+                ycoord = annoYidx - (float(iter) / float(5))
+                exonCoord = segment.
+                rect = patches.Rectangle((trxOffset + e1, yCoord), e2 - e1, 1, color=segment.color)
+                ax.add_patch(rect)
+            segTrxIter += 1
 
 
 def map_coding_features(exons):

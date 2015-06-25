@@ -68,109 +68,109 @@ class Transcript:
         os.remove(outFn)
 
 
-class segAnnot():
-    def __init__(self, annoRes, bp, realignStrand, pos, segLen, segment):
-        self.exons = None
-        self.geneName = None
-        self.trxId = None
-        self.geneStrand = None
-        self.bp = bp
-        self.realignStrand = realignStrand
-        self.pos = pos
-        self.segLen = segLen
-        self.mappedExons = []
-        self.genomicEnd = None
-        self.segment = segment
-        self.features = []
-        self.setup(annoRes)
+# class segAnnot():
+#     def __init__(self, annoRes, bp, realignStrand, pos, segLen, segment):
+#         self.exons = None
+#         self.geneName = None
+#         self.trxId = None
+#         self.geneStrand = None
+#         self.bp = bp
+#         self.realignStrand = realignStrand
+#         self.pos = pos
+#         self.segLen = segLen
+#         self.mappedExons = []
+#         self.genomicEnd = None
+#         self.segment = segment
+#         self.features = []
+#         self.setup(annoRes)
 
-    def setup(self, annoRes):
-        if annoRes:
-            self.features = annoRes['features']
-            self.geneName = annoRes['name']
-            self.trxId = annoRes['trxId']
-            self.geneStrand = annoRes['strand']
+#     def setup(self, annoRes):
+#         if annoRes:
+#             self.features = annoRes['features']
+#             self.geneName = annoRes['name']
+#             self.trxId = annoRes['trxId']
+#             self.geneStrand = annoRes['strand']
 
-    def get_brkpt(self):
-        return self.bp.split(':')[1]
+#     def get_brkpt(self):
+#         return self.bp.split(':')[1]
 
-    def get_exons(self):
-        features = []
-        bp = self.get_brkpt()
-        for feature in self.features:
-            print 'Feature', feature
-            if feature != 'exon' :
-                continue
-            fElements = self.features[feature]
-            reverse = False
-            if self.realignStrand == '-':
-                reverse = True
-            fElements_sorted = sorted(fElements, key=lambda x: x[0], reverse=reverse)
-            eIter = 1
-            for element in fElements:
-                add = False
-                if self.pos == "first":
-                    if int(element[1]) >= int(bp) and self.realignStrand=='-':
-                        add = True
-                    elif int(element[0]) <= int(bp) and self.realignStrand=='+':
-                        add = True   
-                    if add:
-                        features.append((element[0], element[1], feature+str(eIter)))
-                elif self.pos == "last":
-                    if int(element[0]) <= int(bp) and self.realignStrand=='-':
-                        add = True
-                    elif int(element[1]) >= int(bp) and self.realignStrand=='+':
-                        add = True
-                    if add:
-                        features.append((element[0], element[1], feature+str(eIter)))
-                eIter += 1
-        print 'Brkpt', bp
-        print 'Features', features
-        return features
+#     def get_exons(self):
+#         features = []
+#         bp = self.get_brkpt()
+#         for feature in self.features:
+#             print 'Feature', feature
+#             if feature != 'exon' :
+#                 continue
+#             fElements = self.features[feature]
+#             reverse = False
+#             if self.realignStrand == '-':
+#                 reverse = True
+#             fElements_sorted = sorted(fElements, key=lambda x: x[0], reverse=reverse)
+#             eIter = 1
+#             for element in fElements:
+#                 add = False
+#                 if self.pos == "first":
+#                     if int(element[1]) >= int(bp) and self.realignStrand=='-':
+#                         add = True
+#                     elif int(element[0]) <= int(bp) and self.realignStrand=='+':
+#                         add = True   
+#                     if add:
+#                         features.append((element[0], element[1], feature+str(eIter)))
+#                 elif self.pos == "last":
+#                     if int(element[0]) <= int(bp) and self.realignStrand=='-':
+#                         add = True
+#                     elif int(element[1]) >= int(bp) and self.realignStrand=='+':
+#                         add = True
+#                     if add:
+#                         features.append((element[0], element[1], feature+str(eIter)))
+#                 eIter += 1
+#         print 'Brkpt', bp
+#         print 'Features', features
+#         return features
 
-    def map_coding_features(self, exons):
-        bp = self.get_brkpt()
-        reverse = False
-        print self.realignStrand
-        if self.realignStrand == '-':
-            reverse = True
-        l = sorted(exons, key=lambda x: x[1], reverse=reverse)
-        genomicStart = self.get_brkpt()
+#     def map_coding_features(self, exons):
+#         bp = self.get_brkpt()
+#         reverse = False
+#         print self.realignStrand
+#         if self.realignStrand == '-':
+#             reverse = True
+#         l = sorted(exons, key=lambda x: x[1], reverse=reverse)
+#         genomicStart = self.get_brkpt()
 
-        print self.pos
-        print l
-        if self.pos == "first":
-            end = l[0][0]
-            genomicStart = end
-        elif self.pos == "last":
-            end = l[-1][1]
+#         print self.pos
+#         print l
+#         if self.pos == "first":
+#             end = l[0][0]
+#             genomicStart = end
+#         elif self.pos == "last":
+#             end = l[-1][1]
 
-        print exons
-        print end, bp
-        genomicLen = log(abs(end - int(bp)), 2)
-        bpUnits = float(self.segment.plotLen)/float(genomicLen)
-        print self.segment.plotLen
-        print genomicLen
-        print bpUnits
-        pos = []
+#         print exons
+#         print end, bp
+#         genomicLen = log(abs(end - int(bp)), 2)
+#         bpUnits = float(self.segment.plotLen)/float(genomicLen)
+#         print self.segment.plotLen
+#         print genomicLen
+#         print bpUnits
+#         pos = []
 
-        previousCoord = 0
-        if self.pos == "last": 
-            previousCoord = log(int(bp), 2)
+#         previousCoord = 0
+#         if self.pos == "last": 
+#             previousCoord = log(int(bp), 2)
 
-        intronLen = 0
-        for coords in l:
-            if coords[2].find('exon') == -1:
-                continue
-            ll = [log(coords[0], 2), log(coords[1], 2)]
-            e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2)*bpUnits
-            e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2)*bpUnits
-            eCoords = [e1, e2]
-            eCoords.sort()
-            eCoords.append(coords[2])
-            pos.append(eCoords)
-        self.mappedExons = pos
-        self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
+#         intronLen = 0
+#         for coords in l:
+#             if coords[2].find('exon') == -1:
+#                 continue
+#             ll = [log(coords[0], 2), log(coords[1], 2)]
+#             e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2)*bpUnits
+#             e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2)*bpUnits
+#             eCoords = [e1, e2]
+#             eCoords.sort()
+#             eCoords.append(coords[2])
+#             pos.append(eCoords)
+#         self.mappedExons = pos
+#         self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
 
 
 def annotate_event(svEventResult, contigMeta):

@@ -62,7 +62,7 @@ class annotation():
                     retVals['features'] = self.trxs[achr][gene]['trx'][canonTrxId]['features']
                     retVals['name'] = self.trxs[achr][gene]['name']
                     retVals['strand'] = self.trxs[achr][gene]['strand']
-                    retVals['trxId'] = canonTrxId 
+                    retVals['trxId'] = canonTrxId
                     if int(bp) >= int(trxStart) and int(bp) <= int(trxStop):
                         return retVals
 #                        return self.trxs[achr][gene]['trx'][canonTrxId]['features'], self.trxs[achr][gene]['name'], self.trxs[achr][gene]['strand'], canonTrxId

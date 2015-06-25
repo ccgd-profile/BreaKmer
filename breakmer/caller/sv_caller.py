@@ -364,6 +364,8 @@ class SVBreakpoints:
         """ """
         # List of tuples for indel breakpoints parsed from the blat result ('chr#', bp1, bp2)
         self.genomicBrkpts['target'] = blatResult.get_genomic_brkpts()
+        for brkpt in self.genomicBrkpts['target']:
+            blatResult.set_sv_brkpt(brkpt, 'indel', 'target')
         # brkpt_out = []
         # bp_str = []
         # chrm = 'chr' + str(blatResult.get_seq_name('ref'))
