@@ -428,49 +428,49 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             segTrxIter += 1
 
 
-def map_coding_features(exons):
-    bp = self.get_brkpt()
-    reverse = False
-    print self.realignStrand
-    if self.realignStrand == '-':
-        reverse = True
-    l = sorted(exons, key=lambda x: x[1], reverse=reverse)
-    genomicStart = self.get_brkpt()
+# def map_coding_features(exons):
+#     bp = self.get_brkpt()
+#     reverse = False
+#     print self.realignStrand
+#     if self.realignStrand == '-':
+#         reverse = True
+#     l = sorted(exons, key=lambda x: x[1], reverse=reverse)
+#     genomicStart = self.get_brkpt()
 
-    print self.pos
-    print l
-    if self.pos == "first":
-        end = l[0][0]
-        genomicStart = end
-    elif self.pos == "last":
-        end = l[-1][1]
+#     print self.pos
+#     print l
+#     if self.pos == "first":
+#         end = l[0][0]
+#         genomicStart = end
+#     elif self.pos == "last":
+#         end = l[-1][1]
 
-    print exons
-    print end, bp
-    genomicLen = log(abs(end - int(bp)), 2)
-    bpUnits = float(self.segment.plotLen)/float(genomicLen)
-    print self.segment.plotLen
-    print genomicLen
-    print bpUnits
-    pos = []
+#     print exons
+#     print end, bp
+#     genomicLen = log(abs(end - int(bp)), 2)
+#     bpUnits = float(self.segment.plotLen)/float(genomicLen)
+#     print self.segment.plotLen
+#     print genomicLen
+#     print bpUnits
+#     pos = []
 
-    previousCoord = 0
-    if self.pos == "last":
-        previousCoord = log(int(bp), 2)
+#     previousCoord = 0
+#     if self.pos == "last":
+#         previousCoord = log(int(bp), 2)
 
-    intronLen = 0
-    for coords in l:
-        if coords[2].find('exon') == -1:
-            continue
-        ll = [log(coords[0], 2), log(coords[1], 2)]
-        e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2)*bpUnits
-        e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2)*bpUnits
-        eCoords = [e1, e2]
-        eCoords.sort()
-        eCoords.append(coords[2])
-        pos.append(eCoords)
-    self.mappedExons = pos
-    self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
+#     intronLen = 0
+#     for coords in l:
+#         if coords[2].find('exon') == -1:
+#             continue
+#         ll = [log(coords[0], 2), log(coords[1], 2)]
+#         e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2) * bpUnits
+#         e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2) * bpUnits
+#         eCoords = [e1, e2]
+#         eCoords.sort()
+#         eCoords.append(coords[2])
+#         pos.append(eCoords)
+#     self.mappedExons = pos
+#     self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
 
 # class annotation():
 #     def __init__(self, annoFn):
