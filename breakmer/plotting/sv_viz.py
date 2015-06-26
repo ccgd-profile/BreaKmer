@@ -69,7 +69,7 @@ class Segment:
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
-            print svBreakpoint.chr, svBreakpoint.genomicCoordinates, svBreakpoint.targetKey
+            print svBreakpoint.chrom, svBreakpoint.genomicCoordinates, svBreakpoint.targetKey
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
@@ -421,6 +421,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             genomicLen = log(abs(trx.stop - int(trx.start)), 2)
             bpUnits = float(segLen) / float(genomicLen)
             for exon in exons:
+                print 'Exon', exon.start, exon.stop
                 ll = [log(exon.start, 2), log(exon.stop, 2)]
                 e1 = log(max(abs(int(trx.start) - int(exon.start)), 1), 2) * bpUnits
                 e2 = log(max(abs(int(trx.start) - int(exon.stop)), 1), 2) * bpUnits
