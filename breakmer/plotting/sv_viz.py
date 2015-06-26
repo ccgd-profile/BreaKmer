@@ -165,17 +165,17 @@ class AlignSegments:
 
     def get_segment_color(self, nucIter):
         """ """
-        colors = []
+        colors = ['grey']
         for segment in self.segments:
             # print nucIter
             # print segment.queryCoordinates
             if (nucIter >= segment.queryCoordinates[0]) and (nucIter <= segment.queryCoordinates[1] + 1):
                 colors.append(segment.color)
                 # print colors
-        if len(colors) > 1:
+        if len(colors) > 2:
             colors = 'black'
         else:
-            colors = colors[0]
+            colors = colors[1]
         return colors
 
 
@@ -387,7 +387,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
         brkIdx = 0
         nucIter = 0
         for nuc in seq:
-            nucColor = 'black' # segmentManager.get_segment_color(nucIter)
+            nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
             nucIter += 1
