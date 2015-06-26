@@ -91,6 +91,7 @@ class Segment:
                     # Right
                     trxItems, trxIds = check_add_trx(rightBpTrxList[0], trxItems, trxIds, rightBpDistList[0], svBreakpoint, 1)
                 else:
+                    print annotatedTrxsDict
                     trxList, distList = annotatedTrxsDict[0]
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands
