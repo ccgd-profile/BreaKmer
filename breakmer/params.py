@@ -311,6 +311,7 @@ class ParamManager:
 
         self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
         ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
+        print 'Ref fasta name', ref_fasta_name
 
         # Check if 2bit is there.
         self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
