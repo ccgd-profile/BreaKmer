@@ -258,7 +258,7 @@ class AlignResults:
         for i in self.alignmentFreq:
             if i > 0:
                 nhits += 1
-        return round((float(nhits) / float(self.qsize)) * 100, 2)
+        return round((float(nhits) / float(self.querySize)) * 100, 2)
 
     def get_mean_cov(self, s, e):
         return float(sum(self.alignmentFreq[s:e])) / float(len(self.alignmentFreq[s:e]))
