@@ -222,6 +222,7 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     bpIter = 1
     for queryStartCoord, blatResult in blatResults:
         svBreakpoints = blatResult.get_sv_brkpts()
+        print bpIter, svBreakpoints.chrom, svBreakpoints.genomicCoords
         for svBreakpoint in svBreakpoints:
             chrom = svBreakpoint.chrom
             brkptCoords = svBreakpoint.genomicCoords
@@ -238,6 +239,8 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     cmd = 'sort -k1,1 -k2,2n %s > %s' % (bpBedFn, bpBedFn + '.sorted')
     os.system(cmd)
     shutil.move(bpBedFn + '.sorted', bpBedFn)
+    print bpBedFn
+    sys.exit()
     return bpMap
 
 
