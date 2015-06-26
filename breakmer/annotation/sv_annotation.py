@@ -208,6 +208,10 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                     trx.get_exons(annotationFn, tmpFilePath)
                 print 'Store annotations', trx, dist, coordIdx
                 svBreakpoint.store_annotation([trx], [dist], coordIdx)
+                print svBreakpoint.annotated_trxs
+                svbps = blatResult.svBreakpoints
+                for sv in svbps:
+                    print sv.annotated_trxs
             else:
                 upTrx, upDist = upstream
                 downTrx, downDist = downstream
