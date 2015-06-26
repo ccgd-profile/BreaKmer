@@ -344,15 +344,15 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         xCoord = xOffset + segment.queryCoordinates[0]
         yCoord = yCoord + ((i + 1) * 0.5)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
-        rectHeight = 0.5
+        rectHeight = 0.25
         lenText = str(rectLen) + 'bp'
         xCoordLabel = xCoord + (float(rectLen) / float(2))
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
-        ax.text(xCoordLabel, yCoord - 0.5, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
+        ax.text(xCoordLabel, yCoord - 0.25, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
         # Plot genomic coordinates of the segment
-        ax.text(xCoord, yCoord - 0.5, segment.genomicCoordinates[0], ha='center', va='top', size=10)
-        ax.text(xCoord + rectLen, yCoord - 0.5, segment.genomicCoordinates[1], ha='center', va='top', size=10)
+        ax.text(xCoord, yCoord - 0.25, segment.genomicCoordinates[0], ha='left', va='top', size=10)
+        ax.text(xCoord + rectLen, yCoord - 0.25, segment.genomicCoordinates[1], ha='right', va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
