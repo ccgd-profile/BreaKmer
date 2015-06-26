@@ -421,8 +421,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             bpUnits = float(segLen) / float(genomicLen)
             for exon in exons:
                 ll = [log(exon.start, 2), log(exon.stop, 2)]
-                e1 = log(max(abs(int(genomicStart) - int(exon.start)), 1), 2) * bpUnits
-                e2 = log(max(abs(int(genomicStart) - int(exon.stop)), 1), 2) * bpUnits
+                e1 = log(max(abs(int(trx.start) - int(exon.start)), 1), 2) * bpUnits
+                e2 = log(max(abs(int(trx.start) - int(exon.stop)), 1), 2) * bpUnits
                 eCoords = [e1, e2]
                 eCoords.sort()
                 ycoord = annoYidx - (float(iter) / float(5))
