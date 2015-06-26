@@ -11,7 +11,7 @@ import breakmer.realignment.realigner as realigner
 import breakmer.caller.sv_caller as sv_caller
 import breakmer.utils as utils
 import breakmer.annotation.sv_annotation as annotator
-# import breakmer.plotting.sv_viz as svplotter
+import breakmer.plotting.sv_viz as svplotter
 
 __author__ = "Ryan Abo"
 __copyright__ = "Copyright 2015, Ryan Abo"
