@@ -126,7 +126,11 @@ class Breakpoints:
 
     def reverse_breakpts(self, querySeqSize):
         for i in range(len(self.contigBreakpoints)):
-            self.contigBreakpoints[i] = querySeqSize - self.contigBreakpoints[i]
+            contigBrkpts = self.contigBreakpoints[i]
+            contigBrkpts[1] = querySeqSize - contigBrkpts[1]
+            if len(contigBrkpts) > 2:
+                contigBrkpts[2] = querySeqSize - contigBrkpts[2]
+            self.contigBreakpoints[i] = contigBrkpts
 
     def set_sv_brkpt(self, coords, svType, targetKey):
         """ """
