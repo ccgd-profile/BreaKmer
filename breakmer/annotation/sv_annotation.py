@@ -194,11 +194,12 @@ def annotate_event(svEventResult, contigMeta):
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
-        print 'store_annotations', bpKey, coordIdx
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
         else:
             svBreakpoint = blatResult.get_sv_brkpts()[svBrkptIdx]
+            print 'Store annotations() blatResult object', blatResult
+            print 'Store annotations() svBreakpoint object', svBreakpoint
             trxMappings = trxMap[bpKey]
             intersect = trxMap[bpKey]['intersect']
             upstream = trxMap[bpKey]['upstream']
@@ -207,12 +208,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 trx, dist = intersect
                 if params.get_param('generate_image') or True:
                     trx.get_exons(annotationFn, tmpFilePath)
-                print 'Store annotations', trx, dist, coordIdx
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([trx], [dist], coordIdx)
-                print blatResult.get_sv_brkpts()[svBrkptIdx].annotated_trxs
-                svbps = blatResult.breakpts.svBreakpoints
-                for sv in svbps:
-                    print sv.annotated_trxs
             else:
                 upTrx, upDist = upstream
                 downTrx, downDist = downstream
@@ -228,6 +224,7 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     bpBedFile = open(bpBedFn, 'w')
     bpIter = 1
     for queryStartCoord, blatResult in blatResults:
+        print 'Blat result write_brkpt_bed_file()', blatResult
         svBreakpoints = blatResult.get_sv_brkpts()
         svBrkptIdx = 0
         for svBreakpoint in svBreakpoints:

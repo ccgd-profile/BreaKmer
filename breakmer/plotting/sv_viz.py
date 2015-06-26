@@ -64,6 +64,7 @@ class Segment:
         return self.queryCoordinates[1] - self.queryCoordinates[0]
 
     def get_segment_trxs(self):
+        print 'Blat result object', self.alignResult
         svBreakpoints = self.alignResult.get_sv_brkpts()
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
