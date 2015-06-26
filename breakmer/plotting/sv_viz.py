@@ -231,12 +231,12 @@ def plot_pileup(segmentManager, outName):
     xOffset = 2
     # Increment text by 1 unit
     xInc = 1
-    plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
+    # plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-    plot_annotation_track(ax, yCoord + 3, xOffset, segmentManager)
+    plot_annotation_track(ax, yCoord + 8, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
@@ -309,13 +309,13 @@ def plot_pileup(segmentManager, outName):
     plt.savefig(outName + '.svg')
 
 
-def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
-    """Plot the strand the segments were realigned to the reference - +/-"""
-    for segment in segmentManager.segments:
-        queryStartCoord, queryEndCoord = segment.queryCoordinates
-        midDist = float(abs(queryEndCoord - queryStartCoord)) / float(2)
-        xCoord = xOffset + queryStartCoord + midDist
-        ax.text(xCoord, seqYidx + 0.5, segment.strand, ha='center', va='bottom', size=14, family='monospace')
+# def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
+#     """Plot the strand the segments were realigned to the reference - +/-"""
+#     for segment in segmentManager.segments:
+#         queryStartCoord, queryEndCoord = segment.queryCoordinates
+#         midDist = float(abs(queryEndCoord - queryStartCoord)) / float(2)
+#         xCoord = xOffset + queryStartCoord + midDist
+#         ax.text(xCoord, seqYidx + 0.5, segment.strand, ha='center', va='bottom', size=14, family='monospace')
 
 
 def add_seq_text(ax, x, y, char, color='black'):
@@ -353,7 +353,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         xCoordLabel = xCoord + (float(rectLen) / float(2))
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
-        ax.text(xCoordLabel, yCoord - 0.5, lenText, ha='center', va='top', size=10)
+        ax.text(xCoordLabel, yCoord - 0.5, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
         # Plot genomic coordinates of the segment
         ax.text(xCoord, yCoord - 0.5, segment.genomicCoordinates[0], ha='center', va='top', size=10)
         ax.text(xCoord + rectLen, yCoord - 0.5, segment.genomicCoordinates[1], ha='center', va='top', size=10)
