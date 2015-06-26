@@ -435,20 +435,20 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             for brkpt in brkpts:
                 print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx]
             for exon in exons:
-                if segmentPos == 'first':
-                    if int(element[1]) >= int(bp) and segment.strand == '-':
-                        add = True
-                    elif int(element[0]) <= int(bp) and s=='+':
-                        add = True
-                    if add:
-                        features.append((element[0], element[1], feature+str(eIter)))
-                elif iter == 2:
-                    if int(element[0]) <= int(bp) and s=='-':
-                        add = True
-                    elif int(element[1]) >= int(bp) and s=='+':
-                        add = True
-                    if add:
-                        features.append((element[0], element[1], feature+str(eIter)))
+                # if segmentPos == 'first':
+                #     if int(element[1]) >= int(bp) and segment.strand == '-':
+                #         add = True
+                #     elif int(element[0]) <= int(bp) and s=='+':
+                #         add = True
+                #     if add:
+                #         features.append((element[0], element[1], feature+str(eIter)))
+                # elif iter == 2:
+                #     if int(element[0]) <= int(bp) and s=='-':
+                #         add = True
+                #     elif int(element[1]) >= int(bp) and s=='+':
+                #         add = True
+                #     if add:
+                #         features.append((element[0], element[1], feature+str(eIter)))
 
                 ll = [log(exon.start, 2), log(exon.stop, 2)]
                 e1 = log(max(abs(int(trx.start) - int(exon.start)), 1), 2) * bpUnits
