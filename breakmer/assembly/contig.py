@@ -914,7 +914,6 @@ class Contig:
     def annotate_calls(self):
         """ """
         if self.svEventResult and self.meta.params.get_param('gene_annotation_file') and self.meta.params.get_param('bedtools'):
-            print 'contig.py annotate_calls() - Annotating calls'
             annotator.annotate_event(self.svEventResult, self.meta)
 
     def output_calls(self, outputPath, svReadsBamFn):
