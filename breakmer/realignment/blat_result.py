@@ -128,9 +128,9 @@ class Breakpoints:
         for i in range(len(self.contigBreakpoints)):
             contigBrkpts = self.contigBreakpoints[i]
             print 'blat_result contig breakpoints', contigBrkpts
-            contigBrkpts[1] = querySeqSize - contigBrkpts[1]
-            if len(contigBrkpts) > 2:
-                contigBrkpts[2] = querySeqSize - contigBrkpts[2]
+            contigBrkpts[0] = querySeqSize - contigBrkpts[0]
+            if len(contigBrkpts) > 1:
+                contigBrkpts[1] = querySeqSize - contigBrkpts[1]
             self.contigBreakpoints[i] = contigBrkpts
 
     def set_sv_brkpt(self, coords, svType, targetKey):
@@ -358,7 +358,7 @@ class BlatResult:
             if ins_bp > 0:
                 self.breakpts.add_brkpts('genomic', (chrom, bp1))
                 self.indel_sizes.append("I" + str(ins_bp))
-                self.breakpts.add_brkpts('contig', (qend1, qstart2))
+                self.breakpts.add_brkpts('contig', [qend1, qstart2])
                 # self.breakpts.add_brkpts('contig', qstart2)
                 self.cigar += str(ins_bp) + "I"
                 if ins_bp > self.indel_maxevent_size[0]:
@@ -366,7 +366,7 @@ class BlatResult:
             if del_bp > 0:
                 self.breakpts.add_brkpts('genomic', (chrom, bp1, bp2))
                 self.indel_sizes.append("D" + str(del_bp))
-                self.breakpts.add_brkpts('contig', qend1)
+                self.breakpts.add_brkpts('contig', [qend1])
                 self.cigar += str(del_bp) + "D"
                 if del_bp > self.indel_maxevent_size[0]:
                     self.indel_maxevent_size = [del_bp, "D"]
