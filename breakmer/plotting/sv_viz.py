@@ -155,6 +155,10 @@ class AlignSegments:
         """ """
         return self.svEventResult.contig.seq
 
+    def get_contig_id(self):
+        """ """
+        return self.svEventResult.contig.get_id()
+
     def set_orderedseqs(self, orderedSeqs):
         """ """
         self.orderedSeqs = orderedSeqs
@@ -201,7 +205,7 @@ def pile_reads(reads, contigSeq):
     return os
 
 
-def plot_pileup(segmentManager, outBaseFn):
+def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
