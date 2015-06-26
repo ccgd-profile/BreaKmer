@@ -303,6 +303,7 @@ class ParamManager:
         Return:
             None
         """
+        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
 
         # This makes the assumption that an existing blat server exists at this port.
         # Typically nice for debugging and --keep_blat_server was used.
@@ -310,14 +311,10 @@ class ParamManager:
         if self.get_param('blat_port'):
             return
 
-        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
         ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
-        print 'Ref fasta name', ref_fasta_name
-        print 'Ref fasta dir', self.opts['reference_fasta_dir']
 
         # Check if 2bit is there.
         self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
-        sys.exit()
         if not os.path.exists(self.opts['blat_2bit']):
             utils.log(self.logging_name, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
             # Create 2bit requires faToTwoBit
