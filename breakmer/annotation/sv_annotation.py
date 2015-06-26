@@ -22,6 +22,8 @@ class Exon:
     def set_values(self, values):
         """ """
         self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta = values
+        self.start = int(self.start)
+        self.stop = int(self.stop)
 
 
 class Transcript:
