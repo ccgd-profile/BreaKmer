@@ -28,7 +28,7 @@ class TrxBrkpt:
 
 class AnnoTrx:
     def __init__(self, trx, trxDist, svBreakpoint, brkptIdx):
-        sefl.trx = trx
+        self.trx = trx
         self.brkpts = [TrxBrkpt(trxDist, svBreakpoint, brkptIdx)]
 
     def add_brkpt(self, trxDist, svBreakpoint, brkptIdx):
