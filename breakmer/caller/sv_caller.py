@@ -347,7 +347,8 @@ class SVBreakpoints:
             self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
             self.genomicBrkpts[targetKey].append((chrom, ts, te))
-            br.set_sv_brkpt((chrom, ts, te), 'rearrangement', targetKey)
+            if br.strand == '+':
+                br.set_sv_brkpt((chrom, ts, te), 'rearrangement', targetKey)
             if br.strand == '-':
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
