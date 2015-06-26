@@ -171,7 +171,7 @@ class AlignSegments:
             # print segment.queryCoordinates
             if (nucIter >= segment.queryCoordinates[0]) and (nucIter <= segment.queryCoordinates[1]):
                 colors.append(segment.color)
-                print colors
+                # print colors
         if len(colors) > 1:
             colors = 'black'
         else:
