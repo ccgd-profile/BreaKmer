@@ -167,8 +167,8 @@ class AlignSegments:
         """ """
         colors = []
         for segment in self.segments:
-            print nucIter
-            print segment.queryCoordinates
+            # print nucIter
+            # print segment.queryCoordinates
             if (nucIter >= segment.queryCoordinates[0]) and (nucIter <= segment.queryCoordinates[1]):
                 colors.append(segment.color)
                 print colors
