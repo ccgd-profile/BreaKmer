@@ -193,11 +193,12 @@ def annotate_event(svEventResult, contigMeta):
 
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
-        blatResult, svBreakpoint, coordIdx = bpMap[bpKey]
+        blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
         print 'store_annotations', bpKey, coordIdx
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
         else:
+            svBreakpoint = blatResult.get_sv_brkpts()[svBrkptIdx]
             trxMappings = trxMap[bpKey]
             intersect = trxMap[bpKey]['intersect']
             upstream = trxMap[bpKey]['upstream']
@@ -228,6 +229,7 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     bpIter = 1
     for queryStartCoord, blatResult in blatResults:
         svBreakpoints = blatResult.get_sv_brkpts()
+        svBrkptIdx = 0
         for svBreakpoint in svBreakpoints:
             chrom = svBreakpoint.chrom
             brkptCoords = svBreakpoint.genomicCoords
@@ -237,8 +239,9 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
                 bpKey = chrom + ':' + str(coord) + '_BP' + str(bpIter)
                 bpStr = [chrom, coord, int(coord) + 1, bpKey]
                 bpBedFile.write('\t'.join([str(x) for x in bpStr]) + '\n')
-                bpMap[bpKey] = (blatResult, svBreakpoint, coordIdx)
+                bpMap[bpKey] = (blatResult, svBrkptIdx, coordIdx)
                 coordIdx += 1
+            svBrkptIdx += 1
         bpIter += 1
     bpBedFile.close()
     cmd = 'sort -k1,1 -k2,2n %s > %s' % (bpBedFn, bpBedFn + '.sorted')
