@@ -169,8 +169,9 @@ class AlignSegments:
         for segment in self.segments:
             print nucIter
             print segment.queryCoordinates
-            if nucIter >= segment.queryCoordinates[0] and nucIter <= segment.queryCoordinates[1]:
+            if (nucIter >= segment.queryCoordinates[0]) and (nucIter <= segment.queryCoordinates[1]):
                 colors.append(segment.color)
+                print colors
         if len(colors) > 1:
             colors = 'black'
         else:
@@ -379,11 +380,11 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     xInc = 1
     # Iterate through sequences.
     for idx, seq in segmentManager.orderedSeqs:
-        seqTextOff = xOffset
+        seqTextOff = xOffset + idx
         seqYidx = seqYidx - yInc
         segIdx = 0
         brkIdx = 0
-        nucIter = 0
+        nucIter = idx
         for nuc in seq:
             nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
