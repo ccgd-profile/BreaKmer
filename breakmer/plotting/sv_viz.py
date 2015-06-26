@@ -69,6 +69,7 @@ class Segment:
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
+            print svBreakpoint.chr, svBreakpoint.genomicCoordinates, svBreakpoint.targetKey
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
