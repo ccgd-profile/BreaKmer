@@ -381,17 +381,17 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     # Iterate through sequences.
     print segmentManager.get_contig_seq(), len(segmentManager.get_contig_seq())
     for idx, seq in segmentManager.orderedSeqs:
-        print idx, seq
         seqTextOff = xOffset + idx
         seqYidx = seqYidx - yInc
         segIdx = 0
         brkIdx = 0
         nucIter = idx
-        # for nuc in seq:
+        for nuc in seq:
         #     nucColor = segmentManager.get_segment_color(nucIter)
         #     add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
         #     seqTextOff += xInc
-        #     nucIter += 1
+            nucIter += 1
+        print seq, idx, nucIter
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
