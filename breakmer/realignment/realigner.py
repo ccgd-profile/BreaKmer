@@ -131,11 +131,12 @@ class Realignment:
             return False
         else:
             self.results = AlignResults(alignProgram, scope, resultFn, self.contig)
+            print self.results.resultFn
             return True
 
     def get_result_fn(self):
         """ """
-        if self.results:
+        if self.results is not None:
             return self.results.resultFn
 
     def has_results(self):

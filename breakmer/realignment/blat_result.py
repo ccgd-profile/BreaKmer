@@ -127,6 +127,7 @@ class Breakpoints:
     def reverse_breakpts(self, querySeqSize):
         for i in range(len(self.contigBreakpoints)):
             contigBrkpts = self.contigBreakpoints[i]
+            print 'blat_result contig breakpoints', contigBrkpts
             contigBrkpts[1] = querySeqSize - contigBrkpts[1]
             if len(contigBrkpts) > 2:
                 contigBrkpts[2] = querySeqSize - contigBrkpts[2]
