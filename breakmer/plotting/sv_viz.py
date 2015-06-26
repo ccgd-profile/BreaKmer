@@ -146,7 +146,7 @@ class AlignSegments:
     def __init__(self, svEventResult):
         """ """
         self.svEventResult = svEventResult
-        self.segments = None
+        self.segments = []
         self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
         self.orderedSeqs = None
         self.setup()
