@@ -205,7 +205,7 @@ def plot_pileup(segmentManager, outBaseFn):
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
     plotHeight = 5 # seqPlotSize*1.5
-    if len(orderedSeqs) > 10:
+    if len(segmentManager.orderedSeqs) > 10:
         plotHeight = 15
 
     # Setup figure
