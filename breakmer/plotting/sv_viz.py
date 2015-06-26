@@ -113,9 +113,7 @@ class Segment:
                 if len(dKeys) == 1:
                     # Insertion with one genomic breakpoint
                     trxList, distList = annotatedTrxsDict[0]
-                    if self.check_add_trx(trxList[0], trxIds):
-                        self.append((trxList[0], distList[0], svBreakpoint, 0))
-                        trxIds.append(trxList[0].id)
+                    trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0)
                 else:
                     # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
                     leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
@@ -123,19 +121,14 @@ class Segment:
                     # Take the first trx no matter what
                     trx = leftBpTrxList[0]
                     trxDist = leftBpDistList[0]
-                    if self.check_add_trx(trx, trxIds):
-                        trxItems.append((trx, trxDist, svBreakpoint, 0))
-                        trxIds.append(trx.id)
-
+                    trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0)
                     keepIdx = 0
                     if len(rightBpTrxList) > 1:
                         # Take the outer trx
                         keepIdx = 1
                     trx = rightBpTrxList[keepIdx]
                     trxDist = rightBpDistList[keepIdx]
-                    if self.check_add_trx(trx, trxIds):
-                        trxItems.append((trx, trxDist, svBreakpoint, 1))
-                        trxIds.append(trx.id)
+                    trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1)
         return trxItems, trxIds
 
 
