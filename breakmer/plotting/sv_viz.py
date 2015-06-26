@@ -433,7 +433,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             bpUnits = float(segLen) / float(genomicLen)
             brkpts = segTrx.brkpts
             for brkpt in brkpts:
-                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx]
+                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
             for exon in exons:
                 # if segmentPos == 'first':
                 #     if int(element[1]) >= int(bp) and segment.strand == '-':
