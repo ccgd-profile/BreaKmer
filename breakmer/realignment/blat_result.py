@@ -320,7 +320,7 @@ class BlatResult:
         for indx in m_indxs:
             nmatch = ''
             windx = indx - 1
-            while windx > -1 and is_number(flank_str[windx]):
+            while windx > -1 and utils.is_number(flank_str[windx]):
                 nmatch = flank_str[windx] + nmatch
                 windx = windx - 1
             match_sum += int(nmatch)
