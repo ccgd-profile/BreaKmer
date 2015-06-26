@@ -103,6 +103,7 @@ class SVBreakpoint:
 
     def store_annotation(self, trxList, distList, coordIdx):
         """ """
+        print self
         self.annotated_trxs[coordIdx] = [trxList, distList]
 
 
