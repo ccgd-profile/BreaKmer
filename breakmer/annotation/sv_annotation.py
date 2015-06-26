@@ -209,7 +209,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 print 'Store annotations', trx, dist, coordIdx
                 svBreakpoint.store_annotation([trx], [dist], coordIdx)
                 print svBreakpoint.annotated_trxs
-                svbps = blatResult.svBreakpoints
+                svbps = blatResult.breakpts.svBreakpoints
                 for sv in svbps:
                     print sv.annotated_trxs
             else:
