@@ -399,7 +399,19 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     if not segmentManager.has_annotations():
         return
 
+    segStarts = []
     for i, segment in enumerate(segmentManager.segments):
+        segStarts.append((segment.queryCoordinates[0], segment))
+
+    sortedSegs = sorted(segStarts, key=lambda x: x[0])
+
+    for i, segment in enumerate(sortedSegs):
+        segmentPos = 'first'
+        if i > 0 and i < len(sortedSegs):
+            segmentPos = 'middle'
+        elif i == (len(sortedSegs) - 1):
+            segmentPos = 'last'
+
         segTrxs, segTrxIds = segment.get_segment_trxs()
 
         segLen = segment.get_len()
@@ -418,7 +430,25 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             exons = sorted(trx.exons, key=lambda x: x.start, reverse=reverse)
             genomicLen = log(abs(trx.stop - int(trx.start)), 2)
             bpUnits = float(segLen) / float(genomicLen)
+            brkpts = segTrx.brkpts
+            for brkpt in brkpts:
+                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx]
             for exon in exons:
+                if segmentPos == 'first':
+                    if int(element[1]) >= int(bp) and segment.strand == '-':
+                        add = True
+                    elif int(element[0]) <= int(bp) and s=='+':
+                        add = True
+                    if add:
+                        features.append((element[0], element[1], feature+str(eIter)))
+                elif iter == 2:
+                    if int(element[0]) <= int(bp) and s=='-':
+                        add = True
+                    elif int(element[1]) >= int(bp) and s=='+':
+                        add = True
+                    if add:
+                        features.append((element[0], element[1], feature+str(eIter)))
+
                 ll = [log(exon.start, 2), log(exon.stop, 2)]
                 e1 = log(max(abs(int(trx.start) - int(exon.start)), 1), 2) * bpUnits
                 e2 = log(max(abs(int(trx.start) - int(exon.stop)), 1), 2) * bpUnits
