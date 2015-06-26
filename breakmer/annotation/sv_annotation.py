@@ -208,8 +208,8 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 if params.get_param('generate_image') or True:
                     trx.get_exons(annotationFn, tmpFilePath)
                 print 'Store annotations', trx, dist, coordIdx
-                svBreakpoint.store_annotation([trx], [dist], coordIdx)
-                print svBreakpoint.annotated_trxs
+                blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([trx], [dist], coordIdx)
+                print blatResult.get_sv_brkpts()[svBrkptIdx].annotated_trxs
                 svbps = blatResult.breakpts.svBreakpoints
                 for sv in svbps:
                     print sv.annotated_trxs
@@ -219,7 +219,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 if params.get_param('generate_image') or True:
                     upTrx.get_exons(annotationFn)
                     downTrx.get_exons(annotationFn)
-                svBreakpoint.store_annotation([downTrx, upTrx], [upDist, downDist], coordIdx)
+                blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([downTrx, upTrx], [upDist, downDist], coordIdx)
 
 
 def write_brkpt_bed_file(bpBedFn, blatResults):
