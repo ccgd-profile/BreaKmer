@@ -387,13 +387,10 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
         brkIdx = 0
         nucIter = 0
         for nuc in seq:
-             nucColor = segmentManager.get_segment_color(nucIter)
-        #     add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
-        #     seqTextOff += xInc
+            nucColor = segmentManager.get_segment_color(nucIter)
+            add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
+            seqTextOff += xInc
             nucIter += 1
-        #     print nuc, nucIter, idx, len(seq)
-        # if idx == 2:
-        #     sys.exit()
         print seq, idx, nucIter
 
 
