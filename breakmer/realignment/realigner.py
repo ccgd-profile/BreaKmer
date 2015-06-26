@@ -62,6 +62,7 @@ class RealignManager:
         if not self.realignment.align(self.alignParams.get_values('target'), 'target'):
             # Log
             return
+        print 'realigner.py realign() check target_aligned()', self.realignment.target_aligned()
         if not self.realignment.target_aligned():
             self.realignment.align(self.alignParams.get_values('genome'), 'genome')
 
@@ -149,7 +150,7 @@ class Realignment:
         """
         noAlignmentResults = False
         targetHit = False
-        if not self.results:
+        if self.results is None:
             noAlignmentResults = True
         else:
             self.results.modify_blat_result_file()
