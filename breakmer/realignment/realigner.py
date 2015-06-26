@@ -207,6 +207,7 @@ class AlignResults:
     def target_hit(self):
         """ """
         indelHit = self.results[0].spans_query() or (len(self.results) == 1 and self.get_query_coverage() >= 90.0)
+        print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % indelHit)
         return indelHit
 
