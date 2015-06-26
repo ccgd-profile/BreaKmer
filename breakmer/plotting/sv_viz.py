@@ -298,7 +298,7 @@ def plot_pileup(segmentManager, outName):
 #                 ax.text(offset, annoYidx-(iter*0.8)-0.5, coordText, ha=lr, va='top', size=12)
 #         iter += 1
 
-    ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 10
+    ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 20
     ax.axis([0, len(segmentManager.get_contig_seq()) + 10, -seqPlotSize - 5, 8])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
