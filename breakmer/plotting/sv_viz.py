@@ -376,10 +376,12 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
         seqYidx = seqYidx - yInc
         segIdx = 0
         brkIdx = 0
+        nucIter = 0
         for nuc in seq:
             nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
+            nucIter += 1
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
