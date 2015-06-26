@@ -30,6 +30,7 @@ PARSER.add_argument('-z', '--no_output_header', dest='no_output_header', default
 PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
 PARSER.add_argument('-n', '--nprocessors', dest='nprocs', default=1, type=int, help='The number of processors to use for analysis [default: %(default)s]')
 PARSER.add_argument('-x', '--keep_blat_server', dest='keep_blat_server', default=False, action='store_true', help='Keep the blat server alive [default: %(default)s]')
+PARSER.add_argument('--generate_image', dest='generate_image', default=False, action='store_true', help='Generate pileup image for events [default: %(default)s]')
 
 RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(PARSER.parse_args()))
 RUN_TRACKER.run()
