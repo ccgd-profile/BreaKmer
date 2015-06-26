@@ -21,8 +21,6 @@ class Exon:
 
     def set_values(self, values):
         """ """
-        print values
-        print len(values)
         self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta = values
 
 
@@ -43,8 +41,6 @@ class Transcript:
 
     def set_values(self, values):
         """ """
-        print values
-        print len(values)
         self.chr, self.src, featureType, self.start, self.stop, fill, self.strand, fill2, meta, dist = values
         meta = meta.split(';')
         self.id = meta[1].split(' ')[2].lstrip('"').rstrip('"')
@@ -59,11 +55,9 @@ class Transcript:
         exonSelect = '$3 == "exon"'
         outFn = os.path.join(tmpFilePath, self.id + '.exons')
         cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "' > " + os.path.join(tmpFilePath, self.id + '.exons')
-        print cmd
         os.system(cmd)
         # ' 'bedtools multicov -bams ' + args.bam + ' -bed ' + args.intervals
         for line in open(outFn, 'r'):
-            print line
             self.exons.append(Exon(line.strip().split('\t')))
         os.remove(outFn)
 
@@ -190,6 +184,7 @@ def annotate_event(svEventResult, contigMeta):
     outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
+    # Remove temporary bedtools output files.
 
 
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
@@ -250,19 +245,16 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
     knownGeneSelect = 'gene_status "KNOWN"'
 
     outputFiles = {'intersect': os.path.join(tmpFilePath, 'bedtools.intersect.out'),
-                   'upstream': os.path.join(tmpFilePath, 'bedtools.uptream.out'),
+                   'upstream': os.path.join(tmpFilePath, 'bedtools.upstream.out'),
                    'downstream': os.path.join(tmpFilePath, 'bedtools.downstream.out')}
     # Intersecting transcripts
     cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' intersect -wo -a %s -b - > %s' % (brkptBedFn, outputFiles['intersect'])
-    print cmd
     os.system(cmd)
     # Upstream transcripts
     cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' closest -D a -id -a %s -b - > %s' % (brkptBedFn, outputFiles['upstream'])
-    print cmd
     os.system(cmd)
     # Downstream transcripts
     cmd = 'cat ' + annotationFn + " | awk '" + trxSelect + "' | grep '" + knownGeneSelect + "' | " + bedtools + ' closest -D a -iu -a %s -b - > %s' % (brkptBedFn, outputFiles['downstream'])
-    print cmd
     os.system(cmd)
     return outputFiles
 
