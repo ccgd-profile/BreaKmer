@@ -405,7 +405,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
 
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
-    for i, segment in enumerate(sortedSegs):
+    for i, segmentTuple in enumerate(sortedSegs):
+        segment = segmentTuple[1]
         segmentPos = 'first'
         if i > 0 and i < len(sortedSegs):
             segmentPos = 'middle'
