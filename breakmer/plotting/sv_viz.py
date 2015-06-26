@@ -64,14 +64,11 @@ class Segment:
         return self.queryCoordinates[1] - self.queryCoordinates[0]
 
     def get_segment_trxs(self):
-        print 'Blat result object', self.alignResult
         svBreakpoints = self.alignResult.get_sv_brkpts()
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
-            print svBreakpoint
-            print svBreakpoint.chrom, svBreakpoint.genomicCoords, svBreakpoint.targetKey
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
@@ -94,7 +91,6 @@ class Segment:
                     # Right
                     trxItems, trxIds = check_add_trx(rightBpTrxList[0], trxItems, trxIds, rightBpDistList[0], svBreakpoint, 1)
                 else:
-                    print annotatedTrxsDict
                     trxList, distList = annotatedTrxsDict[0]
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands
@@ -423,10 +419,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             genomicLen = log(abs(trx.stop - int(trx.start)), 2)
             bpUnits = float(segLen) / float(genomicLen)
             for exon in exons:
-                print 'Exon', exon.start, exon.stop
                 ll = [log(exon.start, 2), log(exon.stop, 2)]
                 e1 = log(max(abs(int(trx.start) - int(exon.start)), 1), 2) * bpUnits
                 e2 = log(max(abs(int(trx.start) - int(exon.stop)), 1), 2) * bpUnits
+                print 'Exon', exon.start, exon.stop, trxOffset + e1
                 eCoords = [e1, e2]
                 eCoords.sort()
                 ycoord = int(yCoord) - (float(segTrxIter) / float(5))

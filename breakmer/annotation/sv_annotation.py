@@ -198,8 +198,6 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
             print 'Missing a breakpoint annotation', bpKey
         else:
             svBreakpoint = blatResult.get_sv_brkpts()[svBrkptIdx]
-            print 'Store annotations() blatResult object', blatResult
-            print 'Store annotations() svBreakpoint object', svBreakpoint
             trxMappings = trxMap[bpKey]
             intersect = trxMap[bpKey]['intersect']
             upstream = trxMap[bpKey]['upstream']
@@ -224,7 +222,6 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
     bpBedFile = open(bpBedFn, 'w')
     bpIter = 1
     for queryStartCoord, blatResult in blatResults:
-        print 'Blat result write_brkpt_bed_file()', blatResult
         svBreakpoints = blatResult.get_sv_brkpts()
         svBrkptIdx = 0
         for svBreakpoint in svBreakpoints:
