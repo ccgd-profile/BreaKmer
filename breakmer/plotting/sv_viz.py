@@ -425,7 +425,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 e2 = log(max(abs(int(trx.start) - int(exon.stop)), 1), 2) * bpUnits
                 eCoords = [e1, e2]
                 eCoords.sort()
-                ycoord = annoYidx - (float(iter) / float(5))
+                ycoord = yCoord - (float(iter) / float(5))
                 rect = patches.Rectangle((trxOffset + e1, yCoord), e2 - e1, 1, color=segment.color)
                 ax.add_patch(rect)
             segTrxIter += 1
