@@ -35,8 +35,7 @@ class AlignParams:
         self.binary['target'] = params.get_param('blat')
         self.binary['genome'] = params.get_param('gfclient')
         self.binaryParams['genome'] = {'hostname': params.get_param('blat_hostname'),
-                                       'port': params.get_param('blat_port')
-                                      }
+                                       'port': params.get_param('blat_port')}
         # Use the forward sequence for blatting targeted sequences
         self.ref['target'] = targetRefFns[0]
         self.ref['genome'] = params.get_param('reference_fasta_dir')
@@ -124,7 +123,7 @@ class Realignment:
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        utils.log(self.loggingName, 'info', 'Realignment output file %s' % output)
+        utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
         if errors != '':
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
 
@@ -132,6 +131,7 @@ class Realignment:
             return False
         else:
             self.results = AlignResults(alignProgram, scope, resultFn, self.contig)
+            return True
 
     def get_result_fn(self):
         """ """
@@ -140,7 +140,7 @@ class Realignment:
 
     def has_results(self):
         """ """
-        if self.results:
+        if self.results is not None:
             return True
         else:
             return False
