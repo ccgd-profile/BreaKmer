@@ -293,6 +293,8 @@ def parse_bedtools_output(outputFileDict):
     parse_bedtools_file(outputFileDict['intersect'], 'intersect', trxMap)
     parse_bedtools_file(outputFileDict['upstream'], 'upstream', trxMap)
     parse_bedtools_file(outputFileDict['downstream'], 'downstream', trxMap)
+    print 'Transcript map'
+    print trxMap
     return trxMap
 
 
