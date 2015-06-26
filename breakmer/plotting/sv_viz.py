@@ -379,12 +379,14 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     yInc = 0.75
     xInc = 1
     # Iterate through sequences.
+    print segmentManager.get_contig_seq(), len(segmentManager.get_contig_seq())
     for idx, seq in segmentManager.orderedSeqs:
+        print idx, seq
         seqTextOff = xOffset + idx
         seqYidx = seqYidx - yInc
         segIdx = 0
         brkIdx = 0
-        nucIter = idx - 1
+        nucIter = idx
         for nuc in seq:
             nucColor = segmentManager.get_segment_color(nucIter)
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
