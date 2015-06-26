@@ -35,7 +35,7 @@ class AlignParams:
         self.binary['target'] = params.get_param('blat')
         self.binary['genome'] = params.get_param('gfclient')
         self.binaryParams['genome'] = {'hostname': params.get_param('blat_hostname'),
-                                       'port': params.get_param('blat_port')}
+                                       'port': int(params.get_param('blat_port'))}
         # Use the forward sequence for blatting targeted sequences
         self.ref['target'] = targetRefFns[0]
         self.ref['genome'] = params.get_param('reference_fasta_dir')
