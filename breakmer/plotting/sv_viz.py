@@ -391,7 +391,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
         #     add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
         #     seqTextOff += xInc
             nucIter += 1
-            print nuc, nucIter, idx
+            print nuc, nucIter, idx, len(seq)
         if idx == 2:
             sys.exit()
         print seq, idx, nucIter
