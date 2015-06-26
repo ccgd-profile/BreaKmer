@@ -517,7 +517,7 @@ class SVEvent:
 
     def has_annotations(self):
         """ """
-
+        return True
 
     def get_genomic_brkpts(self):
         """ """
@@ -783,7 +783,11 @@ class ContigCaller:
         for gap in gaps:
             gs, ge = gap
             utils.log(self.loggingName, 'debug', 'Gap coords %d, %d' % (gs, ge))
-            if (qs >= gs and qs <= ge) or (qe <= ge and qe >= gs):
+            startWithinGap = (qs >= gs and qs <= ge)
+            endWithinGap = (qe <= ge and qe >= gs)
+            gapEdgeDistStart = (qs <= gs) and ((gs - qs) < 15)
+            gapEdgeDistEnd = (qe >= ge) and ((qe - ge) < 15)
+            if startWithinGap or endWithinGap or (gapEdgeDistStart and (endWithinGap or gapEdgeDistEnd)) or (gapEdgeDistEnd and (startWithinGap or gapEdgeDistStart)):
                 ngap = []
                 if qs > gs:
                     if (qs - 1 - gs) > 10:

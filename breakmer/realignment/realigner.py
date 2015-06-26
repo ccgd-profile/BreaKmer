@@ -68,7 +68,7 @@ class RealignManager:
     def get_result_fn(self):
         resultFn = None
         if self.realignment.has_results():
-            self.realignment.get_result_fn()
+            resultFn = self.realignment.get_result_fn()
         return resultFn
 
     def has_results(self):
