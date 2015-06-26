@@ -4,6 +4,7 @@
 import os
 import sys
 import re
+import pysam
 from math import log
 import matplotlib
 import matplotlib.pyplot as plt
@@ -105,13 +106,9 @@ class Segment:
                                 trx = trxList[0]
                             else:
                                 trx = trxList[1]
-                        if self.check_add_trx(trx, trxIds):
-                            trxItems.append((trx, trxDist, svBreakpoint, 0))
-                            trxIds.append(trx.id)
+                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0)
                     else:
-                        if self.check_add_trx(trxList[0], trxIds):
-                            trxItems.append((trxList[0], distList[0], svBreakpoint, 0))
-                            trxIds.append(trxList[0].id)
+                        trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0)
             elif svBreakpoint.svType == 'indel':
                 if len(dKeys) == 1:
                     # Insertion with one genomic breakpoint
