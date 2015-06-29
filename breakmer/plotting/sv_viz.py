@@ -445,7 +445,7 @@ class AnnotationBrkpt:
                 if (bp[2] == 'left') and (int(exon.start) <= int(bp[1])):
                     # Get all exons with start < bp
                     add = True
-                elif (bp[2] == 'right') and (int(exon.end) >= int(bp[1])):
+                elif (bp[2] == 'right') and (int(exon.stop) >= int(bp[1])):
                     add = True
                 elif bp[2] == 'all':
                     # Single insertion in a gene
@@ -460,7 +460,7 @@ class AnnotationBrkpt:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     elif absDist > firstLastExons['furthest_exon'][0]:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    selectedExons.append([int(exon.start), int(exon.end), ''])
+                    selectedExons.append([int(exon.start), int(exon.stop), ''])
                 eIter += 1
             selectedExons[firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
             selectedExons[firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
