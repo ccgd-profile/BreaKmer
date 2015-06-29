@@ -466,7 +466,7 @@ class AnnotationBrkpt:
                 eIter += 1
             selectedExons[firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
             selectedExons[firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-        return selectedExons
+        return selectedExons, 
 
 
 def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
@@ -503,6 +503,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
+        print 'sv_viz.py plot_annotation_track segment', i
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
@@ -512,6 +513,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
+        print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
 
