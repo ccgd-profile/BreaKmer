@@ -409,7 +409,7 @@ class AnnotationBrkpt:
 
     def setup(self):
         """ """
-        for bp in self.trxBrpts:
+        for bp in self.trxBrkpts:
             exonCode = 'right'
             if self.segPos == 'only':
                 if bp.svType == 'del':
@@ -427,6 +427,7 @@ class AnnotationBrkpt:
                 if bp.svType == 'rearr':
                     if self.segStrand == '-':
                         exonCode = 'left'
+            print 'sv_viz.py setup() adding breakpoint', (bp, bp.get_genomic_coord(), exonCode)
             self.bps.append((bp, bp.get_genomic_coord(), exonCode))
 
     def add_brkpt(self, trxBrkpts):
