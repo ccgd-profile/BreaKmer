@@ -446,11 +446,13 @@ class AnnotationBrkpt:
                     # Get all exons with start < bp
                     add = True
                 elif (bp[2] == 'right') and (int(exon.stop) >= int(bp[1])):
+
                     add = True
                 elif bp[2] == 'all':
                     # Single insertion in a gene
                     add = True
                 if add:
+                    print 'sv_viz.py keep exon', bp, exon.start, exon.stop
                     absDist = abs(int(bp[1]) - int(exon.start))
                     if len(firstLastExons['nearest_exon']) == 0:
                         firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
