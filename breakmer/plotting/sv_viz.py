@@ -570,12 +570,12 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
                 e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
                 e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
+                print 'genomic start', genomicStart
                 print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
                 eCoords = [e1, e2]
+                print 'Mapped coords', e1, e2
                 eCoords.sort()
                 if reverse:
-                    print 'genomic start', genomicStart
-                    print 'exon', exon
                     print 'Reversing exon coords'
                     tmp = e2
                     e2 = e1
