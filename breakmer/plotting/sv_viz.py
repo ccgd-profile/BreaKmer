@@ -572,7 +572,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
                 e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
                 e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
-                if maxminCoords[3] == 'left':
+                if segmentPos == 'first':
                     e1 = trxLen - e1
                     e2 = trxLen - e2
                 print 'genomic start', genomicStart, bpUnits
