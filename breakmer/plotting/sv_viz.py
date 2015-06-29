@@ -516,7 +516,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         if len(sortedSegs) > 1:
             if i == 0:
                 segmentPos = 'first'
-            elif i > 0 and i < len(sortedSegs):
+            elif i > 0 and i < (len(sortedSegs) - 1):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
@@ -557,7 +557,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             print selectedExons
             for exon in selectedExons:
                 genomicStart = maxminCoords[0]
-                if reverse: 
+                if reverse:
                     genomicStart = maxminCoords[1]
                 ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
                 e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
