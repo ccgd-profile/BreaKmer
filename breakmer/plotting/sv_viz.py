@@ -573,12 +573,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 print 'Exon', exon[0], exon[1], trxOffset + e1
                 eCoords = [e1, e2]
                 eCoords.sort()
+                if reverse:
+                    eCoords.reverse()
                 ycoord = int(yCoord) - (float(segTrxIter) / float(5))
                 color = segment.color
                 rectLen = e2 - e1
                 if exon[2] == 'breakpoint':
                     color = 'black'
-                    rectLen = 1
+                    # rectLen = 0.25
 
                 rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
                 ax.add_patch(rect)
