@@ -553,7 +553,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     color = 'black'
                 rect = patches.Rectangle((trxOffset + e1, ycoord), e2 - e1, 1, color=color)
                 ax.add_patch(rect)
-                if exon[2] != '':
+                if exon[2] != '' and exon[2] != 'breakpoint':
                     ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
             ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
             segTrxIter += 1
