@@ -574,9 +574,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 eCoords = [e1, e2]
                 eCoords.sort()
                 if reverse:
+                    print 'Reversing exon coords'
                     tmp = e2
                     e2 = e1
                     e1 = tmp
+                    print 'Mapped exon coords', e1, e2
                 ycoord = int(yCoord) - (float(segTrxIter) / float(5))
                 color = segment.color
                 rectLen = e2 - e1
