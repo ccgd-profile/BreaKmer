@@ -543,6 +543,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
 
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
             for exon in selectedExons:
+                print exon
                 ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
                 e1 = log(max(abs(int(trx.start) - int(exon[0])), 1), 2) * bpUnits
                 e2 = log(max(abs(int(trx.start) - int(exon[1])), 1), 2) * bpUnits
