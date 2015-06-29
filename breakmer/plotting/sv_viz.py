@@ -471,7 +471,7 @@ def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
     abrkpt = None
     brkptTypes = {}
     for brkpt in trxBrkpts:
-        if brkpt.svType not in brkpTypes:
+        if brkpt.svType not in brkptTypes:
             brkptTypes[brkpt.svType] = []
         brkptTypes[brkpt.svType].append(brkpt)
 
