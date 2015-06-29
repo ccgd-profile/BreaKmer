@@ -466,7 +466,7 @@ class AnnotationBrkpt:
                 eIter += 1
             selectedExons[firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
             selectedExons[firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-        return selectedExons, 
+        return selectedExons
 
 
 def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
@@ -542,6 +542,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             selectedExons = abrkpt.select_exons(exons)
 
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
+            print selectedExons
             for exon in selectedExons:
                 print exon
                 ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
