@@ -574,6 +574,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 eCoords = [e1, e2]
                 eCoords.sort()
                 if reverse:
+                    print 'genomic start', genomicStart
+                    print 'exon', exon
                     print 'Reversing exon coords'
                     tmp = e2
                     e2 = e1
