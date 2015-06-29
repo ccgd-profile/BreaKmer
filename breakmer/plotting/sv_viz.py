@@ -441,7 +441,7 @@ class AnnotationBrkpt:
         selectedExons = []
         maxminCoords = []
         for bp in self.bps:
-            selectedExons.append((int(bp[1]), int(bp[1]) + 1, 'breakpoint'))
+            selectedExons.append((int(bp[1]) - 1, int(bp[1]), 'breakpoint'))
             if len(maxminCoords) == 0:
                 maxminCoords = [int(bp[1]), int(bp[1]) + 1]
             eIter = 1
@@ -452,11 +452,11 @@ class AnnotationBrkpt:
                 if (bp[2] == 'left') and (int(exon.start) <= int(bp[1])):
                     # Get all exons with start < bp
                     if int(bp[1]) < int(exon.stop):
-                        exonCoords[1] = int(bp[1]) - 1
+                        exonCoords[1] = int(bp[1])
                     add = True
                 elif (bp[2] == 'right') and (int(exon.stop) >= int(bp[1])):
                     if int(bp[1]) < int(exon.start):
-                        exonCoords[0] = int(bp[1]) + 1
+                        exonCoords[0] = int(bp[1])
                     add = True
                 elif bp[2] == 'all':
                     # Single insertion in a gene
