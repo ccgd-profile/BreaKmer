@@ -452,7 +452,7 @@ class AnnotationBrkpt:
                 if (bp[2] == 'left') and (int(exon.start) <= int(bp[1])):
                     # Get all exons with start < bp
                     if int(bp[1]) < int(exon.stop):
-                        exonCoords[1] = int(bp1) - 1
+                        exonCoords[1] = int(bp[1]) - 1
                     add = True
                 elif (bp[2] == 'right') and (int(exon.stop) >= int(bp[1])):
                     if int(bp[1]) < int(exon.start):
