@@ -443,7 +443,7 @@ class AnnotationBrkpt:
         for bp in self.bps:
             selectedExons.append((int(bp[1]) - 1, int(bp[1]), 'breakpoint'))
             if len(maxminCoords) == 0:
-                maxminCoords = [int(bp[1]) - 1, int(bp[1]), int(bp[1])]
+                maxminCoords = [int(bp[1]) - 1, int(bp[1]), int(bp[1]), bp[2]]
             eIter = 1
             firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
             for exon in exons:
@@ -565,11 +565,16 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             print selectedExons
             for exon in selectedExons:
                 genomicStart = maxminCoords[2]
+                if maxminCoords[3] == 'all':
+                    genomicStart = int(trx.start)
                 # if reverse:
                 #     genomicStart = maxminCoords[1]
-                ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
+                # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
                 e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
                 e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
+                if maxminCoords[3] == 'left':
+                    e1 = trxLen - e1
+                    e2 = trxLen - e2
                 print 'genomic start', genomicStart, bpUnits
                 print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
                 eCoords = [e1, e2]
