@@ -467,7 +467,7 @@ class AnnotationBrkpt:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     selectedExons.append([int(exon.start), int(exon.stop), ''])
                     if maxminCoords[0] > int(exon.start):
-                        maxminCoords[0] = [int(exon.start)]
+                        maxminCoords[0] = int(exon.start)
                     if maxminCoords[1] < int(exon.stop):
                         maxminCoords[1] = int(exon.stop)
                 eIter += 1
@@ -556,10 +556,12 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
             print selectedExons
             for exon in selectedExons:
-                print exon
+                genomicStart = maxminCoords[0]
+                if reverse: 
+                    genomicStart = maxminCoords[1]
                 ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
-                e1 = log(max(abs(int(trx.start) - int(exon[0])), 1), 2) * bpUnits
-                e2 = log(max(abs(int(trx.start) - int(exon[1])), 1), 2) * bpUnits
+                e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
+                e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
                 print 'Exon', exon[0], exon[1], trxOffset + e1
                 eCoords = [e1, e2]
                 eCoords.sort()
