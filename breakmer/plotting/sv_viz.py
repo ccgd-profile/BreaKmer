@@ -443,7 +443,7 @@ class AnnotationBrkpt:
         for bp in self.bps:
             selectedExons.append((int(bp[1]) - 1, int(bp[1]), 'breakpoint'))
             if len(maxminCoords) == 0:
-                maxminCoords = [int(bp[1]), int(bp[1]) + 1]
+                maxminCoords = [int(bp[1]) - 1, int(bp[1])]
             eIter = 1
             firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
             for exon in exons:
