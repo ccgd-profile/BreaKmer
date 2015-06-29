@@ -436,8 +436,11 @@ class AnnotationBrkpt:
 
     def select_exons(self, exons):
         selectedExons = []
+        maxminCoords = []
         for bp in self.bps:
             selectedExons.append((int(bp[1]), int(bp[1]) + 1, 'breakpoint'))
+            if len(maxminCoords) == 0:
+                maxminCoords = [int(bp[1]), int(bp[1]) + 1]
             eIter = 1
             firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
             for exon in exons:
@@ -463,10 +466,14 @@ class AnnotationBrkpt:
                     elif absDist > firstLastExons['furthest_exon'][0]:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     selectedExons.append([int(exon.start), int(exon.stop), ''])
+                    if maxminCoords[0] > int(exon.start):
+                        maxminCoords[0] = [int(exon.start)]
+                    if maxminCoords[1] < int(exon.stop):
+                        maxminCoords[1] = int(exon.stop)
                 eIter += 1
             selectedExons[firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
             selectedExons[firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-        return selectedExons
+        return selectedExons, maxminCoords
 
 
 def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
@@ -531,15 +538,20 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxOffset += segTrxIter * (trxLen)
             trx = segTrx.trx
             brkpts = segTrx.brkpts
-            exons = sorted(trx.exons, key=lambda x: x.start, reverse=reverse)
-            genomicLen = log(abs(trx.stop - int(trx.start)), 2)
-            bpUnits = float(trxLen) / float(genomicLen)
+            trx_reverse = False
+            if trx.strand == '-':
+                trx_reverse = True
+            exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
+
 
             for brkpt in brkpts:
                 print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
-            selectedExons = abrkpt.select_exons(exons)
+            selectedExons, maxminCoords = abrkpt.select_exons(exons)
+
+            genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
+            bpUnits = float(trxLen) / float(genomicLen)
 
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
             print selectedExons
