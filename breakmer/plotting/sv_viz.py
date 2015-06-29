@@ -355,8 +355,11 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         ax.add_patch(rect)
         ax.text(xCoordLabel, yCoord - 0.25, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
         # Plot genomic coordinates of the segment
-        ax.text(xCoord, yCoord - 0.25, segment.genomicCoordinates[0], ha='left', va='top', size=10)
-        ax.text(xCoord + rectLen, yCoord - 0.25, segment.genomicCoordinates[1], ha='right', va='top', size=10)
+        gCoordOrder = [xCoord, xCoord + rectLen]
+        if segment.strand == '-':
+            gCoordOrder = [xCoord + rectLen, xCoord]
+        ax.text(gCoordOrder[0], yCoord - 0.25, segment.genomicCoordinates[0], ha='left', va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.25, segment.genomicCoordinates[1], ha='right', va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
@@ -567,9 +570,12 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 eCoords.sort()
                 ycoord = int(yCoord) - (float(segTrxIter) / float(5))
                 color = segment.color
+                rectLen = e2 - e1
                 if exon[2] == 'breakpoint':
                     color = 'black'
-                rect = patches.Rectangle((trxOffset + e1, ycoord), e2 - e1, 1, color=color)
+                    rectLen = 1
+
+                rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
                 ax.add_patch(rect)
                 if exon[2] != '' and exon[2] != 'breakpoint':
                     ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
