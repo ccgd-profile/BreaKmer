@@ -653,10 +653,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         trxOffset = segStart + xOffset + 3
         segTrxIter = 0
         for segTrx in segTrxs:
-            if segTrxIter == 0:
+            if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
                 segLen = segLen - 3
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset - 3 + i, yCoord + 0.125), 0.25, 0.2, color=segment.color)
+                    rect = patches.Rectangle((trxOffset - 3 + i, yCoord + 0.125), 0.25, 0.1, color=segment.color)
                     ax.add_patch(rect)
             elif segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last'):
                 # Last segment and trx
@@ -668,7 +668,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            rect = patches.Rectangle((trxOffset, yCoord + 0.125), trxLen, 0.25, color=segment.color)
+            rect = patches.Rectangle((trxOffset, yCoord + 0.125), trxLen, 0.125, color=segment.color)
             ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
@@ -722,9 +722,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 print 'Exon', exon
                 ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
 
-                if exonStr is not None:
-                    ax.text(start, yCoord - 0.125, str(exon[1]), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord + 0.125, str(exon[1]), ha='right', va='center', size=8)
+                if exonStr != '':
+                    exstart = exon[0]
+                    exend = exon[1]
+                    if segment.strand == '-':
+                        exstart = exon[1]
+                        exend = exon[0]
+                    ax.text(start, yCoord - 0.25, str(exstart), ha='left', va='center', size=8)
+                    ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=8)
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
