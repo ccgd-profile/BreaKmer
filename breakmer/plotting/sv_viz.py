@@ -564,7 +564,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
             selectedExons = abrkpt.select_exons(exons)
-
+            print selectedExons
+            
             genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
             bpUnits = float(trxLen) / float(genomicLen)
 
