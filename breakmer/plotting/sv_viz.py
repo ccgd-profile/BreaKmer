@@ -733,6 +733,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if segment.strand == '-':
                         exstart = exon[1]
                         exend = exon[0]
+                    exstart = segment.chromName + ':' + str(exstart)
+                    exend = segment.chromName + ':' + str(exend)
                     ax.text(start, yCoord - 0.25, str(exstart), ha='left', va='center', size=8)
                     ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=8)
                 if exon[3] is not None:
