@@ -650,7 +650,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         if segment.strand == '-':
             reverse = True
 
-        trxOffset = segStart + xOffset + 3
+        trxOffset = segStart + xOffset
+        if (segmentPos == 'first' or segmentPos == 'only'):
+            trxOffset += 3
         segTrxIter = 0
         for segTrx in segTrxs:
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
