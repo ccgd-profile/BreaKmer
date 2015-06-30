@@ -240,7 +240,7 @@ def plot_pileup(segmentManager, outName):
     # plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
-    plot_segments(ax, yCoord + 1, xOffset, segmentManager)
+    plot_segments(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
     plot_annotation_track(ax, yCoord + 4, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
@@ -352,7 +352,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
     for i, segment in enumerate(segmentManager.segments):
         # Plot rectangles for each realignment result
         xCoord = xOffset + segment.queryCoordinates[0]
-        yCoord = yCoord + ((i + 1) * 0.5)
+        yCoord = yCoord + ((i + 1) * 0.15)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
         rectHeight = 0.25
         lenText = str(rectLen) + 'bp'
@@ -369,8 +369,8 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
             horizAlign.reverse()
         segCoordStart = segment.chromName + ':' + str(segment.genomicCoordinates[0])
         segCoordEnd = segment.chromName + ':' + str(segment.genomicCoordinates[1])
-        ax.text(gCoordOrder[0], yCoord - 0.25, segCoordStart, ha=horizAlign[0], va='top', size=10)
-        ax.text(gCoordOrder[1], yCoord - 0.25, segCoordEnd, ha=horizAlign[1], va='top', size=10)
+        ax.text(gCoordOrder[0], yCoord - 0.125, segCoordStart, ha=horizAlign[0], va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.125, segCoordEnd, ha=horizAlign[1], va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
