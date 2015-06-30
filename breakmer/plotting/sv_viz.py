@@ -56,6 +56,7 @@ class Segment:
         self.color = segmentColor
         self.queryCoordinates = [alignResult.qstart(), alignResult.qend()]
         self.genomicCoordinates = [alignResult.tstart(), alignResult.tend()]
+        self.chromName = alignResult.get_seq_name('ref')
         self.indelCoordinates = alignResult.breakpts.contigBreakpoints
         self.indelSizes = alignResult.indel_sizes
         self.strand = alignResult.strand
@@ -366,8 +367,10 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         horizAlign = ['left', 'right']
         if segment.strand == '-':
             horizAlign.reverse()
-        ax.text(gCoordOrder[0], yCoord - 0.25, segment.genomicCoordinates[0], ha=horizAlign[0], va='top', size=10)
-        ax.text(gCoordOrder[1], yCoord - 0.25, segment.genomicCoordinates[1], ha=horizAlign[1], va='top', size=10)
+        segCoordStart = segment.chromName + ':' + segment.genomicCoordinates[0]
+        segCoordEnd = segment.chromName + ':' + segment.genomicCoordinates[1] 
+        ax.text(gCoordOrder[0], yCoord - 0.25, segCoordStart, ha=horizAlign[0], va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.25, segCoordEnd, ha=horizAlign[1], va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
