@@ -457,8 +457,8 @@ class AnnotationBrkpt:
             self.bounds.sort()
             bpCoordKey = '-'.join([str(x) for x in self.bounds])
             selectedExons[bpCoordKey] = {'coords': []}
-            selectedExons[bpCoordKey]['coords'].append((self.bounds[0] - 1, self.bounds[0], 'breakpoint'))
-            selectedExons[bpCoordKey]['coords'].append((self.bounds[1] - 1, self.bounds[1], 'breakpoint'))
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[0] - 1, self.bounds[0], 'breakpoint', None))
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[1] - 1, self.bounds[1], 'breakpoint', None))
             eIter = 1
             maxminCoords = [self.bounds[0], self.bounds[1], self.bounds[0], self.bps[0][2]]
             bpOverlap = [False, None]
@@ -502,7 +502,7 @@ class AnnotationBrkpt:
                 maxminCoords = []
                 bpObj, bpCoord, exonCode = bp
                 selectedExons[bpCoord] = {'coords': []}
-                selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint'))
+                selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint', None))
                 if len(maxminCoords) == 0:
                     maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
                 eIter = 1
@@ -584,6 +584,7 @@ def get_neighbor_exons(exons):
     currentBp = None
     bpOverlaps = []
     for exon in exons:
+        print exon
         start, end, name, bpOverlapCoord = exon
         if name == 'breakpoint':
             bpExonBuffer[start] = {'left': leftExonBuffer, 'right': rightExonBuffer, 'add_to_list': False}
