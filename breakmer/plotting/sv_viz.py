@@ -725,6 +725,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxLen)
+            print trxMin, trxMax
             rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
