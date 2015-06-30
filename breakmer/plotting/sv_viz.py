@@ -471,12 +471,12 @@ class AnnotationBrkpt:
                 if (estart >= self.bounds[0] and estart <= self.bounds[1]):
                     add = True
                     if estop > self.bounds[1]:
-                        bpOverlap = [True, self.bounds[1]]
+                        bpOverlap = [True, self.bounds[1] - 1]
                         exonCoords[1] = self.bounds[1]
                 elif (estop >= self.bounds[0] and estop <= self.bounds[1]):
                     add = True
                     if estart < self.bounds[0]:
-                        bpOverlap = [True, self.bounds[0]]
+                        bpOverlap = [True, self.bounds[0] - 1]
                         exonCoords[0] = self.bounds[0]
                 if add:
                     # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
@@ -518,18 +518,18 @@ class AnnotationBrkpt:
                         # Get all exons with start < bp
                         if bpCoord < estop:
                             # Breakpoint intersects with exon, reduce feature count to 2
-                            bpOverlap = [True, bpCoord]
+                            bpOverlap = [True, bpCoord - 1]
                             exonCoords[1] = bpCoord
                         add = True
                     elif (exonCode == 'right') and (estop >= bpCoord):
                         if bpCoord > estart:
-                            bpOverlap = [True, bpCoord]
+                            bpOverlap = [True, bpCoord - 1]
                             exonCoords[0] = bpCoord
                         add = True
                     elif exonCode == 'all':
                         # Single insertion in a gene
                         if bpCoord >= estart and bpCoord <= estop:
-                            bpOverlap = [True, bpCoord]
+                            bpOverlap = [True, bpCoord - 1]
                         add = True
                     if add:
                         # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
