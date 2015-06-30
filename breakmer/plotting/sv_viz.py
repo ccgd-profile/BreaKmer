@@ -567,11 +567,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             selectedExons = abrkpt.select_exons(exons)
             print selectedExons
 
-            genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
-            bpUnits = float(trxLen) / float(genomicLen)
+            # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
+            # bpUnits = float(trxLen) / float(genomicLen)
 
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
-            print 'SELECTED EXONS', 10*'#'
+            print 'SORTED SELECTED EXONS', 10*'#'
             print selectedExons
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
