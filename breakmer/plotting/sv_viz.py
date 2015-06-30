@@ -591,7 +591,7 @@ def get_neighbor_exons(exons):
             currentBp = start
             leftExonBuffer = []
         elif currentBp is None:
-            leftExonBuffer.insert(0, exon)
+            leftExonBuffer.append(exon)
             if bpOverlapCoord is not None:
                 bpOverlaps.append(bpOverlapCoord)
         else:
@@ -603,7 +603,7 @@ def get_neighbor_exons(exons):
         left = bpExonBuffer[item]['left']
         right = bpExonBuffer[item]['right']
         if len(left) > 0:
-            finalList.extend(left[0:2])
+            finalList.extend(left[len(left) - 2: len(left)])
         if item not in bpOverlaps:
             finalList.append((item, item + 1, 'breakpoint'))
         if len(right) > 0:
