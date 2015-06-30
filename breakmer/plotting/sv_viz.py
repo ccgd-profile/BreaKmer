@@ -728,6 +728,14 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
+            for bp in bpPlotBins:
+                mult = 1
+                if bp[0] == 'exon':
+                    multiplier = 2
+                start = trxOffset + (binSize * mult * bp[1]) + (float(binSize) / float(2))
+                ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
+
+
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     """ """
