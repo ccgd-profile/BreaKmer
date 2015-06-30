@@ -459,7 +459,6 @@ class AnnotationBrkpt:
                     if bpCoord < estop:
                         # Breakpoint intersects with exon, reduce feature count to 2
                         exonCoords[1] = bpCoord
-                        bpCodingFeatureCount[1] -= 1
                     add = True
                 elif (exonCode == 'right') and (estop >= bpCoord):
                     if bpCoord < estart:
