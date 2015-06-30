@@ -455,6 +455,7 @@ class AnnotationBrkpt:
             selectedExons['-'.join([str(x) for x in self.bounds])] = {'coords': []}
             self.bounds.sort()
             eIter = 1
+            maxminCoords = [self.bounds[0], self.bounds[1], self.bounds[0], self.bps[0][2]]
             for exon in exons:
                 # print 'Check exon', exon.start, exon.stop, exon.featureType
                 add = False
