@@ -727,7 +727,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             print 'TRX elements', trxElements, trxOffset, trxLen
             trxMin = max(min(trxElements), trxOffset)
-            trxMax = min(max(trxElements), trxLen)
+            trxMax = min(max(trxElements), trxOffset + trxLen)
             print 'TRX max, min', trxMin, trxMax
             rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
@@ -872,7 +872,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     ax.vlines(x=start, ymin=0.2, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             trxMin = max(min(trxElements), trxOffset)
-            trxMax = min(max(trxElements), trxLen)
+            trxMax = min(max(trxElements), trxOffset + trxLen)
             rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
                     # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
