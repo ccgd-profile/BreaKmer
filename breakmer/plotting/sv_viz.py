@@ -450,6 +450,7 @@ class AnnotationBrkpt:
     def select_exons(self, exons):
         selectedExons = {}
         if len(self.bounds) > 0:
+            print 'Bounds', self.bounds
             selectedExons['-'.join([str(x) for x in self.bounds])] = {'coords': []}
             self.bounds.sort()
             eIter = 1
