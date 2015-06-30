@@ -367,8 +367,8 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         horizAlign = ['left', 'right']
         if segment.strand == '-':
             horizAlign.reverse()
-        segCoordStart = segment.chromName + ':' + segment.genomicCoordinates[0]
-        segCoordEnd = segment.chromName + ':' + segment.genomicCoordinates[1] 
+        segCoordStart = segment.chromName + ':' + str(segment.genomicCoordinates[0])
+        segCoordEnd = segment.chromName + ':' + str(segment.genomicCoordinates[1])
         ax.text(gCoordOrder[0], yCoord - 0.25, segCoordStart, ha=horizAlign[0], va='top', size=10)
         ax.text(gCoordOrder[1], yCoord - 0.25, segCoordEnd, ha=horizAlign[1], va='top', size=10)
 
@@ -706,7 +706,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
                 ax.add_patch(rect)
                 print 'Exon', exon
-                ax.text(start, yCoord + 0.25, exonStr, ha='left', va='center', size=8)
+                ax.text(start, yCoord + 0.75, exonStr, ha='left', va='center', size=8)
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
