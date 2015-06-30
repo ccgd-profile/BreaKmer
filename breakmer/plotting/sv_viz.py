@@ -241,7 +241,7 @@ def plot_pileup(segmentManager, outName):
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-    plot_annotation_track(ax, yCoord + 5, xOffset, segmentManager)
+    plot_annotation_track(ax, yCoord + 1, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
@@ -685,16 +685,16 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
-            ax.text(trxOffset, yCoord + 2, labelStr, ha='center', va='center', size=8)
+            ax.text(trxOffset, yCoord + 2, labelStr, ha='left', va='center', size=8)
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
                 color = segment.color
-                height = 1
+                height = 0.5
                 exonStr = exon[2]
                 if exon[2] == 'breakpoint':
                     rectLen = 1
-                    height = 2
+                    height = 1.5
                     color = 'black'
                     exonStr = 'breakpoint:' + str(exon[1])
                     if i == (len(plotExons) - 1):
@@ -704,14 +704,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
                 ax.add_patch(rect)
                 print 'Exon', exon
-                ax.text(start, yCoord + 2.25, exonStr, ha='center', va='center', size=8)
+                ax.text(start, yCoord + 2.25, exonStr, ha='left', va='center', size=8)
                 if exon[3] is not None:
                     exonStr = 'breakpoint:' + str(exon[3] + 1)
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
-                    rect = patches.Rectangle((start, yCoord), 1, 2, color='black')
+                    rect = patches.Rectangle((start, yCoord), 0.5, 1.5, color='black')
                     ax.add_patch(rect)
-                    ax.text(start, yCoord + 2.25, exonStr, ha='center', va='center', size=8)
+                    ax.text(start, yCoord + 2.25, exonStr, ha='left', va='center', size=8)
 
 
             # for exon in selectedExons:
