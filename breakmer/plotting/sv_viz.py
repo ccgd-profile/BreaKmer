@@ -455,7 +455,7 @@ class AnnotationBrkpt:
                 exonCoords = [estart, estop]
                 if (exonCode == 'left') and (estart <= bpCoord):
                     # Get all exons with start < bp
-                    if bpCode < estop:
+                    if bpCoord < estop:
                         # Breakpoint intersects with exon, reduce feature count to 2
                         exonCoords[1] = bpCoord
                         bpCodingFeatureCount[1] -= 1
@@ -468,7 +468,7 @@ class AnnotationBrkpt:
                     # Single insertion in a gene
                     add = True
                 if add:
-                    print 'sv_viz.py keep exon', bp, exon.start, exon.stop
+                    print 'sv_viz.py keep exon', bp, estart, estop
                     absDist = abs(bpCoord - int(exonCoords[0]))
                     if len(firstLastExons['nearest_exon']) == 0:
                         firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
