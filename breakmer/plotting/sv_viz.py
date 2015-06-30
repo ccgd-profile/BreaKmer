@@ -656,13 +656,13 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             if segTrxIter == 0:
                 segLen = segLen - 5
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset - 5 + i, yCoord + 0.125), 0.2, 0.2, color=color)
+                    rect = patches.Rectangle((trxOffset - 5 + i, yCoord + 0.125), 0.2, 0.2, color=segment.color)
                     ax.add_patch(rect)
             elif segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last'):
                 # Last segment and trx
                 segLen = segLen - 5
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset + segLen - 5 + i, yCoord + 0.125), 0.2 ,0.2, color=color)
+                    rect = patches.Rectangle((trxOffset + segLen - 5 + i, yCoord + 0.125), 0.2, 0.2, color=segment.color)
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
@@ -692,7 +692,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             for item in selectedExons:
                 mergedExons.extend(selectedExons[item]['coords'])
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
-            print 'All Exons sorted', 10*'#'
+            print 'All Exons sorted', 10 * '#'
             print allExons
             plotExons = get_neighbor_exons(allExons)
             print plotExons
