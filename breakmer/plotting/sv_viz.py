@@ -735,9 +735,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             for bp in bpPlotBins:
                 print 'BP', bp
                 add = -(float(binSize) / float(2))
+                inc = 1
                 if bp[0] == 'exon':
                     add = (float(binSize) / float(2))
-                start = trxOffset + (binSize * 2 * bp[1]) + add
+                    inc = 0
+                start = trxOffset + (binSize * 2 * (bp[1] + inc)) + add
                 print 'Start coord', start
                 ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
 
