@@ -27,7 +27,7 @@ class TrxBrkpt:
         self.svType = svType
 
     def get_genomic_coord(self):
-        return self.svBrkpt.genomicCoords[self.brkptIdx]
+        return int(self.svBrkpt.genomicCoords[self.brkptIdx])
 
 
 class AnnoTrx:
@@ -438,32 +438,38 @@ class AnnotationBrkpt:
         self.other_brkpts = trxBrkpts
 
     def select_exons(self, exons):
-        selectedExons = []
-        maxminCoords = []
+        selectedExons = {}
         for bp in self.bps:
-            selectedExons.append((int(bp[1]) - 1, int(bp[1]), 'breakpoint'))
+            maxminCoords = []
+            bpObj, bpCoord, exonCode = bp
+            selectedExons[bpCoord] = {'coords': []}
+            selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint'))
             if len(maxminCoords) == 0:
-                maxminCoords = [int(bp[1]) - 1, int(bp[1]), int(bp[1]), bp[2]]
+                maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
             eIter = 1
             firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
             for exon in exons:
                 add = False
-                exonCoords = [int(exon.start), int(exon.stop)]
-                if (bp[2] == 'left') and (int(exon.start) <= int(bp[1])):
+                estart = int(exon.start)
+                estop = int(exon.stop)
+                exonCoords = [estart, estop]
+                if (exonCode == 'left') and (estart <= bpCoord):
                     # Get all exons with start < bp
-                    if int(bp[1]) < int(exon.stop):
-                        exonCoords[1] = int(bp[1])
+                    if bpCode < estop:
+                        # Breakpoint intersects with exon, reduce feature count to 2
+                        exonCoords[1] = bpCoord
+                        bpCodingFeatureCount[1] -= 1
                     add = True
-                elif (bp[2] == 'right') and (int(exon.stop) >= int(bp[1])):
-                    if int(bp[1]) < int(exon.start):
-                        exonCoords[0] = int(bp[1])
+                elif (exonCode == 'right') and (estop >= bpCoord):
+                    if bpCoord < estart:
+                        exonCoords[0] = bpCoord
                     add = True
-                elif bp[2] == 'all':
+                elif exonCode == 'all':
                     # Single insertion in a gene
                     add = True
                 if add:
                     print 'sv_viz.py keep exon', bp, exon.start, exon.stop
-                    absDist = abs(int(bp[1]) - int(exonCoords[0]))
+                    absDist = abs(bpCoord - int(exonCoords[0]))
                     if len(firstLastExons['nearest_exon']) == 0:
                         firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     elif absDist < firstLastExons['nearest_exon'][0]:
@@ -472,15 +478,16 @@ class AnnotationBrkpt:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     elif absDist > firstLastExons['furthest_exon'][0]:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    selectedExons.append([int(exonCoords[0]), int(exonCoords[1]), ''])
+                    selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), ''])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
                     if maxminCoords[1] < int(exonCoords[1]):
                         maxminCoords[1] = int(exonCoords[1])
                 eIter += 1
-            selectedExons[firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
-            selectedExons[firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-        return selectedExons, maxminCoords
+            selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
+            selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
+            selectedExons[bpCoord]['maxmincoords'] = maxmincoords
+        return selectedExons
 
 
 def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
@@ -562,6 +569,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             bpUnits = float(trxLen) / float(genomicLen)
 
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
+            print 'SELECTED EXONS', 10*'#'
             print selectedExons
             for exon in selectedExons:
                 genomicStart = maxminCoords[2]
