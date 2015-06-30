@@ -660,23 +660,34 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
-            ax.add_patch(rect)
+            # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
+            # ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             exons = sorted(trx.exons, key=lambda x: x.start)
 
+            parsedExons = []
+            for exon in exons:
+                parsedExons.append((int(exon.start), int(exon.stop), 'exon'))
+
             bpPlotBins = []
             for brkpt in brkpts:
                 print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
                 gCoord = brkpt.get_genomic_coord()
-                for i, exon in enumerate(exons):
-                    if gCoord >= exon.start and gCoord <= exon.stop:
-                        # within exon
-                        bpPlotBins.append(('exon', i))
-                    elif gCoord < exon.start:
-                        bpPlotBins.append(('intron', i - 1))
+                if gCoord < trx.start or gCoord > trx.stop:
+                    parsedExons.append((int(gCoord) - 1, int(gCoord), 'breakpoint'))
+                else:
+                    for i, exon in enumerate(exons):
+                        if gCoord >= exon.start and gCoord <= exon.stop:
+                            # within exon
+                            bpPlotBins.append(('exon', i))
+                            break
+                        elif gCoord < exon.start:
+                            bpPlotBins.append(('intron', i - 1))
+                            break
+
+            newExons = sorted(parsedExons, key=lambda x: x[0])
 
             binSize = trxLen / (2 * len(exons) - 1)
             offset = trxOffset
@@ -688,17 +699,34 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             exonLabel = 'exon1'
             if trx.strand == '-':
                 exonLabel = 'exon' + str(len(exons))
-            ax.text(trxOffset, yCoord + 0.35, exonLabel, ha='left', va='center', size=8)
-            for i, exon in enumerate(exons):
+            ax.text(trxOffset, yCoord + 0.5, exonLabel, ha='left', va='center', size=8)
+            trxElements = []
+            for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
                 color = segment.color
                 height = 0.35
-                offset += binSize + rectLen
-                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
-                rect = patches.Rectangle((start, yCoord), rectLen, height, color=segment.color)
-                ax.add_patch(rect)
+                if exon[2] == 'breakpoint':
+                    rectLen = 0.5
+                    height = 5
+                    exonStr = ''
+                    if i == (len(plotExons) - 1):
+                        start += binSize
+                    ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
+                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                        trxElements.append(start)
+                offset += binSize + rectLen + (binSize - rectLen)
+                if exon[2] != 'breakpoint':
+                    rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
+                    ax.add_patch(rect)
+                    trxElements.append(start)
+                    trxElements.append(start + binSize)
             segTrxIter += 1
+            # This guarantees that intergenic breakpoints don't appear to be in the transcript.
+            trxMin = max(min(trxElements), trxOffset)
+            trxMax = min(max(trxElements), trxLen)
+            rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
+            ax.add_patch(rect)
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
