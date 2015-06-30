@@ -652,15 +652,13 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             reverse = True
 
         trxOffset = segStart + xOffset
-        if (segmentPos == 'first' or segmentPos == 'only'):
-            trxOffset += 3
         segTrxIter = 0
         for segTrx in segTrxs:
-            yCoord = yCoord + ((i + 0.75) * 0.50)
+            yCoord = yCoord + ((i + 0.5) * 0.25)
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.1, color=segment.color)
+            rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
             ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
@@ -673,13 +671,15 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             binSize = trxLen / (2 * len(exons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
-            labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
-            ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
+            # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
+            # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
+            ax.text(trxOffset, yCoord + 0.25, str(trx.start), ha='left', va='center', size=10)
+            ax.text(trxOffset, yCoord + 0.25, str(trx.stop), ha='right', va='center', size=10)
             for i, exon in enumerate(exons):
                 rectLen = binSize
                 start = offset
                 color = segment.color
-                height = 0.25
+                height = 0.35
                 offset += binSize + rectLen
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 rect = patches.Rectangle((start, yCoord), rectLen, height, color=segment.color)
