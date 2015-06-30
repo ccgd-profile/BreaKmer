@@ -352,7 +352,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
     for i, segment in enumerate(segmentManager.segments):
         # Plot rectangles for each realignment result
         xCoord = xOffset + segment.queryCoordinates[0]
-        yCoord = yCoord + ((i + 0.5) * 0.50)
+        yCoord = yCoord + ((i + 0.75) * 0.50)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
         rectHeight = 0.25
         lenText = str(rectLen) + 'bp'
@@ -665,7 +665,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 segLen = segLen - 3
                 print 'HELLO', '@'*20
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset + segLen + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
+                    rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
@@ -735,7 +735,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=8)
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
-                        start += binSize - rectLen
+                        start += binSize - 0.5
                     rect = patches.Rectangle((start, yCoord), 0.5, 1.5, color='black')
                     ax.add_patch(rect)
 
