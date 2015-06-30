@@ -692,7 +692,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, ycoord, start + rectLen, binSize
                 rect = patches.Rectangle((start, ycoord), rectLen, 1, color=color)
-                if exon[3][1] is not None:
+                print 'Exon', exon
+                if exon[3] is not None:
                     rect = patches.Rectangle((start, ycoord), 1.5, 1, color=color)
 
             # for exon in selectedExons:
