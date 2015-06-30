@@ -667,9 +667,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
             # bpUnits = float(trxLen) / float(genomicLen)
 
-            allExons = []
+            mergedExons = []
             for item in selectedExons:
-                allExons.extend(selectedExons[item]['coords'])
+                mergedExons.extend(selectedExons[item]['coords'])
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
             plotExons = get_neighbor_exons(allExons)
             print plotExons
