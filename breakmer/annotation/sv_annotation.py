@@ -58,7 +58,7 @@ class Transcript:
     def get_exons(self, annotationFn, tmpFilePath):
         """ """
         # Grep the exons and UTRs from the annotationFn
-        exonSelect = '($3 == "exon" || $3 == "UTR")'
+        exonSelect = '$3 == "exon"' #' || $3 == "UTR")'
         outFn = os.path.join(tmpFilePath, self.id + '.exons')
         cmd = 'cat ' + annotationFn + " | awk '" + exonSelect + "' | grep '" + self.id + "' > " + os.path.join(tmpFilePath, self.id + '.exons')
         os.system(cmd)
