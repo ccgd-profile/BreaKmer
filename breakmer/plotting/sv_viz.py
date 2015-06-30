@@ -656,10 +656,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             trxOffset += 3
         segTrxIter = 0
         for segTrx in segTrxs:
+            yCoord = yCoord + ((i + 0.75) * 0.50)
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            rect = patches.Rectangle((trxOffset, yCoord + 0.125), trxLen, 0.125, color=segment.color)
+            rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.1, color=segment.color)
             ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
@@ -678,7 +679,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 rectLen = binSize
                 start = offset
                 color = segment.color
-                height = 0.2
+                height = 0.25
                 offset += binSize + rectLen
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 rect = patches.Rectangle((start, yCoord), rectLen, height, color=segment.color)
