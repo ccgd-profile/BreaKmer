@@ -453,9 +453,10 @@ class AnnotationBrkpt:
         if len(self.bounds) > 0:
             print 'Bounds', self.bounds
             self.bounds.sort()
-            selectedExons['-'.join([str(x) for x in self.bounds])] = {'coords': []}
-            selectedExons[bpCoord]['coords'].append((self.bounds[0] - 1, self.bounds[0], 'breakpoint'))
-            selectedExons[bpCoord]['coords'].append((self.bounds[1] - 1, self.bounds[1], 'breakpoint'))
+            bpCoordKey = '-'.join([str(x) for x in self.bounds])
+            selectedExons[bpCoordKey] = {'coords': []}
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[0] - 1, self.bounds[0], 'breakpoint'))
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[1] - 1, self.bounds[1], 'breakpoint'))
             eIter = 1
             maxminCoords = [self.bounds[0], self.bounds[1], self.bounds[0], self.bps[0][2]]
             for exon in exons:
@@ -483,7 +484,7 @@ class AnnotationBrkpt:
                     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     # elif absDist > firstLastExons['furthest_exon'][0]:
                     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    selectedExons['-'.join([str(x) for x in self.bounds])]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
+                    selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
                     if maxminCoords[1] < int(exonCoords[1]):
