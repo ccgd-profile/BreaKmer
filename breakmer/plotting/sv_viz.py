@@ -676,6 +676,17 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             print allExons
             plotExons = get_neighbor_exons(allExons)
             print plotExons
+
+            binSize = trxLen / (2 * len(plotExons) - 1)
+            intronSize = binSize
+            offset = trxOffset
+            for exon in plotExons:
+                rectLen = binSize
+                if exon[2] == 'breakpoint':
+                    rectLen = 1.5
+                start = offset
+                offset += binSize + rectLen + (binSize - rectLen)
+                print 'Rect plot coords', start, start + rectLen
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
             #     if maxminCoords[3] == 'all':
