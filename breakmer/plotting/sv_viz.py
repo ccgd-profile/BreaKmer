@@ -718,7 +718,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     exonStr = ''
                     if i == (len(plotExons) - 1):
                         start += binSize #- rectLen
-                    ax.vlines(x=start, ymin=0, ymax=yCoord, color='black', linewidth=1.5)
+                    ax.vlines(x=start, ymin=0, ymax=yCoord + 0.25, color='black', linewidth=1.5)
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
@@ -738,7 +738,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
                         start += binSize - 0.5
-                    ax.vlines(x=start, ymin=0, ymax=yCoord, color='black', linewidth=1.5)
+                    ax.vlines(x=start, ymin=0, ymax=yCoord + 0.25, color='black', linewidth=1.5)
                     # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
                     # ax.add_patch(rect)
 
