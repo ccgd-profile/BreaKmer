@@ -672,6 +672,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             for item in selectedExons:
                 mergedExons.extend(selectedExons[item]['coords'])
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
+            print 'All Exons sorted', 10*'#'
+            print allExons
             plotExons = get_neighbor_exons(allExons)
             print plotExons
             # for exon in selectedExons:
