@@ -308,8 +308,8 @@ def plot_pileup(segmentManager, outName):
 #                 ax.text(offset, annoYidx-(iter*0.8)-0.5, coordText, ha=lr, va='top', size=12)
 #         iter += 1
 
-    ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 20
-    ax.axis([0, len(segmentManager.get_contig_seq()) + 10, -seqPlotSize - 8, 15])
+    ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 10
+    ax.axis([0, len(segmentManager.get_contig_seq()) + 10, -seqPlotSize - 5, 10])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.svg')
@@ -713,17 +713,19 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 exonStr = exon[2]
                 if exon[2] == 'breakpoint':
                     rectLen = 0.5
-                    height = 1.5
+                    height = 5
                     color = 'black'
                     exonStr = ''
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
+                    ax.axvline(x=start, ymin=0, ymax=yCoord)
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
-                rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
-                ax.add_patch(rect)
-                print 'Exon', exon
-                ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
+                if exon[2] != 'breakpoint':
+                    rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
+                    ax.add_patch(rect)
+                    print 'Exon', exon
+                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
 
                 if exonStr != '':
                     exstart = exon[0]
@@ -736,8 +738,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
                         start += binSize - 0.5
-                    rect = patches.Rectangle((start, yCoord), 0.5, 1.5, color='black')
-                    ax.add_patch(rect)
+                    ax.axvline(x=start, ymin=0, ymax=yCoord)
+                    # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
+                    # ax.add_patch(rect)
 
 
             # for exon in selectedExons:
