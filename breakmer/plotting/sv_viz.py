@@ -35,7 +35,7 @@ class AnnoTrx:
         self.trx = trx
         self.brkpts = [TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType)]
 
-    def add_brkpt(self, trxDist, svBreakpoint, brkptIdx):
+    def add_brkpt(self, trxDist, svBreakpoint, brkptIdx, svType):
         self.brkpts.append(TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType))
 
 
