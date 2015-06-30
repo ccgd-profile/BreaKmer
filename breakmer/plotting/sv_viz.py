@@ -678,15 +678,23 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             print plotExons
 
             binSize = trxLen / (2 * len(plotExons) - 1)
-            intronSize = binSize
             offset = trxOffset
-            for exon in plotExons:
+            ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+            for i, exon in enumerate(plotExons):
                 rectLen = binSize
+                start = offset
+                color = segment.color
                 if exon[2] == 'breakpoint':
                     rectLen = 1.5
-                start = offset
+                    color = 'black'
+                    if i == (len(plotExons) - 1):
+                        start += binSize - rectLen
                 offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, start + rectLen
+                print 'Rect plot coords', start, start + rectLen, binSize
+                rect = patches.Rectangle(start, ycoord, rectLen, 1, color=color)
+                if exon[3] is not None:
+                    rect = patches.Rectangle(start, ycoord, 1.5, 1, color=color)
+
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
             #     if maxminCoords[3] == 'all':
