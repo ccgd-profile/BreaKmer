@@ -240,9 +240,9 @@ def plot_pileup(segmentManager, outName):
     # plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
-    plot_segments(ax, yCoord + 0.5, xOffset, segmentManager)
+    plot_segments(ax, yCoord + 0.75, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-    plot_annotation_track(ax, yCoord + 4, xOffset, segmentManager)
+    plot_annotation_track(ax, yCoord + 5, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
