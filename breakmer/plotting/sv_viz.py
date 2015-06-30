@@ -650,12 +650,26 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         if segment.strand == '-':
             reverse = True
 
-        trxOffset = segStart + xOffset
+        trxOffset = segStart + xOffset + 5
         segTrxIter = 0
         for segTrx in segTrxs:
+            if segTrxIter == 0:
+                segLen = segLen - 5
+                for i in range(3):
+                    rect = patches.Rectangle((trxOffset - 5 + i, yCoord + 0.125), 0.2, 0.2, color=color)
+                    ax.add_patch(rect)
+            elif segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last'):
+                # Last segment and trx
+                segLen = segLen - 5
+                for i in range(3):
+                    rect = patches.Rectangle((trxOffset + segLen - 5 + i, yCoord + 0.125), 0.2 ,0.2, color=color)
+                    ax.add_patch(rect)
+
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
+            rect = patches.Rectangle((trxOffset, yCoord + 0.25), trxLen, height, color=color)
+            ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
