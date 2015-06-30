@@ -664,7 +664,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 # Last segment and trx
                 segLen = segLen - 3
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset + segLen - 3 + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
+                    rect = patches.Rectangle((trxOffset + segLen + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
