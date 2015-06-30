@@ -449,7 +449,7 @@ class AnnotationBrkpt:
             eIter = 1
             firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
             for exon in exons:
-                print 'Check exon', exon.start, exon.stop, exon.featureType
+                # print 'Check exon', exon.start, exon.stop, exon.featureType
                 add = False
                 estart = int(exon.start)
                 estop = int(exon.stop)
@@ -468,7 +468,7 @@ class AnnotationBrkpt:
                     # Single insertion in a gene
                     add = True
                 if add:
-                    print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
+                    # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
                     absDist = abs(bpCoord - int(exonCoords[0]))
                     if len(firstLastExons['nearest_exon']) == 0:
                         firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
