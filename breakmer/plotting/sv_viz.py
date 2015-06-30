@@ -431,10 +431,10 @@ class AnnotationBrkpt:
                 if bp.svType == 'rearr':
                     self.bounds.append(bp.get_genomic_coord())
                     if bp.brkptIdx == 1:
-                        if self.segmentStrand == '+':
+                        if self.segStrand == '+':
                             exonCode = 'left'
                     elif bp.brkptIdx == 0:
-                        if self.segmentStrand == '-':
+                        if self.segStrand == '-':
                             exonCode = 'left'
             elif self.segPos == 'last':
                 if bp.svType == 'rearr':
