@@ -222,9 +222,9 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = 12 # seqPlotSize*1.5
-    if len(segmentManager.orderedSeqs) > 10:
-        plotHeight = 20
+    plotHeight = round(seqPlotSize) + 5 # seqPlotSize*1.5
+    # if len(segmentManager.orderedSeqs) > 10:
+    #     plotHeight = 20
 
     # Setup figure
     fig = plt.figure(figsize=(25, plotHeight), frameon=False)
