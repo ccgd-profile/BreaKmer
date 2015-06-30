@@ -605,7 +605,7 @@ def get_neighbor_exons(exons):
         if len(left) > 0:
             finalList.extend(left[len(left) - 2: len(left)])
         if item not in bpOverlaps:
-            finalList.append((item, item + 1, 'breakpoint'))
+            finalList.append((item, item + 1, 'breakpoint', None))
         if len(right) > 0:
             finalList.extend(right[0:2])
     return finalList
