@@ -222,12 +222,12 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = 15 # seqPlotSize*1.5
+    plotHeight = 12 # seqPlotSize*1.5
     if len(segmentManager.orderedSeqs) > 10:
-        plotHeight = 25
+        plotHeight = 20
 
     # Setup figure
-    fig = plt.figure(figsize=(30, plotHeight), frameon=False)
+    fig = plt.figure(figsize=(25, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
@@ -309,7 +309,7 @@ def plot_pileup(segmentManager, outName):
 #         iter += 1
 
     ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 20
-    ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 3, 15])
+    ax.axis([0, len(segmentManager.get_contig_seq()) + 10, -seqPlotSize - 8, 15])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.svg')
@@ -352,7 +352,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
     for i, segment in enumerate(segmentManager.segments):
         # Plot rectangles for each realignment result
         xCoord = xOffset + segment.queryCoordinates[0]
-        yCoord = yCoord + ((i + 1) * 0.15)
+        yCoord = yCoord + ((i + 0.5) * 0.50)
         rectLen = segment.queryCoordinates[1] - segment.queryCoordinates[0]
         rectHeight = 0.25
         lenText = str(rectLen) + 'bp'
