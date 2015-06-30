@@ -690,10 +690,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
                 offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, start + rectLen, binSize
-                rect = patches.Rectangle(start, ycoord, rectLen, 1, color=color)
+                print 'Rect plot coords', start, ycoord, start + rectLen, binSize
+                rect = patches.Rectangle((start, ycoord), rectLen, 1, color=color)
                 if exon[3] is not None:
-                    rect = patches.Rectangle(start, ycoord, 1.5, 1, color=color)
+                    rect = patches.Rectangle((start, ycoord), 1.5, 1, color=color)
 
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
