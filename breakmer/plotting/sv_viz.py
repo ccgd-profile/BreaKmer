@@ -92,8 +92,12 @@ class Segment:
                         keepIdx = 1
                     # Left
                     trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
+                    keepIdx = 0
+                    if len(rightBpTrxList) > 1:
+                        # Take the inner trxs
+                        keepIdx = 1
                     # Right
-                    trxItems, trxIds = check_add_trx(rightBpTrxList[0], trxItems, trxIds, rightBpDistList[0], svBreakpoint, 1, 'rearr')
+                    trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
                 else:
                     trxList, distList = annotatedTrxsDict[0]
                     if len(trxList) > 1:
@@ -408,6 +412,7 @@ class AnnotationBrkpt:
         self.trxBrkpts = trxBrkpts
         self.other_brkpts = None
         self.bps = []
+        self.bounds = []
         self.setup()
 
     def setup(self):
@@ -424,8 +429,13 @@ class AnnotationBrkpt:
                         exonCode = 'left'
             elif self.segPos == 'middle':
                 if bp.svType == 'rearr':
+                    self.bounds.append(bp.get_genomic_coord())
                     if bp.brkptIdx == 1:
-                        exonCode = 'left'
+                        if self.segmentStrand == '+':
+                            exonCode = 'left'
+                    elif bp.brkptIdx == 0:
+                        if self.segmentStrand == '-':
+                            exonCode = 'left'
             elif self.segPos == 'last':
                 if bp.svType == 'rearr':
                     if self.segStrand == '-':
@@ -439,54 +449,90 @@ class AnnotationBrkpt:
 
     def select_exons(self, exons):
         selectedExons = {}
-        for bp in self.bps:
-            maxminCoords = []
-            bpObj, bpCoord, exonCode = bp
-            selectedExons[bpCoord] = {'coords': []}
-            selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint'))
-            if len(maxminCoords) == 0:
-                maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
-            eIter = 1
-            firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
+        if len(self.bounds) > 0:
+            selectedExons['-'.join([str(x) for x in self.bounds])] = {'coords': []}
+            self.bounds.sort()
             for exon in exons:
                 # print 'Check exon', exon.start, exon.stop, exon.featureType
                 add = False
                 estart = int(exon.start)
                 estop = int(exon.stop)
                 exonCoords = [estart, estop]
-                if (exonCode == 'left') and (estart <= bpCoord):
-                    # Get all exons with start < bp
-                    if bpCoord < estop:
-                        # Breakpoint intersects with exon, reduce feature count to 2
-                        exonCoords[1] = bpCoord
+                if (estart >= self.bounds[0] and estart <= self.bounds[1]):
                     add = True
-                elif (exonCode == 'right') and (estop >= bpCoord):
-                    if bpCoord > estart:
-                        exonCoords[0] = bpCoord
+                    if estop > self.bounds[1]:
+                        exonCoords[1] = self.bounds[1]
+                elif (estop >= self.bounds[0] and estop <= self.bounds[1]):
                     add = True
-                elif exonCode == 'all':
-                    # Single insertion in a gene
-                    add = True
+                    if estart < self.bounds[1]:
+                        exonCoords[0] = self.bounds[0]
                 if add:
                     # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
-                    absDist = abs(bpCoord - int(exonCoords[0]))
-                    if len(firstLastExons['nearest_exon']) == 0:
-                        firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    elif absDist < firstLastExons['nearest_exon'][0]:
-                        firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    if len(firstLastExons['furthest_exon']) == 0:
-                        firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    elif absDist > firstLastExons['furthest_exon'][0]:
-                        firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
+                    # absDist = abs(bpCoord - int(exonCoords[0]))
+                    # if len(firstLastExons['nearest_exon']) == 0:
+                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # elif absDist < firstLastExons['nearest_exon'][0]:
+                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # if len(firstLastExons['furthest_exon']) == 0:
+                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # elif absDist > firstLastExons['furthest_exon'][0]:
+                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    selectedExons['-'.join([str(x) for x in self.bounds])]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
                     if maxminCoords[1] < int(exonCoords[1]):
                         maxminCoords[1] = int(exonCoords[1])
                 eIter += 1
-            selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
-            selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-            selectedExons[bpCoord]['maxmincoords'] = maxminCoords
+            selectedExons['-'.join([str(x) for x in self.bounds])]['maxmincoords'] = maxminCoords
+        else:
+            for bp in self.bps:
+                maxminCoords = []
+                bpObj, bpCoord, exonCode = bp
+                selectedExons[bpCoord] = {'coords': []}
+                selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint'))
+                if len(maxminCoords) == 0:
+                    maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
+                eIter = 1
+                firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
+                for exon in exons:
+                    # print 'Check exon', exon.start, exon.stop, exon.featureType
+                    add = False
+                    estart = int(exon.start)
+                    estop = int(exon.stop)
+                    exonCoords = [estart, estop]
+                    if (exonCode == 'left') and (estart <= bpCoord):
+                        # Get all exons with start < bp
+                        if bpCoord < estop:
+                            # Breakpoint intersects with exon, reduce feature count to 2
+                            exonCoords[1] = bpCoord
+                        add = True
+                    elif (exonCode == 'right') and (estop >= bpCoord):
+                        if bpCoord > estart:
+                            exonCoords[0] = bpCoord
+                        add = True
+                    elif exonCode == 'all':
+                        # Single insertion in a gene
+                        add = True
+                    if add:
+                        # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
+                        absDist = abs(bpCoord - int(exonCoords[0]))
+                        if len(firstLastExons['nearest_exon']) == 0:
+                            firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        elif absDist < firstLastExons['nearest_exon'][0]:
+                            firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        if len(firstLastExons['furthest_exon']) == 0:
+                            firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        elif absDist > firstLastExons['furthest_exon'][0]:
+                            firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
+                        if maxminCoords[0] > int(exonCoords[0]):
+                            maxminCoords[0] = int(exonCoords[0])
+                        if maxminCoords[1] < int(exonCoords[1]):
+                            maxminCoords[1] = int(exonCoords[1])
+                    eIter += 1
+                selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
+                selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
+                selectedExons[bpCoord]['maxmincoords'] = maxminCoords
         return selectedExons
 
 
@@ -537,7 +583,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-
+        print 'Segment transcript ids', segTrxIds
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
