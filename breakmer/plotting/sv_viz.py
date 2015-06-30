@@ -222,12 +222,12 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = 5 # seqPlotSize*1.5
+    plotHeight = 15 # seqPlotSize*1.5
     if len(segmentManager.orderedSeqs) > 10:
-        plotHeight = 15
+        plotHeight = 25
 
     # Setup figure
-    fig = plt.figure(figsize=(50, plotHeight), frameon=False)
+    fig = plt.figure(figsize=(30, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
@@ -660,9 +660,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 for i in range(3):
                     rect = patches.Rectangle((trxOffset - 3 + i, yCoord + 0.125), 0.25, 0.1, color=segment.color)
                     ax.add_patch(rect)
-            elif segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last'):
+            if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
                 # Last segment and trx
                 segLen = segLen - 3
+                print 'HELLO', '@'*20
                 for i in range(3):
                     rect = patches.Rectangle((trxOffset + segLen + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
