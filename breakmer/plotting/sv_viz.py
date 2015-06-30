@@ -486,7 +486,7 @@ class AnnotationBrkpt:
                 eIter += 1
             selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
             selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-            selectedExons[bpCoord]['maxmincoords'] = maxmincoords
+            selectedExons[bpCoord]['maxmincoords'] = maxminCoords
         return selectedExons
 
 
