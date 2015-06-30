@@ -241,7 +241,7 @@ def plot_pileup(segmentManager, outName):
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
-    plot_annotation_track(ax, yCoord + 1, xOffset, segmentManager)
+    plot_annotation_track(ax, yCoord + 4, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
@@ -626,7 +626,6 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        yCoord = yCoord + ((i + 1) * 0.5)
         print 'sv_viz.py plot_annotation_track segment', i
         segment = segmentTuple[1]
         segmentPos = 'only'
