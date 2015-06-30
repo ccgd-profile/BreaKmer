@@ -668,7 +668,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            rect = patches.Rectangle((trxOffset, yCoord + 0.25), trxLen, height, color=color)
+            rect = patches.Rectangle((trxOffset, yCoord + 0.25), trxLen, 0.25, color=segment.color)
             ax.add_patch(rect)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
@@ -721,6 +721,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 ax.add_patch(rect)
                 print 'Exon', exon
                 ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
+
+
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
