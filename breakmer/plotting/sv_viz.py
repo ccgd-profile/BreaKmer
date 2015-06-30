@@ -479,7 +479,7 @@ class AnnotationBrkpt:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     elif absDist > firstLastExons['furthest_exon'][0]:
                         firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), ''])
+                    selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
                     if maxminCoords[1] < int(exonCoords[1]):
@@ -573,41 +573,41 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
             print 'SELECTED EXONS', 10*'#'
             print selectedExons
-            for exon in selectedExons:
-                genomicStart = maxminCoords[2]
-                if maxminCoords[3] == 'all':
-                    genomicStart = int(trx.start)
-                # if reverse:
-                #     genomicStart = maxminCoords[1]
-                # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
-                e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
-                e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
-                if segmentPos == 'first':
-                    e1 = trxLen - e1
-                    e2 = trxLen - e2
-                print 'genomic start', genomicStart, bpUnits
-                print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
-                eCoords = [e1, e2]
-                print 'Mapped coords', e1, e2
-                eCoords.sort()
-                if reverse:
-                    print 'Reversing exon coords'
-                    tmp = e2
-                    e2 = e1
-                    e1 = tmp
-                    print 'Mapped exon coords', e1, e2
-                ycoord = int(yCoord) - (float(segTrxIter) / float(5))
-                color = segment.color
-                rectLen = e2 - e1
-                if exon[2] == 'breakpoint':
-                    color = 'black'
-                    # rectLen = 0.25
+            # for exon in selectedExons:
+            #     genomicStart = maxminCoords[2]
+            #     if maxminCoords[3] == 'all':
+            #         genomicStart = int(trx.start)
+            #     # if reverse:
+            #     #     genomicStart = maxminCoords[1]
+            #     # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
+            #     e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
+            #     e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
+            #     if segmentPos == 'first':
+            #         e1 = trxLen - e1
+            #         e2 = trxLen - e2
+            #     print 'genomic start', genomicStart, bpUnits
+            #     print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
+            #     eCoords = [e1, e2]
+            #     print 'Mapped coords', e1, e2
+            #     eCoords.sort()
+            #     if reverse:
+            #         print 'Reversing exon coords'
+            #         tmp = e2
+            #         e2 = e1
+            #         e1 = tmp
+            #         print 'Mapped exon coords', e1, e2
+            #     ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+            #     color = segment.color
+            #     rectLen = e2 - e1
+            #     if exon[2] == 'breakpoint':
+            #         color = 'black'
+            #         # rectLen = 0.25
 
-                rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
-                ax.add_patch(rect)
-                if exon[2] != '' and exon[2] != 'breakpoint':
-                    ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
-            ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
+            #     rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
+            #     ax.add_patch(rect)
+            #     if exon[2] != '' and exon[2] != 'breakpoint':
+            #         ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
+            # ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
             segTrxIter += 1
 
 
