@@ -675,6 +675,10 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
             ax.text(trxOffset, yCoord + 0.25, str(trx.start), ha='left', va='center', size=10)
             ax.text(trxOffset, yCoord + 0.25, str(trx.stop), ha='right', va='center', size=10)
+            exonLabel = 'exon1'
+            if trx.strand == '-':
+                exonLabel = 'exon' + str(len(exons))
+            ax.text(trxOffset, yCoord + 0.25, str(trx.stop), ha='left', va='center', size=8)
             for i, exon in enumerate(exons):
                 rectLen = binSize
                 start = offset
