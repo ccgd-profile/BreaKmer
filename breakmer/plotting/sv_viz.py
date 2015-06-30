@@ -227,7 +227,7 @@ def plot_pileup(segmentManager, outName):
         plotHeight = 15
 
     # Setup figure
-    fig = plt.figure(figsize=(30, plotHeight), frameon=False)
+    fig = plt.figure(figsize=(50, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
@@ -240,7 +240,7 @@ def plot_pileup(segmentManager, outName):
     # plot_realignment_strands(ax, yCoord + 0.5, xOffset, segmentManager)
     plot_contig_seq(ax, yCoord, xOffset, segmentManager)
     plot_pileup_seq(ax, yCoord, xOffset, segmentManager)
-    plot_segments(ax, yCoord + 0.75, xOffset, segmentManager)
+    plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
     plot_annotation_track(ax, yCoord + 5, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
@@ -309,7 +309,7 @@ def plot_pileup(segmentManager, outName):
 #         iter += 1
 
     ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 20
-    ax.axis([0, len(segmentManager.get_contig_seq()) + 10, -seqPlotSize - 5, 8])
+    ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 3, 15])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.svg')
@@ -359,7 +359,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         xCoordLabel = xCoord + (float(rectLen) / float(2))
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
-        ax.text(xCoordLabel, yCoord - 0.25, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
+        ax.text(xCoordLabel, yCoord - 0.15, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
         # Plot genomic coordinates of the segment
         gCoordOrder = [xCoord, xCoord + rectLen]
         if segment.strand == '-':
@@ -369,8 +369,8 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
             horizAlign.reverse()
         segCoordStart = segment.chromName + ':' + str(segment.genomicCoordinates[0])
         segCoordEnd = segment.chromName + ':' + str(segment.genomicCoordinates[1])
-        ax.text(gCoordOrder[0], yCoord - 0.125, segCoordStart, ha=horizAlign[0], va='top', size=10)
-        ax.text(gCoordOrder[1], yCoord - 0.125, segCoordEnd, ha=horizAlign[1], va='top', size=10)
+        ax.text(gCoordOrder[0], yCoord - 0.15, segCoordStart, ha=horizAlign[0], va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.15, segCoordEnd, ha=horizAlign[1], va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
