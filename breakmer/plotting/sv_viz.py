@@ -623,6 +623,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
+        yCoord = yCoord + ((i + 1) * 0.5)
         print 'sv_viz.py plot_annotation_track segment', i
         segment = segmentTuple[1]
         segmentPos = 'only'
@@ -680,25 +681,35 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+            labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
+            ax.text(trxOffset, yCoord + 2, labelStr, ha='center', va='center', size=8)
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
                 color = segment.color
+                height = 1
+                exonStr = exon[2]
                 if exon[2] == 'breakpoint':
-                    rectLen = 1.5
+                    rectLen = 1
+                    height = 2
                     color = 'black'
+                    exonStr = 'breakpoint:' + str(exon[1])
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
                 offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, ycoord, start + rectLen, binSize
-                rect = patches.Rectangle((start, ycoord), rectLen, 1, color=color)
+                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
                 ax.add_patch(rect)
                 print 'Exon', exon
+                ax.text(start, yCoord + 2.25, exonStr, ha='center', va='center', size=8)
                 if exon[3] is not None:
+                    exonStr = 'breakpoint:' + str(exon[3] + 1)
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
-                    rect = patches.Rectangle((start, ycoord), 1.5, 2, color=color)
+                    rect = patches.Rectangle((start, yCoord), 1, 2, color='black')
                     ax.add_patch(rect)
+                    ax.text(start, yCoord + 2.25, exonStr, ha='center', va='center', size=8)
+
 
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
