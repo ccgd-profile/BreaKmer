@@ -681,9 +681,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     for i, exon in enumerate(exons):
                         if gCoord >= exon.start and gCoord <= exon.stop:
                             # within exon
+                            print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
                             bpPlotBins.append(('exon', i))
                             break
                         elif gCoord < exon.start:
+                            print 'Gcoord, exon.start', gCoord, exon.start, i
                             bpPlotBins.append(('intron', i - 1))
                             break
 
