@@ -45,6 +45,7 @@ def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx, svType
         trxItems[idx].add_brkpt(trxDist, svBreakpoint, brkptIdx, svType)
     else:
         trxItems.append(AnnoTrx(trx, trxDist, svBreakpoint, brkptIdx, svType))
+        trxIds.append(trx.id)
     return trxItems, trxIds
 
 
