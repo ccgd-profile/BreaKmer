@@ -461,7 +461,7 @@ class AnnotationBrkpt:
                         exonCoords[1] = bpCoord
                     add = True
                 elif (exonCode == 'right') and (estop >= bpCoord):
-                    if bpCoord < estart:
+                    if bpCoord > estart:
                         exonCoords[0] = bpCoord
                     add = True
                 elif exonCode == 'all':
