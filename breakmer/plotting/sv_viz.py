@@ -590,7 +590,7 @@ def get_neighbor_exons(exons):
             currentBp = start
             leftExonBuffer = []
         elif currentBp is None:
-            lefExonBuffer.insert(0, exon)
+            leftExonBuffer.insert(0, exon)
             if bpOverlapCoord is not None:
                 bpOverlaps.append(bpOverlapCoord)
         else:
