@@ -725,7 +725,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
                     ax.add_patch(rect)
                     print 'Exon', exon
-                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=10)
+                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
 
                 if exonStr != '':
                     exstart = exon[0]
@@ -736,10 +736,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     exstart = segment.chromName + ':' + str(exstart)
                     exend = segment.chromName + ':' + str(exend)
                     ax.text(start, yCoord - 0.25, str(exstart), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=10)
+                    ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=8)
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1):
-                        start += binSize - 0.5
+                        start += binSize
                     ax.vlines(x=start, ymin=0.2, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                     # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
                     # ax.add_patch(rect)
