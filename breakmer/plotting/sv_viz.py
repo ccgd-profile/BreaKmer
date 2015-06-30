@@ -693,10 +693,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 height = 0.5
                 exonStr = exon[2]
                 if exon[2] == 'breakpoint':
-                    rectLen = 1
+                    rectLen = 0.5
                     height = 1.5
                     color = 'black'
-                    exonStr = 'breakpoint:' + str(exon[1])
+                    exonStr = ''
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
                 offset += binSize + rectLen + (binSize - rectLen)
@@ -704,14 +704,12 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
                 ax.add_patch(rect)
                 print 'Exon', exon
-                ax.text(start, yCoord + 2.25, exonStr, ha='left', va='center', size=8)
+                ax.text(start, yCoord + 0.25, exonStr, ha='left', va='center', size=8)
                 if exon[3] is not None:
-                    exonStr = 'breakpoint:' + str(exon[3] + 1)
                     if i == (len(plotExons) - 1):
                         start += binSize - rectLen
                     rect = patches.Rectangle((start, yCoord), 0.5, 1.5, color='black')
                     ax.add_patch(rect)
-                    ax.text(start, yCoord + 2.25, exonStr, ha='left', va='center', size=8)
 
 
             # for exon in selectedExons:
