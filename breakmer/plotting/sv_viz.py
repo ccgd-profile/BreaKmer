@@ -723,6 +723,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     trxElements.append(start + binSize)
             segTrxIter += 1
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
+            print 'TRX elements', trxElements, trxOffset, trxLen
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxLen)
             print 'TRX max, min', trxMin, trxMax
@@ -737,7 +738,6 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 start = trxOffset + (binSize * mult * bp[1]) + (float(binSize) / float(2))
                 print 'Start coord', start
                 ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
-
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
