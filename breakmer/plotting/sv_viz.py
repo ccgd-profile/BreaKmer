@@ -563,7 +563,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
-            selectedExons, maxminCoords = abrkpt.select_exons(exons)
+            selectedExons = abrkpt.select_exons(exons)
 
             genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
             bpUnits = float(trxLen) / float(genomicLen)
