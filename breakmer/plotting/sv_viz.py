@@ -570,9 +570,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
             # bpUnits = float(trxLen) / float(genomicLen)
 
-            selectedExons = sorted(selectedExons, key=lambda x: x[0], reverse=reverse)
-            print 'SORTED SELECTED EXONS', 10*'#'
-            print selectedExons
+            for item in selectedExons:
+                exonCoords = sorted(selectedExons[item]['coords'], key=lambda x: x[0], reverse=reverse)
+                print 'SORTED SELECTED EXONS', 10*'#'
+                print exonCoords
             # for exon in selectedExons:
             #     genomicStart = maxminCoords[2]
             #     if maxminCoords[3] == 'all':
