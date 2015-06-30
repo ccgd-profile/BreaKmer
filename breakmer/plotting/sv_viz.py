@@ -363,8 +363,11 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         gCoordOrder = [xCoord, xCoord + rectLen]
         if segment.strand == '-':
             gCoordOrder = [xCoord + rectLen, xCoord]
-        ax.text(gCoordOrder[0], yCoord - 0.25, segment.genomicCoordinates[0], ha='left', va='top', size=10)
-        ax.text(gCoordOrder[1], yCoord - 0.25, segment.genomicCoordinates[1], ha='right', va='top', size=10)
+        horizAlign = ['left', 'right']
+        if segment.strand == '-':
+            horizAlign.reverse()
+        ax.text(gCoordOrder[0], yCoord - 0.25, segment.genomicCoordinates[0], ha=horizAlign[0], va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.25, segment.genomicCoordinates[1], ha=horizAlign[1], va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
