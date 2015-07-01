@@ -539,7 +539,7 @@ class SVEvent:
     def format_indel_values(self):
         """
         """
-        self.brkpts.set_indel_brkpts(self.blatResults[0])
+        self.brkpts.set_indel_brkpts(self.blatResults[0][1])
         self.resultValues.format_indel_values(self)
 
     def format_rearr_values(self):
