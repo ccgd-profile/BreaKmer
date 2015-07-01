@@ -140,7 +140,7 @@ class SVResult:
         self.alignCigar = blatResult.cigar
         self.svType = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
-        self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in blatResult.contigBreakpoints]
+        self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in blatResult.breakpts.contigBreakpoints]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
 
     def format_rearrangement_values(self, svEvent):
