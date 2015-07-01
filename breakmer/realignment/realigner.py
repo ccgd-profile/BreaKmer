@@ -61,7 +61,7 @@ class RealignManager:
         if not self.realignment.align(self.alignParams.get_values('target'), 'target'):
             # Log
             return
-        print 'realigner.py realign() check target_aligned()', self.realignment.target_aligned()
+        # print 'realigner.py realign() check target_aligned()', self.realignment.target_aligned()
         if not self.realignment.target_aligned():
             self.realignment.align(self.alignParams.get_values('genome'), 'genome')
 
@@ -131,7 +131,7 @@ class Realignment:
             return False
         else:
             self.results = AlignResults(alignProgram, scope, resultFn, self.contig)
-            print self.results.resultFn
+            # print self.results.resultFn
             return True
 
     def get_result_fn(self):
@@ -209,7 +209,7 @@ class AlignResults:
     def target_hit(self):
         """ """
         indelHit = self.results[0].spans_query() or (len(self.results) == 1 and self.get_query_coverage() >= 90.0)
-        print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
+        # print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % indelHit)
         return indelHit
 
