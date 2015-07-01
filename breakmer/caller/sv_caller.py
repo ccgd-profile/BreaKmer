@@ -244,6 +244,8 @@ class SVResult:
                      'Filter_values'
                      ]
 
+        print 'Get formatted output values', self.contigSeq, self.contigId
+
         outList = [self.targetName,
                    self.svType,
                    self.svSubtype,
