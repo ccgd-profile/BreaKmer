@@ -125,7 +125,7 @@ class ResultFilter:
             if not indelSize:
                 filterReasons.append('Max indel size (%d) is less than %d' % (svFilterValues.maxEventSize, indelSizeThresh))
             if not brkptCoverages:
-                filterReasons.append('Minimum coverage at breakpoints (%d) less than input threshold %d' % (svFilterValues.brktpCoverages[0], self.params.get_sr_thresh('indel')))
+                filterReasons.append('Minimum coverage at breakpoints (%d) less than input threshold %d' % (svFilterValues.brkptCoverages[0], self.params.get_sr_thresh('indel')))
             if not minFlankMatches:
                 filterReasons.append('Minimum percentage of contig sequence that realigns to the reference to the left or right of the indel event less than 10.0% (%d)' % min(svFilterValues.flankMatchPercents))
             svEvent.set_filtered(','.join(filterReasons))
