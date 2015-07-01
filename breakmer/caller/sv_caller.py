@@ -734,17 +734,22 @@ class ContigCaller:
 
     def call_svs(self):
         """ """
+        print 'realigment results', self.realignment.has_results()
         if not self.realignment.has_results():
             utils.log(self.loggingName, 'info', 'No blat results file exists, no calls for %s.' % self.contig.get_id())
         else:
+            print 'Results exist'
             utils.log(self.loggingName, 'info', 'Making variant calls from blat results %s' % self.realignment.get_result_fn())
             if self.check_indels():
+                print 'Check indels passed'
                 # self.result = self.realignment.get_indel_result()
                 self.svEvent.format_indel_values()
             elif self.check_svs():
+                print 'Check svs passed'
                 # self.result = self.realignment.get_svs_result()
                 self.svEvent.format_rearr_values()
         # Format the result into a
+        print 'result', self.svEvent
         return self.svEvent
 
     def check_indels(self):
