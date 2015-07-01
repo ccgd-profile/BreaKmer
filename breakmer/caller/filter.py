@@ -19,7 +19,8 @@ class Filter:
         self.breakpoints = None
         self.description = None
 
-    def set_values(self, name, svType, breakpoints, description):
+    def set_values(self, values):
+        name, svType, breakpoints, description = values
         self.name = name.lower()
         self.svType = svType
         self.breakpoints = self.parse_breakpoints(breakpoints)
