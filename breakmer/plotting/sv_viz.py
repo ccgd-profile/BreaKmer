@@ -423,33 +423,33 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
         print seq, idx, nucIter
 
 
-def get_exon_code(bp, segPos, segStrand):
-    """ """
-    exonCode = 'right'
-    if segPos == 'only':
-        if bp.svType == 'del':
-            if bp.brkptIdx == 0:
-                exonCode = 'left'
-        elif bp.svType == 'ins':
-            exonCode = 'all'
-    elif segPos == 'first':
-        if bp.svType == 'rearr':
-            if segStrand == '+':
-                exonCode = 'left'
-    elif segPos == 'middle':
-        if bp.svType == 'rearr':
-            self.bounds.append(bp.get_genomic_coord())
-            if bp.brkptIdx == 1:
-                if segStrand == '+':
-                    exonCode = 'left'
-            elif bp.brkptIdx == 0:
-                if segStrand == '-':
-                    exonCode = 'left'
-    elif segPos == 'last':
-        if bp.svType == 'rearr':
-            if segStrand == '-':
-                exonCode = 'left'
-    return exonCode
+# def get_exon_code(bp, segPos, segStrand):
+#     """ """
+#     exonCode = 'right'
+#     if segPos == 'only':
+#         if bp.svType == 'del':
+#             if bp.brkptIdx == 0:
+#                 exonCode = 'left'
+#         elif bp.svType == 'ins':
+#             exonCode = 'all'
+#     elif segPos == 'first':
+#         if bp.svType == 'rearr':
+#             if segStrand == '+':
+#                 exonCode = 'left'
+#     elif segPos == 'middle':
+#         if bp.svType == 'rearr':
+#             self.bounds.append(bp.get_genomic_coord())
+#             if bp.brkptIdx == 1:
+#                 if segStrand == '+':
+#                     exonCode = 'left'
+#             elif bp.brkptIdx == 0:
+#                 if segStrand == '-':
+#                     exonCode = 'left'
+#     elif segPos == 'last':
+#         if bp.svType == 'rearr':
+#             if segStrand == '-':
+#                 exonCode = 'left'
+#     return exonCode
 
 
 class AnnotationBrkpt:
@@ -706,25 +706,25 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
             parsedExons = []
             for exon in exons:
-                parsedExons.append((int(exon.start), int(exon.stop), 'exon', None))
+                parsedExons.append((int(exon.start), int(exon.stop), 'exon'))
 
             bpPlotBins = []
             for brkpt in brkpts:
                 print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
                 gCoord = brkpt.get_genomic_coord()
-                exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
+                # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
                 if gCoord < trx.start or gCoord > trx.stop:
-                    parsedExons.append((int(gCoord) - 1, int(gCoord), 'breakpoint', exonCode))
+                    parsedExons.append((int(gCoord) - 1, int(gCoord), 'breakpoint'))
                 else:
                     for i, exon in enumerate(exons):
                         if gCoord >= exon.start and gCoord <= exon.stop:
                             # within exon
                             print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
-                            bpPlotBins.append(('exon', i, exonCode))
+                            bpPlotBins.append(('exon', i))
                             break
                         elif gCoord < exon.start:
                             print 'Gcoord, exon.start', gCoord, exon.start, i
-                            bpPlotBins.append(('intron', i - 1, exonCode))
+                            bpPlotBins.append(('intron', i - 1))
                             break
 
             newExons = sorted(parsedExons, key=lambda x: x[0])
