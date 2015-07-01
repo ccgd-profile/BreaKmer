@@ -135,7 +135,7 @@ class Breakpoints:
     def set_sv_brkpt(self, coords, svType, targetKey):
         """ """
         self.svBreakpoints.append(SVBreakpoint(coords, svType, targetKey))
-        print self.svBreakpoints
+        # print self.svBreakpoints
 
 
 class AlignValues:
