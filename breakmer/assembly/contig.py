@@ -928,6 +928,7 @@ class Contig:
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
             readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
+            print 'output_calls() generate image'
             if self.meta.params.get_param('generate_image'):
                 svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 

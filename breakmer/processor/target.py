@@ -519,7 +519,7 @@ class TargetManager:
             else:
                 utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
-
+        print 'Ending resolve_sv()'
         # Add code for inferring SVs from discordant reads only.
         """
         Discordant read-only analysis - discordant reads that contribute to contig SVs are included in those calls.
