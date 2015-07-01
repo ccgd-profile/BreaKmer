@@ -683,6 +683,8 @@ class Meta:
         print 'Opened bamfile and new outfile.', svBamReadsFn, bamOutFn
         for bam_read in bamFile.fetch():
             for read in reads:
+                print 'Bam_read', bam_read
+                print 'Read', read
                 rid, idx = read.id.lstrip("@").split("/")
                 ridx, indel_only_read = idx.split("_")
                 if (bam_read.qname == rid) and ((ridx == '2' and bam_read.is_read2) or (ridx == '1' and bam_read.is_read1)):
