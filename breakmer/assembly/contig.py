@@ -680,6 +680,7 @@ class Meta:
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
         bamFile = pysam.Samfile(svBamReadsFn, 'rb')
         bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
+        print 'Opened bamfile and new outfile.', svBamReadsFn, bamOutFn
         for bam_read in bamFile.fetch():
             for read in reads:
                 rid, idx = read.id.lstrip("@").split("/")
