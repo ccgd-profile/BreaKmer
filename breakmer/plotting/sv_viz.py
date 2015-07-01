@@ -408,7 +408,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
     yInc = 0.75
     xInc = 1
     # Iterate through sequences.
-    print segmentManager.get_contig_seq(), len(segmentManager.get_contig_seq())
+    # print segmentManager.get_contig_seq(), len(segmentManager.get_contig_seq())
     for idx, seq in segmentManager.orderedSeqs:
         seqTextOff = xOffset
         seqYidx = seqYidx - yInc
@@ -420,7 +420,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
             nucIter += 1
-        print seq, idx, nucIter
+        # print seq, idx, nucIter
 
 
 # def get_exon_code(bp, segPos, segStrand):
@@ -489,7 +489,7 @@ class AnnotationBrkpt:
                 if bp.svType == 'rearr':
                     if self.segStrand == '-':
                         exonCode = 'left'
-            print 'sv_viz.py setup() adding breakpoint', (bp, bp.get_genomic_coord(), exonCode)
+            # print 'sv_viz.py setup() adding breakpoint', (bp, bp.get_genomic_coord(), exonCode)
             self.bps.append((bp, bp.get_genomic_coord(), exonCode))
 
     def add_brkpt(self, trxBrkpts):
@@ -499,7 +499,7 @@ class AnnotationBrkpt:
     def select_exons(self, exons):
         selectedExons = {}
         if len(self.bounds) > 0:
-            print 'Bounds', self.bounds
+            # print 'Bounds', self.bounds
             self.bounds.sort()
             bpCoordKey = '-'.join([str(x) for x in self.bounds])
             selectedExons[bpCoordKey] = {'coords': []}
@@ -630,7 +630,7 @@ def get_neighbor_exons(exons):
     currentBp = None
     bpOverlaps = []
     for exon in exons:
-        print exon
+        # print exon
         start, end, name, bpOverlapCoord = exon
         if name == 'breakpoint':
             bpExonBuffer[start] = {'left': leftExonBuffer, 'right': rightExonBuffer, 'add_to_list': False}
@@ -669,7 +669,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        print 'sv_viz.py plot_annotation_track segment', i
+        # print 'sv_viz.py plot_annotation_track segment', i
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
@@ -679,10 +679,10 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
-        print 'segment position', segmentPos, 'segmentStrand', segment.strand
+        # print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        print 'Segment transcript ids', segTrxIds
+        # print 'Segment transcript ids', segTrxIds
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
@@ -695,11 +695,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         for segTrx in segTrxs:
             yCoord = yCoord + ((i + 0.75) * 0.25)
             trxLen = float(segLen) / float(len(segTrxs))
-            print 'TRX len', trxLen
+            # print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
             # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
             # ax.add_patch(rect)
-            print 'TRX offset', trxOffset
+            # print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             exons = sorted(trx.exons, key=lambda x: x.start)
@@ -710,7 +710,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
             bpPlotBins = []
             for brkpt in brkpts:
-                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+                # print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
                 gCoord = brkpt.get_genomic_coord()
                 # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
                 if gCoord < trx.start or gCoord > trx.stop:
@@ -719,11 +719,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     for i, exon in enumerate(exons):
                         if gCoord >= exon.start and gCoord <= exon.stop:
                             # within exon
-                            print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
+                            # print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
                             bpPlotBins.append(('exon', i))
                             break
                         elif gCoord < exon.start:
-                            print 'Gcoord, exon.start', gCoord, exon.start, i
+                            # print 'Gcoord, exon.start', gCoord, exon.start, i
                             bpPlotBins.append(('intron', i - 1))
                             break
 
@@ -765,22 +765,22 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     trxElements.append(start + binSize)
             segTrxIter += 1
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            print 'TRX elements', trxElements, trxOffset, trxLen
+            # print 'TRX elements', trxElements, trxOffset, trxLen
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
-            print 'TRX max, min', trxMin, trxMax
+            # print 'TRX max, min', trxMin, trxMax
             rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
             for bp in bpPlotBins:
-                print 'BP', bp
+                # print 'BP', bp
                 add = -(float(binSize) / float(2))
                 inc = 1
                 if bp[0] == 'exon':
                     add = (float(binSize) / float(2))
                     inc = 0
                 start = trxOffset + (binSize * 2 * (bp[1] + inc)) + add
-                print 'Start coord', start
+                # print 'Start coord', start
                 ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
 
 
@@ -796,7 +796,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        print 'sv_viz.py plot_annotation_track segment', i
+        # print 'sv_viz.py plot_annotation_track segment', i
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
@@ -806,10 +806,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
-        print 'segment position', segmentPos, 'segmentStrand', segment.strand
+        # print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        print 'Segment transcript ids', segTrxIds
+        # print 'Segment transcript ids', segTrxIds
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
@@ -830,15 +830,15 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
                 # Last segment and trx
                 segLen = segLen - 3
-                print 'HELLO', '@'*20
+                # print 'HELLO', '@'*20
                 for i in range(3):
                     rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
-            print 'TRX len', trxLen
+            # print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            print 'TRX offset', trxOffset
+            # print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             trx_reverse = False
@@ -846,12 +846,12 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 trx_reverse = True
             exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
 
-            for brkpt in brkpts:
-                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+            # for brkpt in brkpts:
+            #     print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
             selectedExons = abrkpt.select_exons(exons)
-            print selectedExons
+            # print selectedExons
 
             # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
             # bpUnits = float(trxLen) / float(genomicLen)
@@ -860,10 +860,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             for item in selectedExons:
                 mergedExons.extend(selectedExons[item]['coords'])
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
-            print 'All Exons sorted', 10 * '#'
-            print allExons
+            # print 'All Exons sorted', 10 * '#'
+            # print allExons
             plotExons = get_neighbor_exons(allExons)
-            print plotExons
+            # print plotExons
 
             binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
@@ -888,11 +888,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                # print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
                     rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
                     ax.add_patch(rect)
-                    print 'Exon', exon
+                    # print 'Exon', exon
                     ax.text(start + (float(binSize) / float(2)), yCoord + 0.45, exonStr, ha='center', va='center', size=8)
 
                 if exonStr != '':
@@ -957,491 +957,3 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             #         ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
             # ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
             segTrxIter += 1
-
-
-# def map_coding_features(exons):
-#     bp = self.get_brkpt()
-#     reverse = False
-#     print self.realignStrand
-#     if self.realignStrand == '-':
-#         reverse = True
-#     l = sorted(exons, key=lambda x: x[1], reverse=reverse)
-#     genomicStart = self.get_brkpt()
-
-#     print self.pos
-#     print l
-#     if self.pos == "first":
-#         end = l[0][0]
-#         genomicStart = end
-#     elif self.pos == "last":
-#         end = l[-1][1]
-
-#     print exons
-#     print end, bp
-#     genomicLen = log(abs(end - int(bp)), 2)
-#     bpUnits = float(self.segment.plotLen)/float(genomicLen)
-#     print self.segment.plotLen
-#     print genomicLen
-#     print bpUnits
-#     pos = []
-
-#     previousCoord = 0
-#     if self.pos == "last":
-#         previousCoord = log(int(bp), 2)
-
-#     intronLen = 0
-#     for coords in l:
-#         if coords[2].find('exon') == -1:
-#             continue
-#         ll = [log(coords[0], 2), log(coords[1], 2)]
-#         e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2) * bpUnits
-#         e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2) * bpUnits
-#         eCoords = [e1, e2]
-#         eCoords.sort()
-#         eCoords.append(coords[2])
-#         pos.append(eCoords)
-#     self.mappedExons = pos
-#     self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
-
-# class annotation():
-#     def __init__(self, annoFn):
-#         self.trxs = {}
-#         self.setup_anno(annoFn)
-
-#     def setup_anno(self, annoFn):
-#         for line in open(annoFn, 'r'):
-#             if line.find('#') > -1:
-#                 continue
-#             line = line.strip()
-#             chr, src, type, start, stop, fill, strand, fill2, meta = line.split('\t')
-#             meta = meta.split(';')
-#             trxId = meta[1].split(' ')[2].lstrip('"').rstrip('"')
-#             gId = meta[0].split(' ')[1].lstrip('"').rstrip('"')
-#             gName = meta[4].split(' ')[2].lstrip('"').rstrip('"')
-#             gStatus = meta[3].split(' ')[2].lstrip('"').rstrip('"')
-#             if gStatus != "KNOWN":
-#                 continue
-#             if chr not in self.trxs:
-#                 self.trxs[chr] = {}
-#             if gId not in self.trxs[chr]:
-#                 self.trxs[chr][gId] = {'trx':{}, 'canon':'', 'trxSizes':[], 'name':gName, 'strand':strand}
-#             if trxId not in self.trxs[chr][gId]['trx']:
-#                 self.trxs[chr][gId]['trx'][trxId] = {'bounds':[int(start), int(stop)], 'features':{}, 'strand':strand}
-
-#             if type == 'transcript':
-#                 self.trxs[chr][gId]['trx'][trxId]['bounds'] = [int(start), int(stop)]
-#                 self.trxs[chr][gId]['trxSizes'].append((abs(int(stop)-int(start)), trxId))
-#             elif type != 'gene' and type != 'transcript' and type != 'CDS':
-#                 if type not in self.trxs[chr][gId]['trx'][trxId]['features']:
-#                     self.trxs[chr][gId]['trx'][trxId]['features'][type] = []
-#                 self.trxs[chr][gId]['trx'][trxId]['features'][type].append((int(start), int(stop)))
-
-#     def get_trx_exons(self, bp, strand, segLoc):
-#         chr, bp = bp.split(":")
-#         if bp.find('-') > -1:
-#             return None
-#         nearestGene = [None, None]
-#         for achr in self.trxs:
-#             if achr == chr:
-#                 for gene in self.trxs[achr]:
-#                     retVals = {}
-#                     trxSizes = sorted(self.trxs[achr][gene]['trxSizes'], key=lambda x: x[0])
-#                     canonTrxId = trxSizes[-1][1]
-#                     trxStart = self.trxs[achr][gene]['trx'][canonTrxId]['bounds'][0]
-#                     trxStop = self.trxs[achr][gene]['trx'][canonTrxId]['bounds'][1]
-#                     #print bp, trxStart, trxStop
-#                     #print trx, trxStart, trxStop, self.trxs[achr][trx]['strand']
-#                     retVals['features'] = self.trxs[achr][gene]['trx'][canonTrxId]['features']
-#                     retVals['name'] = self.trxs[achr][gene]['name']
-#                     retVals['strand'] = self.trxs[achr][gene]['strand']
-#                     retVals['trxId'] = canonTrxId
-#                     if int(bp) >= int(trxStart) and int(bp) <= int(trxStop):
-#                         return retVals
-# #                        return self.trxs[achr][gene]['trx'][canonTrxId]['features'], self.trxs[achr][gene]['name'], self.trxs[achr][gene]['strand'], canonTrxId
-#                     else:
-#                         if segLoc == "first":
-#                             if strand == '-':
-#                                 # Get downstream gene
-#                                 dist = int(trxStart) - int(bp)
-#                                 if dist > 0 and not nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-# #                                    print 'first', nearestGene, dist, bp, trxStart
-#                                 elif dist > 0 and dist < nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-# #                                    print 'change', nearestGene, dist, bp, trxStop
-#                             elif strand == '+':
-#                                 # Get upstream genes
-#                                 dist = int(bp) - int(trxStop)
-#                                 if dist > 0 and not nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-# #                                    print 'first', nearestGene, dist, bp, trxStop
-#                                 elif dist > 0 and dist < nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-# #                                    print 'change', nearestGene, dist, bp, trxStop
-#                         elif segLoc == "last":
-#                             if strand == '-':
-#                                 dist = int(bp) - int(trxStop)
-#                                 if dist > 0 and not nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-#                                 elif dist > 0 and dist < nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-#                             elif strand == '+':
-#                                 dist = int(trxStart) - int(bp)
-#                                 if dist > 0 and not nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-#                                 elif dist > 0 and dist < nearestGene[0]:
-#                                     nearestGene = [dist, retVals]
-# #        print bp
-# #        print nearestGene
-# #        sys.exit()
-#         return nearestGene[1]
-
-# class segAnnot():
-#     def __init__(self, annoRes, bp,  realignStrand, pos, segLen, segment):
-#         self.exons = None
-#         self.geneName = None
-#         self.trxId = None
-#         self.geneStrand = None
-#         self.bp = bp
-#         self.realignStrand = realignStrand
-#         self.pos = pos
-#         self.segLen = segLen
-#         self.mappedExons = []
-#         self.genomicEnd = None
-#         self.segment = segment
-#         self.features = []
-#         self.setup(annoRes)
-
-#     def setup(self, annoRes):
-#         if annoRes:
-#             self.features = annoRes['features']
-#             self.geneName = annoRes['name']
-#             self.trxId = annoRes['trxId']
-#             self.geneStrand = annoRes['strand']
-
-#     def get_brkpt(self):
-#         return self.bp.split(':')[1]
-
-#     def get_exons(self):
-#         features = []
-#         bp = self.get_brkpt()
-#         for feature in self.features:
-#             print 'Feature', feature
-#             if feature != 'exon' :
-#                 continue
-#             fElements = self.features[feature]
-#             reverse = False
-#             if self.realignStrand == '-':
-#                 reverse = True
-#             fElements_sorted = sorted(fElements, key=lambda x: x[0], reverse=reverse)
-#             eIter = 1
-#             for element in fElements:
-#                 add = False
-#                 if self.pos == "first":
-#                     if int(element[1]) >= int(bp) and self.realignStrand=='-':
-#                         add = True
-#                     elif int(element[0]) <= int(bp) and self.realignStrand=='+':
-#                         add = True
-#                     if add:
-#                         features.append((element[0], element[1], feature+str(eIter)))
-#                 elif self.pos == "last":
-#                     if int(element[0]) <= int(bp) and self.realignStrand=='-':
-#                         add = True
-#                     elif int(element[1]) >= int(bp) and self.realignStrand=='+':
-#                         add = True
-#                     if add:
-#                         features.append((element[0], element[1], feature+str(eIter)))
-#                 eIter += 1
-#         print 'Brkpt', bp
-#         print 'Features', features
-#         return features
-
-#     def map_coding_features(self, exons):
-#         bp = self.get_brkpt()
-#         reverse = False
-#         print self.realignStrand
-#         if self.realignStrand == '-':
-#             reverse = True
-#         l = sorted(exons, key=lambda x: x[1], reverse=reverse)
-#         genomicStart = self.get_brkpt()
-
-#         print self.pos
-#         print l
-#         if self.pos == "first":
-#             end = l[0][0]
-#             genomicStart = end
-#         elif self.pos == "last":
-#             end = l[-1][1]
-
-#         print exons
-#         print end, bp
-#         genomicLen = log(abs(end - int(bp)), 2)
-#         bpUnits = float(self.segment.plotLen)/float(genomicLen)
-#         print self.segment.plotLen
-#         print genomicLen
-#         print bpUnits
-#         pos = []
-
-#         previousCoord = 0
-#         if self.pos == "last":
-#             previousCoord = log(int(bp), 2)
-
-#         intronLen = 0
-#         for coords in l:
-#             if coords[2].find('exon') == -1:
-#                 continue
-#             ll = [log(coords[0], 2), log(coords[1], 2)]
-#             e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2)*bpUnits
-#             e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2)*bpUnits
-#             eCoords = [e1, e2]
-#             eCoords.sort()
-#             eCoords.append(coords[2])
-#             pos.append(eCoords)
-#         self.mappedExons = pos
-#         self.genomicEnd = self.bp.split(':')[0] + ':' + str(end)
-
-# class plotAnnot():
-#     def __init__(self, res, annot, contigSeq):
-#         self.segAnnots = []
-#         self.res = res
-#         self.run(res, annot, contigSeq)
-
-#     def run(self, res, annot, contigSeq):
-#         iter = 0
-#         for strand, brkpt, segLen, segment in zip(res.strands, res.brkpts, res.segLens, contigSeq.segments):
-#             if iter == 0:
-#                 pos = "first"
-#             elif iter == (len(res.strands)-1):
-#                 pos = "last"
-#             r = annot.get_trx_exons(brkpt, strand, pos)
-#             self.segAnnots.append(segAnnot(r, brkpt, strand, pos, segLen, segment))
-#             iter += 1
-
-#     def get_coding_features(self):
-#         for iter, segAnnot in enumerate(self.segAnnots):
-#             e = segAnnot.get_exons()
-#             segAnnot.map_coding_features(e)
-
-# class svResult():
-#     def __init__(self, fn, contigId):
-#         self.contig = None
-#         self.segMetrics = []
-#         self.brkpts = []
-#         self.strands = []
-#         self.segLens = []
-#         self.setup_results(fn, contigId)
-
-#     def setup_results(self, fn, contigId):
-#         i=0
-#         for line in open(fn, 'r'):
-#             if i==0:
-#                 i+=1
-#                 continue
-#             if line.find(contigId) == -1:
-#                 continue
-#             line = line.strip()
-#             linesplit = line.split('\t')
-#             print 'Result values', linesplit
-#             self.contig = linesplit[-1]
-#             self.segMetrics = linesplit[5].split(',')
-#             self.brkpts = linesplit[1].split(',')
-#             self.cigar = linesplit[2].split(',')
-#             self.strands = linesplit[4].split(',')
-#         self.set_segment_lengths()
-
-#     def set_segment_lengths(self):
-#         for item in self.segMetrics:
-#             self.segLens.append(int(item.split(":")[1]))
-
-#     def get_segment_lengths(self):
-#         lens = []
-#         for item in self.segMetrics:
-#             lens.append(int(item.split(":")[1]))
-#         return lens
-
-#     def get_contig_brkpts(self):
-#         # Return the start and end positions relative to the contig sequence
-#         # where the segmenets map to the reference genome.
-#         # Note that there will usually be overlap between two segments.
-#         l = len(self.contig)
-#         contigBps = []
-#         overlaps = []
-#         overlapIndices = []
-#         breaks = []
-#         genomicBps = []
-#         segLens = self.get_segment_lengths()
-#         iter = 0
-#         for seqCigar in self.cigar:
-#             split = re.split('(\D+)', seqCigar)
-#             matchLen = 0
-#             for i, ssplit in enumerate(split):
-#                 if ssplit == 'M' or ssplit == 'I':
-#                     matchLen += int(split[i-1])
-# #            matchLen = int(split[split.index('M')-1])
-#             scLen = 0
-#             if seqCigar.find('S') > -1 and split[1] != 'S':
-#                 scLen = int(split[split.index('S')-1])
-#             start = l - (matchLen + scLen)
-#             end = start + matchLen
-#             if len(contigBps) > 0:
-#                 if contigBps[-1][1] < end:
-#                     overlaps.append(end - contigBps[-1][1])
-#                     overlapIndices.extend(range(contigBps[-1][1], end))
-#             contigBps.append((start, end))
-#             if iter > 0 :
-#                 breaks.append(start)
-#             elif iter != (len(self.cigar)-1):
-#                 breaks.append(end)
-
-#             gBps = []
-#             if self.brkpts[iter].find('-') > -1:
-#                 gBps = self.brkpts[iter].split('-')
-#                 if self.strands[iter] == '-':
-#                     gBps.reverse()
-#             else:
-#                 chr, bp = self.brkpts[iter].split(':')
-#                 sl = segLens[iter]
-#                 if self.strands[iter] == '-':
-#                     if iter == 0:
-#                         gBps = [chr+':'+str(int(bp)+int(sl)), chr+':'+bp]
-#                     else:
-#                         gBps = [chr+':'+bp, chr+':'+str(int(bp)-int(sl))]
-#                 elif self.strands[iter] == '+':
-#                     if iter == 0:
-#                         gBps = [chr+':'+str(int(bp)-int(sl)), chr+':'+bp]
-#                     else:
-#                         gBps = [chr+':'+bp, chr+':'+str(int(bp)+int(sl))]
-#             genomicBps.append(gBps)
-#             iter += 1
-#         breakIdx = list(set(breaks))
-#         breakIdx.sort()
-#         print 'Breaks', breakIdx
-#         return contigBps, overlaps, overlapIndices, breakIdx, genomicBps
-
-# class segment:
-#     def __init__(self, len, coords, pos, color, plotLen, gBp, alignStrand):
-#         self.len = len
-#         self.coords = coords
-#         self.pos = pos
-#         self.color = color
-#         self.plotLen = plotLen
-#         self.yidx = 0
-#         self.genomicBrkpts = gBp
-#         self.alignStrand = alignStrand
-
-# class contigSeq:
-#     def __init__(self, svRes):
-#         self.contigSeqLen = len(svRes.contig)
-#         self.totalPlotLen = 0
-#         self.segments = []
-#         self.overlaps = []
-#         self.overlapIndices = []
-#         self.contigBrkpts = []
-#         self.genomicBrkpts = []
-#         self.setup(svRes)
-
-#     def setup(self, svRes):
-#         nSegs = len(svRes.segMetrics)
-#         segLens = svRes.get_segment_lengths()
-#         segStartEnd, self.overlaps, self.overlapIndices, self.contigBrkpts, self.genomicBrkpts = svRes.get_contig_brkpts()
-#         self.totalPlotLen = self.contigSeqLen + len(self.contigBrkpts)
-
-#         segColors = ['green', 'orange', 'blue']
-#         for i in range(nSegs):
-#             segPlotLen = segStartEnd[i][1] - segStartEnd[i][0] #segLens[i]
-#             segAlignStrand = svRes.strands[i]
-#             for brkpt in self.contigBrkpts:
-#                 if brkpt < segStartEnd[i][1]:
-#                     segPlotLen += 1
-#             self.segments.append(segment(segLens[i], segStartEnd[i], i, segColors[i], segPlotLen, self.genomicBrkpts[i], segAlignStrand))
-
-#     def get_segment(self, nucIter):
-#         # Determine which segment the iterator is within.
-#         segColor = ''
-#         brkptColor = ''
-#         segs = []
-#         for segment in self.segments:
-#             if nucIter <= segment.coords[1] and nucIter > segment.coords[0]:
-#                 segs.append(segment)
-#             if (nucIter == segment.coords[1]) or (nucIter == segment.coords[0]):
-#                 brkptColor = segment.color
-#                 if brkptColor != '':
-#                     brkptColor = 'black'
-
-#         if len(segs) == 0:
-#             segColor = 'grey'
-#         elif len(segs) > 1:
-#             # Overlapping region
-#             segColor = 'black'
-#         else:
-#             segColor = segs[0].color
-#         return segColor, brkptColor, segs
-
-# def map_coding_features(f, s, iter, bp, len):
-#     reverse = False
-#     if s == '-':
-#         reverse = True
-#     l = sorted(f, key=lambda x: x[1], reverse=reverse)
-#     genomicStart = bp
-#     if iter == 1:
-#         end = l[0][1]
-#         genomicStart = end
-#     elif iter == 2:
-#         end = l[-1][1]
-
-#     print end, bp, iter
-#     genomicLen = log(abs(end - int(bp)), 2)
-#     print genomicLen
-#     bpUnits = float(len)/float(genomicLen)
-#     print bpUnits
-#     intronUnits = bpUnits
-#     exonUnits = bpUnits
-#     pos = []
-
-#     previousCoord = 0
-#     if iter ==2:
-#         previousCoord = log(int(bp), 2)
-
-#     intronLen = 0
-#     for coords in l:
-#         if coords[2].find('exon') == -1:
-#             continue
-#         ll = [log(coords[0], 2), log(coords[1], 2)]
-#         e1 = log(max(abs(int(genomicStart) - int(coords[0])), 1), 2)*bpUnits
-#         e2 = log(max(abs(int(genomicStart) - int(coords[1])), 1), 2)*bpUnits
-#         eCoords = [e1, e2]
-#         eCoords.sort()
-#         eCoords.append(coords[2])
-#         pos.append(eCoords)
-#     return pos, end
-
-# def get_coding_features(f, g, s, iter, bp):
-#     features = []
-#     for feature in f:
-#         if feature != 'exon' :
-#             continue
-
-#         fElements = f[feature]
-#         reverse = False
-#         if s == '-':
-#             reverse = True
-#         fElements_sorted = sorted(fElements, key=lambda x: x[0], reverse=reverse)
-#         eIter = 1
-#         for element in fElements:
-#             add = False
-#             if iter == 1 :
-#                 if int(element[1]) >= int(bp) and s=='-':
-#                     add = True
-#                 elif int(element[0]) <= int(bp) and s=='+':
-#                     add = True
-#                 if add:
-#                     features.append((element[0], element[1], feature+str(eIter)))
-#             elif iter == 2:
-#                 if int(element[0]) <= int(bp) and s=='-':
-#                     add = True
-#                 elif int(element[1]) >= int(bp) and s=='+':
-#                     add = True
-#                 if add:
-#                     features.append((element[0], element[1], feature+str(eIter)))
-#             eIter += 1
-#     return features
