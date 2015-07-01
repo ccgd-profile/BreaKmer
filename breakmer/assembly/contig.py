@@ -718,8 +718,8 @@ class Contig:
         self.setup = False
         self.builder = Builder(kmerObj, readAlignValues)
         self.seq = None
-        self.kmers = None
-        self.kmer_locs = None
+        self.kmers = []
+        self.kmer_locs = []
         self.reads = set()
         self.buffer = set([readAlignValues['read'].id])
         self.svEventResult = None
