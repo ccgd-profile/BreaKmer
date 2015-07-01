@@ -108,7 +108,7 @@ class RunTracker:
             # p.map(analyze_targets, targetAnalysisList)
             multiprocResults = []
             for targetList in targetAnalysisList:
-                multiprocResults.append(pool.apply_async(analyze_targets, (targetList, )))
+                multiprocResults.append(p.apply_async(analyze_targets, (targetList, )))
             wait(multiprocResults)
             for multiprocResult in multiprocResults:
                 aggResults.extend(multiprocResult.get())
