@@ -109,10 +109,11 @@ class ResultFilter:
         utils.log(self.loggingName, 'debug', 'Keep blat result %r' % keep_br)
 
         # Determine the uniqueness of the realignment.
-        uniqRealignment = svEvent.filterValues.resultMeanHitFreq < 2
-        indelSize = svEvent.filterValues.maxEventSize >= indelSizeThresh
-        brkptCoverages = svEvent.filterValues.brktpCoverages[0] >= self.params.get_sr_thresh('indel')
-        minFlankMatches = min(svEvent.filterValues.flankMatchPercents) >= 10.0
+        svFilterValues = svEvent.resultValues.filterValues
+        uniqRealignment = svFilterValues.resultMeanHitFreq < 2
+        indelSize = svFilterValues.maxEventSize >= indelSizeThresh
+        brkptCoverages = svFilterValues.brktpCoverages[0] >= self.params.get_sr_thresh('indel')
+        minFlankMatches = min(svFilterValues.flankMatchPercents) >= 10.0
 
         if uniqRealignment and indelSize and brkptCoverages and minFlankMatches:
             utils.log(self.loggingName, 'debug', 'Indel meets basic filtering requirements.')
