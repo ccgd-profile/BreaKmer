@@ -95,7 +95,7 @@ class ResultFilter:
         for SVFilter in self.filters:
             print 'Names', svEvent.contig.get_target_name().lower(), SVFilter.name
             print 'Types', svEvent.svType, SVFilter.svType
-            nameMatch = svEvent.get_target_name().lower() == SVFilter.name
+            nameMatch = svEvent.contig.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
             eventBrkpts = svEvents.get_brkpts()
             bpMatches = True
