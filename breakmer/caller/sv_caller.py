@@ -136,7 +136,7 @@ class SVResult:
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         # List of insertion or deletion sizes that coorespond with the breakpoints
-        self.description = blatResult.get_indel_sizes()
+        self.description = blatResult.indel_sizes
         self.alignCigar = blatResult.cigar
         self.svType = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
