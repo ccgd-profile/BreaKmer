@@ -512,7 +512,7 @@ class Builder:
         newContigs = []
         kmerSet = set()
         for read, nreads in self.read_batch.alt:
-            altKmers = get_read_kmers(read.seq, self.kmerLen, kmerTracker.kmer_seqs, '')
+            altKmers = get_read_kmers(read.seq, self.kmerLen, kmerTracker.kmerSeqs, '')
             newKmers = set(altKmers) - set(contigKmers) - contigBuffer.used_mers - kmerSet
             if len(newKmers) > 0:
                 for kmerSeq in list(newKmers):
