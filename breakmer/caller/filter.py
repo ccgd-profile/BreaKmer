@@ -54,6 +54,7 @@ class ResultFilter:
         if self.filterFn:
             for line in open(self.filterFn, 'rU'):
                 line = line.strip()
+                print line.split('\t')
                 resultFilter = Filter()
                 resultFilter.set_values(line.split('\t'))
                 self.filters.append(resultFilter)
