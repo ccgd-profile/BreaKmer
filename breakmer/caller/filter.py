@@ -71,9 +71,10 @@ class ResultFilter:
     def check_filters(self, svEvent):
         """
         """
-        print len(self.filters)
+        print 'Check filters', len(self.filters)
         if len(self.filters) > 0:
             # Check if event is in the pre-defined filters
+            print 'Check define filters'
             self.check_defined_filters(svEvent)
 
         if svEvent.svType == 'indel':

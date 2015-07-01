@@ -909,6 +909,7 @@ class Contig:
         """
         if self.svEventResult is not None:
             svFilter = self.meta.params.filter
+            print 'contig.py check_filters'
             svFilter.check_filters(self.svEventResult)
 
     def annotate_calls(self):
