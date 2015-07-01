@@ -704,8 +704,8 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
             # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
-            tStart = trx.chr + ':' + str(trx.start)
-            tStop = trx.chr + ':' + str(trx.stop)
+            tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
+            tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
             ax.text(trxOffset, yCoord - 0.35, tStart, ha='left', va='center', size=8)
             ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
             exonLabel = 'exon1'
@@ -795,14 +795,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
                 segLen = segLen - 3
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset - 3 + i, yCoord + 0.125), 0.25, 0.1, color=segment.color)
+                    rect = patches.Rectangle((trxOffset - 3 + i, yCoord), 0.25, 0.1, color=segment.color)
                     ax.add_patch(rect)
             if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
                 # Last segment and trx
                 segLen = segLen - 3
                 print 'HELLO', '@'*20
                 for i in range(3):
-                    rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord + 0.125), 0.2, 0.1, color=segment.color)
+                    rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
@@ -860,7 +860,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord - 0.25), rectLen, height, color=color)
+                    rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                     print 'Exon', exon
                     ax.text(start + (float(binSize) / float(2)), yCoord + 0.35, exonStr, ha='center', va='center', size=8)
