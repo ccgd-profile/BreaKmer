@@ -13,7 +13,13 @@ class Filter:
     """
     """
 
-    def __init(self, name, svType, breakpoints, description):
+    def __init(self):
+        self.name = None
+        self.svType = None
+        self.breakpoints = None
+        self.description = None
+
+    def set_values(self, name, svType, breakpoints, description):
         self.name = name.lower()
         self.svType = svType
         self.breakpoints = self.parse_breakpoints(breakpoints)
