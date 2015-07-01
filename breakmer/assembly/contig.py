@@ -697,6 +697,7 @@ class Meta:
         pysam.sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         utils.log(self.loggingName, 'info', 'Indexing bam file %s' % bam_out_sorted_fn)
         pysam.index(bam_out_sorted_fn)
+        print 'Ending write bam function'
         return bam_out_sorted_fn
 
 
