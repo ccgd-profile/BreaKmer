@@ -146,6 +146,9 @@ class SVResult:
                 contigBrkpts.append(bp)
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
+        print 'Formatting indel values', self.contigSeq
+        print 'contig id', self.contigId
+        print 'target', self.targetName
 
     def format_rearrangement_values(self, svEvent):
         """ """
