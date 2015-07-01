@@ -676,28 +676,21 @@ class Meta:
     def write_bam(self, outputPath, svBamReadsFn, reads):
         bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
         utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
-        print 'Writing contig reads to bam file'
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
         bamFile = pysam.Samfile(svBamReadsFn, 'rb')
         bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
-        print 'Opened bamfile and new outfile.', svBamReadsFn, bamOutFn
         for bam_read in bamFile.fetch():
             for read in reads:
                 rid, idx = read.id.lstrip("@").split("/")
                 ridx, indel_only_read = idx.split("_")
                 if (bam_read.qname == rid) and ((ridx == '2' and bam_read.is_read2) or (ridx == '1' and bam_read.is_read1)):
-                    print 'Bam_read', bam_read
-                    print 'Read', read
                     bam_out_f.write(bam_read)
-                    print 'Write bam read'
         bamFile.close()
         bam_out_f.close()
-        print 'Closed bam files'
         utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
         pysam.sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         utils.log(self.loggingName, 'info', 'Indexing bam file %s' % bam_out_sorted_fn)
         pysam.index(bam_out_sorted_fn)
-        print 'Ending write bam function'
         return bam_out_sorted_fn
 
 
@@ -928,7 +921,6 @@ class Contig:
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
             readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
-            print 'output_calls() generate image'
             if self.meta.params.get_param('generate_image'):
                 svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 

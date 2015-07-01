@@ -188,8 +188,8 @@ class RunTracker:
         utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
         resultFile = open(resultFn, 'w')
 
-        for i, svEventResult in enumerate(aggregateResults):
-            headerStr, formattedResultValuesStr = svEventResult.get_formatted_output_values()
+        for i, formattedResultStr in enumerate(aggregateResults):
+            headerStr, formattedResultValuesStr = formattedResultStr
             if not self.params.get_param('no_output_header') and i == 0:
                 resultFile.write(headerStr + '\n')
             resultFile.write(formattedResultValuesStr + '\n')

@@ -236,14 +236,12 @@ class Variation:
         resultFn = os.path.join(outputPath, targetName + "_svs.out")
         utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
         resultFile = open(resultFn, 'w')
-
         for i, result in enumerate(self.results):
             headerStr, formattedResultValuesStr = result.get_formatted_output_values()
             if i == 0:
                 resultFile.write(headerStr + '\n')
             resultFile.write(formattedResultValuesStr + '\n')
         resultFile.close()
-        print 'Write results()'
 
     def get_formatted_output(self):
         """ """
@@ -527,7 +525,7 @@ class TargetManager:
             else:
                 utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
-        print 'Ending resolve_sv()'
+
         # Add code for inferring SVs from discordant reads only.
         """
         Discordant read-only analysis - discordant reads that contribute to contig SVs are included in those calls.
