@@ -93,7 +93,7 @@ class ResultFilter:
         """
         print 'Checking defined filters'
         for SVFilter in self.filters:
-            print 'Names', svEvent.get_target_name().lower(), SVFilter.name
+            print 'Names', svEvent.contig.get_target_name().lower(), SVFilter.name
             print 'Types', svEvent.svType, SVFilter.svType
             nameMatch = svEvent.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
