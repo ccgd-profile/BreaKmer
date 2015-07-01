@@ -67,7 +67,9 @@ def analyze_targets(targetList):
         if targetRegion.has_results():
             aggregateResults.extend(targetRegion.get_results())
         targetRegion.complete_analysis()
-    return aggregateResults
+    print multiprocessing.current_process().name, 'returning results', aggregateResults
+    return 'Hello'
+    # return aggregateResults
 
 
 class RunTracker:
@@ -120,7 +122,8 @@ class RunTracker:
         else:
             aggResults = analyze_targets(targetAnalysisList)
 
-        self.write_aggregated_output(aggResults)
+        print aggResults
+        # self.write_aggregated_output(aggResults)
 
         # Perform any post-primary analysis scripts here.
 
