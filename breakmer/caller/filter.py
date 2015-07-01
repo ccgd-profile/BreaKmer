@@ -88,6 +88,7 @@ class ResultFilter:
             3. breakpoints
             4. description
         """
+        print 'Checking defined filters'
         for SVFilter in self.filters:
             nameMatch = svEvent.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
