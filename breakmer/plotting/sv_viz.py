@@ -869,7 +869,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
-            ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 0.75, labelStr, ha='center', va='center', size=12)
+            ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
             trxElements = []
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
