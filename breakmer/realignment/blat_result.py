@@ -81,6 +81,7 @@ class AlignFragments:
         self.set_values(values, offset)
 
     def set_values(self, values, offset):
+        print 'Set fragment values', values
         coordOffset = 0
         if offset:
             coordOffset = offset
@@ -343,6 +344,7 @@ class BlatResult:
 
     def set_indel_locs(self):
         """ """
+        print self.values
         chrom = 'chr' + self.get_seq_name('reference')
         for i in range(self.fragments.count - 1):
             if i == 0 and self.fragments.query[i][0] > 0:
