@@ -225,18 +225,19 @@ class BlatResult:
             offset:           Integer of genomic position for target alignment
         """
         rName = blatResultValues[13].replace('chr', '')
-        if refName:
+        if refName is not None:
             rName = refName
         blatResultValues[13] = rName
 
         coordOffset = 0
-        if offset:
+        if offset is not None:
             coordOffset = offset
         blatResultValues[15] = coordOffset + int(blatResultValues[15])
         blatResultValues[16] = coordOffset + int(blatResultValues[16])
 
         tstarts = [coordOffset + int(x) for x in blatResultValues[20].rstrip(",").split(",")]
         blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
+        print blatResultValues
         return blatResultValues
 
     def set_sv_brkpt(self, coords, svType, targetKey):
