@@ -97,22 +97,29 @@ class ResultFilter:
             print 'Types', svEvent.svType, SVFilter.svType
             nameMatch = svEvent.contig.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
-            eventBrkpts = svEvents.get_brkpts()
+            eventBrkpts = svEvent.get_genomic_brkpts()
+            ebps = []
+            for key in eventBrkpts:
+                ebps.extend(eventBrkpts[key])
             bpMatches = True
-            for eventBrkpt in eventBrkpts:
+            for eventBrkpt in ebps:
+                # Should be a tuple with chr, bp1, bp2 or chr, bp1
                 match = False
                 for filterBrkpt in SVFilter.breakpoints:
                     print 'lens', len(eventBrkpt), len(filterBrkpt)
                     if len(eventBrkpt) == len(filterBrkpt):
                         bpMatch = True
-                        for v1, v2 in zip(eventBrkpt, filterBrkpt):
-                            print 'bps', v1, v2
-                            if str(v1) != str(v2):
-                                bpMatch = False
-                                break
+                        # Check chroms
+                        bpMatch = eventBrkpt[0].replace('chr', '') == filterBrkpt[0].replace('chr', '')
                         if bpMatch:
-                            match = True
-                            break
+                            for v1, v2 in zip(eventBrkpt[1:], filterBrkpt[1:]):
+                                print 'bps', v1, v2
+                                if int(v1) != int(v2):
+                                    bpMatch = False
+                                    break
+                            if bpMatch:
+                                match = True
+                                break
                 boMatches = bpMatches and match
             print nameMatch, typeMatch, bpMatches
             if nameMatch and typeMatch and bpMatches:
