@@ -28,7 +28,7 @@ def wait(results):
     njobs = check_status(results)
 
     while njobs > 0:
-        time.sleep(5)
+        time.sleep(10)
         jobs = check_status(results)
         if jobs < njobs:
             print '\n', jobs, '/', njobs, " jobs not complete."
@@ -49,12 +49,9 @@ def analyze_targets(targetList):
         None
     """
     aggregateResults = []
-    print 'Multiprocessing name', multiprocessing.current_process().name
     for targetRegion in targetList:
-        print 'Multiprocessing', multiprocessing.current_process().name, 'target', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
-
         # If only presetting data stop here.
         if targetRegion.params.get_param('preset_ref_data'):
             continue
@@ -63,12 +60,9 @@ def analyze_targets(targetList):
             continue
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
-        print multiprocessing.current_process().name, 'finished resolve_sv'
         if targetRegion.has_results():
             aggregateResults.extend(targetRegion.get_formatted_output())
         targetRegion.complete_analysis()
-    print multiprocessing.current_process().name, 'returning results', aggregateResults
-    # return 'Hello'
     return aggregateResults
 
 
@@ -116,14 +110,12 @@ class RunTracker:
             for targetList in targetAnalysisList:
                 multiprocResults.append(p.apply_async(analyze_targets, (targetList, )))
             wait(multiprocResults)
-            print 'Finished waiting for results'
             for multiprocResult in multiprocResults:
                 aggResults.extend(multiprocResult.get())
         else:
             aggResults = analyze_targets(targetAnalysisList)
 
-        print aggResults
-        # self.write_aggregated_output(aggResults)
+        self.write_aggregated_output(aggResults)
 
         # Perform any post-primary analysis scripts here.
 
