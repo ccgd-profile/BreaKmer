@@ -676,6 +676,7 @@ class Meta:
     def write_bam(self, outputPath, svBamReadsFn, reads):
         bamOutFn = os.path.join(outputPath, self.id + "_reads.bam")
         utils.log(self.loggingName, 'info', 'Writing contig reads bam file %s' % bamOutFn)
+        print 'Writing contig reads to bam file'
         bam_out_sorted_fn = os.path.join(outputPath, self.id + "_reads.sorted.bam")
         bamFile = pysam.Samfile(svBamReadsFn, 'rb')
         bam_out_f = pysam.Samfile(bamOutFn, 'wb', template=bamFile)
