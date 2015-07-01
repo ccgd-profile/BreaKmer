@@ -235,7 +235,6 @@ class BlatResult:
 
         tstarts = [coordOffset + int(x) for x in blatResultValues[20].rstrip(",").split(",")]
         blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
-        print blatResultValues
         return blatResultValues
 
     def set_sv_brkpt(self, coords, svType, targetKey):
@@ -341,7 +340,6 @@ class BlatResult:
 
     def set_indel_locs(self):
         """ """
-        print self.values
         chrom = 'chr' + self.get_seq_name('reference')
         for i in range(self.fragments.count - 1):
             if i == 0 and self.fragments.query[i][0] > 0:
@@ -354,8 +352,6 @@ class BlatResult:
             del_bp = tstart2 - tend1
             bp1 = tend1
             bp2 = tstart2
-            print 'set indel_locs, bp1', bp1
-            print 'set indel_locs, bp2', bp2
             self.cigar += str(self.fragments.blockSizes[i]) + "M"
             if ins_bp > 0:
                 self.breakpts.add_brkpts('genomic', (chrom, bp1))
@@ -379,7 +375,6 @@ class BlatResult:
         #     self.cigar += str(endClipped) + "S"
 
         self.set_indel_flank_matches()
-        print self.breakpts.genomicBreakpoints
         if self.strand == "-":
             self.breakpts.reverse_breakpts(self.get_seq_size('query'))
 

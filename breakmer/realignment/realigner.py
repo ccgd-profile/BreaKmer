@@ -229,10 +229,8 @@ class AlignResults:
             refName = self.contig.get_chr()
             offset = self.contig.get_target_start() - self.contig.get_target_buffer()
 
-        print 'Parsing blat result file', self.resultFn
         for line in open(self.resultFn, 'r'):
             line = line.strip()
-            print line, offset, refName
             parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
             parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
             # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
