@@ -1,6 +1,7 @@
 #! /usr/bin/local/python
 # -*- coding: utf-8 -*-
 
+import sys
 import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
@@ -90,6 +91,8 @@ class ResultFilter:
         """
         print 'Checking defined filters'
         for SVFilter in self.filters:
+            print 'Names', svEvent.get_target_name().lower(), SVFilter.name
+            print 'Types', svEvent.svType, SVFilter.svType
             nameMatch = svEvent.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
             eventBrkpts = svEvents.get_brkpts()
@@ -97,9 +100,11 @@ class ResultFilter:
             for eventBrkpt in eventBrkpts:
                 match = False
                 for filterBrkpt in SVFilter.breakpoints:
+                    print 'lens', len(eventBrkpt), len(filterBrkpt)
                     if len(eventBrkpt) == len(filterBrkpt):
                         bpMatch = True
                         for v1, v2 in zip(eventBrkpt, filterBrkpt):
+                            print 'bps', v1, v2
                             if str(v1) != str(v2):
                                 bpMatch = False
                                 break
@@ -107,8 +112,10 @@ class ResultFilter:
                             match = True
                             break
                 boMatches = bpMatches and match
+            print nameMatch, typeMatch, bpMatches
             if nameMatch and typeMatch and bpMatches:
                 svEvent.set_filtered('Matched input filter variant')
+        sys.exit()
 
     def filter_indel(self, svEvent):
         """ """
