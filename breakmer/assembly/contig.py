@@ -910,7 +910,7 @@ class Contig:
     def filter_calls(self):
         """
         """
-        if self.svEventResult:
+        if self.svEventResult is not None:
             svFilter = self.meta.params.filter
             svFilter.check_filters(self.svEventResult)
 

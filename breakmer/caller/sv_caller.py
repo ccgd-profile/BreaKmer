@@ -788,6 +788,8 @@ class ContigCaller:
         if self.svEvent and self.svEvent.result_valid():
             return True
         else:
+            print 'svs result invalid'
+            self.svEvent = None
             return False
 
     def iter_gaps(self, gaps, clippedQuerySeqVals, iterIdx):
