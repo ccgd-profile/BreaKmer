@@ -357,6 +357,8 @@ class BlatResult:
             del_bp = tstart2 - tend1
             bp1 = tend1
             bp2 = tstart2
+            print 'set indel_locs, bp1', bp1
+            print 'set indel_locs, bp2', bp2
             self.cigar += str(self.fragments.blockSizes[i]) + "M"
             if ins_bp > 0:
                 self.breakpts.add_brkpts('genomic', (chrom, bp1))
