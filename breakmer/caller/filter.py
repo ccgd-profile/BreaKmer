@@ -54,7 +54,8 @@ class ResultFilter:
         if self.filterFn:
             for line in open(self.filterFn, 'rU'):
                 line = line.strip()
-                resultFilter = Filter(line.split('\t'))
+                resultFilter = Filter()
+                resultFilter.set_values(line.split('\t'))
                 self.filters.append(resultFilter)
 
 # Filters for events
