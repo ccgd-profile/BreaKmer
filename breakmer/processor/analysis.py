@@ -94,6 +94,10 @@ class RunTracker:
         Returns
             None
         """
+        if self.params.runAnalysis:
+            print 'Reference data setup. Analysis can now be run.'
+            return
+
         startTime = time.clock()
         targetAnalysisList = self.create_targets()
 
@@ -124,6 +128,7 @@ class RunTracker:
         if not self.params.get_param('keep_blat_server'):
             cmd = '%s stop localhost %d' % (self.params.opts['gfserver'], int(self.params.get_param('blat_port')))
             os.system(cmd)
+
         print 'Analysis complete!'
 
     def create_targets(self):
@@ -175,7 +180,6 @@ class RunTracker:
         Returns:
             None
         """
-        print 'Write agg results'
         resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
         utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
         resultFile = open(resultFn, 'w')
