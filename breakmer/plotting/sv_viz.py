@@ -860,7 +860,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
+                    rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
                     ax.add_patch(rect)
                     print 'Exon', exon
                     ax.text(start + (float(binSize) / float(2)), yCoord + 0.35, exonStr, ha='center', va='center', size=8)
@@ -873,8 +873,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         exend = exon[0]
                     exstart = segment.chromName + ':' + str(exstart)
                     exend = segment.chromName + ':' + str(exend)
-                    ax.text(start, yCoord - 0.25, str(exstart), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord - 0.25, str(exend), ha='right', va='center', size=8)
+                    ax.text(start, yCoord - 0.3, str(exstart), ha='left', va='center', size=8)
+                    ax.text(start + binSize, yCoord - 0.3, str(exend), ha='right', va='center', size=8)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
