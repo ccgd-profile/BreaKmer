@@ -377,7 +377,7 @@ class BlatResult:
         #     self.cigar += str(endClipped) + "S"
 
         self.set_indel_flank_matches()
-
+        print self.breakpts.genomicBreakpoints
         if self.strand == "-":
             self.breakpts.reverse_breakpts(self.get_seq_size('query'))
 
