@@ -65,11 +65,11 @@ def analyze_targets(targetList):
         targetRegion.resolve_sv()
         print multiprocessing.current_process().name, 'finished resolve_sv'
         if targetRegion.has_results():
-            aggregateResults.extend(targetRegion.get_results())
+            aggregateResults.extend(targetRegion.get_formatted_output())
         targetRegion.complete_analysis()
     print multiprocessing.current_process().name, 'returning results', aggregateResults
-    return 'Hello'
-    # return aggregateResults
+    # return 'Hello'
+    return aggregateResults
 
 
 class RunTracker:

@@ -245,6 +245,13 @@ class Variation:
         resultFile.close()
         print 'Write results()'
 
+    def get_formatted_output(self):
+        """ """
+        formattedResults = []
+        for i, result in enumerate(self.results):
+            formattedResults.append(result.get_formatted_output_values())
+        return formattedResults
+
 
 class TargetManager:
     """TargetManager class handles all the high level information relating to a target.
@@ -573,4 +580,7 @@ class TargetManager:
     def get_results(self):
         """ """
         return self.variation.results
+
+    def get_formatted_output(self):
+        return self.variation.get_formatted_output()
 
