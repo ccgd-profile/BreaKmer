@@ -28,7 +28,7 @@ class Filter:
 
     def parse_breakpoints(self, breakpoints):
         """ """
-        breakpointsList = breakpoints.split(',')
+        breakpointList = breakpoints.split(',')
         brkpts = []
         for breakpoint in breakpointList:
             chrom, bps = breakpoint.split(':')
@@ -99,7 +99,7 @@ class ResultFilter:
                     if len(eventBrkpt) == len(filterBrkpt):
                         bpMatch = True
                         for v1, v2 in zip(eventBrkpt, filterBrkpt):
-                            if v1 != v2:
+                            if str(v1) != str(v2):
                                 bpMatch = False
                                 break
                         if bpMatch:
