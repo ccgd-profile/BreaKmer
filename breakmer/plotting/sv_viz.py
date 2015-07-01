@@ -352,7 +352,15 @@ def plot_contig_seq(ax, seqYidx, xOffset, segmentManager):
 
 def plot_segments(ax, yCoord, xOffset, segmentManager):
     """ """
+
+    segStarts = []
     for i, segment in enumerate(segmentManager.segments):
+        segStarts.append((segment.queryCoordinates[0], segment))
+
+    sortedSegs = sorted(segStarts, key=lambda x: x[0])
+
+    for i, segmentTuple in enumerate(sortedSegs):
+        segment = segmentTuple[1]
         # Plot rectangles for each realignment result
         xCoord = xOffset + segment.queryCoordinates[0]
         yCoord = yCoord + ((i + 0.75) * 0.50)
