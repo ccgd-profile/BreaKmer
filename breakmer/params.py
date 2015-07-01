@@ -45,6 +45,7 @@ class ParamManager:
         self.paths = {}
         self.repeat_mask = None
         self.logging_name = 'breakmer.params'
+        self.runAnalysis = True
         self.set_params(arguments)
 
     def set_params(self, arguments):
@@ -108,6 +109,7 @@ class ParamManager:
         # If only preseting the reference data, then move on.
         if self.get_param('preset_ref_data'):
             utils.log(self.logging_name, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
+            self.runAnalysis = False
             return
 
         # TODO - set this as an optional parameter.
