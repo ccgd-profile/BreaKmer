@@ -745,9 +745,9 @@ class ContigCaller:
         for i, blatResult in enumerate(blatResults):
             if i == 0 and blatResult.check_indel(len(blatResults)):
                 hasIndel = True
-                utils.log(self.loggingName, 'info', 'Contig has indel, returning %r' % has_indel)
+                utils.log(self.loggingName, 'info', 'Contig has indel, returning %r' % hasIndel)
                 self.svEvent = SVEvent(blatResult, self.contig, 'indel')
-                return has_indel
+                return hasIndel
             else:
                 utils.log(self.loggingName, 'debug', 'Storing clipped blat result start %d, end %d' % (blatResult.qstart(), blatResult.qend()))
                 self.clippedQs.append((blatResult.qstart(), blatResult.qend(), blatResult, i))
