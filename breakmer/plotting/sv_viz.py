@@ -719,7 +719,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
                 if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
+                    rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                     trxElements.append(start)
                     trxElements.append(start + binSize)
@@ -729,7 +729,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
             print 'TRX max, min', trxMin, trxMax
-            rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
+            rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
             for bp in bpPlotBins:
