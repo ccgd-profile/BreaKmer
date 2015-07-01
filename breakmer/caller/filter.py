@@ -36,7 +36,7 @@ class Filter:
             brkptList = [chrom]
             for bp in bpSplit:
                 brkptList.append(bp)
-            brkpts.append(brptList)
+            brkpts.append(brkptList)
         return brkpts
 
 
