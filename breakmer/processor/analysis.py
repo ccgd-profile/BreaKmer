@@ -94,7 +94,7 @@ class RunTracker:
         Returns
             None
         """
-        if self.params.runAnalysis:
+        if not self.params.runAnalysis:
             print 'Reference data setup. Analysis can now be run.'
             return
 
