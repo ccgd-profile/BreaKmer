@@ -689,8 +689,10 @@ class Meta:
                     print 'Bam_read', bam_read
                     print 'Read', read
                     bam_out_f.write(bam_read)
+                    print 'Write bam read'
         bamFile.close()
         bam_out_f.close()
+        print 'Closed bam files'
         utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (bamOutFn, bam_out_sorted_fn))
         pysam.sort(bamOutFn, bam_out_sorted_fn.replace('.bam', ''))
         utils.log(self.loggingName, 'info', 'Indexing bam file %s' % bam_out_sorted_fn)
