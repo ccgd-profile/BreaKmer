@@ -51,6 +51,7 @@ def analyze_targets(targetList):
     aggregateResults = []
     print 'Multiprocessing name', multiprocessing.current_process().name
     for targetRegion in targetList:
+        print 'Multiprocessing', multiprocessing.current_process().name, 'target', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
 
@@ -113,6 +114,7 @@ class RunTracker:
             for targetList in targetAnalysisList:
                 multiprocResults.append(p.apply_async(analyze_targets, (targetList, )))
             wait(multiprocResults)
+            print 'Finished waiting for results'
             for multiprocResult in multiprocResults:
                 aggResults.extend(multiprocResult.get())
         else:
