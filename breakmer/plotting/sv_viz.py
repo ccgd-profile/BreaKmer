@@ -245,7 +245,7 @@ def plot_pileup(segmentManager, outName):
     plot_segments(ax, yCoord + 1, xOffset, segmentManager)
     plot_indel_track(ax, yCoord + 1, xOffset, segmentManager)
     plot_annotation_track(ax, yCoord + 5, xOffset, segmentManager)
-    plot_global_trx_track(ax, yCoord + 8, xOffset, segmentManager)
+    plot_global_trx_track(ax, yCoord + 7, xOffset, segmentManager)
 #     annoYidx = seqYidx + len(cSeq.segments) + 1
 #     # Vertical breakpojnt lines, colors match the segments.
 #     brkptLines = []
