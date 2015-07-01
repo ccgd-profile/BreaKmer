@@ -1,7 +1,6 @@
 #! /usr/bin/local/python
 # -*- coding: utf-8 -*-
 
-import sys
 import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
@@ -56,7 +55,6 @@ class ResultFilter:
         if self.filterFn:
             for line in open(self.filterFn, 'rU'):
                 line = line.strip()
-                print line.split('\t')
                 resultFilter = Filter()
                 resultFilter.set_values(line.split('\t'))
                 self.filters.append(resultFilter)
@@ -71,10 +69,8 @@ class ResultFilter:
     def check_filters(self, svEvent):
         """
         """
-        print 'Check filters', len(self.filters)
         if len(self.filters) > 0:
             # Check if event is in the pre-defined filters
-            print 'Check define filters'
             self.check_defined_filters(svEvent)
 
         if svEvent.svType == 'indel':
@@ -91,10 +87,7 @@ class ResultFilter:
             3. breakpoints
             4. description
         """
-        print 'Checking defined filters'
         for SVFilter in self.filters:
-            print 'Names', svEvent.contig.get_target_name().lower(), SVFilter.name
-            print 'Types', svEvent.svType, SVFilter.svType
             nameMatch = svEvent.contig.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
             eventBrkpts = svEvent.get_genomic_brkpts()
@@ -106,14 +99,12 @@ class ResultFilter:
                 # Should be a tuple with chr, bp1, bp2 or chr, bp1
                 match = False
                 for filterBrkpt in SVFilter.breakpoints:
-                    print 'lens', len(eventBrkpt), len(filterBrkpt)
                     if len(eventBrkpt) == len(filterBrkpt):
                         bpMatch = True
                         # Check chroms
                         bpMatch = eventBrkpt[0].replace('chr', '') == filterBrkpt[0].replace('chr', '')
                         if bpMatch:
                             for v1, v2 in zip(eventBrkpt[1:], filterBrkpt[1:]):
-                                print 'bps', v1, v2
                                 if int(v1) != int(v2):
                                     bpMatch = False
                                     break
@@ -121,10 +112,8 @@ class ResultFilter:
                                 match = True
                                 break
                 boMatches = bpMatches and match
-            print nameMatch, typeMatch, bpMatches
             if nameMatch and typeMatch and bpMatches:
                 svEvent.set_filtered('Matched input filter variant')
-        sys.exit()
 
     def filter_indel(self, svEvent):
         """ """
