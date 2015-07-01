@@ -112,7 +112,7 @@ class ResultFilter:
         svFilterValues = svEvent.resultValues.filterValues
         uniqRealignment = svFilterValues.resultMeanHitFreq < 2
         indelSize = svFilterValues.maxEventSize >= indelSizeThresh
-        brkptCoverages = min(svFilterValues.splitReadCount) >= self.params.get_sr_thresh('indel')
+        brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('indel')
         minFlankMatches = min(svFilterValues.flankMatchPercents) >= 10.0
 
         if uniqRealignment and indelSize and brkptCoverages and minFlankMatches:
