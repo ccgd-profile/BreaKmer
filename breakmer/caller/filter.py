@@ -139,20 +139,21 @@ class ResultFilter:
         discReadCount = svEvent.discReadCount >= 1
         minBrkptKmers = svEvent.minBrkptKmers > 0
 
+        svFilterValues = svEvent.resultValues.filterValues
         if brkptCoverages and minSegmentLen and discReadCount and minBrkptKmers:
             utils.log(self.loggingName, 'info', 'Rearrangement meets basic filtering requirements.')
         else:
             filteredReasons = []
             if not missingQueryCoverage:
-                logMsg = 'No realignment for %d bases in the contig sequence, more than threshold %d.' % (svEvent.filterValues.missingQueryCoverage, self.params.get_min_segment_length('rearr'))
+                logMsg = 'No realignment for %d bases in the contig sequence, more than threshold %d.' % (svFilterValues.missingQueryCoverage, self.params.get_min_segment_length('rearr'))
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
             if not brkptCoverages:
-                logMsg = 'Minimum coverage at breakpoints (%d) less than input threshold %d.' % (svEvent.filterValues.brkptCoverages[0], self.params.get_sr_thresh('rearrangement'))
+                logMsg = 'Minimum coverage at breakpoints (%d) less than input threshold %d.' % (svFilterValues.brkptCoverages[0], self.params.get_sr_thresh('rearrangement'))
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
             if not minSegmentLen:
-                logMsg = 'The minimum realigned segment length (%d) is less than the input threshold %d.' % (svEvent.filterValues.minSegmentLen, self.params.get_min_segment_length('rearr'))
+                logMsg = 'The minimum realigned segment length (%d) is less than the input threshold %d.' % (svFilterValues.minSegmentLen, self.params.get_min_segment_length('rearr'))
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
             if not discReadCount:
@@ -184,8 +185,9 @@ class ResultFilter:
             if not f:
                 nStrictFiltersFail += 1
 
+        svFilterValues = svEvent.resultValues.filterValues
         if not maxBrkptCoverages:
-            logMsg = 'Maximum breakpoint coverages (%d) did not meet input threshold %d.' % (svEvent.filterValues.brkptCoverages[1], self.params.get_sr_thresh('trl'))
+            logMsg = 'Maximum breakpoint coverages (%d) did not meet input threshold %d.' % (svFilterValues.brkptCoverages[1], self.params.get_sr_thresh('trl'))
             utils.log(self.loggingName, 'info', logMsg)
             svEvent.set_filtered(logMsg)
         else:
