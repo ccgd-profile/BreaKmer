@@ -243,6 +243,7 @@ class Variation:
                 resultFile.write(headerStr + '\n')
             resultFile.write(formattedResultValuesStr + '\n')
         resultFile.close()
+        print 'Write results()'
 
 
 class TargetManager:

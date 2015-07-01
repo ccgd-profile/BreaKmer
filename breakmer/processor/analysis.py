@@ -176,6 +176,7 @@ class RunTracker:
         Returns:
             None
         """
+        print 'Write agg results'
         resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
         utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
         resultFile = open(resultFn, 'w')
