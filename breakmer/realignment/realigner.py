@@ -154,7 +154,6 @@ class Realignment:
         if self.results is None:
             noAlignmentResults = True
         else:
-            self.results.modify_blat_result_file()
             if self.results.target_hit():
                 targetHit = True
                 utils.log(self.loggingName, 'debug', 'Top hit contains whole query sequence, indicating an indel variant.')
@@ -196,6 +195,8 @@ class AlignResults:
         elif len(open(self.resultFn, 'rU').readlines()) == 0:
             self.hasResults = False
         else:
+            if self.scope == 'target':
+                self.modify_blat_result_file()
             self.parse_result_file()
 
     def modify_blat_result_file(self):
@@ -229,8 +230,10 @@ class AlignResults:
             refName = self.contig.get_chr()
             offset = self.contig.get_target_start() - self.contig.get_target_buffer()
 
+        print 'Parsing blat result file', self.resultFn
         for line in open(self.resultFn, 'r'):
             line = line.strip()
+            print line
             parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
             parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
             # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
