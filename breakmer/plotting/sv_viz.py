@@ -696,12 +696,14 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
             # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
-            ax.text(trxOffset, yCoord - 0.25, str(trx.start), ha='left', va='center', size=10)
-            ax.text(trxOffset + trxLen, yCoord - 0.25, str(trx.stop), ha='right', va='center', size=10)
+            tStart = trx.chr + ':' + str(trx.start)
+            tStop = trx.chr + ':' + str(trx.stop)
+            ax.text(trxOffset, yCoord - 0.35, tStart, ha='left', va='center', size=8)
+            ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
             exonLabel = 'exon1'
             if trx.strand == '-':
                 exonLabel = 'exon' + str(len(exons))
-            ax.text(trxOffset, yCoord + 0.5, exonLabel, ha='left', va='center', size=8)
+            ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
             for i, exon in enumerate(newExons):
                 rectLen = binSize
@@ -850,10 +852,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord), rectLen, height, color=color)
+                    rect = patches.Rectangle((start, yCoord - 0.25), rectLen, height, color=color)
                     ax.add_patch(rect)
                     print 'Exon', exon
-                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.75, exonStr, ha='center', va='center', size=8)
+                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.35, exonStr, ha='center', va='center', size=8)
 
                 if exonStr != '':
                     exstart = exon[0]
@@ -875,7 +877,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
-            rect = patches.Rectangle((trxMin, yCoord + 0.125), trxMax - trxMin, 0.125, color=segment.color)
+            rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
                     # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
                     # ax.add_patch(rect)
