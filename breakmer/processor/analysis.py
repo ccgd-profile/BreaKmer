@@ -31,7 +31,7 @@ def wait(results):
         time.sleep(5)
         jobs = check_status(results)
         if jobs < njobs:
-            print '\n', jobs, '/', total_jobs, " jobs not complete."
+            print '\n', jobs, '/', njobs, " jobs not complete."
             njobs = jobs
         else:
             sys.stdout.write('.')
