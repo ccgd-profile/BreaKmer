@@ -104,8 +104,8 @@ class ResultFilter:
         """ """
         indelSizeThresh = int(self.params.get_param('indel_size'))
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
-
-        keep_br = br.valid and br.mean_cov < 2 and br.in_target and (br.indel_maxevent_size[0] >= indelSizeThresh)
+        blatResult = svEvent.blatResults[0][1]
+        keep_br = blatResult.valid and blatResult.mean_cov < 2 and blatResult.in_target and (blatResult.indel_maxevent_size[0] >= indelSizeThresh)
         self.logger.debug('Keep blat result %r' % keep_br)
 
         # Determine the uniqueness of the realignment.
