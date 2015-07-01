@@ -49,6 +49,7 @@ def analyze_targets(targetList):
         None
     """
     aggregateResults = []
+    print 'Multiprocessing name', multiprocessing.current_process().name
     for targetRegion in targetList:
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
@@ -61,6 +62,7 @@ def analyze_targets(targetList):
             continue
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
+        print multiprocessing.current_process().name, 'finished resolve_sv'
         if targetRegion.has_results():
             aggregateResults.extend(targetRegion.get_results())
         targetRegion.complete_analysis()
