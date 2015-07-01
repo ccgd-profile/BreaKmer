@@ -121,13 +121,13 @@ class ResultFilter:
             utils.log(self.loggingName, 'debug', 'Indel filtered due to non-unique realignment (%r), less than input size threshold (%r), low coverage at breakpoints (%r), or contig edge realignment not long enough (%r), filter status set to True.' % (uniqRealignment, indelSize, brkptCoverages, minFlankMatches))
             filterReasons = []
             if not uniqRealignment:
-                filterReasons.append('Non-unique realignment (%d) > 2' % svEvent.filterValues.resultMeanHitFreq)
+                filterReasons.append('Non-unique realignment (%d) > 2' % svFilterValues.resultMeanHitFreq)
             if not indelSize:
-                filterReasons.append('Max indel size (%d) is less than %d' % (svEvent.filterValues.maxEventSize, indelSizeThresh))
+                filterReasons.append('Max indel size (%d) is less than %d' % (svFilterValues.maxEventSize, indelSizeThresh))
             if not brkptCoverages:
-                filterReasons.append('Minimum coverage at breakpoints (%d) less than input threshold %d' % (svEvent.filterValues.brktpCoverages[0], self.params.get_sr_thresh('indel')))
+                filterReasons.append('Minimum coverage at breakpoints (%d) less than input threshold %d' % (svFilterValues.brktpCoverages[0], self.params.get_sr_thresh('indel')))
             if not minFlankMatches:
-                filterReasons.append('Minimum percentage of contig sequence that realigns to the reference to the left or right of the indel event less than 10.0% (%d)' % min(svEvent.filterValues.flankMatchPercents))
+                filterReasons.append('Minimum percentage of contig sequence that realigns to the reference to the left or right of the indel event less than 10.0% (%d)' % min(svFilterValues.flankMatchPercents))
             svEvent.set_filtered(','.join(filterReasons))
 
     def filter_rearr(self, svEvent):
