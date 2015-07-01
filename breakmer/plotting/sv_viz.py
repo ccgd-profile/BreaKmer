@@ -370,7 +370,7 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
         xCoordLabel = xCoord + (float(rectLen) / float(2))
         rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color=segment.color)
         ax.add_patch(rect)
-        ax.text(xCoordLabel, yCoord - 0.15, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
+        ax.text(xCoordLabel, yCoord - 0.125, lenText + ' (' + segment.strand + ')', ha='center', va='top', size=10)
         # Plot genomic coordinates of the segment
         gCoordOrder = [xCoord, xCoord + rectLen]
         if segment.strand == '-':
@@ -380,8 +380,8 @@ def plot_segments(ax, yCoord, xOffset, segmentManager):
             horizAlign.reverse()
         segCoordStart = segment.chromName + ':' + str(segment.genomicCoordinates[0])
         segCoordEnd = segment.chromName + ':' + str(segment.genomicCoordinates[1])
-        ax.text(gCoordOrder[0], yCoord - 0.15, segCoordStart, ha=horizAlign[0], va='top', size=10)
-        ax.text(gCoordOrder[1], yCoord - 0.15, segCoordEnd, ha=horizAlign[1], va='top', size=10)
+        ax.text(gCoordOrder[0], yCoord - 0.125, segCoordStart, ha=horizAlign[0], va='top', size=10)
+        ax.text(gCoordOrder[1], yCoord - 0.125, segCoordEnd, ha=horizAlign[1], va='top', size=10)
 
 
 def plot_indel_track(ax, yCoord, xOffset, segmentManager):
@@ -863,7 +863,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
                     ax.add_patch(rect)
                     print 'Exon', exon
-                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.35, exonStr, ha='center', va='center', size=8)
+                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.4, exonStr, ha='center', va='center', size=8)
 
                 if exonStr != '':
                     exstart = exon[0]
@@ -873,8 +873,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         exend = exon[0]
                     exstart = segment.chromName + ':' + str(exstart)
                     exend = segment.chromName + ':' + str(exend)
-                    ax.text(start, yCoord - 0.3, str(exstart), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord - 0.3, str(exend), ha='right', va='center', size=8)
+                    ax.text(start, yCoord - 0.35, str(exstart), ha='left', va='center', size=8)
+                    ax.text(start + binSize, yCoord - 0.35, str(exend), ha='right', va='center', size=8)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
