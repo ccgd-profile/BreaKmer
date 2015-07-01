@@ -895,12 +895,15 @@ class Contig:
         Args:
         Return:
         """
+        print 'contig.py query_ref()'
         self.realignment = realigner.RealignManager(self.meta.params, targetRefFns)
         self.realignment.realign(self)
+        print 'Done realigning'
 
     def make_calls(self):
         """
         """
+        print 'contig.py make_calls()'
         contigCaller = sv_caller.ContigCaller(self.realignment, self, self.meta.params)
         self.svEventResult = contigCaller.call_svs()
 
@@ -918,6 +921,7 @@ class Contig:
 
     def output_calls(self, outputPath, svReadsBamFn):
         """ """
+        print 'contig.py output_calls()', self.get_id(), self.svEventResult
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
             readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
