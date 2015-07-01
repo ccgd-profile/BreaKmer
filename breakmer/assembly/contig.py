@@ -527,7 +527,7 @@ class Builder:
                         read_align_values = {'read': read,
                                              'align_pos': kmerPos,
                                              'nreads': nreads}
-                        newContigs.append((read, Contig(kmer_values, read_align_values)))
+                        newContigs.append((read, Contig(kmerObj, read_align_values)))
                         kmerSet = kmerSet | newKmers
                         break
         return newContigs
