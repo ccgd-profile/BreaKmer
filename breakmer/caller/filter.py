@@ -106,7 +106,7 @@ class ResultFilter:
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
         blatResult = svEvent.blatResults[0][1]
         keep_br = blatResult.valid and blatResult.meanCov < 2 and blatResult.in_target and (blatResult.indel_maxevent_size[0] >= indelSizeThresh)
-        self.logger.debug('Keep blat result %r' % keep_br)
+        utils.log(self.loggingName, 'debug', 'Keep blat result %r' % keep_br)
 
         # Determine the uniqueness of the realignment.
         uniqRealignment = svEvent.filterValues.resultMeanHitFreq < 2
