@@ -305,7 +305,7 @@ class Builder:
             hit = 'remove'
             readAlignValues['read'].used = True
             self.read_batch.set_last_read_aligned()
-        elif kmerObj.count > 2 and not readAlignValues['read'].used:
+        elif kmerObj.counts > 2 and not readAlignValues['read'].used:
             self.read_batch.alt.append((readAlignValues['read'], readAlignValues['nreads']))
         else:
             self.read_batch.delete.add(readAlignValues['read'])
