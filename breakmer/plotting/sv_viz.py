@@ -898,7 +898,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         start += binSize #- rectLen
                     minCoord = 0.2
-                    if segTrx.svType == 'indel':
+                    if segTrx.svType != 'rearrangement':
                         minCoord = yCoord - 0.5
                     print minCoord
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
@@ -929,7 +929,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         start += binSize
                     minCoord = 0.2
-                    if segTrx.svType == 'indel':
+                    if segTrx.svType != 'rearrangement':
                         minCoord = yCoord - 0.5
                     print minCoord
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
