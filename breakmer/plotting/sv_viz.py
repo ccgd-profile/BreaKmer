@@ -33,6 +33,7 @@ class TrxBrkpt:
 class AnnoTrx:
     def __init__(self, trx, trxDist, svBreakpoint, brkptIdx, svType):
         self.trx = trx
+        self.svType = svType
         self.brkpts = [TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType)]
 
     def add_brkpt(self, trxDist, svBreakpoint, brkptIdx, svType):
@@ -892,7 +893,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         start += binSize #- rectLen
                     minCoord = 0.2
-                    if segment.svType == 'indel':
+                    if segTrx.svType == 'indel':
                         minCoord = yCoord - 0.5
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
@@ -922,7 +923,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         start += binSize
                     minCoord = 0.2
-                    if segment.svType == 'indel':
+                    if segTrx.svType == 'indel':
                         minCoord = yCoord - 0.5
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
