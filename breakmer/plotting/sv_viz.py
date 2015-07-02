@@ -879,7 +879,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxElements = []
 
             print 'Plot exons', plotExons
+            plottedItems = []
             for i, exon in enumerate(plotExons):
+                if exon[2] != 'breakpoint' and exon[2] in plottedItems:
+                    continue
+                plottedItems.append(exon[2])
                 rectLen = binSize
                 start = offset
                 color = segment.color
@@ -895,6 +899,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     minCoord = 0.2
                     if segTrx.svType == 'indel':
                         minCoord = yCoord - 0.5
+                    print minCoord
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
@@ -925,6 +930,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     minCoord = 0.2
                     if segTrx.svType == 'indel':
                         minCoord = yCoord - 0.5
+                    print minCoord
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             trxMin = max(min(trxElements), trxOffset)
