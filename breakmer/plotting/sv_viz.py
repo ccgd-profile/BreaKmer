@@ -224,7 +224,7 @@ def pile_reads(reads, contigSeq):
 def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
-    seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
+    seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.5
     plotHeight = round(seqPlotSize) + 5 # seqPlotSize*1.5
     # if len(segmentManager.orderedSeqs) > 10:
     #     plotHeight = 20
