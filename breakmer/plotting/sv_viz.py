@@ -637,8 +637,8 @@ def get_neighbor_exons(exons):
         if name == 'breakpoint':
             bpExonBuffer[start] = {'left': leftExonBuffer, 'right': rightExonBuffer, 'add_to_list': False}
             currentBp = start
-            leftExonBuffer = []
             print 'Breakpoint saved with leftExonBuffer', leftExonBuffer
+            leftExonBuffer = []
             print 'Current bp is', start
         elif currentBp is None:
             leftExonBuffer.append(exon)
@@ -652,6 +652,7 @@ def get_neighbor_exons(exons):
     for item in bpExonBuffer:
         left = bpExonBuffer[item]['left']
         right = bpExonBuffer[item]['right']
+
         if len(left) > 0:
             finalList.extend(left[len(left) - 2: len(left)])
         if item not in bpOverlaps:
@@ -866,7 +867,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
             # print 'All Exons sorted', 10 * '#'
             # print allExons
-            plotExons = get_neighbor_exons(allExons)
+            plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
             # print plotExons
 
             binSize = trxLen / (2 * len(plotExons) - 1)
