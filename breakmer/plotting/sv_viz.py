@@ -396,11 +396,11 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
             if len(coord) == 2:
                 rectLen = coord[1] - coord[0]
                 indelType = 'I'
-            rectHeight = 0.5
+            rectHeight = 0.25
             rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
-            ax.text(xCoordLabel, yCoord + 1, segment.indelSizes[i], ha='center', va='top', size=10)
+            ax.text(xCoordLabel, yCoord + 0.5, segment.indelSizes[i], ha='center', va='top', size=10)
 
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
@@ -597,6 +597,7 @@ class AnnotationBrkpt:
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 selectedExons[bpCoord]['maxmincoords'] = maxminCoords
+        print 'Selected exons', selectedExons
         return selectedExons
 
 

@@ -66,6 +66,7 @@ class FilterValues:
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
         self.maxSegmentOverlap = max(blatResult.seg_overlap)
+        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
 
     def get_formatted_output_values(self, svType, svSubtype):
         """ """
@@ -81,13 +82,13 @@ class FilterValues:
             outputValues['minSegmentLen'] = self.minSegmentLen
             outputValues['missingQueryCoverage'] = self.missingQueryCoverage
             outputValues['maxSegmentOverlap'] = self.maxSegmentOverlap
+            outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
             if svSubtype == 'trl':
                 outputValues['breakpointCoverages'] = self.brkptCoverages
                 outputValues['sequenceComplexity'] = self.seqComplexity
                 outputValues['startEndMissingQueryCoverage'] = self.startEndMissingQueryCoverage
                 outputValues['nReadStrands'] = self.nReadStrands
                 outputValues['maxRealignmentGapSize'] = self.maxRealignmentGap
-                outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
 
         outputList = []
         for key, value in outputValues.items():
@@ -221,6 +222,59 @@ class SVResult:
         self.filtered['status'] = True
         self.filtered['reason'] = filterReason
 
+    def get_old_formatted_output_values(self):
+        """ """
+        headerStr = ['genes',
+                     'target_breakpoints',
+                     'align_cigar',
+                     'mismatches',
+                     'strands',
+                     'rep_overlap_segment_len',
+                     'sv_type',
+                     'split_read_count',
+                     'nkmers',
+                     'disc_read_count',
+                     'breakpoint_coverages',
+                     'contig_id',
+                     'contig_seq'
+                     ]
+
+        brkptStr = ','.join([str(x) for x in item])
+        if self.svType == 'indel':
+            brkptStr += ' (' + ','.join([str(x) for x in self.descript]) + ')'
+
+        repOverlap_segLen_hitFreq = []
+        for i in self.totalMatching:
+            repOverlap_segLen_hitFreq.append('0.0:' + str(matchLen) + ':0.0')
+
+        nkmers = '0'
+
+        outList = [self.targetName,
+                   self.brkptStr,
+                   self.alignCigar,
+                   self.totalMismatches,
+                   self.strands,
+                   repOverlap_segLen_hitFreq,
+                   self.svType,
+                   self.splitReadCount,
+                   nkmers,
+                   self.discReadCount,
+                   self.breakpointCoverageDepth,
+                   self.contigId,
+                   self.contigSeq,
+                   ]
+
+        outListStr = []
+        for item in outList:
+            if not isinstance(item, list):
+                outListStr.append(str(item))
+            else:
+                outListStr.append(','.join([str(x) for x in item]))
+
+        formattedFilterValsStr = self.filterValues.get_formatted_output_values(self.svType, self.svSubtype)
+        outListStr.append(formattedFilterValsStr)
+        return ('\t'.join(headerStr), '\t'.join(outListStr))
+
     def get_formatted_output_values(self):
         """ """
         headerStr = ['Target_Name',
@@ -243,8 +297,6 @@ class SVResult:
                      'Filtered_reason',
                      'Filter_values'
                      ]
-
-        print 'Get formatted output values', self.contigSeq, self.contigId
 
         outList = [self.targetName,
                    self.svType,
