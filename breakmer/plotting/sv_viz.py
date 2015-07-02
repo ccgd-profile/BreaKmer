@@ -401,7 +401,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
             rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
-            ax.text(xCoordLabel, yCoord + 0.5, segment.indelSizes[i], ha='center', va='top', size=10)
+            ax.text(xCoordLabel, yCoord + 0.6, segment.indelSizes[i], ha='center', va='top', size=10)
 
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
@@ -660,7 +660,13 @@ def get_neighbor_exons(exons):
             finalList.append((item, item + 1, 'breakpoint', None))
         if len(right) > 0:
             finalList.extend(right[0:2])
-    return finalList
+    dupItems = []
+    uniqList = []
+    for item in finalList:
+        if item[2] == 'breakpoint' or (item[2] not in dupItems):
+            uniqList.append(item)
+            dupItems.append(item[2])
+    return uniqList
 
 
 def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
@@ -880,11 +886,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxElements = []
 
             print 'Plot exons', plotExons
-            plottedItems = []
             for i, exon in enumerate(plotExons):
-                if exon[2] != 'breakpoint' and exon[2] in plottedItems:
-                    continue
-                plottedItems.append(exon[2])
                 rectLen = binSize
                 start = offset
                 color = segment.color
