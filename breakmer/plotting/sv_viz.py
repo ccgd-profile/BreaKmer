@@ -397,7 +397,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
                 rectLen = coord[1] - coord[0]
                 indelType = 'I'
             rectHeight = 0.25
-            rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
+            rect = patches.Rectangle((xCoord, yCoord + 0.75 * 0.50), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
             ax.text(xCoordLabel, yCoord + 0.5, segment.indelSizes[i], ha='center', va='top', size=10)
@@ -630,13 +630,16 @@ def get_neighbor_exons(exons):
     bpExonBuffer = {}
     currentBp = None
     bpOverlaps = []
+    print 'Get neighbor exons', exons
     for exon in exons:
-        # print exon
+        print 'Getting neighboring exons', exon
         start, end, name, bpOverlapCoord = exon
         if name == 'breakpoint':
             bpExonBuffer[start] = {'left': leftExonBuffer, 'right': rightExonBuffer, 'add_to_list': False}
             currentBp = start
             leftExonBuffer = []
+            print 'Breakpoint saved with leftExonBuffer', leftExonBuffer
+            print 'Current bp is', start
         elif currentBp is None:
             leftExonBuffer.append(exon)
             if bpOverlapCoord is not None:
@@ -872,6 +875,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
             ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
             trxElements = []
+
+            print 'Plot exons', plotExons
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
