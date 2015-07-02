@@ -230,7 +230,7 @@ def plot_pileup(segmentManager, outName):
     #     plotHeight = 20
 
     # Setup figure
-    fig = plt.figure(figsize=(25, plotHeight), frameon=False)
+    fig = plt.figure(figsize=(10, 20), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
