@@ -401,7 +401,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
             rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
-            ax.text(xCoordLabel, yCoord + 0.375, segment.indelSizes[i], ha='center', va='top', size=10)
+            ax.text(xCoordLabel, yCoord + 0.5, segment.indelSizes[i], ha='center', va='top', size=10)
 
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
@@ -828,6 +828,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxOffset += 3
         segTrxIter = 0
         for segTrx in segTrxs:
+            print 'segTRX svtype', segTrx.svType
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
                 segLen = segLen - 3
                 for i in range(3):
