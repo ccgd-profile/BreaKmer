@@ -655,3 +655,11 @@ class VariantReadTracker:
     def check_inv_readcounts(self, brkpts):
         """ """
         return self.discReadTracker.check_inv_readcounts(brkpts)
+
+    def check_td_readcounts(self, brkpts):
+        """ """
+        return self.discReadTracker.check_td_readcounts(brkpts)
+
+    def check_other_readcounts(self, brkpts):
+        """ """
+        return self.discReadTracker.check_other_readcounts(brkpts)
