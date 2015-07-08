@@ -261,7 +261,7 @@ def cluster_regions(dReadLst, idx, clusterType):
                 withinBuffer = dRead.pos[idx] > c[1] and dRead.pos[idx] - c[1] <= distBuffer
                 if startWithin or withinBuffer:
                     readInfoLst = clusterLst[i][2]
-                    readInfoLst.append(readInfoLst)
+                    readInfoLst.append(dRead.readInfoStr)
                     clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
                 add = True
             if not add:
@@ -385,6 +385,10 @@ class discReads:
                     print key1, key2, key3
                     c1 = cluster_regions(srt1, 0, 'target')
                     c2 = cluster_regions(srt2, 1, 'mate')
+                    for x in c1:
+                        print x
+                    for x in c2:
+                        print x
                     for item in dReadsLst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
