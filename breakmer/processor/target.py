@@ -253,7 +253,7 @@ class Variation:
                 headerStr, outStr = discReadRes
                 if i == 0:
                     resultFile.write(headerStr + '\n')
-                resultFile.write(outStr+ '\n')
+                resultFile.write(outStr + '\n')
             resultFile.close()
 
     def get_formatted_output(self):
@@ -269,7 +269,7 @@ class Variation:
 
     def cluster_discreads(self, targetName, targetChrom):
         """ """
-        self.discReadClusters = self.var_reads['sample'].cluster_discreads()
+        self.discReadClusters = self.var_reads['sv'].cluster_discreads()
         self.discReadFormatted = []
         headStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
