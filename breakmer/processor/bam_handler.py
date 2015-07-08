@@ -230,7 +230,7 @@ def get_strand_str(isReverseBoolean):
     return strand
 
 
-def get_strand_key(self, read, ordered=False):
+def get_strand_key(read, ordered=False):
     strands = []
     readStrand = '+'
     if read.is_reverse:
