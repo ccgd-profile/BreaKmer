@@ -386,9 +386,9 @@ class discReads:
                     c1 = cluster_regions(srt1, 0, 'target')
                     c2 = cluster_regions(srt2, 1, 'mate')
                     for x in c1:
-                        print x
+                        print 'c1', x
                     for x in c2:
-                        print x
+                        print 'c2', x
                     for item in dReadsLst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
