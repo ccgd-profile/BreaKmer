@@ -311,7 +311,7 @@ class discReads:
         mateRefId = bam.getrname(read.rnext)
         if mateRefId not in self.reads['inter']:
             self.reads['inter'][mateRefId] = {}
-        strandKey = self.get_strand_key(read)
+        strandKey = get_strand_key(read)
         if strandKey not in self.reads['inter'][mateRefId]:
             self.reads['inter'][mateRefId][strandKey] = []
         self.reads['inter'][mateRefId][strandKey].append(dRead)
@@ -323,16 +323,16 @@ class discReads:
         strandKey = ''
         if (read.is_reverse and read.mate_is_reverse) or (not read.is_reverse and not read.mate_is_reverse):
             discType = 'inv'
-            strandKey = self.get_strand_key(read)
+            strandKey = get_strand_key(read)
         elif (read.is_reverse and not read.mate_is_reverse) and (not read.is_reverse and read.mate_is_reverse):
             discType = 'td'
             strandKey = '-:+'
         elif disc_ins_size:
             discType = 'dist'
-            strandKey = self.get_strand_key(read, True)
+            strandKey = get_strand_key(read, True)
         elif (read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos) or (not read.is_reverse and read.mate_is_reverse and read.mpos < read.pos):
             discType = 'other'
-            strandKey = self.get_strand_key(read, True)
+            strandKey = get_strand_key(read, True)
         else:
             dRead = None
 
