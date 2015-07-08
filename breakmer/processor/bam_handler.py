@@ -251,6 +251,7 @@ def cluster_regions(dReadLst, idx, clusterType):
     for dRead in dReadLst:
         # trgtStart = dRead.pos[0]
         # mateStart = dRead.pos[1]
+        print 'cluster_regions dRead', dRead.pos, dRead.readLen
         if len(clusterLst) == 0:
             clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
         else:
