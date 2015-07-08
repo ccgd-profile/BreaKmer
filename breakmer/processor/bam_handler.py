@@ -249,25 +249,23 @@ def cluster_regions(dReadLst, idx, clusterType):
     distBuffer = 50
     clusterLst = []
     for dRead in dReadLst:
-        trgtStart = dRead.pos[0]
-        mateStart = dRead.pos[1]
-        read = item.read
-
+        # trgtStart = dRead.pos[0]
+        # mateStart = dRead.pos[1]
         if len(clusterLst) == 0:
-            clusterLst.append([item.pos[idx], item.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
+            clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
         else:
             # Check overlap
             add = False
             for i, c in enumerate(clusterLst):
-                startWithin = item.pos[idx] >= c[0] and item.pos[idx] <= c[1]
-                withinBuffer = item.pos[idx] > c[1] and item.pos[idx] - c[1] <= distBuffer
+                startWithin = dRead.pos[idx] >= c[0] and dRead.pos[idx] <= c[1]
+                withinBuffer = dRead.pos[idx] > c[1] and dRead.pos[idx] - c[1] <= distBuffer
                 if startWithin or withinBuffer:
                     readInfoLst = clusterLst[i][2]
                     readInfoLst.append(readInfoLst)
-                    clusterLst[i] = [c[0], item.pos[idx] + dRead.readLen, readInfoLst]
+                    clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
                 add = True
             if not add:
-                clusterLst.append([item.pos[idx], item.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
+                clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
     return clusterLst
 
 
