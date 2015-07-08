@@ -701,7 +701,7 @@ class SVEvent:
                     # Tandem dup
                     for readPair in varReads.td:
                         r1p, r2p, r1s, r2s, qname = readPair
-                        if (r1p <= brkpts[0] and r1p >= brkpts[1]) and ():
+                        if (r1p <= brkpts[0] and r1p >= brkpts[1]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
                             rs += 1
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')

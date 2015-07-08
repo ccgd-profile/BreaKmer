@@ -18,7 +18,7 @@ PARSER.add_argument('-a', '--keep_repeat_regions', dest='keep_repeat_regions', d
 PARSER.add_argument('-p', '--preset_ref_data', dest='preset_ref_data', default=False, action='store_true', help='Preset all the reference data for all the targets before running analysis. [default: False]')
 PARSER.add_argument('-s', '--indel_size', dest='indel_size', default=15, type=int, help='Indel size filter [default: %(default)s]')
 PARSER.add_argument('-c', '--trl_sr_thresh', dest='trl_sr_thresh', default=2, type=int, help='Split read support threshold for translocations [default: %(default)s]')
-PARSER.add_argument('-d', '--indel_sr_thresh', dest='indel_sr_thresh', default=5, type=int, help='Split read support threshold for indels [default: %(default)s]')
+PARSER.add_argument('-i', '--indel_sr_thresh', dest='indel_sr_thresh', default=5, type=int, help='Split read support threshold for indels [default: %(default)s]')
 PARSER.add_argument('-r', '--rearr_sr_thresh', dest='rearr_sr_thresh', default=3, type=int, help='Split read support threshold for rearrangements [default: %(default)s]')
 PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='Gene list to consider for analysis [default: %(default)s]')
 PARSER.add_argument('-k', '--keep_intron_vars', dest='keep_intron_vars', default=False, action='store_true', help='Keep intronic indels or rearrangements [default: %(default)s]')
@@ -30,6 +30,7 @@ PARSER.add_argument('-z', '--no_output_header', dest='no_output_header', default
 PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
 PARSER.add_argument('-n', '--nprocessors', dest='nprocs', default=1, type=int, help='The number of processors to use for analysis [default: %(default)s]')
 PARSER.add_argument('-x', '--keep_blat_server', dest='keep_blat_server', default=False, action='store_true', help='Keep the blat server alive [default: %(default)s]')
+PARSER.add_argument('-d', '--discread_only_thresh', dest='discread_only_thresh', default=2, type=int, help='The number of discordant read pairs in a cluster to output without evidence from a split read event [default: %(default)s]')
 PARSER.add_argument('--generate_image', dest='generate_image', default=False, action='store_true', help='Generate pileup image for events [default: %(default)s]')
 
 RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(PARSER.parse_args()))

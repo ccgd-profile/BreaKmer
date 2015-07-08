@@ -43,9 +43,11 @@ class Variation:
         self.results = []
         self.files = {}
         self.svs = {}
+        self.discReadClusters = {}
+        self.discReadFormatted = []
         self.loggingName = 'breakmer.processor.target'
 
-    def setup_cleaned_reads(self, sampleType):
+    def cleaned_reads(self, sampleType):
         """Initiate the cleaned_read_recs dictionary for sample or normal data.
         Args:
             type: String indicating the sample type - 'sv' or 'normal'
@@ -92,7 +94,7 @@ class Variation:
         """
         """
         # Get VariantReadTracker object from bam_handler module.
-        self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer)
+        self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer, self.params.get_param('insertsize_thresh'))
         # Iterate through reads that are not perfectly aligned and store necessary information for downstream analysis.
         self.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), start, end)
 
@@ -233,22 +235,60 @@ class Variation:
         return self.var_reads['sv'].get_disc_reads()
 
     def write_results(self, outputPath, targetName):
-        resultFn = os.path.join(outputPath, targetName + "_svs.out")
-        utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
-        resultFile = open(resultFn, 'w')
-        for i, result in enumerate(self.results):
-            headerStr, formattedResultValuesStr = result.get_formatted_output_values()
-            if i == 0:
-                resultFile.write(headerStr + '\n')
-            resultFile.write(formattedResultValuesStr + '\n')
-        resultFile.close()
+        if len(self.results) > 0:
+            resultFn = os.path.join(outputPath, targetName + "_svs.out")
+            utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
+            resultFile = open(resultFn, 'w')
+            for i, result in enumerate(self.results):
+                headerStr, formattedResultValuesStr = result.get_formatted_output_values()
+                if i == 0:
+                    resultFile.write(headerStr + '\n')
+                resultFile.write(formattedResultValuesStr + '\n')
+            resultFile.close()
+        if len(self.discReadClusters) > 0:
+            resultFn = os.path.join(outputPath, targetName + "_discreads.out")
+            utils.log(self.loggingName, 'info', 'Writing %s discordant read cluster result file %s' % (targetName, resultFn))
+            resultFile = open(resultFn, 'w')
+            for i, discReadRes in enumerate(self.discReadFormatted):
+                headerStr, outStr = discReadRes
+                if i == 0:
+                    resultFile.write(headerStr + '\n')
+                resultFile.write(outStr+ '\n')
+            resultFile.close()
 
     def get_formatted_output(self):
         """ """
-        formattedResults = []
-        for i, result in enumerate(self.results):
-            formattedResults.append(result.get_formatted_output_values())
-        return formattedResults
+        formattedResultsDict = {'contigs': [], 'discreads': []}
+        if len(self.results) > 0:
+            for i, result in enumerate(self.results):
+                formattedResultsDict['contigs'].append(result.get_formatted_output_values())
+        if len(self.discReadClusters) > 0:
+            for i, discReadRes in enumerate(self.discReadFormatted):
+                formattedResultsDict['discreads'].append(discReadRes)
+        return formattedResultsDict
+
+    def cluster_discreads(self, targetName, targetChrom):
+        """ """
+        self.discReadClusters = self.var_reads['sample'].cluster_discreads()
+        self.discReadFormatted = []
+        headStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
+        for key in self.discReadClusters:
+            readCount = self.discReadClusters[key]['readCount']
+            if readCount < self.params['discread_only_thresh']:
+                continue
+            k1, k2, k3, c1, c2 = key.split('|')
+            svType = 'inter-chromosomal'
+            lChrom = 'chr' + targetChrom.replace('chr', '')
+            if k1 == 'inter':
+                rChrom = 'chr' + k2.replace('chr', '')
+            elif k1 == 'intra':
+                svType = 'intra-chromosomal_' + k2
+                rChrom = lChrom
+            lStrand, rStrand = k3.split(':')
+            lBrkpt = self.discReadClusters[key]['leftBrkpt']
+            rBrkpt = self.discReadClusters[key]['rightBrkpt']
+            outStr = '\t'.join([targetName, svType, lChrom + ':' + str(lBrkpt), rChrom + ':' + str(rBrkpt), lStrand + ',' + rStrand, str(readCount)])
+            self.discReadFormatted.append((headerStr, outStr))
 
 
 class TargetManager:
@@ -530,10 +570,11 @@ class TargetManager:
         """
         Discordant read-only analysis - discordant reads that contribute to contig SVs are included in those calls.
         """
+        self.variation.cluster_discreads(self.name, self.chrom)
 
     def complete_analysis(self):
         """ """
-        if len(self.variation.results) > 0:
+        if len(self.variation.results) > 0 or len(self.variation.discReadFormatted) > 0:
             self.variation.write_results(self.paths['output'], self.name)
         else:
             self.rm_output_dir()
@@ -570,7 +611,7 @@ class TargetManager:
 
     def has_results(self):
         """ """
-        if len(self.variation.results) > 0:
+        if len(self.variation.results) > 0 or len(self.variation.discReadFormatted) > 0:
             return True
         else:
             return False
@@ -581,4 +622,3 @@ class TargetManager:
 
     def get_formatted_output(self):
         return self.variation.get_formatted_output()
-

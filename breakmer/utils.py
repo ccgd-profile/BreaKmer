@@ -16,6 +16,76 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+def median(lst):
+    lst = sorted(lst)
+    if len(lst) < 1:
+            return None
+    if len(lst) % 2 == 1:
+            return lst[((len(lst) + 1) / 2) - 1]
+    else:
+            return float(sum(lst[(len(lst) / 2) - 1:(len(lst) / 2) + 1])) / 2.0
+
+
+def percentile(N, percent, key=lambda x: x):
+    """
+    Find the percentile of a list of values.
+
+    @parameter N - is a list of values. Note N MUST BE already sorted.
+    @parameter percent - a float value from 0.0 to 1.0.
+    @parameter key - optional key function to compute value from each element of N.
+
+    @return - the percentile of the values
+    """
+    if not N:
+        return None
+    N.sort()
+    k = (len(N) - 1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return key(N[int(k)])
+    d0 = key(N[int(f)]) * (c - k)
+    d1 = key(N[int(c)]) * (k - f)
+    return d0 + d1
+
+
+def remove_outliers(x):
+    qnt1 = percentile(x, 0.25)
+    qnt2 = percentile(x, 0.75)
+    H = 1.5 * (qnt2 - qnt1)
+    x.sort()
+    i = 0
+    while (x[i] < (qnt1 - H)):
+        i += 1
+    cut1 = i
+
+    x.sort(reverse=True)
+    while (x[i] > (qnt2 + H)):
+        i += 1
+
+    cut2 = len(x) - i
+
+    x.sort()
+    return x[cut1:cut2]
+
+
+def mean(lst):
+    """calculates mean"""
+    sum = 0
+    for i in range(len(lst)):
+        sum += lst[i]
+    return (sum / len(lst))
+
+
+def stddev(lst):
+    """calculates standard deviation"""
+    sum = 0
+    mn = mean(lst)
+    for i in range(len(lst)):
+        sum += pow((lst[i] - mn), 2)
+    return math.sqrt(sum / len(lst) - 1)
+
+
 def run_cutadapt(cutadapt, cutadapt_config_f, input_fn, output_fn, logging_src):
     """
     """
@@ -322,7 +392,7 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size):
         logger.info('Using jellyfish version %d' % jfish_version)
 
         count_fn = os.path.join(file_path, file_base + "_" + str(kmer_size) + "mers_counts")
-        logger.info('Running %s on file %s to determine kmers' % (jellyfish, fa_fn)) 
+        logger.info('Running %s on file %s to determine kmers' % (jellyfish, fa_fn))
         cmd = '%s count -m %d -s %d -t %d -o %s %s' % (jellyfish, kmer_size, 100000000, 8, count_fn, fa_fn)
         logger.info('Jellyfish counts system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -378,7 +448,7 @@ def setup_ref_data(setup_params):
             for altref in altref_fas:
                 for dir in directions:
                     fn = os.path.join(gene_ref_path, name + '_' + dir + '_altrefseq_' + str(alt_iter) + '.fa')
-                    marker_fn = get_marker_fn(fn) 
+                    marker_fn = get_marker_fn(fn)
                     if not os.path.isfile(marker_fn):
                         altref_fns.append((altref, fn, alt_iter))
                 alt_iter += 1
@@ -693,7 +763,7 @@ def get_overlap_index(a, b):
     nmismatch = 10
     while nmismatch > 1:
         nmismatch = 0
-        for aa,bb in zip(a[i:], b[:len(a[i:])]):
+        for aa, bb in zip(a[i:], b[:len(a[i:])]):
             if aa != bb:
                 nmismatch += 1
         i += 1

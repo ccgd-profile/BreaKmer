@@ -896,14 +896,10 @@ class params:
                 return int(self.opts['rearr_sr_thresh'])
             elif type == 'indel' :
                 return int(self.opts['indel_sr_thresh'])
-# End of params class
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Class fastq_read
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-class fq_read :
-    def __init__(self, header, seq, qual, indel_only) :
+
+class fq_read:
+    def __init__(self, header, seq, qual, indel_only):
         self.id = header
         self.seq = str(seq)
         self.qual = str(qual)
@@ -911,18 +907,17 @@ class fq_read :
         self.dup = False
         self.indel_only = indel_only
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Class FastqFile
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-class FastqFile(object) :
-    def __init__(self,f) :
-        if isinstance(f,str) :
+
+class FastqFile(object):
+    def __init__(self, f):
+        if isinstance(f, str):
             f = open(f)
             self._f = f
-    def __iter__(self) :
+
+    def __iter__(self):
         return self
 
-    def next(self) :
+    def next(self):
         header, seq, qual_header, qual = [self._f.next() for _ in range(4)]
         header = header.strip()
         # inst,lane,tile,x,y_end = header.split(':')
@@ -944,14 +939,10 @@ class FastqFile(object) :
                                      'bc': bc}
         '''
         return (header, seq, qual)
-# End FastqFile class
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@a
-# Class anno
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-class anno :
-    def __init__(self) :
+
+class anno:
+    def __init__(self):
         self.genes = {}
         self.logger = logging.getLogger('root')
 

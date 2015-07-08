@@ -60,7 +60,7 @@ def check_pair_overlap(mate_seq, read, coords, trim_dir):
             add_clip = False
     else:
         while check_overlap(trim_dir, mate_seq, clip_seq) and nmisses < 5 and len(clip_seq) > 0:
-            if trim_dir == 'bacl':
+            if trim_dir == 'back':
                 clip_seq = clip_seq[0:(len(clip_seq) - 1)]
             else:
                 clip_seq = clip_seq[1:len(clip_seq)]
@@ -195,7 +195,7 @@ def get_region_reads(bamFile, chrom, start, end):
     return (reads, bamF)
 
 
-def get_variant_reads(bamFile, chrom, start, end):
+def get_variant_reads(bamFile, chrom, start, end, insertSizeThresh):
     """
     Args:
         bam_file: String of the path to the bam file to open, must be indexed!
@@ -206,7 +206,7 @@ def get_variant_reads(bamFile, chrom, start, end):
         var_read_tracker: VarReadTracker object
     """
     reads, bamF = get_region_reads(bamFile, chrom, start, end)
-    vrt = VariantReadTracker(bamF)
+    vrt = VariantReadTracker(bamF, insertSizeThresh)
     for read in reads:
         skip = False
         if read.mate_is_unmapped or read.rnext == -1:
@@ -221,6 +221,187 @@ def get_variant_reads(bamFile, chrom, start, end):
             continue
         vrt.check_read(read)
     return vrt
+
+
+def get_strand_str(isReverseBoolean):
+    strand = '+'
+    if isReverseBoolean:
+        strand = '-'
+    return strand
+
+
+def get_strand_key(self, read, ordered=False):
+    strands = []
+    readStrand = '+'
+    if read.is_reverse:
+        readStrand = '-'
+    mateStrand = '+'
+    if read.mate_is_reverse:
+        mateStrand = '-'
+    strands = [readStrand, mateStrand]
+
+    if ordered:
+            strands.reverse()
+    return ':'.join(strands)
+
+
+def cluster_regions(dReadLst, idx, clusterType):
+    distBuffer = 50
+    clusterLst = []
+    for dRead in dReadLst:
+        trgtStart = dRead.pos[0]
+        mateStart = dRead.pos[1]
+        read = item.read
+
+        if len(clusterLst) == 0:
+            clusterLst.append([item.pos[idx], item.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
+        else:
+            # Check overlap
+            add = False
+            for i, c in enumerate(clusterLst):
+                startWithin = item.pos[idx] >= c[0] and item.pos[idx] <= c[1]
+                withinBuffer = item.pos[idx] > c[1] and item.pos[idx] - c[1] <= distBuffer
+                if startWithin or withinBuffer:
+                    readInfoLst = clusterLst[i][2]
+                    readInfoLst.append(readInfoLst)
+                    clusterLst[i] = [c[0], item.pos[idx] + dRead.readLen, readInfoLst]
+                add = True
+            if not add:
+                clusterLst.append([item.pos[idx], item.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
+    return clusterLst
+
+
+def get_cluster_membership(item, clusters, idx):
+    for i, cluster in enumerate(clusters):
+        if item.pos[idx] >= cluster[0] and item.pos[idx] <= cluster[1]:
+            return i
+
+
+class discReadPair:
+    def __init__(self, read, orderType):
+        self.pos = []
+        self.strands = []
+        self.readName = read.qname
+        self.readLen = read.rlen
+        self.readInfoStr = ''
+        # self.read = read
+        self.set_values(read, orderType)
+
+    def set_values(self, read, orderType):
+        self.pos = [read.pos, read.mpos]
+        self.strands = [get_strand_str(read.is_reverse), get_strand_str(read.mate_is_reverse)]
+        if (orderType == 'ordered') and (read.mpos < read.pos):
+            # Store the read and mate ordered by chrom alignment position
+            self.pos.reverse()
+            self.strands.reverse()
+        self.readInfoStr = '|'.join([str(x) for x in [read.qname, self.strands[0], self.strands[1], read.tlen, read.mpos]])
+
+
+class discReads:
+    """
+    """
+    def __init__(self, insertSizeThresh):
+        self.reads = {'inter': {}, 'intra': {}}
+        self.insertSizeThresh = insertSizeThresh
+        self.checkedIds = {}
+        self.clusters = {}
+
+    def add_inter_discread(self, bam, read):
+        dRead = discReadPair(read, 'unordered')
+        mateRefId = bam.getrname(read.rnext)
+        if mateRefId not in self.reads['inter']:
+            self.reads['inter'][mateRefId] = {}
+        strandKey = self.get_strand_key(read)
+        if strandKey not in self.reads['inter'][mateRefId]:
+            self.reads['inter'][mateRefId][strandKey] = []
+        self.reads['inter'][mateRefId][strandKey].append(dRead)
+
+    def add_intra_discread(self, read):
+        discType = 'other'
+        dRead = discReadPair(read, True)
+        disc_ins_size = abs(read.tlen) >= self.insertSizeThresh
+        strandKey = ''
+        if (read.is_reverse and read.mate_is_reverse) or (not read.is_reverse and not read.mate_is_reverse):
+            discType = 'inv'
+            strandKey = self.get_strand_key(read)
+        elif (read.is_reverse and not read.mate_is_reverse) and (not read.is_reverse and read.mate_is_reverse):
+            discType = 'td'
+            strandKey = '-:+'
+        elif disc_ins_size:
+            discType = 'dist'
+            strandKey = self.get_strand_key(read, True)
+        elif (read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos) or (not read.is_reverse and read.mate_is_reverse and read.mpos < read.pos):
+            discType = 'other'
+            strandKey = self.get_strand_key(read, True)
+        else:
+            dRead = None
+
+        if dRead is None:
+            return
+
+        if discType not in self.reads['intra']:
+            self.reads['intra'][discType] = {}
+        if strandKey not in self.reads['intra'][discType]:
+            self.reads['intra'][discType][strandKey] = []
+        self.reads['intra'][discType][strandKey].append(dRead)
+
+    def add_read_pair(self, bam, read):
+        """
+        Args:
+            read:
+        Return:
+            None
+        """
+        if read.qname not in self.checkedIds:
+            self.checkedIds[read.qname] = read.qname
+        else:
+            return
+
+        if read.mapq == 0 or read.mate_is_unmapped:
+            return
+
+        # Extract read-pairs that are mapped to different chromosomes or fair apart.
+        diff_chroms = read.rnext != -1 and read.tid != read.rnext
+        if read.tid == read.rnext:
+            self.add_intra_discread(read)
+        elif diff_chroms:
+            self.add_inter_discread(bam, read)
+
+    def cluster_discreads(self):
+        """self.reads is a dictionary with 3 levels
+        1. Inter / intra
+        2. Chrom (inter) / inv, td, dist, other (intra)
+        3. -:+, -:-, +:+, +:-
+        4. List of discRead objects
+        """
+        for key1 in self.reads:
+            d1 = self.reads[key1]
+            for key2 in d1:
+                d2 = d1[key2]
+                for key3 in d2:
+                    dReadsLst = d2[key3]
+                    srt1 = sorted(dReadsLst, key=lambda x: x.pos[0])
+                    srt2 = sorted(dReadsLst, key=lambda x: x.pos[1])
+                    c1 = cluster_regions(srt1, 0, 101, 'target')
+                    c2 = cluster_regions(srt2, 1, 101, 'mate')
+                    for item in lst:
+                        cIdx1 = get_cluster_membership(item, c1, 0)
+                        cIdx2 = get_cluster_membership(item, c2, 1)
+                        regionPairKey = '|'.join([key1, key2, key3, str(cIdx1), str(cIdx2)])
+                        leftBrkpt = c1[cIdx1][0]
+                        rightBrkpt = c2[cIdx2][0]
+                        leftStrand, rightStrand = key3.split(':')
+                        if lefStrand == '+':
+                            leftBrkpt = c1[cIdx1][1]
+                        if rightStrand == '+':
+                            rightBrkpt = c2[cIdx2][1]
+                        if regionPairKey not in self.clusters:
+                            self.clusters[regionPairKey] = {'readCount': 0,
+                                                            'leftBounds': c1[cIdx1][0:2],
+                                                            'rightBounds': c2[cIdx2][0:2],
+                                                            'leftBrkpt': leftBrkpt,
+                                                            'rightBrkpt': rightBrkpt}
+                        self.clusters[regionPairKey]['readCount'] += 1
 
 
 class VariantReadTracker:
@@ -244,28 +425,29 @@ class VariantReadTracker:
         bam: BAM file source the reads came from.
     """
 
-    def __init__(self, bamFile):
+    def __init__(self, bamFile, insertSizeThresh):
         self.pair_indices = {}
         self.valid = []
-        self.disc = {}
+        # self.disc = {}
+        self.discReadTracker = discReads(insertSizeThresh)
         self.unmapped = {}
         self.unmapped_keep = []
-        self.inv = []
-        self.td = []
-        self.other = []
+        # self.inv = []
+        # self.td = []
+        # self.other = []
         self.sv = {}
         self.bam = bamFile
 
     def check_read(self, read):
         """ """
-
         # proper_map = False
         # overlapping_reads = False
         proper_map, overlapping_reads = pe_meta(read)
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
-            self.add_discordant_pe(read)
-        self.valid.append((read, proper_map, overlapping_reads))
+            # self.add_discordant_pe(read)
+            self.discReadTracker.add_read_pair(self.bam, read)
 
+        self.valid.append((read, proper_map, overlapping_reads))
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
             self.pair_indices[read.qname] = {}
         if read.qname in self.pair_indices:
@@ -275,50 +457,49 @@ class VariantReadTracker:
         """Add read to unmapped dictionary with name as the key, object as the value"""
         self.unmapped[read.qname] = read
 
-    def add_discordant_pe(self, read):
-        """
-        Args:
-            read:
-        Return:
-            None
-        """
+    # def add_discordant_pe(self, read):
+    #     """Deprecated
+    #     Args:
+    #         read:
+    #     Return:
+    #         None
+    #     """
+    #     # Extract read-pairs that are mapped to different chromosomes or fair apart.
+    #     diff_chroms = read.rnext != -1 and read.tid != read.rnext
+    #     disc_ins_size = abs(read.tlen) >= 500
+    #     if read.mapq > 0 and not read.mate_is_unmapped and (diff_chroms or disc_ins_size):
+    #         mate_refid = self.bam.getrname(read.rnext)
+    #         mate_read = self.bam.mate(read)
+    #         if mate_read.mapq > 0:
+    #             if mate_refid not in self.disc:
+    #                 self.disc[mate_refid] = []
+    #             self.disc[mate_refid].append((read.pos, read.pnext))
 
-        # Extract read-pairs that are mapped to different chromosomes or fair apart.
-        diff_chroms = read.rnext != -1 and read.tid != read.rnext
-        disc_ins_size = abs(read.tlen) >= 500
-        if read.mapq > 0 and not read.mate_is_unmapped and (diff_chroms or disc_ins_size):
-            mate_refid = self.bam.getrname(read.rnext)
-            mate_read = self.bam.mate(read)
-            if mate_read.mapq > 0:
-                if mate_refid not in self.disc:
-                    self.disc[mate_refid] = []
-                self.disc[mate_refid].append((read.pos, read.pnext))
-
-        if read.mapq > 0 and not read.mate_is_unmapped and read.tid == read.rnext:
-            if read.is_read1:
-                read_positions = None
-                if read.is_reverse and read.mate_is_reverse:
-                    # reverse -- reverse, samflag 115 (note: only considering read1, read2 samflag 179)
-                    read_positions = (read.pos, read.mpos, 0, 0, read.qname)
-                    if read.mpos < read.pos:
-                        read_positions = (read.mpos, read.pos, 0, 0, read.qname)
-                    self.inv.append(read_positions)
-                elif not read.is_reverse and not read.mate_is_reverse:
-                    # forward -- forward = samflag 67 (note: only considering read1, read2 samflag 131)
-                    read_positions = (read.pos, read.mpos, 1, 1, read.qname)
-                    if read.mpos < read.pos:
-                        read_positions = (read.mpos, read.pos, 1, 1, read.qname)
-                    self.inv.append(read_positions)
-                elif read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos:
-                    # reverse -- forward = samflag 83 with positive insert (read2 samflag 163 with + insert size)
-                    read_positions = (read.pos, read.mpos, 0, 1, read.qname)
-                    self.td.append(read_positions)
-                elif not read.is_reverse and read.mate_is_reverse and read.mpos < read.pos:
-                    # reverse -- forward = samflag 99 with - insert (read2 samflag 147 with - insert)
-                    read_positions = (read.mpos, read.pos, 1, 0, read.qname)
-                    self.td.append(read_positions)
-                if read_positions:
-                    self.other.append(read_positions)
+    #     if read.mapq > 0 and not read.mate_is_unmapped and read.tid == read.rnext:
+    #         if read.is_read1:
+    #             read_positions = None
+    #             if read.is_reverse and read.mate_is_reverse:
+    #                 # reverse -- reverse, samflag 115 (note: only considering read1, read2 samflag 179)
+    #                 read_positions = (read.pos, read.mpos, 0, 0, read.qname)
+    #                 if read.mpos < read.pos:
+    #                     read_positions = (read.mpos, read.pos, 0, 0, read.qname)
+    #                 self.inv.append(read_positions)
+    #             elif not read.is_reverse and not read.mate_is_reverse:
+    #                 # forward -- forward = samflag 67 (note: only considering read1, read2 samflag 131)
+    #                 read_positions = (read.pos, read.mpos, 1, 1, read.qname)
+    #                 if read.mpos < read.pos:
+    #                     read_positions = (read.mpos, read.pos, 1, 1, read.qname)
+    #                 self.inv.append(read_positions)
+    #             elif read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos:
+    #                 # reverse -- forward = samflag 83 with positive insert (read2 samflag 163 with + insert size)
+    #                 read_positions = (read.pos, read.mpos, 0, 1, read.qname)
+    #                 self.td.append(read_positions)
+    #             elif not read.is_reverse and read.mate_is_reverse and read.mpos < read.pos:
+    #                 # reverse -- forward = samflag 99 with - insert (read2 samflag 147 with - insert)
+    #                 read_positions = (read.mpos, read.pos, 1, 0, read.qname)
+    #                 self.td.append(read_positions)
+    #             if read_positions:
+    #                 self.other.append(read_positions)
 
     def check_clippings(self, kmer_size, region_start_pos, region_end_pos):
         """
@@ -409,8 +590,11 @@ class VariantReadTracker:
     def clear_sv_reads(self):
         self.sv = None
 
-    def get_disc_reads(self):
+    # def get_disc_reads(self):
+    #     """ """
+    #     return self.disc
+
+    def cluster_discreads(self):
         """ """
-        return self.disc
-
-
+        dReadClusters = self.discReadTracker.cluster_discreads()
+        return dReadClusters

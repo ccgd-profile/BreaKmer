@@ -48,7 +48,7 @@ def analyze_targets(targetList):
     Returns:
         None
     """
-    aggregateResults = []
+    aggregateResults = {'contigs': [], 'discreads': []}
     for targetRegion in targetList:
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
@@ -61,7 +61,9 @@ def analyze_targets(targetList):
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
         if targetRegion.has_results():
-            aggregateResults.extend(targetRegion.get_formatted_output())
+            outputs = targetRegion.get_formatted_output()
+            for key in outputs:
+                aggregateResults[key].extend(outputs[key])
         targetRegion.complete_analysis()
     return aggregateResults
 
@@ -180,16 +182,27 @@ class RunTracker:
         Returns:
             None
         """
-        resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
-        utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
-        resultFile = open(resultFn, 'w')
+        if len(aggregateResults['contigs']) > 0:
+            resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
+            resultFile = open(resultFn, 'w')
+            for i, formattedResultStr in enumerate(aggregateResults['contigs']):
+                headerStr, formattedResultValuesStr = formattedResultStr
+                if not self.params.get_param('no_output_header') and i == 0:
+                    resultFile.write(headerStr + '\n')
+                resultFile.write(formattedResultValuesStr + '\n')
+            resultFile.close()
 
-        for i, formattedResultStr in enumerate(aggregateResults):
-            headerStr, formattedResultValuesStr = formattedResultStr
-            if not self.params.get_param('no_output_header') and i == 0:
-                resultFile.write(headerStr + '\n')
-            resultFile.write(formattedResultValuesStr + '\n')
-        resultFile.close()
+        if len(aggregateResults['discreads']) > 0:
+            resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_discreads.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
+            resultFile = open(resultFn, 'w')
+            for i, formattedResultStr in enumerate(aggregateResults['discreads']):
+                headerStr, formattedResultValuesStr = formattedResultStr
+                if not self.params.get_param('no_output_header') and i == 0:
+                    resultFile.write(headerStr + '\n')
+                resultFile.write(formattedResultValuesStr + '\n')
+            resultFile.close()
 
         # resultFiles = {}
         # for res in self.results:

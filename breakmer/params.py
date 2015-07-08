@@ -142,6 +142,29 @@ class ParamManager:
 
         self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)
 
+        self.set_insertsize_thresh()
+
+    def set_insertsize_thresh(self):
+        """Store the insert sizes for a small number of "properly mapped" reads
+        and determine an upperbound cutoff to use to determine discordantly mapped read
+        pairs.
+        """
+        nSampleReads = 100000
+        bamF = pysam.Samfile(self.get_param('sample_bam_file'), 'rb')
+        testReads = bamF.fetch()
+        insertSizes = []
+        readIter = 0
+        for read in testReads:
+            proper_map = read.flag == 83 or read.flag == 99 and read.mapq > 0
+            if read.is_read1 and proper_map:
+                readIter += 1
+                insertSizes.append(abs(read.tlen))
+            if readIter == nSampleReads:
+                break
+        isMedian = median(insertSizes)
+        isSD = stddev(utils.remove_outliers(insertSizes))
+        self.opts['insertsize_thresh'] = isMedian + (5 * isSD)
+
     def parse_opts(self, arguments):
         """Formats input parameters into dictionary, self.opts
         It first parses the configuration file and stores the key, values in the self.opts dictionary.
