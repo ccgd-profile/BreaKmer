@@ -448,6 +448,8 @@ class discReads:
         counts = [0] * len(brkpts)
         for i in range(len(brkpts)):
             b = brkpts[i]
+            if 'other' not in self.reads['intra']:
+                break
             for strand in self.reads['intra']['other']:
                 lStrand, rStrand = strand.split(':')
                 strandReads = self.reads['intra']['other'][strand]
