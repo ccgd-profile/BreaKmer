@@ -271,6 +271,8 @@ def cluster_regions(dReadLst, idx, clusterType):
 
 def get_cluster_membership(item, clusters, idx):
     for i, cluster in enumerate(clusters):
+        print cluster
+        print item.pos
         if item.pos[idx] >= cluster[0] and item.pos[idx] <= cluster[1]:
             return i
 
@@ -385,7 +387,7 @@ class discReads:
                     for item in dReadsLst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
-                        print cIdx1, cIdx2, item
+                        print cIdx1, cIdx2, item.pos
                         print c1
                         print c2
                         regionPairKey = '|'.join([key1, key2, key3, str(cIdx1), str(cIdx2)])
