@@ -382,8 +382,8 @@ class discReads:
                     dReadsLst = d2[key3]
                     srt1 = sorted(dReadsLst, key=lambda x: x.pos[0])
                     srt2 = sorted(dReadsLst, key=lambda x: x.pos[1])
-                    c1 = cluster_regions(srt1, 0, 101, 'target')
-                    c2 = cluster_regions(srt2, 1, 101, 'mate')
+                    c1 = cluster_regions(srt1, 0, 'target')
+                    c2 = cluster_regions(srt2, 1, 'mate')
                     for item in lst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
