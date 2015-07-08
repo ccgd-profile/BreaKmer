@@ -274,7 +274,7 @@ class Variation:
         headStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
-            if readCount < self.params['discread_only_thresh']:
+            if readCount < self.params.get_param('discread_only_thresh'):
                 continue
             k1, k2, k3, c1, c2 = key.split('|')
             svType = 'inter-chromosomal'
