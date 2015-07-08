@@ -389,7 +389,7 @@ class discReads:
                         leftBrkpt = c1[cIdx1][0]
                         rightBrkpt = c2[cIdx2][0]
                         leftStrand, rightStrand = key3.split(':')
-                        if lefStrand == '+':
+                        if leftStrand == '+':
                             leftBrkpt = c1[cIdx1][1]
                         if rightStrand == '+':
                             rightBrkpt = c2[cIdx2][1]
