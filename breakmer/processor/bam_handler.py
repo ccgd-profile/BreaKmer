@@ -330,7 +330,7 @@ class discReads:
         if (read.is_reverse and read.mate_is_reverse) or (not read.is_reverse and not read.mate_is_reverse):
             discType = 'inv'
             strandKey = get_strand_key(read)
-        elif (read.is_reverse and not read.mate_is_reverse) and (not read.is_reverse and read.mate_is_reverse):
+        elif (read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos) or (not read.is_reverse and read.mate_is_reverse and read.pos > read.mpos):
             discType = 'td'
             strandKey = '-:+'
         elif disc_ins_size:
@@ -419,6 +419,43 @@ class discReads:
                                                             'rightBrkpt': rightBrkpt}
                         self.clusters[regionPairKey]['readCount'] += 1
         return self.clusters
+
+    def check_inv_readcounts(self, brkpts):
+        """ """
+        counts = 0
+        for strand in self.reads['intra']['inv']:
+            lStrand, rStrand = strand.split(':')
+            strandReads = self.read['intra']['inv'][strand]
+            for dRead in strandReads:
+                r1p, r2p, r1s, r2s, qname = readPair
+                if lStrand == '+' and rStrand == '+':
+                    if (dRead.pos[0] <= brkpts[0]) and (dRead.pos[1] <= brkpts[1] and dRead.pos[1] >= brkpts[0]):
+                        counts += 1
+                else:
+                    if (dRead.pos[0] <= brkpts[1] and dRead.pos[0] >= brkpts[0]) and dRead.pos[1] >= brkpts[1]:
+                        counts += 1
+        return counts
+
+    def check_td_readcounts(self, brkpts):
+        """ """
+        counts = 0
+        for dRead in self.reads['intra']['td']['-:+']:
+            if (dRead.pos[0] <= brkpts[0] and dRead.pos[0] >= brkpts[1]) and (dRead.pos[1] <= brkpts[1] and dRead.pos[1] >= brkpts[0]):
+                counts += 1
+        return counts
+
+    def check_other_readcounts(self, brkpts):
+        """ """
+        counts = [0] * len(brkpts)
+        for i in range(len(brkpts)):
+            b = brkpts[i]
+            for strand in self.reads['intra']['other']:
+                lStrand, rStrand = strand.split(':')
+                strandReads = self.reads['intra']['other'][strand]
+                for dRead in strandReads:
+                    if abs(dRead.pos[0] - b) <= 300 or abs(dRead.pos[1] - b) <= 300:
+                        counts[i] += 1
+        return max(counts)
 
 
 class VariantReadTracker:
@@ -615,3 +652,7 @@ class VariantReadTracker:
         """ """
         dReadClusters = self.discReadTracker.cluster_discreads()
         return dReadClusters
+
+    def check_inv_readcounts(self, brkpts):
+        """ """
+        return self.discReadTracker.check_inv_readcounts(brkpts)

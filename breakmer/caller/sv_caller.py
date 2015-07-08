@@ -686,34 +686,38 @@ class SVEvent:
                     utils.log(self.loggingName, 'debug', 'Inversion event identified.')
                     hit = True
                     svType = 'inversion'
-                    for readPair in varReads.inv:
-                        r1p, r2p, r1s, r2s, qname = readPair
-                        if r1s == 1 and r2s == 1:
-                            if (r1p <= brkpts[0]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                                rs += 1
-                        else:
-                            if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
-                                rs += 1
+                    rs = varReads.check_inv_readcounts(brkpts)
+                    # for readPair in varReads.inv:
+                    #     r1p, r2p, r1s, r2s, qname = readPair
+                    #     if r1s == 1 and r2s == 1:
+                    #         if (r1p <= brkpts[0]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
+                    #             rs += 1
+                    #     else:
+                    #         if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
+                    #             rs += 1
                 elif (strands[0] == '+' and strands[1] == '+') and (brkpts[0] > brkpts[1]):
                     utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
                     hit = True
                     svType = 'tandem_dup'
                     # Tandem dup
-                    for readPair in varReads.td:
-                        r1p, r2p, r1s, r2s, qname = readPair
-                        if (r1p <= brkpts[0] and r1p >= brkpts[1]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                            rs += 1
+                    rs = varReads.check_td_readcounts(brkpts)
+                    # for readPair in varReads.td:
+                    #     r1p, r2p, r1s, r2s, qname = readPair
+                    #     if (r1p <= brkpts[0] and r1p >= brkpts[1]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
+                    #         rs += 1
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
-            rs = [0] * len(brkpts)
-            for i in range(len(brkpts)):
-                b = brkpts[i]
-                for readPair in varReads.other:
-                    r1p, r2p, r1s, r2s, qname = readPair
-                    if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
-                        utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %s, %s and positions %d, %d for breakpoint at %d' % (qname, r1s, r2s, r1p, r2p, b))
-                        rs[i] += 1
-            rs = max(rs)
+            rs = varReads.check_other_readcounts(brkpts)
+            # rs = [0] * len(brkpts)
+            # for i in range(len(brkpts)):
+            #     b = brkpts[i]
+                # rs = varReads.check_other_readcounts(b)
+                # for readPair in varReads.reads.other:
+                #     r1p, r2p, r1s, r2s, qname = readPair
+                #     if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
+                #         utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %s, %s and positions %d, %d for breakpoint at %d' % (qname, r1s, r2s, r1p, r2p, b))
+                #         rs[i] += 1
+            # rs = max(rs)
         return svType, rs
 
     def get_max_meanCoverage(self):
