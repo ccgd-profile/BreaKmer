@@ -385,7 +385,9 @@ class discReads:
                     for item in dReadsLst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
-                        print cIdx1, cIdx2
+                        print cIdx1, cIdx2, item
+                        print c1
+                        print c2
                         regionPairKey = '|'.join([key1, key2, key3, str(cIdx1), str(cIdx2)])
                         leftBrkpt = c1[cIdx1][0]
                         rightBrkpt = c2[cIdx2][0]
