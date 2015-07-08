@@ -47,7 +47,7 @@ class Variation:
         self.discReadFormatted = []
         self.loggingName = 'breakmer.processor.target'
 
-    def cleaned_reads(self, sampleType):
+    def setup_cleaned_reads(self, sampleType):
         """Initiate the cleaned_read_recs dictionary for sample or normal data.
         Args:
             type: String indicating the sample type - 'sv' or 'normal'
