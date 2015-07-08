@@ -425,7 +425,7 @@ class discReads:
         counts = 0
         for strand in self.reads['intra']['inv']:
             lStrand, rStrand = strand.split(':')
-            strandReads = self.read['intra']['inv'][strand]
+            strandReads = self.reads['intra']['inv'][strand]
             for dRead in strandReads:
                 r1p, r2p, r1s, r2s, qname = readPair
                 if lStrand == '+' and rStrand == '+':
