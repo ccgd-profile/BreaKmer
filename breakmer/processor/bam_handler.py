@@ -251,13 +251,15 @@ def cluster_regions(dReadLst, idx, clusterType):
     for dRead in dReadLst:
         # trgtStart = dRead.pos[0]
         # mateStart = dRead.pos[1]
-        print 'cluster_regions dRead', dRead.pos, dRead.readLen
+        print 'cluster_regions dRead', dRead.pos, dRead.readLen, clusterType
         if len(clusterLst) == 0:
             clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
+            print 'Initial cluster list', clusterLst
         else:
             # Check overlap
             add = False
             for i, c in enumerate(clusterLst):
+                print 'Checking read pos against cluster region', c, dRead.pos
                 startWithin = dRead.pos[idx] >= c[0] and dRead.pos[idx] <= c[1]
                 withinBuffer = dRead.pos[idx] > c[1] and dRead.pos[idx] - c[1] <= distBuffer
                 if startWithin or withinBuffer:
@@ -266,6 +268,7 @@ def cluster_regions(dReadLst, idx, clusterType):
                     clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
                 add = True
             if not add:
+                print 'No add, creating new cluster region'
                 clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
     return clusterLst
 
