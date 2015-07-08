@@ -6,6 +6,7 @@ import sys
 import glob
 import logging
 import time
+import math
 from Bio import SeqIO
 import subprocess
 from pysam import *
