@@ -163,7 +163,7 @@ class ParamManager:
             if readIter == nSampleReads:
                 break
         isMedian = utils.median(insertSizes)
-        isSD = stddev(utils.remove_outliers(insertSizes))
+        isSD = utils.stddev(utils.remove_outliers(insertSizes))
         self.opts['insertsize_thresh'] = isMedian + (5 * isSD)
 
     def parse_opts(self, arguments):
