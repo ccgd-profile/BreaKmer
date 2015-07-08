@@ -262,9 +262,11 @@ def cluster_regions(dReadLst, idx, clusterType):
                 print 'Checking read pos against cluster region', c, dRead.pos
                 startWithin = dRead.pos[idx] >= c[0] and dRead.pos[idx] <= c[1]
                 withinBuffer = dRead.pos[idx] > c[1] and dRead.pos[idx] - c[1] <= distBuffer
+                print 'in check', startWithin, withinBuffer
                 if startWithin or withinBuffer:
                     readInfoLst = clusterLst[i][2]
                     readInfoLst.append(dRead.readInfoStr)
+                    print 'Add read to cluster region', clusterLst[i]
                     clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
                 add = True
             if not add:
