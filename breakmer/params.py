@@ -7,6 +7,7 @@ import logging
 import random
 import subprocess
 import time
+import pysam
 import breakmer.utils as utils
 import breakmer.caller.filter as resultfilter
 
