@@ -380,6 +380,8 @@ class discReads:
                 d2 = d1[key2]
                 for key3 in d2:
                     dReadsLst = d2[key3]
+                    for xx in dReadsLst:
+                        print 'dRead', xx.pos
                     srt1 = sorted(dReadsLst, key=lambda x: x.pos[0])
                     srt2 = sorted(dReadsLst, key=lambda x: x.pos[1])
                     print key1, key2, key3
