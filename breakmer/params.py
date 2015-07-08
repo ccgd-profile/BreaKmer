@@ -162,7 +162,7 @@ class ParamManager:
                 insertSizes.append(abs(read.tlen))
             if readIter == nSampleReads:
                 break
-        isMedian = median(insertSizes)
+        isMedian = utils.median(insertSizes)
         isSD = stddev(utils.remove_outliers(insertSizes))
         self.opts['insertsize_thresh'] = isMedian + (5 * isSD)
 
