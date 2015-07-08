@@ -271,7 +271,7 @@ class Variation:
         """ """
         self.discReadClusters = self.var_reads['sv'].cluster_discreads()
         self.discReadFormatted = []
-        headStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
+        headerStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
             if readCount < self.params.get_param('discread_only_thresh'):
