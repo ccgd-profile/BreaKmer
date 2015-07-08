@@ -418,6 +418,7 @@ class discReads:
                                                             'leftBrkpt': leftBrkpt,
                                                             'rightBrkpt': rightBrkpt}
                         self.clusters[regionPairKey]['readCount'] += 1
+        return self.clusters
 
 
 class VariantReadTracker:
