@@ -268,7 +268,7 @@ def cluster_regions(dReadLst, idx, clusterType):
                     readInfoLst.append(dRead.readInfoStr)
                     print 'Add read to cluster region', clusterLst[i]
                     clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
-                add = True
+                    add = True
             if not add:
                 print 'No add, creating new cluster region'
                 clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
