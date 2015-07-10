@@ -83,7 +83,7 @@ class ParamManager:
             value = self.opts[param]
             utils.log(self.logging_name, 'info', '%s = %s' % (param, value))
 
-        self.set_targets(self.opts['gene_list'])
+        self.set_targets(self.get_param('gene_list'))
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))
 
         """DEPRECATED
