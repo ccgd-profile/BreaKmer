@@ -116,6 +116,8 @@ class RunTracker:
                 multiprocResults.append(p.apply_async(analyze_targets, (targetList, )))
             wait(multiprocResults)
             for multiprocResult in multiprocResults:
+                a = multiprocResult.get()
+                print a
                 aggResults.extend(multiprocResult.get())
         else:
             aggResults.append(analyze_targets(targetAnalysisList))
