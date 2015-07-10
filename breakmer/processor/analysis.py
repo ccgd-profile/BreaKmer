@@ -31,7 +31,7 @@ def wait(results):
         time.sleep(10)
         jobs = check_status(results)
         if jobs < njobs:
-            print '\n', jobs, '/', njobs, " jobs not complete."
+            # print '\n', jobs, '/', njobs, " jobs not complete."
             njobs = jobs
         else:
             sys.stdout.write('.')
@@ -186,6 +186,7 @@ class RunTracker:
         contigResults = []
         discReadResults = []
         for aResultDict in aggregateResults:
+            print aResultDict
             contigResults.extend(aResultDict['contig'])
             discReadResults.extend(aResultDict['discreads'])
 
