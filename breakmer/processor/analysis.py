@@ -120,12 +120,16 @@ class RunTracker:
         else:
             aggResults = analyze_targets(targetAnalysisList)
 
+        if self.params.fncCmd == 'prepare_reference_data':
+            print 'Reference data setup!'
+            return
+
         self.write_aggregated_output(aggResults)
 
         utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
         if not self.params.get_param('keep_blat_server'):
-            cmd = '%s stop localhost %d' % (self.params.opts['gfserver'], int(self.params.get_param('blat_port')))
+            cmd = '%s stop %s %d' % (self.params.opts['gfserver'], self.params.get_param('blat_hostname'), int(self.params.get_param('blat_port')))
             os.system(cmd)
 
         print 'Analysis complete!'
