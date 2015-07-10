@@ -47,7 +47,7 @@ else:
 
     elif fncCmd == 'start_blat_server':
         PARSER.add_argument('-p', '--port_number', dest='blat_port', default=None, type=int, help='The port number for the blat server. A random port number (8000-9500) will be used if not specified. [default: %(default)s]')
-        PARSER.add_argument('--hostname', dest='blat_hostname', default='localhost', action='store_true', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
+        PARSER.add_argument('--blah', dest='blat_hostname', default='localhost', action='store_true', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('-c', '--config', dest='config_fn', default=None, required=True, help='The configuration filename that contains additional parameters. [default: %(default)s]')
         print PARSER
         print args
