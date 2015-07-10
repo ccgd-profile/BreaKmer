@@ -30,7 +30,7 @@ class ParamManager:
                      feature (i.e., chr, left_bp, right_bp, repeat_name).
     """
 
-    def __init__(self, arguments):
+    def __init__(self, fncCmd, arguments):
         """Initializes params class.
         Args:
             arguments: The argparse dictionary object from the command line parameters.
@@ -46,7 +46,7 @@ class ParamManager:
         self.paths = {}
         self.repeat_mask = None
         self.logging_name = 'breakmer.params'
-        self.runAnalysis = True
+        self.fncCmd = fncCmd
         self.set_params(arguments)
 
     def set_params(self, arguments):
@@ -108,9 +108,12 @@ class ParamManager:
         """
 
         # If only preseting the reference data, then move on.
-        if self.get_param('preset_ref_data'):
+        if self.fncCmd == 'prepare_reference_data':
             utils.log(self.logging_name, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
-            self.runAnalysis = False
+            return
+        elif self.fncCmd == 'start_blat_server':
+            utils.log(self.logging_name, 'info', 'Starting the blat server.')
+
             return
 
         # TODO - set this as an optional parameter.
@@ -135,15 +138,15 @@ class ParamManager:
 
         # Check if Jellyfish and Cutadapt work.
         self.check_binaries()
-
-        # Set repeats if specified
-        if not self.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.opts:
-            utils.log(self.logging_name, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
-            self.repeat_mask = utils.setup_rmask_all(self.opts['repeat_mask_file'])
-
         self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)
 
+        # Set the expected insert size threshold from the properly mapped read pairs.
         self.set_insertsize_thresh()
+
+        # Set repeats if specified
+        # if not self.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.opts:
+        #     utils.log(self.logging_name, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
+        #     self.repeat_mask = utils.setup_rmask_all(self.opts['repeat_mask_file'])
 
     def set_insertsize_thresh(self):
         """Store the insert sizes for a small number of "properly mapped" reads
@@ -317,6 +320,30 @@ class ParamManager:
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
         utils.log(self.logging_name, 'info', '%d targets' % len(self.targets))
 
+    def check_blat_server(self):
+        """
+
+        """
+        test_dir = os.path.join(self.paths['analysis'], 'blatserver_test')
+        test_fa_fn = os.path.join(test_dir, 'test.fa')
+        if not os.path.exists(test_dir):
+            os.makedirs(test_dir)
+        test_fa = open(test_fa_fn, 'w')
+        test_fa.write('>test\nCCAAGGGAGACTTCAAGCAGAAAATCTTTAAGGGACCCTTGCATAGCCAGAAGTCCTTTTCAGGCTGATGTACATAAAATATTTAGTAGCCAGGACAGTAGAAGGACTGAAGAGTGAGAGGAGCTCCCAGGGCCTGGAAAGGCCACTTTGTAAGCTCATTCTTG')
+        test_fa.close()
+
+        resultFn = os.path.join(test_dir, 'blatserver_test.psl')
+        cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (self.get_param('gfclient'), self.get_param('hostname'), self.get_param('port'), self.get_param('reference_fasta_dir'), test_fa_fn, resultFn)
+        utils.log(self.loggingName, 'info', 'Blat server test system command %s' % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        output, errors = p.communicate()
+        utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
+        serverSuccess = False
+        if errors != '':
+            serverSuccess = True
+            utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
+        return serverSuccess
+
     def start_blat_server(self):
         """Fire up a blat server instance using a random port number and localhost.
         The required files to start a blat server are first checked and created, if
@@ -329,13 +356,40 @@ class ParamManager:
         Return:
             None
         """
+
+        if self.fncCmd == 'prepare_reference_data':
+            return
+        elif self.fncCmd == 'start_blat_server':
+            port = self.get_param('blat_port')
+            hostname = self.get_param('blat_hostname')
+            self.opts['blat_hostname'] = hostname
+            self.opts['blat_port'] = port
+            if port is None:
+                self.opts['blat_port'] = random.randint(8000, 9500)
+                utils.log(self.logging_name, 'info', 'Starting blat server on port %d on host %s.' % (self.opts['blat_port'], self.opts['blat_hostname']))    
+        elif self.fncCmd == 'run':
+            if not self.get_param('start_blat_server'):
+                port = self.get_param('blat_port')
+                hostname = self.get_param('blat_hostname')
+                self.opts['blat_hostname'] = hostname
+                if port is None:
+                    utils.log(self.logging_name, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
+                    self.opts['blat_port'] = random.randint(8000, 9500)
+                else:
+                    # Blat server is already running in this instance. Check it to make sure with a test blat.
+                    self.opts['blat_port'] = int(self.get_param('blat_port'))
+                    if self.check_blat_server():
+                        return
+                    else:
+                        utils.log(self.logging_name, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.opts['blat_port'], self.opts['blat_hostname']))
+
         self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
 
         # This makes the assumption that an existing blat server exists at this port.
         # Typically nice for debugging and --keep_blat_server was used.
         # TODO - make this more stable
-        if self.get_param('blat_port'):
-            return
+        # if self.get_param('blat_port'):
+        #     return
 
         ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
 
@@ -354,10 +408,10 @@ class ParamManager:
         curdir = os.getcwd()
         os.chdir(self.opts['reference_fasta_dir'])
         # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
-        self.opts['blat_port'] = random.randint(8000, 9500)
-        self.opts['blat_hostname'] = 'localhost'
+        # self.opts['blat_port'] = random.randint(8000, 9500)
+        # self.opts['blat_hostname'] = 'localhost'
         self.opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.opts['blat_port'])
-        cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &' % (self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'], ref_fasta_name + ".2bit")
+        cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_hostname'], self.opts['blat_port'], ref_fasta_name + ".2bit")
         utils.log(self.logging_name, 'info', "Starting gfServer %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         start_time = time.time()

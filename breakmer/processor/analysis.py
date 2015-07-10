@@ -53,7 +53,7 @@ def analyze_targets(targetList):
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         # If only presetting data stop here.
-        if targetRegion.params.get_param('preset_ref_data'):
+        if targetRegion.params.fncCmd == 'prepare_reference_kmers':
             continue
         # targetRegion fails to find any interesting reads to use. Exiting.
         if not targetRegion.find_sv_reads():
@@ -96,15 +96,11 @@ class RunTracker:
         Returns
             None
         """
-        if not self.params.runAnalysis:
-            print 'Reference data setup. Analysis can now be run.'
-            return
-
         startTime = time.clock()
-        targetAnalysisList = self.create_targets()
 
-        if not self.params.get_param('preset_ref_data'):
-            self.params.start_blat_server()
+        self.params.start_blat_server()
+
+        targetAnalysisList = self.create_targets()
 
         aggResults = []
         nprocs = int(self.params.get_param('nprocs'))
@@ -122,8 +118,6 @@ class RunTracker:
             aggResults = analyze_targets(targetAnalysisList)
 
         self.write_aggregated_output(aggResults)
-
-        # Perform any post-primary analysis scripts here.
 
         utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 

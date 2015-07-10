@@ -351,7 +351,7 @@ class TargetManager:
 
         # Create the proper paths for the target analysis.
         self.add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
-        if not self.params.get_param('preset_ref_data'):
+        if self.params.fncCmd == 'run':
             self.add_path('base', os.path.join(self.params.paths['targets'], self.name))
             self.add_path('data', os.path.join(self.paths['base'], 'data'))
             self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
@@ -387,9 +387,9 @@ class TargetManager:
         """
         """
         # Write rmask bed file if needed.
-        if not self.params.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.params.opts:
-            utils.log(self.loggingName, 'info', 'Extracting repeat mask regions for target gene %s.' % self.name)
-            self.repeat_mask = utils.setup_rmask(self.get_values()[0:5], self.paths['ref_data'], self.params.opts['repeat_mask_file'])
+        # if not self.params.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.params.opts:
+        #     utils.log(self.loggingName, 'info', 'Extracting repeat mask regions for target gene %s.' % self.name)
+        #     self.repeat_mask = utils.setup_rmask(self.get_values()[0:5], self.paths['ref_data'], self.params.opts['repeat_mask_file'])
 
         # Write reference fasta file if needed.
         for i in range(len(self.files['target_ref_fn'])):

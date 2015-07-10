@@ -115,7 +115,7 @@ class Realignment:
         elif alignProgram == 'blat':
             if scope == 'genome':
                 # all blat server
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead localhost %d %s %s %s' % (alignBinary, binaryParams['port'], alignRef, self.contig.meta.fa_fn, resultFn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (alignBinary, binaryParams['hostname'], binaryParams['port'], alignRef, self.contig.meta.fa_fn, resultFn)
             elif scope == 'target':
                 # target
                 cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
