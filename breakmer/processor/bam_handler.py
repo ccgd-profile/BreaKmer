@@ -311,6 +311,7 @@ class discReads:
         self.insertSizeThresh = insertSizeThresh
         self.checkedIds = {}
         self.clusters = {}
+        self.disc = {}
 
     def add_inter_discread(self, bam, read):
         dRead = discReadPair(read, 'unordered')
@@ -321,6 +322,10 @@ class discReads:
         if strandKey not in self.reads['inter'][mateRefId]:
             self.reads['inter'][mateRefId][strandKey] = []
         self.reads['inter'][mateRefId][strandKey].append(dRead)
+
+        if mateRefId not in self.disc:
+            self.disc[mateRefId] = []
+        self.disc[mateRefId].append((read.pos, read.mpos))
 
     def add_intra_discread(self, read):
         discType = 'other'
@@ -350,6 +355,10 @@ class discReads:
         if strandKey not in self.reads['intra'][discType]:
             self.reads['intra'][discType][strandKey] = []
         self.reads['intra'][discType][strandKey].append(dRead)
+
+        if read.tid not in self.disc:
+            self.disc[read.tid] = []
+        self.disc[read.tid].append((read.pos, read.mpos))
 
     def add_read_pair(self, bam, read):
         """
@@ -645,9 +654,9 @@ class VariantReadTracker:
     def clear_sv_reads(self):
         self.sv = None
 
-    # def get_disc_reads(self):
-    #     """ """
-    #     return self.disc
+    def get_disc_reads(self):
+        """This function needs to be updated to handle the new disc read storage."""
+        return self.discReadTracker.disc
 
     def cluster_discreads(self):
         """ """
