@@ -486,7 +486,7 @@ class BlatResult:
     def check_indel(self, nBlatResults):
         indel = False
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
-        if self.spans_query() or (nBlatResults == 1 and self.in_target):
+        if (self.spans_query() or (nBlatResults == 1 and self.in_target)) and (self.ngaps > 0):
             utils.log(self.loggingName, 'info', 'Blat result spans query (%r) or only one blat result (%r) and blat result in target (%r)' % (self.spans_query(), (nBlatResults == 1), self.in_target))
             indel = True
         return indel
