@@ -45,7 +45,7 @@ class ParamManager:
         self.targets = {}
         self.paths = {}
         self.repeat_mask = None
-        self.logging_name = 'breakmer.params'
+        self.loggingName = 'breakmer.params'
         self.fncCmd = fncCmd
         self.set_params(arguments)
 
@@ -62,7 +62,7 @@ class ParamManager:
         self.parse_opts(arguments)
         # Create logging object.
         utils.setup_logger(self.get_param('analysis_dir', True), 'breakmer')
-        utils.log(self.logging_name, 'info', 'Setting up parameters')
+        utils.log(self.loggingName, 'info', 'Setting up parameters')
 
         """DEPRECATED
         # Set the output filter
@@ -72,16 +72,16 @@ class ParamManager:
         else:
             self.opts['var_filter'] = var_filter.split(",")
             if 'indel' in self.opts['var_filter'] or 'rearrangement' in self.opts['var_filter'] or 'trl' in self.opts['var_filter']:
-                utils.log(self.logging_name, 'info', 'Variant filters %s set, only reporting these variants' % ','.join(self.opts['var_filter']))
+                utils.log(self.loggingName, 'info', 'Variant filters %s set, only reporting these variants' % ','.join(self.opts['var_filter']))
             else:
-                utils.log(self.logging_name, 'debug', 'Variant filter options %s are not valid, using all' % ','.join(self.opts['var_filter']))
+                utils.log(self.loggingName, 'debug', 'Variant filter options %s are not valid, using all' % ','.join(self.opts['var_filter']))
                 self.opts['var_filter'] = ['indel', 'rearrangement', 'trl']
         """
 
         # Log all parameters passed in, warn for poor paths
         for param in self.opts:
             value = self.opts[param]
-            utils.log(self.logging_name, 'info', '%s = %s' % (param, value))
+            utils.log(self.loggingName, 'info', '%s = %s' % (param, value))
 
         self.set_targets(self.get_param('gene_list'))
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))
@@ -89,27 +89,27 @@ class ParamManager:
         """DEPRECATED
         # Setup alternative reference sequence files if they were passed in.
         if 'alternate_reference_fastas' in self.opts:
-            utils.log(self.logging_name, 'info', 'Alternate reference fastas listed in configuration %s' % self.opts['alternate_reference_fastas'])
+            utils.log(self.loggingName, 'info', 'Alternate reference fastas listed in configuration %s' % self.opts['alternate_reference_fastas'])
             self.opts['alternate_reference_fastas'] = self.opts['alternate_reference_fastas'].split(',')
             # Check for altref 2bit files
             for fn in self.opts['alternate_reference_fastas']:
                 twobit_fn = os.path.splitext(fn)[0] + '.2bit'
                 if not os.path.exists(twobit_fn):
-                    utils.log(self.logging_name, 'info', 'Creating 2bit from %s alternate reference fasta' % fn)
+                    utils.log(self.loggingName, 'info', 'Creating 2bit from %s alternate reference fasta' % fn)
                     curdir = os.getcwd()
                     os.chdir(os.path.dirname(fn))
                     cmd = '%s %s %s' % (self.opts['fatotwobit'], fn, twobit_fn)
-                    utils.log(self.logging_name, 'info', 'fatotwobit command %s' % cmd)
+                    utils.log(self.loggingName, 'info', 'fatotwobit command %s' % cmd)
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                     output, errors = p.communicate()
                     os.chdir(curdir)
         else:
-            utils.log(self.logging_name, 'info', 'No alternate reference fasta files listed in configuration.')
+            utils.log(self.loggingName, 'info', 'No alternate reference fasta files listed in configuration.')
         """
 
         # If only preseting the reference data, then move on.
         if self.fncCmd == 'prepare_reference_data':
-            utils.log(self.logging_name, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
+            utils.log(self.loggingName, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
             return
 
         # TODO - set this as an optional parameter.
@@ -128,12 +128,12 @@ class ParamManager:
             self.paths['targets'] = os.path.join(self.paths['analysis'], 'targets')
 
         for path in self.paths:
-            utils.log(self.logging_name, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
+            utils.log(self.loggingName, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
             if not os.path.exists(self.paths[path]):
                 os.makedirs(self.paths[path])
 
         if self.fncCmd == 'start_blat_server':
-            utils.log(self.logging_name, 'info', 'Starting the blat server.')
+            utils.log(self.loggingName, 'info', 'Starting the blat server.')
             return
 
         # Check if Jellyfish and Cutadapt work.
@@ -145,7 +145,7 @@ class ParamManager:
 
         # Set repeats if specified
         # if not self.opts['keep_repeat_regions'] and 'repeat_mask_file' in self.opts:
-        #     utils.log(self.logging_name, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
+        #     utils.log(self.loggingName, 'info', 'Storing all repeats by chrom from file %s' % self.opts['repeat_mask_file'])
         #     self.repeat_mask = utils.setup_rmask_all(self.opts['repeat_mask_file'])
 
     def set_insertsize_thresh(self):
@@ -192,7 +192,7 @@ class ParamManager:
             if len(linesplit) == 1:
                 err_msg = 'Config line', line, ' not set correctly. Exiting.'
                 print err_msg
-                utils.log(self.logging_name, 'error', err_msg)
+                utils.log(self.loggingName, 'error', err_msg)
                 sys.exit(1)
             else:
                 key, value = linesplit
@@ -249,10 +249,10 @@ class ParamManager:
                 self.opts[bin] = bin_check
             if not bin_check:
                 print 'Missing path/executable for', bin
-                utils.log(self.logging_name, 'error', 'Missing path/executable for %s' % bin)
+                utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % bin)
                 sys.exit(1)
-            utils.log(self.logging_name, 'info', '%s path = %s' % (bin, bin_check))
-        utils.log(self.logging_name, 'info', 'All the required binaries have been check successfully!')
+            utils.log(self.loggingName, 'info', '%s path = %s' % (bin, bin_check))
+        utils.log(self.loggingName, 'info', 'All the required binaries have been check successfully!')
 
         # Test cutadapt and jellyfish binaries
         test_dir = os.path.join(self.paths['analysis'], 'bin_test')
@@ -262,15 +262,15 @@ class ParamManager:
         utils.write_test_fq(test_fq)
         clean_fq, rc = utils.test_cutadapt(test_fq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
         if clean_fq:
-            utils.log(self.logging_name, 'info', 'Test cutadapt ran successfully')
+            utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
             jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], clean_fq, test_dir)
             if rc != 0:
-                utils.log(self.logging_name, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
+                utils.log(self.loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
             else:
-                utils.log(self.logging_name, 'info', 'Test jellyfish ran successfully')
+                utils.log(self.loggingName, 'info', 'Test jellyfish ran successfully')
         else:
-            utils.log(self.logging_name, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
+            utils.log(self.loggingName, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
             sys.exit(1)
 
     def set_targets(self, geneList):
@@ -298,7 +298,7 @@ class ParamManager:
                 line = line.strip()
                 regionList.append(line.upper())
 
-        utils.log(self.logging_name, 'info', 'Parsing target list')
+        utils.log(self.loggingName, 'info', 'Parsing target list')
         # TODO: Check to make sure there aren't duplicate genes.
         cur_region = ['', []]
         for target in open(self.opts['targets_bed_file'], 'rU'):
@@ -318,7 +318,7 @@ class ParamManager:
             if name.upper() not in self.targets:
                 self.targets[name.upper()] = []
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
-        utils.log(self.logging_name, 'info', '%d targets' % len(self.targets))
+        utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
 
     def check_blat_server(self):
         """
@@ -366,14 +366,14 @@ class ParamManager:
             self.opts['blat_port'] = port
             if port is None:
                 self.opts['blat_port'] = random.randint(8000, 9500)
-                utils.log(self.logging_name, 'info', 'Starting blat server on port %d on host %s.' % (self.opts['blat_port'], self.opts['blat_hostname']))    
+                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.opts['blat_port'], self.opts['blat_hostname']))    
         elif self.fncCmd == 'run':
             if not self.get_param('start_blat_server'):
                 port = self.get_param('blat_port')
                 hostname = self.get_param('blat_hostname')
                 self.opts['blat_hostname'] = hostname
                 if port is None:
-                    utils.log(self.logging_name, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
+                    utils.log(self.loggingName, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
                     self.opts['blat_port'] = random.randint(8000, 9500)
                 else:
                     # Blat server is already running in this instance. Check it to make sure with a test blat.
@@ -381,7 +381,7 @@ class ParamManager:
                     if self.check_blat_server():
                         return
                     else:
-                        utils.log(self.logging_name, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.opts['blat_port'], self.opts['blat_hostname']))
+                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.opts['blat_port'], self.opts['blat_hostname']))
 
         self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
 
@@ -396,7 +396,7 @@ class ParamManager:
         # Check if 2bit is there.
         self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
         if not os.path.exists(self.opts['blat_2bit']):
-            utils.log(self.logging_name, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
+            utils.log(self.loggingName, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
             # Create 2bit requires faToTwoBit
             curdir = os.getcwd()
             os.chdir(self.opts['reference_fasta_dir'])
@@ -412,18 +412,18 @@ class ParamManager:
         # self.opts['blat_hostname'] = 'localhost'
         self.opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.opts['blat_port'])
         cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_hostname'], self.opts['blat_port'], ref_fasta_name + ".2bit")
-        utils.log(self.logging_name, 'info', "Starting gfServer %s" % cmd)
+        utils.log(self.loggingName, 'info', "Starting gfServer %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         start_time = time.time()
         while not utils.server_ready(self.opts['gfserver_log']):
             new_time = time.time()
             wait_time = new_time - start_time
             if wait_time > 1000:
-                utils.log(self.logging_name, 'error', 'gfServer wait time exceeded ~15 minutes, exiting')
+                utils.log(self.loggingName, 'error', 'gfServer wait time exceeded ~15 minutes, exiting')
                 sys.exit(1)
-            utils.log(self.logging_name, 'info', 'Waiting for blat gfServer to load reference seq')
+            utils.log(self.loggingName, 'info', 'Waiting for blat gfServer to load reference seq')
             time.sleep(60)
-        utils.log(self.logging_name, 'info', 'Server ready!')
+        utils.log(self.loggingName, 'info', 'Server ready!')
         os.chdir(curdir)
 
     def get_kmer_size(self):
@@ -464,7 +464,7 @@ class ParamManager:
         if key in self.opts:
             value = self.opts[key]
         elif required:
-            utils.log(self.logging_name, 'error', 'Missing required parameter %s, exiting.' % key)
+            utils.log(self.loggingName, 'error', 'Missing required parameter %s, exiting.' % key)
             sys.exit(1)
         return value
 
