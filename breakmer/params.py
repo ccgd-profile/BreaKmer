@@ -333,7 +333,7 @@ class ParamManager:
         test_fa.close()
 
         resultFn = os.path.join(test_dir, 'blatserver_test.psl')
-        cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (self.get_param('gfclient'), self.get_param('hostname'), self.get_param('port'), self.get_param('reference_fasta_dir'), test_fa_fn, resultFn)
+        cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (self.get_param('gfclient'), self.get_param('blat_hostname'), self.get_param('blat_port'), self.get_param('reference_fasta_dir'), test_fa_fn, resultFn)
         utils.log(self.loggingName, 'info', 'Blat server test system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
