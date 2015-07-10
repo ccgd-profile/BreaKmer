@@ -118,7 +118,7 @@ class RunTracker:
             for multiprocResult in multiprocResults:
                 aggResults.extend(multiprocResult.get())
         else:
-            aggResults = analyze_targets(targetAnalysisList)
+            aggResults.append(analyze_targets(targetAnalysisList))
 
         if self.params.fncCmd == 'prepare_reference_data':
             print 'Reference data setup!'
@@ -183,22 +183,28 @@ class RunTracker:
         Returns:
             None
         """
-        if len(aggregateResults['contigs']) > 0:
+        contigResults = []
+        discReadResults = []
+        for aResultDict in aggregateResults:
+            contigResults.extend(aResultDict['contig'])
+            discReadResults.extend(aResultDict['discreads'])
+
+        if len(contigResults) > 0:
             resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
             utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
             resultFile = open(resultFn, 'w')
-            for i, formattedResultStr in enumerate(aggregateResults['contigs']):
+            for i, formattedResultStr in enumerate(contigResults):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
                 resultFile.write(formattedResultValuesStr + '\n')
             resultFile.close()
 
-        if len(aggregateResults['discreads']) > 0:
+        if len(discReadResults) > 0:
             resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_discreads.out")
             utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
             resultFile = open(resultFn, 'w')
-            for i, formattedResultStr in enumerate(aggregateResults['discreads']):
+            for i, formattedResultStr in enumerate(discReadResults):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
