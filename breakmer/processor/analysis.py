@@ -185,6 +185,7 @@ class RunTracker:
         """
         contigResults = []
         discReadResults = []
+        print aggregateResults, type(aggregateResults)
         for aResultDict in aggregateResults:
             print aResultDict
             contigResults.extend(aResultDict['contig'])
