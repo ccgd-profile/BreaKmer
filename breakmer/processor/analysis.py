@@ -99,6 +99,9 @@ class RunTracker:
         startTime = time.clock()
 
         self.params.start_blat_server()
+        if self.params.fncCmd == 'start_blat_server':
+            print 'Server started!'
+            return
 
         targetAnalysisList = self.create_targets()
 
