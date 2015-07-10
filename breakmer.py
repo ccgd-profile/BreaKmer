@@ -50,6 +50,8 @@ else:
         PARSER.add_argument('--hostname', dest='blat_hostname', default='localhost', action='store_true', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('-c', '--config', dest='config_fn', default=None, required=True, help='The configuration filename that contains additional parameters. [default: %(default)s]')
         print PARSER
+        print args
+        print PARSER.parse_args(args[2:])
 
     elif fncCmd == 'prepare_reference_data':
         PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='Gene list to consider for analysis. [default: %(default)s]')
