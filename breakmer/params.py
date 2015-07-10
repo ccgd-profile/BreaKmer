@@ -183,7 +183,7 @@ class ParamManager:
         """
 
         self.opts = {}
-        for line in open(arguments.configFn, 'rU'):
+        for line in open(arguments.config_fn, 'rU'):
             line = line.strip()
             # Allow for blank lines and comments
             if line == '' or line.find('#') > -1:
