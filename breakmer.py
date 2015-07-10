@@ -49,6 +49,7 @@ else:
         PARSER.add_argument('-p', '--port_number', dest='blat_port', default=None, type=int, help='The port number for the blat server. A random port number (8000-9500) will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('--hostname', dest='blat_hostname', default='localhost', action='store_true', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('-c', '--config', dest='config_fn', default=None, required=True, help='The configuration filename that contains additional parameters. [default: %(default)s]')
+        print PARSER
 
     elif fncCmd == 'prepare_reference_data':
         PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='Gene list to consider for analysis. [default: %(default)s]')
@@ -57,6 +58,6 @@ else:
         print 'The first argument %s is not one of the options.' % fncCmd
         sys.exit(1)
 
-    print PARSER.parse_args(args[2:])
-    RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(fncCmd, PARSER.parse_args(args[2:])))
-    RUN_TRACKER.run()
+    # print PARSER.parse_args(args[2:])
+    # RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(fncCmd, PARSER.parse_args(args[2:])))
+    # RUN_TRACKER.run()
