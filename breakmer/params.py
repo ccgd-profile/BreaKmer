@@ -50,8 +50,6 @@ class ParamManager:
         self.set_params(arguments)
 
     def set_params(self, arguments):
-        print arguments
-        sys.exit()
         """Organize and format all input parameters into class variables to access
         later. Specific instances of parameters are checked and set. All parameters that are
         set are logged. The target objects are set along with the paths.
