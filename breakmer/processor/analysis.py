@@ -105,7 +105,7 @@ class RunTracker:
 
         targetAnalysisList = self.create_targets()
 
-        aggResults = []
+        aggResults = {'contigs': [], 'discreads': []}
         nprocs = int(self.params.get_param('nprocs'))
         if nprocs > 1:
             utils.log(self.loggingName, 'info', 'Creating all reference data.')
@@ -117,10 +117,10 @@ class RunTracker:
             wait(multiprocResults)
             for multiprocResult in multiprocResults:
                 a = multiprocResult.get()
-                print a
-                aggResults.extend(multiprocResult.get())
+                aggResults['contigs'].extend(a['contigs'])
+                aggResults['discreads'].extend(a['discreads'])
         else:
-            aggResults.append(analyze_targets(targetAnalysisList))
+            aggResults = analyze_targets(targetAnalysisList)
 
         if self.params.fncCmd == 'prepare_reference_data':
             print 'Reference data setup!'
@@ -185,30 +185,30 @@ class RunTracker:
         Returns:
             None
         """
-        contigResults = []
-        discReadResults = []
-        print aggregateResults, type(aggregateResults)
-        for aResultDict in aggregateResults:
-            print aResultDict
-            contigResults.extend(aResultDict['contig'])
-            discReadResults.extend(aResultDict['discreads'])
+        # contigResults = []
+        # discReadResults = []
+        # print aggregateResults, type(aggregateResults)
+        # for aResultDict in aggregateResults:
+        #     print aResultDict
+        #     contigResults.extend(aResultDict['contig'])
+        #     discReadResults.extend(aResultDict['discreads'])
 
-        if len(contigResults) > 0:
+        if len(aggregateResults['contigs']) > 0:
             resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
             utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
             resultFile = open(resultFn, 'w')
-            for i, formattedResultStr in enumerate(contigResults):
+            for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
                 resultFile.write(formattedResultValuesStr + '\n')
             resultFile.close()
 
-        if len(discReadResults) > 0:
+        if len(aggregateResults['discreads']) > 0:
             resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_discreads.out")
             utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.opts['analysis_name'], resultFn))
             resultFile = open(resultFn, 'w')
-            for i, formattedResultStr in enumerate(discReadResults):
+            for i, formattedResultStr in enumerate(aggregateResults['discreads']):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
