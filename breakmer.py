@@ -11,7 +11,6 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
-print sys.argv
 args = sys.argv
 if len(args) < 2:
     print 'No arguments provided. At least one command required (run, start_blat_server, prepare_reference_kmers).'
