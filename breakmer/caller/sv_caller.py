@@ -142,9 +142,11 @@ class SVResult:
         self.svType = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
         contigBrkpts = []
+        print 'sv_caller.py format_indel_values() contigBreakpoints', blatResult.breakpts.contigBreakpoints
         for x in blatResult.breakpts.contigBreakpoints:
             for bp in x:
                 contigBrkpts.append(bp)
+        print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
         print 'Formatting indel values', self.contigSeq
