@@ -57,5 +57,5 @@ else:
         print 'The first argument %s is not one of the options.' % fncCmd
         sys.exit(1)
 
-    RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(fncCmd, PARSER.parse_args()))
+    RUN_TRACKER = breakmer_analysis.RunTracker(params.ParamManager(fncCmd, PARSER.parse_args(args[2:])))
     RUN_TRACKER.run()
