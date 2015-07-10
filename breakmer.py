@@ -11,6 +11,9 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+print sys.argv
+sys.exit()
+
 PARSER = argparse.ArgumentParser(description="Program to identify structural variants within targeted locations.", usage='%(prog)s [options]', add_help=True)
 PARSER.add_argument('configFn', help='Path to the configuration file. Required')
 PARSER.add_argument('-l', '--log_level', dest='log_level', default='DEBUG', help='Log level [default: DEBUG]')
