@@ -111,10 +111,6 @@ class ParamManager:
         if self.fncCmd == 'prepare_reference_data':
             utils.log(self.logging_name, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
             return
-        elif self.fncCmd == 'start_blat_server':
-            utils.log(self.logging_name, 'info', 'Starting the blat server.')
-
-            return
 
         # TODO - set this as an optional parameter.
         # self.gene_annotations = utils.Annotation()
@@ -135,6 +131,10 @@ class ParamManager:
             utils.log(self.logging_name, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
             if not os.path.exists(self.paths[path]):
                 os.makedirs(self.paths[path])
+
+        if self.fncCmd == 'start_blat_server':
+            utils.log(self.logging_name, 'info', 'Starting the blat server.')
+            return
 
         # Check if Jellyfish and Cutadapt work.
         self.check_binaries()
