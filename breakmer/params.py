@@ -339,10 +339,10 @@ class ParamManager:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
         utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
-        serverSuccess = False
+        serverSuccess = True
         print 'Blat errors', errors
         if errors != '':
-            serverSuccess = True
+            serverSuccess = False
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
         print 'Sever success', serverSuccess
         return serverSuccess
