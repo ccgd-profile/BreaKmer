@@ -516,6 +516,7 @@ class Builder:
             print 'Contig kmers', contigKmers
             print 'used kmers', contigBuffer.used_kmers
             print 'kmerSet', kmerSet
+            print 'Alt kmers', altKmers
             newKmers = set(altKmers) - set(contigKmers) - contigBuffer.used_kmers - kmerSet
             print 'New kmers', newKmers
             if len(newKmers) > 0:
