@@ -343,6 +343,7 @@ class ParamManager:
         if errors != '':
             serverSuccess = True
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
+        print 'Sever success', serverSuccess
         return serverSuccess
 
     def start_blat_server(self):
