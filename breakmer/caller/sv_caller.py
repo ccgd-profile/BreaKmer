@@ -457,7 +457,7 @@ class SVBreakpoints:
 
     def get_target_brkpt(self, key):
         """ """
-        return self.target[key]
+        return self.genomicBrkpts['target'] # target[key]
 
     def get_brkpt_str(self, targetKey):
         """ """
@@ -615,8 +615,8 @@ class SVEvent:
         """
         discReads = self.contig.get_disc_reads()
         discReadCount = 0
-        nonTargetBrkptChr, nonTargetBrkptBp = self.brkpts.get_target_brkpt('other')
-        targetBrkptChr, targetBrkptBp = self.brkpts.get_target_brkpt('in_target')
+        nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts['other']
+        targetBrkptChr, targetBrkptBp = self.brkpts.get_genomic_brkpts['target']
         if nonTargetBrkptChr in discReads:
             for p1, p2 in discReads[nonTargetBrkptChr]:
                 d1 = abs(p1 - targetBrkptBp)
