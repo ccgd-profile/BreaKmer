@@ -512,6 +512,10 @@ class Builder:
         kmerSet = set()
         for read, nreads in self.read_batch.alt:
             altKmers = get_read_kmers(read.seq, self.kmerLen, kmerTracker.kmerSeqs, '')
+            print 'Check alternate reads'
+            print 'Contig kmers', contigKmers
+            print 'used kmers', contigBuffer.used_kmers
+            print 'kmerSet', kmerSet
             newKmers = set(altKmers) - set(contigKmers) - contigBuffer.used_kmers - kmerSet
             print 'New kmers', newKmers
             if len(newKmers) > 0:
