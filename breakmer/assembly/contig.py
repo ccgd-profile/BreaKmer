@@ -43,7 +43,6 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
     """
     m = len(new_seq) / 2
     kmers = map(lambda x: (new_seq[x:x + kmerLen], x, int(x < m), abs(x - m), order), range(0, (len(new_seq) - kmerLen)))
-    print 'New sequence kmers', kmers
     ks = set(map(lambda x: x[0], kmers))
     ss = ks & kmer_seqs
     kmers = filter(lambda x: x[0] in ss, kmers)
@@ -478,7 +477,6 @@ class Builder:
             if assemblyType == 'grow':
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'for')
                 self.kmers.extend(nkmers)
-                print 'Kmers extended with', nkmers, 'contig_overlap_read', self.kmers
 
     def read_overlap_contig(self, alignment, query_read, nreads, kmer_seqs, type):
         """Assemble consensus and read sequences togheter, where the consensus
@@ -501,7 +499,6 @@ class Builder:
             if type == 'grow':
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'rev')
                 self.kmers.extend(nkmers)
-                print 'Kmers extended with', nkmers, 'read_overlap_contig'
 
     def check_alternate_reads(self, kmerTracker, contigBuffer, contigKmers):
         """Iterate through the buffered reads that were not aligned to the contig
@@ -556,7 +553,6 @@ class Builder:
         Return:
             List of kmer sequences.
         """
-        print self.kmers
         return filter(lambda x: x[0] not in set(self.checked_kmers), self.kmers)
 
     def get_seq(self):
@@ -845,7 +841,6 @@ class Contig:
         while len(newKmers) > 0:
             iter = 0
             for kmer_lst in newKmers:
-                print kmer_lst
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
                 reads = self.get_kmer_reads(kmer_lst, fqRecs.items())
                 contigBuffer.add_used_mer(kmerSeq)
