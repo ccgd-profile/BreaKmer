@@ -480,6 +480,7 @@ class Builder:
             if assemblyType == 'grow':
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'for')
                 self.kmers.extend(nkmers)
+                print 'Kmers extended with', nkmers, 'contig_overlap_read'
 
     def read_overlap_contig(self, alignment, query_read, nreads, kmer_seqs, type):
         """Assemble consensus and read sequences togheter, where the consensus
@@ -502,6 +503,7 @@ class Builder:
             if type == 'grow':
                 nkmers = get_read_kmers(nseq, self.kmerLen, kmer_seqs, 'rev')
                 self.kmers.extend(nkmers)
+                print 'Kmers extended with', nkmers, 'read_overlap_contig'
 
     def check_alternate_reads(self, kmerTracker, contigBuffer, contigKmers):
         """Iterate through the buffered reads that were not aligned to the contig
