@@ -213,8 +213,8 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 upTrx, upDist = upstream
                 downTrx, downDist = downstream
                 if params.get_param('generate_image') or True:
-                    upTrx.get_exons(annotationFn)
-                    downTrx.get_exons(annotationFn)
+                    upTrx.get_exons(annotationFn, tmpFilePath)
+                    downTrx.get_exons(annotationFn, tmpFilePath)
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([downTrx, upTrx], [upDist, downDist], coordIdx)
 
 
