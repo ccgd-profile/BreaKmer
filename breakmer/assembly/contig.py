@@ -51,9 +51,6 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
         kmers.reverse()
     elif order == 'mid':
         kmers = sorted(kmers, key=lambda x: (x[2], x[3]))
-    else:
-        print 'Setting kmers from get_read_kmers', list(ss), kmers
-        kmers = list(ss)
     return kmers
 
 
