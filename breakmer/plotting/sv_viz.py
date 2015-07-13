@@ -107,20 +107,25 @@ class Segment:
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
                         trx = trxList[0]
-                        print 'Index get_segment_trxs sv_viz.py', self.idx
+                        trxDist = distList[0]
+                        print 'Index get_segment_trxs sv_viz.py', self.idx, self.nSegments, trxList, distList
                         if self.idx == 0:
                             # First
                             if self.alignResult.strand == '-':
                                 # Get downstream gene
                                 trx = trxList[1]
+                                trxDist = distList[1]
                             else:
                                 trx = trxList[0]
+                                trxDist = distList[0]
                         elif self.idx == (self.nSegments - 1):
                             if self.alignResult.strand == '-':
                                 # Get upstream gene
                                 trx = trxList[0]
+                                trxDist = distList[0]
                             else:
                                 trx = trxList[1]
+                                trxDist = distList[1]
                         trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
                     else:
                         # lands in a single trancript
