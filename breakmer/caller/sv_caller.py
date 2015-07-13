@@ -680,6 +680,7 @@ class SVEvent:
         varReads = self.contig.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
+        print 'sv_caller.py define_rearr', brkpts
         tcoords = self.brkpts.tcoords
         svType = 'rearrangement'
         rs = 0
@@ -687,7 +688,7 @@ class SVEvent:
         if len(strands) < 3:
             if not self.check_overlap(tcoords[0], tcoords[1]):
                 utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
-                if (strands[0] != strands[1]) and (brkpts[0] < brkpts[1]):
+                if (strands[0] != strands[1]): # and (brkpts[0] < brkpts[1]):
                     # Inversion
                     # Get discordantly mapped read-pairs
                     utils.log(self.loggingName, 'debug', 'Inversion event identified.')
@@ -702,7 +703,7 @@ class SVEvent:
                     #     else:
                     #         if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
                     #             rs += 1
-                elif (strands[0] == '+' and strands[1] == '+') and (brkpts[0] > brkpts[1]):
+                elif (strands[0] == '+' and strands[1] == '+'): # and (brkpts[0] > brkpts[1]):
                     utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
                     hit = True
                     svType = 'tandem_dup'
