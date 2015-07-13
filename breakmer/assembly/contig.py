@@ -556,6 +556,7 @@ class Builder:
         Return:
             List of kmer sequences.
         """
+        print self.kmers
         return filter(lambda x: x[0] not in set(self.checked_kmers), self.kmers)
 
     def get_seq(self):
