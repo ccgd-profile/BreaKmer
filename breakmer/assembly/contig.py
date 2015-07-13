@@ -844,6 +844,7 @@ class Contig:
         while len(newKmers) > 0:
             iter = 0
             for kmer_lst in newKmers:
+                print kmer_lst
                 kmerSeq, kmerPos, lessThanHalf, dist_half, order = kmer_lst
                 reads = self.get_kmer_reads(kmer_lst, fqRecs.items())
                 contigBuffer.add_used_mer(kmerSeq)
