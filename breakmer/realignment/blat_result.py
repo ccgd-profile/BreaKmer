@@ -81,7 +81,7 @@ class AlignFragments:
         self.set_values(values)
 
     def set_values(self, values):
-        print 'Set fragment values', values
+        # print 'Set fragment values', values
         refStarts = [int(x) for x in values[20].rstrip(",").split(",")]
         queryStarts = [int(x) for x in values[19].rstrip(",").split(",")]
         for qstart, tstart, blocksize in zip(queryStarts, refStarts, self.blockSizes):

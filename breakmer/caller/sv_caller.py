@@ -142,16 +142,16 @@ class SVResult:
         self.svType = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
         contigBrkpts = []
-        print 'sv_caller.py format_indel_values() contigBreakpoints', blatResult.breakpts.contigBreakpoints
+        # print 'sv_caller.py format_indel_values() contigBreakpoints', blatResult.breakpts.contigBreakpoints
         for x in blatResult.breakpts.contigBreakpoints:
             for bp in x:
                 contigBrkpts.append(bp)
-        print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
+        # print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
-        print 'Formatting indel values', self.contigSeq
-        print 'contig id', self.contigId
-        print 'target', self.targetName
+        # print 'Formatting indel values', self.contigSeq
+        # print 'contig id', self.contigId
+        # print 'target', self.targetName
 
     def format_rearrangement_values(self, svEvent):
         """ """
@@ -585,7 +585,7 @@ class SVEvent:
 
     def get_genomic_brkpts(self):
         """ """
-        print self.brkpts.genomicBrkpts
+        # print self.brkpts.genomicBrkpts
         return self.brkpts.genomicBrkpts
 
     def check_previous_add(self, br):
@@ -798,22 +798,22 @@ class ContigCaller:
 
     def call_svs(self):
         """ """
-        print 'realigment results', self.realignment.has_results()
+        # print 'realigment results', self.realignment.has_results()
         if not self.realignment.has_results():
             utils.log(self.loggingName, 'info', 'No blat results file exists, no calls for %s.' % self.contig.get_id())
         else:
-            print 'Results exist'
+            # print 'Results exist'
             utils.log(self.loggingName, 'info', 'Making variant calls from blat results %s' % self.realignment.get_result_fn())
             if self.check_indels():
-                print 'Check indels passed'
+                # print 'Check indels passed'
                 # self.result = self.realignment.get_indel_result()
                 self.svEvent.format_indel_values()
             elif self.check_svs():
-                print 'Check svs passed'
+                # print 'Check svs passed'
                 # self.result = self.realignment.get_svs_result()
                 self.svEvent.format_rearr_values()
         # Format the result into a
-        print 'result', self.svEvent
+        # print 'result', self.svEvent
         return self.svEvent
 
     def check_indels(self):
@@ -852,7 +852,7 @@ class ContigCaller:
         if self.svEvent and self.svEvent.result_valid():
             return True
         else:
-            print 'svs result invalid'
+            # print 'svs result invalid'
             self.svEvent = None
             return False
 
