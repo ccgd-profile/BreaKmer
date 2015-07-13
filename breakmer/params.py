@@ -340,11 +340,9 @@ class ParamManager:
         output, errors = p.communicate()
         utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
         serverSuccess = True
-        print 'Blat errors', errors
         if errors != '':
             serverSuccess = False
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
-        print 'Sever success', serverSuccess
         return serverSuccess
 
     def start_blat_server(self):
