@@ -431,6 +431,8 @@ class discReads:
 
     def check_inv_readcounts(self, brkpts):
         """ """
+        brkpt1 = min(brkpts)
+        brkpt2 = max(brkpts)
         counts = 0
         print 'Inversion reads', self.reads['intra']['inv']
         print 'Brkpts', brkpts
@@ -440,10 +442,10 @@ class discReads:
             for dRead in strandReads:
                 print strand, dRead.pos
                 if lStrand == '+' and rStrand == '+':
-                    if (dRead.pos[0] <= brkpts[0]) and (dRead.pos[1] <= brkpts[1] and dRead.pos[1] >= brkpts[0]):
+                    if (dRead.pos[0] <= brkpt1) and (dRead.pos[1] <= brkpt3 and dRead.pos[1] >= brkpt1):
                         counts += 1
                 else:
-                    if (dRead.pos[0] <= brkpts[1] and dRead.pos[0] >= brkpts[0]) and dRead.pos[1] >= brkpts[1]:
+                    if (dRead.pos[0] <= brkpt2 and dRead.pos[0] >= brkpt1) and dRead.pos[1] >= brkpt2:
                         counts += 1
         print 'Counts', counts
         return counts
