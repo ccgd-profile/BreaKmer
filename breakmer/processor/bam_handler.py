@@ -442,9 +442,10 @@ class discReads:
             for dRead in strandReads:
                 print strand, dRead.pos
                 if lStrand == '+' and rStrand == '+':
-                    if (dRead.pos[0] <= brkpt1) and (dRead.pos[1] <= brkpt3 and dRead.pos[1] >= brkpt1):
+                    if (dRead.pos[0] <= brkpt1) and (dRead.pos[1] <= brkpt2 and dRead.pos[1] >= brkpt1):
                         counts += 1
                 else:
+                    print dRead.pos, brkpt1, brkpt2
                     if (dRead.pos[0] <= brkpt2 and dRead.pos[0] >= brkpt1) and dRead.pos[1] >= brkpt2:
                         counts += 1
         print 'Counts', counts
