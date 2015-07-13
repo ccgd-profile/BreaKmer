@@ -434,6 +434,7 @@ class discReads:
         brkpt1 = min(brkpts)
         brkpt2 = max(brkpts)
         counts = 0
+        bpBuffer = 50
         print 'Inversion reads', self.reads['intra']['inv']
         print 'Brkpts', brkpts
         for strand in self.reads['intra']['inv']:
@@ -442,20 +443,23 @@ class discReads:
             for dRead in strandReads:
                 print strand, dRead.pos
                 if lStrand == '+' and rStrand == '+':
-                    if (dRead.pos[0] <= brkpt1) and (dRead.pos[1] <= brkpt2 and dRead.pos[1] >= brkpt1):
+                    if (dRead.pos[0] <= (brkpt1 + bpBuffer)) and (dRead.pos[1] <= (brkpt2 + bpBuffer) and dRead.pos[1] >= (brkpt1 - bpBuffer)):
                         counts += 1
                 else:
                     print dRead.pos, brkpt1, brkpt2
-                    if (dRead.pos[0] <= brkpt2 and dRead.pos[0] >= brkpt1) and dRead.pos[1] >= brkpt2:
+                    if (dRead.pos[0] <= (brkpt2 + bpBuffer) and dRead.pos[0] >= (brkpt1 - bpBuffer)) and dRead.pos[1] >= (brkpt2 - bpBuffer):
                         counts += 1
         print 'Counts', counts
         return counts
 
     def check_td_readcounts(self, brkpts):
         """ """
+        brkpt1 = min(brkpts)
+        brkpt2 = max(brkpts)
         counts = 0
+        bpBuffer = 50
         for dRead in self.reads['intra']['td']['-:+']:
-            if (dRead.pos[0] <= brkpts[0] and dRead.pos[0] >= brkpts[1]) and (dRead.pos[1] <= brkpts[1] and dRead.pos[1] >= brkpts[0]):
+            if (dRead.pos[0] >= (brkpt1 - bpBuffer) and dRead.pos[0] <= (brkpt2 + bpBuffer)) and (dRead.pos[1] <= (brkpt2 + bpBuffer) and dRead.pos[1] >= (brkpt1 - bpBuffer)):
                 counts += 1
         return counts
 
