@@ -680,7 +680,6 @@ class SVEvent:
         varReads = self.contig.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
-        print 'sv_caller.py define_rearr', brkpts
         tcoords = self.brkpts.tcoords
         svType = 'rearrangement'
         rs = 0
@@ -703,7 +702,7 @@ class SVEvent:
                     #     else:
                     #         if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
                     #             rs += 1
-                elif (strands[0] == '+' and strands[1] == '+'): # and (brkpts[0] > brkpts[1]):
+                elif (strands[0] == strands[1]): # and (brkpts[0] > brkpts[1]):
                     utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
                     hit = True
                     svType = 'tandem_dup'
