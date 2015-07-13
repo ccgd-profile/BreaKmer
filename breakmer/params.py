@@ -85,6 +85,7 @@ class ParamManager:
 
         self.set_targets(self.get_param('gene_list'))
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))
+        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
 
         """DEPRECATED
         # Setup alternative reference sequence files if they were passed in.
