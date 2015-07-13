@@ -187,6 +187,8 @@ class AlignSegments:
                 # print colors
         if len(colors) > 2:
             colors = 'black'
+        elif len(colors) == 1:
+            colors = colors[0]
         else:
             colors = colors[1]
         return colors
