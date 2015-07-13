@@ -30,7 +30,7 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
         new_seq: String of the contig sequence to create kmers from.
         kmerLen: Integer of the kmer length
         kmer_seqs: The set of kmer sequences from the pool of extracted reads.
-        order: String for the direction to order the news set of kmer sequences. A None
+        order: String for the direction to order the new set of kmer sequences. A None
                value indicates no ordering.
 
     Return:
@@ -43,6 +43,7 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
     """
     m = len(new_seq) / 2
     kmers = map(lambda x: (new_seq[x:x + kmerLen], x, int(x < m), abs(x - m), order), range(0, (len(new_seq) - kmerLen)))
+    print 'New sequence kmers', kmers
     ks = set(map(lambda x: x[0], kmers))
     ss = ks & kmer_seqs
     kmers = filter(lambda x: x[0] in ss, kmers)
@@ -539,7 +540,6 @@ class Builder:
             kmer_seqs: Set of kmer sequences.
         Return: None
         """
-
         self.kmers = get_read_kmers(str(self.seq), self.kmerLen, kmer_seqs, 'mid')
 
     def set_kmer_locs(self):
@@ -548,7 +548,6 @@ class Builder:
         Args: None
         Return: None
         """
-
         self.kmer_locs = [0] * len(self.seq)
         for kmer in self.kmers:
             kmerPos = self.seq.find(kmer[0])
