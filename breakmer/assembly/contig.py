@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import logging
 import shutil
 import pysam
@@ -50,6 +51,8 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
     elif order == 'mid':
         kmers = sorted(kmers, key=lambda x: (x[2], x[3]))
     else:
+        print 'Setting kmers from get_read_kmers', list(ss)
+        sys.exit()
         kmers = list(ss)
     return kmers
 
