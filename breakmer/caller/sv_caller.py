@@ -616,8 +616,8 @@ class SVEvent:
         """
         discReads = self.contig.get_disc_reads()
         discReadCount = 0
-        nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
-        targetBrkptChr, targetBrkptBp = self.brkpts.get_genomic_brkpts()['target']
+        nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other'][0]
+        targetBrkptChr, targetBrkptBp = self.brkpts.get_genomic_brkpts()['target'][1]
         if nonTargetBrkptChr in discReads:
             for p1, p2 in discReads[nonTargetBrkptChr]:
                 d1 = abs(p1 - targetBrkptBp)
