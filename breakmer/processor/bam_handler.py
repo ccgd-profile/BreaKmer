@@ -251,34 +251,34 @@ def cluster_regions(dReadLst, idx, clusterType):
     for dRead in dReadLst:
         # trgtStart = dRead.pos[0]
         # mateStart = dRead.pos[1]
-        print 'cluster_regions dRead', dRead.pos, dRead.readLen, clusterType
+        # print 'cluster_regions dRead', dRead.pos, dRead.readLen, clusterType
         if len(clusterLst) == 0:
             clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
-            print 'Initial cluster list', clusterLst
+            # print 'Initial cluster list', clusterLst
         else:
             # Check overlap
             add = False
             for i, c in enumerate(clusterLst):
-                print 'Checking read pos against cluster region', c, dRead.pos
+                # print 'Checking read pos against cluster region', c, dRead.pos
                 startWithin = dRead.pos[idx] >= c[0] and dRead.pos[idx] <= c[1]
                 withinBuffer = dRead.pos[idx] > c[1] and dRead.pos[idx] - c[1] <= distBuffer
-                print 'in check', startWithin, withinBuffer
+                # print 'in check', startWithin, withinBuffer
                 if startWithin or withinBuffer:
                     readInfoLst = clusterLst[i][2]
                     readInfoLst.append(dRead.readInfoStr)
-                    print 'Add read to cluster region', clusterLst[i]
+                    # print 'Add read to cluster region', clusterLst[i]
                     clusterLst[i] = [c[0], dRead.pos[idx] + dRead.readLen, readInfoLst]
                     add = True
             if not add:
-                print 'No add, creating new cluster region'
+                # print 'No add, creating new cluster region'
                 clusterLst.append([dRead.pos[idx], dRead.pos[idx] + dRead.readLen, [dRead.readInfoStr]])
     return clusterLst
 
 
 def get_cluster_membership(item, clusters, idx):
     for i, cluster in enumerate(clusters):
-        print cluster
-        print item.pos
+        # print cluster
+        # print item.pos
         if item.pos[idx] >= cluster[0] and item.pos[idx] <= cluster[1]:
             return i
 
@@ -432,6 +432,8 @@ class discReads:
     def check_inv_readcounts(self, brkpts):
         """ """
         counts = 0
+        print 'Inversion reads', self.reads['intra']['inv']
+        print 'Brkpts', brkpts
         for strand in self.reads['intra']['inv']:
             lStrand, rStrand = strand.split(':')
             strandReads = self.reads['intra']['inv'][strand]
