@@ -106,6 +106,8 @@ class Segment:
                     trxList, distList = annotatedTrxsDict[0]
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
+                        trx = trxList[0]
+                        print 'Index get_segment_trxs sv_viz.py', self.idx
                         if self.idx == 0:
                             # First
                             if self.alignResult.strand == '-':
