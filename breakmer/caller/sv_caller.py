@@ -585,6 +585,7 @@ class SVEvent:
 
     def get_genomic_brkpts(self):
         """ """
+        print self.brkpts.genomicBrkpts
         return self.brkpts.genomicBrkpts
 
     def check_previous_add(self, br):
