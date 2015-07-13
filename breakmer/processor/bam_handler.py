@@ -396,22 +396,22 @@ class discReads:
                 for key3 in d2:
                     dReadsLst = d2[key3]
                     for xx in dReadsLst:
-                        print 'dRead', xx.pos
+                        # print 'dRead', xx.pos
                     srt1 = sorted(dReadsLst, key=lambda x: x.pos[0])
                     srt2 = sorted(dReadsLst, key=lambda x: x.pos[1])
-                    print key1, key2, key3
+                    # print key1, key2, key3
                     c1 = cluster_regions(srt1, 0, 'target')
                     c2 = cluster_regions(srt2, 1, 'mate')
                     for x in c1:
-                        print 'c1', x
+                        # print 'c1', x
                     for x in c2:
-                        print 'c2', x
+                        # print 'c2', x
                     for item in dReadsLst:
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
-                        print cIdx1, cIdx2, item.pos
-                        print c1
-                        print c2
+                        # print cIdx1, cIdx2, item.pos
+                        # print c1
+                        # print c2
                         regionPairKey = '|'.join([key1, key2, key3, str(cIdx1), str(cIdx2)])
                         leftBrkpt = c1[cIdx1][0]
                         rightBrkpt = c2[cIdx2][0]
