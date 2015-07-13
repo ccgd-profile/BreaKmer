@@ -741,7 +741,7 @@ class SVEvent:
             strands.append(strand)
         if len(set(strands)) == 1:
             same_strand = True
-        utils.log(self.loggingName, 'debug', 'Checking read strands for contig reads %s' % (",".join([read.id for read in self.contig_reads])))
+        utils.log(self.loggingName, 'debug', 'Checking read strands for contig reads %s' % (",".join([read.id for read in self.contig.reads])))
         utils.log(self.loggingName, 'debug', 'Reads are on same strand: %r' % same_strand)
         return len(set(strands))
 
