@@ -14,9 +14,9 @@ class Matches:
     """
     """
     def __init__(self, values):
-        self.match = int(values[0])
-        self.mismatch = int(values[1])
-        self.repeat = int(values[2])
+        self.match = values['matches']
+        self.mismatch = values['mismatches']
+        self.repeat = values['repmatches']
 
     def get_total_matches(self):
         """Sum all match values"""
@@ -47,8 +47,8 @@ class Gaps:
     def __init__(self, values):
         """
         """
-        self.ref = [int(values[6]), int(values[7])]
-        self.query = [int(values[4]), int(values[5])]
+        self.ref = [int(values['tNumInsert']), int(values['tBaseInsert'])]
+        self.query = [int(values['qNumInsert']), int(values['qBaseInsert'])]
 
     def get_ngaps(self, alignType):
         """Return a gaps"""
@@ -74,7 +74,7 @@ class AlignFragments:
     """
     """
     def __init__(self, values):
-        self.blockSizes = [int(x) for x in values[18].rstrip(",").split(",")]
+        self.blockSizes = [int(x) for x in values['blockSizes'].rstrip(",").split(",")]
         self.ref = []
         self.query = []
         self.count = len(self.blockSizes)
@@ -82,8 +82,8 @@ class AlignFragments:
 
     def set_values(self, values):
         # print 'Set fragment values', values
-        refStarts = [int(x) for x in values[20].rstrip(",").split(",")]
-        queryStarts = [int(x) for x in values[19].rstrip(",").split(",")]
+        refStarts = [int(x) for x in values['tStarts'].rstrip(",").split(",")]
+        queryStarts = [int(x) for x in values['qStarts'].rstrip(",").split(",")]
         for qstart, tstart, blocksize in zip(queryStarts, refStarts, self.blockSizes):
             self.ref.append((tstart, tstart + blocksize))
             self.query.append((qstart, qstart + blocksize))
@@ -140,12 +140,12 @@ class AlignValues:
     """
     """
     def __init__(self, values):
-        self.ref = {'seqName': values[13],
-                    'seqSize': int(values[14]),
-                    'alignCoords': [int(values[15]), int(values[16])]}
-        self.query = {'seqName': values[9],
-                      'seqSize': int(values[10]),
-                      'alignCoords': [int(values[11]), int(values[12])]}
+        self.ref = {'seqName': values['tName'],
+                    'seqSize': int(values['tSize']),
+                    'alignCoords': [int(values['tStart']), int(values['tEnd'])]}
+        self.query = {'seqName': values['qName'],
+                      'seqSize': int(values['qSize']),
+                      'alignCoords': [int(values['qStart']), int(values['qEnd'])]}
 
     def get_coords(self, alignType, index=None):
         """Return the coordinate of the alignment for either the reference
@@ -409,11 +409,12 @@ class BlatResult:
         realignVals = RealignValues(resultValues, self.realignProgram)
         realignVals.adjust_values(refName, offset)
 
+        self.values = realignVals.valueDict
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
         self.alignVals = AlignValues(self.values)
         self.fragments = AlignFragments(self.values)
-        self.strand = self.values[8]
+        self.strand = self.values['strand']
         self.breakpts = Breakpoints()
         # Sort results based on alignScore, percentIdent, number of gaps
         self.perc_ident = 100.0 - self.calcMilliBad()
