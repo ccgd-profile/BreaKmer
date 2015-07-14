@@ -277,7 +277,7 @@ class RealignValues:
                               'qBaseInsert': None,
                               'tNumInsert': None,
                               'tBaseInsert': None,
-                              'tSize': None,
+                              'tSize': 0,
                               'blockCount': None,
                               'blockSizes': None,
                               'qStarts': None,
