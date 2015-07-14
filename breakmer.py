@@ -53,6 +53,7 @@ else:
     elif fncCmd == 'prepare_reference_data':
         PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='Gene list to consider for analysis. [default: %(default)s]')
         PARSER.add_argument('-c', '--config', dest='config_fn', default=None, required=True, help='The configuration filename that contains additional parameters. [default: %(default)s]')
+        PARSER.add_argument('-n', '--nprocessors', dest='nprocs', default=1, type=int, help='The number of processors to use for analysis. [default: %(default)s]')
     else:
         print 'The first argument %s is not one of the options.' % fncCmd
         sys.exit(1)
