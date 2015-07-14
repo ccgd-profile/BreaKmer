@@ -298,10 +298,10 @@ class RealignValues:
             previous = None
             nucIter = 0
             qIter = 0
-            tIter = valueDict['tStart']
+            tIter = self.valueDict['tStart']
             qInserts = [0, 0]
             tInserts = [0, 0]
-            for qNuc, tNuc in zip(valueDict['qSeq'], valueDict['tSeq']):
+            for qNuc, tNuc in zip(self.valueDict['qSeq'], self.valueDict['tSeq']):
                 print qNuc, tNuc, blockSize, qStarts, tStarts, gap, previous, qIter, tIter
                 if qNuc != '-' and tNuc != '-':
                     if blockSize is None:
