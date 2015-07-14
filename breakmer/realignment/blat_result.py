@@ -347,20 +347,19 @@ class RealignValues:
 
         """
         # Adjust values for targeted alignment
-        rName = realignVals['tName'].replace('chr', '')
+        rName = self.valueDict['tName'].replace('chr', '')
         if refName is not None:
             rName = refName
-        realignVals = rName
+        self.valueDict['tName'] = rName
 
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
-        realignVals['tStart'] = coordOffset + int(realignVals['tStart'])
-        realignVals['tEnd'] = coordOffset + int(realignVals['tEnd'])
+         self.valueDict['tStart'] = coordOffset + int( self.valueDict['tStart'])
+         self.valueDict['tEnd'] = coordOffset + int( self.valueDict['tEnd'])
 
-        tstarts = [coordOffset + int(x) for x in resulValues[20].rstrip(",").split(",")]
-        resulValues[20] = ",".join([str(x) for x in tstarts]) + ","
-        self.values = resulValues
+        tstarts = [coordOffset + int(x) for x in self.valueDict['tStarts'].rstrip(",").split(",")]
+        self.valueDict['tStarts'] = ",".join([str(x) for x in tstarts]) + ","
 
 
 class BlatResult:
