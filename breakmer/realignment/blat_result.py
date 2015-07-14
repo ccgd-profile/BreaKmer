@@ -355,8 +355,8 @@ class RealignValues:
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
-         self.valueDict['tStart'] = coordOffset + int( self.valueDict['tStart'])
-         self.valueDict['tEnd'] = coordOffset + int( self.valueDict['tEnd'])
+        self.valueDict['tStart'] = coordOffset + int( self.valueDict['tStart'])
+        self.valueDict['tEnd'] = coordOffset + int( self.valueDict['tEnd'])
 
         tstarts = [coordOffset + int(x) for x in self.valueDict['tStarts'].rstrip(",").split(",")]
         self.valueDict['tStarts'] = ",".join([str(x) for x in tstarts]) + ","
