@@ -26,13 +26,13 @@ class AlignParams:
     def set_values(self, params, targetRefFns):
         """
         """
+        self.binary['target'] = params.get_param('blat')
         blast = params.get_param('blast')
-        if blast:
+        if blast is not None:
             self.program['target'] = 'blast'
             self.binary['target'] = blast
-            self.extension['target'] = 'xml'
+            self.extension['target'] = 'txt'
 
-        self.binary['target'] = params.get_param('blat')
         self.binary['genome'] = params.get_param('gfclient')
         self.binaryParams['genome'] = {'hostname': params.get_param('blat_hostname'),
                                        'port': int(params.get_param('blat_port'))}
@@ -111,7 +111,7 @@ class Realignment:
 
         cmd = ''
         if alignProgram == 'blast':
-            cmd = ''
+            cmd = "%s -task 'blastn-short' -db %s -query %s -evalue 0.01 -out %s -outfmt '7 qseqid sseqid pident qlen length mismatch gapopen qstart qend sstart send evalue bitscore gaps sstrand qseq sseq'" % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
         elif alignProgram == 'blat':
             if scope == 'genome':
                 # all blat server
@@ -157,7 +157,7 @@ class Realignment:
             self.results.modify_blat_result_file()
             if self.results.target_hit():
                 targetHit = True
-                utils.log(self.loggingName, 'debug', 'Top hit contains whole query sequence, indicating an indel variant.')
+                utils.log(self.loggingName, 'debug', 'Top hit contains whole query sequence, indicating an indel variant within the target region.')
 
         # If there was a sufficient target hit or no alignment at all then return True
         # this effectively prevents a genome alignment.
@@ -208,19 +208,14 @@ class AlignResults:
 
     def target_hit(self):
         """ """
-        indelHit = self.results[0].spans_query() or (len(self.results) == 1 and self.get_query_coverage() >= 90.0)
+        cond1 = self.results[0].spans_query() and (self.ngaps > 0)
+        cond2 = self.get_query_coverage() >= 90.0 and (self.ngaps > 0)
+        targetHit = cond1 or cond2
         # print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
-        utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % indelHit)
-        return indelHit
+        utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % targetHit)
+        return targetHit
 
     def parse_result_file(self):
-        """ """
-        if self.program == 'blat':
-            self.parse_blat_results()
-        elif self.program == 'blast':
-            self.parse_blast_results()
-
-    def parse_blat_results(self):
         """ """
         refName = None
         offset = None
@@ -230,18 +225,68 @@ class AlignResults:
             offset = self.contig.get_target_start() - self.contig.get_target_buffer()
 
         for line in open(self.resultFn, 'r'):
+            if line.find('#') > -1:
+                continue
             line = line.strip()
-            parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
-            parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
+            parsedResult = blat_result.BlatResult(line.split('\t'), refName, offset, self.program)
+            parsedResult.in_target_region(self.contig.get_target_region_coordinates())
             # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
             # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
-            self.process_blat_result(parsedBlatResult)
-            self.results.append(parsedBlatResult)
+            self.process_blat_result(parsedResult)
+            self.results.append(parsedResult)
         # Update to use class attributes as sorting categories
         self.sortedResults = sorted(self.results, key=lambda x: (-x.alignScore, -x.perc_ident, x.get_total_num_gaps()))
 
         for i, blatResult in enumerate(self.sortedResults):
             blatResult.set_mean_cov(self.get_mean_cov(blatResult.qstart(), blatResult.qend()))
+
+    # def parse_blast_results(self):
+    #     """ """
+    #     refName = None
+    #     offset = None
+    #     if self.scope == 'target':
+    #         # Need to reset the chrom name and coordinates for blat results.
+    #         refName = self.contig.get_chr()
+    #         offset = self.contig.get_target_start() - self.contig.get_target_buffer()
+
+    #     for line in open(self.resultFn, 'r'):
+    #         if line.find('#') > -1:
+    #             continue
+    #         line = line.strip()
+    #         parsedBlastResult = blat_result.BlatResult(line.split('\t'), refName, offset)
+    #         parsedBlastResult.in_target_region(self.contig.get_target_region_coordinates())
+    #         # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
+    #         # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
+    #         self.process_blat_result(parsedResult)
+    #         self.results.append(parsedResult)
+    #     # Update to use class attributes as sorting categories
+    #     self.sortedResults = sorted(self.results, key=lambda x: (-x.alignScore, -x.perc_ident, x.get_total_num_gaps()))
+
+    #     for i, blatResult in enumerate(self.sortedResults):
+    #         blatResult.set_mean_cov(self.get_mean_cov(blatResult.qstart(), blatResult.qend()))
+
+    # def parse_blat_results(self):
+    #     """ """
+    #     refName = None
+    #     offset = None
+    #     if self.scope == 'target':
+    #         # Need to reset the chrom name and coordinates for blat results.
+    #         refName = self.contig.get_chr()
+    #         offset = self.contig.get_target_start() - self.contig.get_target_buffer()
+
+    #     for line in open(self.resultFn, 'r'):
+    #         line = line.strip()
+    #         parsedBlatResult = blat_result.BlatResult(line.split('\t'), refName, offset)
+    #         parsedBlatResult.in_target_region(self.contig.get_target_region_coordinates())
+    #         # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
+    #         # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())
+    #         self.process_blat_result(parsedBlatResult)
+    #         self.results.append(parsedBlatResult)
+    #     # Update to use class attributes as sorting categories
+    #     self.sortedResults = sorted(self.results, key=lambda x: (-x.alignScore, -x.perc_ident, x.get_total_num_gaps()))
+
+    #     for i, blatResult in enumerate(self.sortedResults):
+    #         blatResult.set_mean_cov(self.get_mean_cov(blatResult.qstart(), blatResult.qend()))
 
     def process_blat_result(self, blatResultObj):
         """Summarize metrics from all alignments.

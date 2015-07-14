@@ -179,22 +179,207 @@ class AlignValues:
         return size
 
 
+class RealignValues:
+    def __init__(self, values, program):
+        self.program = program
+        self.valueDict = {}
+        self.set_values(values)
+
+    def set_values(self, values):
+        """
+        BLAT values
+        1. matches - Number of matching bases that aren't repeats.
+        2. misMatches - Number of bases that don't match.
+        3. repMatches - Number of matching bases that are part of repeats.
+        4. nCount - Number of 'N' bases.
+        5. qNumInsert - Number of inserts in query.
+        6. qBaseInsert - Number of bases inserted into query.
+        7. tNumInsert - Number of inserts in target.
+        8. tBaseInsert - Number of bases inserted into target.
+        9. strand - defined as + (forward) or - (reverse) for query strand. In mouse, a second '+' or '-' indecates genomic strand.
+        10. qName - Query sequence name.
+        11. qSize - Query sequence size.
+        12. qStart - Alignment start position in query.
+        13. qEnd - Alignment end position in query.
+        14. tName - Target sequence name.
+        15. tSize - Target sequence size.
+        16. tStart - Alignment start position in query.
+        17. tEnd - Alignment end position in query.
+        18. blockCount - Number of blocks in the alignment.
+        19. blockSizes - Comma-separated list of sizes of each block.
+        20. qStarts - Comma-separated list of start position of each block in query.
+        21. tStarts - Comma-separated list of start position of each block in target.
+
+        BLAST  values
+        1. qName
+        2. tName
+        3. percentIdent
+        4. matches
+        5. misMatches
+        6. ngaps
+        7. qStart
+        8. qEnd
+        9. tStart
+        10. tEnd
+        11. evalue
+        12. bitScore
+        13. gapBp
+        14. strand
+        15. qSeq
+        16. tSeq
+        """
+
+        if self.program == 'blat':
+            self.valueDict = {'matches': int(values[0]),
+                              'mismatches': int(values[1]),
+                              'repmatches': int(values[2]),
+                              'ncount': int(values[3]),
+                              'qNumInsert': int(values[4]),
+                              'qBaseInsert': int(values[5]),
+                              'tNumInsert': int(values[6]),
+                              'tBaseInsert': int(values[7]),
+                              'strand': values[8],
+                              'qName': values[9],
+                              'qSize': int(values[10]),
+                              'qStart': int(values[11]),
+                              'qEnd': int(values[12]),
+                              'tName': values[13].replace('chr', ''),
+                              'tSize': int(values[14]),
+                              'tStart': int(values[15]),
+                              'tEnd': int(values[16]),
+                              'blockCount': int(values[17]),
+                              'blockSizes': values[18],
+                              'qStarts': values[19],
+                              'tStarts': values[20]
+                              }
+
+        elif self.program == 'blast':
+            self.valueDict = {'qName': values[0],
+                              'tName': values[1].replace('chr', ''),
+                              'percentIdent': float(values[2]),
+                              'qSize': values[3],
+                              'matches': int(values[4]),
+                              'mismatches': int(values[5]),
+                              'ngaps': int(values[6]),
+                              'qStart': int(values[7]),
+                              'qEnd': int(values[8]),
+                              'tStart': int(values[9]) - 1,
+                              'tEnd': int(values[10]),
+                              'evalue': float(values[11]),
+                              'bitscore': float(values[12]),
+                              'gapBp': int(values[13]),
+                              'strand': values[14],
+                              'qSeq': values[15],
+                              'tSeq': values[16],
+                              'repmatches': 0,
+                              'ncount': 0,
+                              'qNumInsert': None,
+                              'qBaseInsert': None,
+                              'tNumInsert': None,
+                              'tBaseInsert': None,
+                              'tSize': None,
+                              'blockCount': None,
+                              'blockSizes': None,
+                              'qStarts': None,
+                              'tStarts': None
+                              }
+
+            if self.valueDict['strand'] == 'plus':
+                self.valueDict['strand'] = '+'
+            else:
+                self.valueDict['strand'] = '-'
+
+            blockSizes = []
+            blockCount = 0
+            blockSize = None
+            qStarts = []
+            tStarts = []
+            gap = None
+            previous = None
+            nucIter = 0
+            qIter = 0
+            tIter = valueDict['tStart']
+            qInserts = [0, 0]
+            tInserts = [0, 0]
+            for qNuc, tNuc in zip(valueDict['qSeq'], valueDict['tSeq']):
+                print qNuc, tNuc, blockSize, qStarts, tStarts, gap, previous, qIter, tIter
+                if qNuc != '-' and tNuc != '-':
+                    if blockSize is None:
+                        blockSize = 0
+                        qStarts.append(qIter)
+                        tStarts.append(tIter)
+                        gap = None
+                    blockSize += 1
+                    qIter += 1
+                    tIter += 1
+                elif qNuc == '-' or tNuc == '-':
+                    startOfGap = False
+                    if gap is None:
+                        gap = 0
+                        startOfGap = True
+                        if blockSize is not None:
+                            blockSizes.append(blockSize)
+                            blockSize = None
+                    if qNuc == '-':
+                        tIter += 1
+                        if startOfGap:
+                            tInserts[0] += 1
+                        tInserts[1] += 1
+                    elif tNuc == '-':
+                        qIter += 1
+                        if startOfGap:
+                            qInserts[0] += 1
+                        qInserts[1] += 1
+                    gap += 1
+            if blockSize is not None:
+                blockSizes.append(blockSize)
+            self.valueDict['blockCount'] = len(blockSizes)
+            self.valueDict['blockSizes'] = ','.join([str(x) for x in blockSizes]) + ','
+            self.valueDict['qStarts'] = ','.join([str(x) for x in qStarts]) + ','
+            self.valueDict['tStarts'] = ','.join([str(x) for x in tStarts]) + ','
+            self.valueDict['qNumInsert'] = qInserts[0]
+            self.valueDict['tNumInsert'] = tInserts[0]
+            self.valueDict['qBaseInsert'] = qInserts[1]
+            self.valueDict['tBaseInsert'] = tInserts[1]
+
+    def adjust_values(self, refName, offset):
+        """
+
+        """
+        # Adjust values for targeted alignment
+        rName = realignVals['tName'].replace('chr', '')
+        if refName is not None:
+            rName = refName
+        realignVals = rName
+
+        coordOffset = 0
+        if offset is not None:
+            coordOffset = offset
+        realignVals['tStart'] = coordOffset + int(realignVals['tStart'])
+        realignVals['tEnd'] = coordOffset + int(realignVals['tEnd'])
+
+        tstarts = [coordOffset + int(x) for x in resulValues[20].rstrip(",").split(",")]
+        resulValues[20] = ",".join([str(x) for x in tstarts]) + ","
+        self.values = resulValues
+
+
 class BlatResult:
     """
     """
-    def __init__(self, blatResultValues, refName, offset):
+    def __init__(self, blatResultValues, refName, offset, programName):
         self.loggingName = 'breakmer.realignment.blat_result'
-        self.values = self.set_values(blatResultValues, refName, offset)
-        self.matches = Matches(self.values)
-        self.gaps = Gaps(self.values)
-        self.alignVals = AlignValues(self.values)
-        self.fragments = AlignFragments(self.values)
-        self.strand = blatResultValues[8]
-        self.breakpts = Breakpoints()
+        self.realignProgram = programName
+        self.values = None # self.set_values(blatResultValues, refName, offset)
+        self.matches = None # Matches(self.values)
+        self.gaps = None # Gaps(self.values)
+        self.alignVals = None #AlignValues(self.values)
+        self.fragments = None # AlignFragments(self.values)
+        self.strand = None # blatResultValues[8]
+        self.breakpts = None #Breakpoints()
         # Sort results based on alignScore, percentIdent, number of gaps
-        self.perc_ident = 100.0 - self.calcMilliBad()
-        self.alignScore = self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
-        self.ngaps = self.get_total_num_gaps()
+        self.perc_ident = 0 # 100.0 - self.calcMilliBad()
+        self.alignScore = None #self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
+        self.ngaps = None # self.get_total_num_gaps()
 
         self.meanCov = 0.0
         self.seg_overlap = [0, 0]
@@ -213,29 +398,42 @@ class BlatResult:
         self.indel_sizes = []
         self.indel_maxevent_size = [0, '']
         self.indel_flank_match = [0, 0]
-        self.set_indel_locs()
+        self.set_values(resultValues, refName, offset, programName)
 
-    def set_values(self, blatResultValues, refName, offset):
+    def set_values(self, resultValues, refName, offset):
         """Modify the blat values if refName and offset are not None
         Args:
-            blatResultValues: List of values from a blat BlatResult
-            refName:          String of chromosome AlignFragments
-            offset:           Integer of genomic position for target alignment
+            resultValues:  List of values from a realignment program
+            refName:       String of chromosome AlignFragments
+            offset:        Integer of genomic position for target alignment
         """
-        rName = blatResultValues[13].replace('chr', '')
-        if refName is not None:
-            rName = refName
-        blatResultValues[13] = rName
+        realignVals = RealignValues(resultValues, self.realignProgram)
+        realignVals.adjust_values(refName, offset)
 
-        coordOffset = 0
-        if offset is not None:
-            coordOffset = offset
-        blatResultValues[15] = coordOffset + int(blatResultValues[15])
-        blatResultValues[16] = coordOffset + int(blatResultValues[16])
+        self.matches = Matches(self.values)
+        self.gaps = Gaps(self.values)
+        self.alignVals = AlignValues(self.values)
+        self.fragments = AlignFragments(self.values)
+        self.strand = self.values[8]
+        self.breakpts = Breakpoints()
+        # Sort results based on alignScore, percentIdent, number of gaps
+        self.perc_ident = 100.0 - self.calcMilliBad()
+        if 'percentIdent' not in realignVals.valueDict:
+            self.perc_ident = 100.0 - self.calcMilliBad()
+        else:
+            self.perc_ident = realignVals.valueDict['percentIdent']
 
-        tstarts = [coordOffset + int(x) for x in blatResultValues[20].rstrip(",").split(",")]
-        blatResultValues[20] = ",".join([str(x) for x in tstarts]) + ","
-        return blatResultValues
+        if 'bitscore' not in realignVals.valueDict:
+            self.alignScore = self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
+        else:
+            self.alignScore = realignVals.valueDict['bitscore']
+
+        if 'ngaps' not in realignVals.valueDict:
+            self.ngaps = self.get_total_num_gaps()
+        else:
+            self.ngaps = realignVals.valueDict['ngaps']
+
+        self.set_indel_locs()
 
     def set_sv_brkpt(self, coords, svType, targetKey):
         """ """
