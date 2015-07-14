@@ -366,7 +366,7 @@ class RealignValues:
 class BlatResult:
     """
     """
-    def __init__(self, blatResultValues, refName, offset, programName):
+    def __init__(self, resultValues, refName, offset, programName):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
         self.values = None # self.set_values(blatResultValues, refName, offset)
