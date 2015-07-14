@@ -398,7 +398,7 @@ class BlatResult:
         self.indel_sizes = []
         self.indel_maxevent_size = [0, '']
         self.indel_flank_match = [0, 0]
-        self.set_values(resultValues, refName, offset, programName)
+        self.set_values(resultValues, refName, offset)
 
     def set_values(self, resultValues, refName, offset):
         """Modify the blat values if refName and offset are not None
