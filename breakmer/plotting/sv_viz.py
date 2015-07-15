@@ -131,6 +131,7 @@ class Segment:
                         # lands in a single trancript
                         trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
             elif svBreakpoint.svType == 'indel':
+                print 'sv_viz.py', annotatedTrxsDict, dKeys
                 if len(dKeys) == 1:
                     # Insertion with one genomic breakpoint
                     trxList, distList = annotatedTrxsDict[0]
