@@ -197,6 +197,7 @@ def annotate_event(svEventResult, contigMeta):
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
+        print 'sv_annotation store_annotations', bpKey
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
         else:
@@ -271,7 +272,7 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
 
 def parse_bedtools_file(fn, fileKey, trxMap):
     for line in open(fn, 'r'):
-        print 'sv_annotation.py parse_bedtools_file', line
+        # print 'sv_annotation.py parse_bedtools_file', line
         line = line.strip()
         linesplit = line.split('\t')
         bpChrom, bpStart, bpEnd, bpKey = linesplit[0:4]
@@ -297,6 +298,7 @@ def parse_bedtools_output(outputFileDict):
     parse_bedtools_file(outputFileDict['intersect'], 'intersect', trxMap)
     parse_bedtools_file(outputFileDict['upstream'], 'upstream', trxMap)
     parse_bedtools_file(outputFileDict['downstream'], 'downstream', trxMap)
+    print 'sv_annotation.py trxMap', trxMap
     return trxMap
 
 
