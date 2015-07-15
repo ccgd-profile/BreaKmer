@@ -721,9 +721,8 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
         trxOffset = segStart + xOffset
         segTrxIter = 0
+        yCoord = yCoord + ((i + 0.5) * 0.25)
         for segTrx in segTrxs:
-            # yCoord = yCoord + ((i + 0.5) * 0.25)
-            # yCoord += 2
             print 'Global trx ycoord', yCoord
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
