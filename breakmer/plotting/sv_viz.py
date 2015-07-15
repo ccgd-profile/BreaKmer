@@ -722,7 +722,8 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         trxOffset = segStart + xOffset
         segTrxIter = 0
         for segTrx in segTrxs:
-            yCoord = yCoord + ((i + 0.5) * 0.25)
+            # yCoord = yCoord + ((i + 0.5) * 0.25)
+            yCoord += 2
             print 'Global trx ycoord', yCoord
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
@@ -731,6 +732,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             # ax.add_patch(rect)
             # print 'TRX offset', trxOffset
             trx = segTrx.trx
+            print 'Trx', trx
             brkpts = segTrx.brkpts
             exons = sorted(trx.exons, key=lambda x: x.start)
             print 'Exons', exons
@@ -774,6 +776,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 exonLabel = 'exon' + str(len(exons))
             ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
+            print 'New exons', newExons
             for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
@@ -800,6 +803,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
             # print 'TRX max, min', trxMin, trxMax
+            print 'Rectangle', trxMin, yCoord, trxMax - trxMin
             rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
