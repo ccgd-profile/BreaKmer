@@ -745,6 +745,7 @@ class Contig:
         Return:
             Boolean indicating whether it meets thresholds or not.
         """
+        print 'contig.py check_valid'. self.get_total_read_support(), int(read_count_thresh), len(self.seq), int(read_len)
         if self.get_total_read_support() < int(read_count_thresh) or len(self.seq) <= int(read_len):
             return True
         else:
