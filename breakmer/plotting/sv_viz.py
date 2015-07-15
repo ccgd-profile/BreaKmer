@@ -72,12 +72,12 @@ class Segment:
 
     def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
-        print 'sv_viz.py breakpoints', svBreakpoints
+        # print 'sv_viz.py breakpoints', svBreakpoints
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
-            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords
+            # print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
@@ -110,7 +110,7 @@ class Segment:
                         # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
                         trx = trxList[0]
                         trxDist = distList[0]
-                        print 'Index get_segment_trxs sv_viz.py', self.idx, self.nSegments, trxList, distList
+                        # print 'Index get_segment_trxs sv_viz.py', self.idx, self.nSegments, trxList, distList
                         if self.idx == 0:
                             # First
                             if self.alignResult.strand == '-':
@@ -133,14 +133,14 @@ class Segment:
                         # lands in a single trancript
                         trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
             elif svBreakpoint.svType == 'indel':
-                print 'sv_viz.py', annotatedTrxsDict, dKeys
+                # print 'sv_viz.py', annotatedTrxsDict, dKeys
                 if len(dKeys) == 1:
                     # Insertion with one genomic breakpoint
                     trxList, distList = annotatedTrxsDict[0]
                     trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'ins')
                 else:
                     # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
-                    print annotatedTrxsDict
+                    # print annotatedTrxsDict
                     leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
                     rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
                     # Take the first trx no matter what
