@@ -187,7 +187,7 @@ def annotate_event(svEventResult, contigMeta):
     # Rearrangements have breakpoints for each segment that is rearranged.
     #  genomicBrkpts = svEventResult.get_genomic_brkpts()
     bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
-    print 'sv_annotation.py bpMap', bpMap
+    # print 'sv_annotation.py bpMap', bpMap
     outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
@@ -197,7 +197,7 @@ def annotate_event(svEventResult, contigMeta):
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
-        print 'sv_annotation store_annotations', bpKey, bpMap[bpKey]
+        # print 'sv_annotation store_annotations', bpKey, bpMap[bpKey]
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
         else:
@@ -206,12 +206,12 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
             intersect = trxMap[bpKey]['intersect']
             upstream = trxMap[bpKey]['upstream']
             downstream = trxMap[bpKey]['downstream']
-            print 'Intersect', intersect
+            # print 'Intersect', intersect
             if intersect is not None:
                 trx, dist = intersect
                 if params.get_param('generate_image') or True:
                     trx.get_exons(annotationFn, tmpFilePath)
-                print blatResult, blatResult.get_sv_brkpts()
+                # print blatResult, blatResult.get_sv_brkpts()
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([trx], [dist], coordIdx)
             else:
                 upTrx, upDist = upstream
@@ -233,12 +233,12 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
         for svBreakpoint in svBreakpoints:
             chrom = svBreakpoint.chrom
             brkptCoords = svBreakpoint.genomicCoords
-            print 'write_brkpt_bed_file', chrom, brkptCoords, svBreakpoint.svType
+            # print 'write_brkpt_bed_file', chrom, brkptCoords, svBreakpoint.svType
             # brkptKey = 'BP' + str(bpIter) + '|' + chrom + ':' + '-'.join([str(x) for x in brkptCoords])
             coordIdx = 0
             for coord in brkptCoords:
                 bpKey = chrom + ':' + str(coord) + '_BP' + str(bpIter) + '_' + str(svBrkptIdx)
-                print 'write_brkpt_bed_file', bpKey
+                # print 'write_brkpt_bed_file', bpKey
                 bpStr = [chrom, coord, int(coord) + 1, bpKey]
                 bpBedFile.write('\t'.join([str(x) for x in bpStr]) + '\n')
                 bpMap[bpKey] = (blatResult, svBrkptIdx, coordIdx)
@@ -302,7 +302,7 @@ def parse_bedtools_output(outputFileDict):
     parse_bedtools_file(outputFileDict['intersect'], 'intersect', trxMap)
     parse_bedtools_file(outputFileDict['upstream'], 'upstream', trxMap)
     parse_bedtools_file(outputFileDict['downstream'], 'downstream', trxMap)
-    print 'sv_annotation.py trxMap', trxMap
+    # print 'sv_annotation.py trxMap', trxMap
     return trxMap
 
 
