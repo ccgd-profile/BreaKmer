@@ -137,6 +137,7 @@ class Segment:
                     trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'ins')
                 else:
                     # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
+                    print annotatedTrxsDict
                     leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
                     rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
                     # Take the first trx no matter what
