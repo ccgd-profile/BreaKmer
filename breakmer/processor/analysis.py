@@ -53,7 +53,7 @@ def analyze_targets(targetList):
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         # If only presetting data stop here.
-        if targetRegion.params.fncCmd == 'prepare_reference_kmers':
+        if targetRegion.params.fncCmd == 'prepare_reference_data':
             continue
         # targetRegion fails to find any interesting reads to use. Exiting.
         if not targetRegion.find_sv_reads():
