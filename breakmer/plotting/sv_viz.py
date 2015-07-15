@@ -720,7 +720,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             reverse = True
 
         trxOffset = segStart + xOffset
-        segTrxIter = 0f
+        segTrxIter = 0
         for segTrx in segTrxs:
             yCoord = yCoord + ((i + 0.5) * 0.25)
             print 'Global trx ycoord', yCoord
