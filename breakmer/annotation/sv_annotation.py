@@ -237,7 +237,8 @@ def write_brkpt_bed_file(bpBedFn, blatResults):
             # brkptKey = 'BP' + str(bpIter) + '|' + chrom + ':' + '-'.join([str(x) for x in brkptCoords])
             coordIdx = 0
             for coord in brkptCoords:
-                bpKey = chrom + ':' + str(coord) + '_BP' + str(bpIter)
+                bpKey = chrom + ':' + str(coord) + '_BP' + str(bpIter) + '_' + str(svBrkptIdx)
+                print 'write_brkpt_bed_file', bpKey
                 bpStr = [chrom, coord, int(coord) + 1, bpKey]
                 bpBedFile.write('\t'.join([str(x) for x in bpStr]) + '\n')
                 bpMap[bpKey] = (blatResult, svBrkptIdx, coordIdx)
