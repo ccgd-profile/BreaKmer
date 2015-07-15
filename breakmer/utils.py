@@ -622,7 +622,7 @@ def setup_rmask(gene_coords, ref_path, rmask_fn):
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
-    logger = logging.getLogger('root')
+    logger = logging.getLogger('breakmer.utils')
     chrom = gene_coords[0]
     start = gene_coords[1]
     end = gene_coords[2]

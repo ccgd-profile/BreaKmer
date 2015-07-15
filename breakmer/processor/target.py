@@ -4,6 +4,7 @@
 import os
 import pysam
 import shutil
+import subprocess
 import breakmer.utils as utils
 import breakmer.processor.bam_handler as bam_handler
 import breakmer.assembly.assembler as assembly
@@ -399,6 +400,19 @@ class TargetManager:
                 direction = "reverse"
             utils.log(self.loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
             utils.extract_refseq_fa(self.get_values(), self.paths['ref_data'], self.params.opts['reference_fasta'], direction, fn)
+
+        blastn = self.params.get_param('blast')
+        if blastn is not None:
+            # Check if blast db files are available for each target.
+            if not os.path.isfile(self.files['target_ref_fn'][0] + '.nin'):
+                # Use makedb
+                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')
+                cmd = "%s -in %s -dbtype 'nucl' -out %s" % (makedb, self.files['target_ref_fn'][0], self.files['target_ref_fn'][0])
+                utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                output, errors = p.communicate()
+                if errors != '':
+                    utils.log(self.loggingName, 'debug', 'Failed to make blast db files using reference file %s' % self.files['target_ref_fn'][0])
 
         """DEPRECATED
         # Write alternate reference files.
