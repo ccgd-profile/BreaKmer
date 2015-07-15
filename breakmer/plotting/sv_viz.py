@@ -239,7 +239,7 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = round(seqPlotSize) + 5 # seqPlotSize*1.5
+    plotHeight = round(seqPlotSize) + 10 # seqPlotSize*1.5
     # if len(segmentManager.orderedSeqs) > 10:
     #     plotHeight = 20
 
@@ -711,7 +711,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         # print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        # print 'Segment transcript ids', segTrxIds
+        print 'Segment transcript ids', segTrxIds
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
@@ -720,12 +720,12 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             reverse = True
 
         trxOffset = segStart + xOffset
-        segTrxIter = 0
+        segTrxIter = 0f
         for segTrx in segTrxs:
             yCoord = yCoord + ((i + 0.5) * 0.25)
             print 'Global trx ycoord', yCoord
             trxLen = float(segLen) / float(len(segTrxs))
-            # print 'TRX len', trxLen
+            print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
             # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
             # ax.add_patch(rect)
@@ -733,6 +733,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             exons = sorted(trx.exons, key=lambda x: x.start)
+            print 'Exons', exons
 
             parsedExons = []
             for exon in exons:
