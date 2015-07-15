@@ -187,6 +187,7 @@ def annotate_event(svEventResult, contigMeta):
     # Rearrangements have breakpoints for each segment that is rearranged.
     #  genomicBrkpts = svEventResult.get_genomic_brkpts()
     bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
+    print 'sv_annotation.py bpMap', bpMap
     outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)

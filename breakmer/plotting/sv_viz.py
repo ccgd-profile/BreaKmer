@@ -208,6 +208,7 @@ class AlignSegments:
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     """ """
     segmentManager = AlignSegments(svEventResult)
+    print 'sv_viz.py svEvent output', svEventResult.get_formatted_output_values()
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     segmentManager.set_orderedseqs(pile_reads(bamFile.fetch(), svEventResult.contig.seq))
     plot_pileup(segmentManager, os.path.join(outPath, contigId))
