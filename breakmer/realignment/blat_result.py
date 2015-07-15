@@ -101,7 +101,7 @@ class SVBreakpoint:
 
     def store_annotation(self, trxList, distList, coordIdx):
         """ """
-        print 'blat_result.py store_annotation', trxList, distList, coordIdx, self.annotated_trxs, self
+        # print 'blat_result.py store_annotation', trxList, distList, coordIdx, self.annotated_trxs, self
         self.annotated_trxs[coordIdx] = [trxList, distList]
 
 
@@ -303,7 +303,7 @@ class RealignValues:
             qInserts = [0, 0]
             tInserts = [0, 0]
             for qNuc, tNuc in zip(self.valueDict['qSeq'], self.valueDict['tSeq']):
-                print qNuc, tNuc, blockSize, qStarts, tStarts, gap, previous, qIter, tIter
+                # print qNuc, tNuc, blockSize, qStarts, tStarts, gap, previous, qIter, tIter
                 if qNuc != '-' and tNuc != '-':
                     if blockSize is None:
                         blockSize = 0

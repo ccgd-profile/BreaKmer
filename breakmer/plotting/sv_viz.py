@@ -406,9 +406,9 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
         indelCoordinates = segment.indelCoordinates
         print 'Indel coordinates', indelCoordinates
         print 'Indel', segment.indelSizes
+        yCoord = yCoord + ((i + 0.75) * 0.50)
         for j, coord in enumerate(indelCoordinates):
             xCoord = xOffset + coord[0]
-            # yCoord = yCoord + ((i + 0.75) * 0.50)
             rectLen = 1
             indelType = 'D'
             if len(coord) == 2:
@@ -418,10 +418,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
             rect = patches.Rectangle((xCoord, yCoord), rectLen, rectHeight, color='red')
             ax.add_patch(rect)
             xCoordLabel = xCoord + (float(rectLen) / float(2))
-            ycoord = yCoord + 0.6
-            if indelType == 'D':
-                ycoord = yCoord - 0.6
-            ax.text(xCoordLabel, ycoord, segment.indelSizes[j], ha='center', va='top', size=10)
+            ax.text(xCoordLabel, yCoord + 0.6, segment.indelSizes[j], ha='center', va='top', size=10)
 
 
 def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
