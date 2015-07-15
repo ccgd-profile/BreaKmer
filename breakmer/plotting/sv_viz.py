@@ -405,7 +405,7 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
     for i, segment in enumerate(segmentManager.segments):
         indelCoordinates = segment.indelCoordinates
         print 'Indel coordinates', indelCoordinates
-        print 'Indel', segments.indelSizes
+        print 'Indel', segment.indelSizes
         for coord in indelCoordinates:
             xCoord = xOffset + coord[0]
             yCoord = yCoord + ((i + 0.75) * 0.50)
