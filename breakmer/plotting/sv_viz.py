@@ -72,6 +72,7 @@ class Segment:
 
     def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
+        print 'sv_viz.py breakpoints', svBreakpoints.chrom, svBreakpoints.genomicCoords
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
         trxIds = []
@@ -820,7 +821,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        # print 'sv_viz.py plot_annotation_track segment', i
+        print 'sv_viz.py plot_annotation_track segment', i
+        print 'sv_viz.py plot_annotation_track segment', segmentTuple
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
