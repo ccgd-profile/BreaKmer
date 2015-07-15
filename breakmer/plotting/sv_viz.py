@@ -793,6 +793,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
                 if exon[2] != 'breakpoint':
+                    print 'Plotting rectangle', start, yCoord, rectLen, height
                     rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                     trxElements.append(start)
