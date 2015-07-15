@@ -323,7 +323,7 @@ class TargetManager:
         self.end = None
         self.paths = {}
         self.files = {}
-        self.read_len = 0
+        self.read_len = params.get_param('readLen')
         self.repeat_mask = None
         self.variation = Variation(params)
         self.regionBuffer = 200

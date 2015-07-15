@@ -164,6 +164,8 @@ class ParamManager:
             if read.is_read1 and proper_map:
                 readIter += 1
                 insertSizes.append(abs(read.tlen))
+                if 'readLen' not in self.opts:
+                    self.opts['readLen'] = read.rlen
             if readIter == nSampleReads:
                 break
         isMedian = utils.median(insertSizes)
