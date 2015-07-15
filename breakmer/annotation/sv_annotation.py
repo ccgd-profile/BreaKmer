@@ -271,6 +271,7 @@ def run_bedtools(bedtools, annotationFn, brkptBedFn, tmpFilePath):
 
 def parse_bedtools_file(fn, fileKey, trxMap):
     for line in open(fn, 'r'):
+        print 'sv_annotation.py parse_bedtools_file', line
         line = line.strip()
         linesplit = line.split('\t')
         bpChrom, bpStart, bpEnd, bpKey = linesplit[0:4]
