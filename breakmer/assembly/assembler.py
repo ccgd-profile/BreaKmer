@@ -60,7 +60,7 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
         while len(contigBuffer.contigs) > 0:
             contig = contigBuffer.get_contig()
             contig.grow(fqRecs, kmerTracker, kmerLen, contigBuffer)
-            if contig.check_valid(rcThresh, readLen):
+            if contig.check_invalid(rcThresh, readLen):
                 logger.info('Contig did not meet the read count threshold %d, with %d or contig length (%d) < readLen (%d)' % (rcThresh, len(contig.reads), len(contig.seq), readLen))
             else:
                 logger.info('Adding contig to buffer')

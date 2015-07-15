@@ -736,7 +736,7 @@ class Contig:
         self.buffer.add(readAlignValues['read'].id)
         return self.builder.check_read(kmerObj, readAlignValues, fncType)
 
-    def check_valid(self, read_count_thresh, read_len):
+    def check_invalid(self, read_count_thresh, read_len):
         """Determine if the finished contig sequence meets minimum requirements for
         length and read count support.
         Args:
@@ -746,7 +746,7 @@ class Contig:
             Boolean indicating whether it meets thresholds or not.
         """
         print 'contig.py check_valid', self.get_total_read_support(), int(read_count_thresh), len(self.seq), int(read_len)
-        if self.get_total_read_support() < int(read_count_thresh) or len(self.seq) <= int(read_len):
+        if (self.get_total_read_support() < int(read_count_thresh)) or (len(self.seq) <= int(read_len)):
             return True
         else:
             return False
