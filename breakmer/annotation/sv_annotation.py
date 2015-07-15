@@ -197,7 +197,7 @@ def annotate_event(svEventResult, contigMeta):
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
-        print 'sv_annotation store_annotations', bpKey
+        print 'sv_annotation store_annotations', bpKey, bpMap[bpKey]
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
         else:
@@ -206,10 +206,12 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
             intersect = trxMap[bpKey]['intersect']
             upstream = trxMap[bpKey]['upstream']
             downstream = trxMap[bpKey]['downstream']
+            print 'Intersect', intersect
             if intersect is not None:
                 trx, dist = intersect
                 if params.get_param('generate_image') or True:
                     trx.get_exons(annotationFn, tmpFilePath)
+                print blatResult, blatResult.get_sv_brkpts()
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([trx], [dist], coordIdx)
             else:
                 upTrx, upDist = upstream
