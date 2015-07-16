@@ -276,9 +276,11 @@ class RealignValues:
                         qDiff = int(qStart) - qPrev
                         tDiff = int(tStart) - tPrev
                         if qDiff > 0:
+                            print qPrev, int(qStart)
                             print 'Insertion sequence', querySeq[qPrev:int(qStart)]
                             qDiffs.append(qDiff)
                         if tDiff > 0:
+                            print tPrev, int(tStart)
                             print 'Deleted sequence in ref', ref_target_seq[tPrev:int(tStart)]
                             tDiffs.append(tDiff)
                     qPrev = int(qEnd)
