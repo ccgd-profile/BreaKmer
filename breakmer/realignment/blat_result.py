@@ -271,8 +271,8 @@ class RealignValues:
                 qEnd = int(qStart) + int(bSize)
                 tEnd = int(tStart) + int(bSize)
                 if listIter > 0:
-                    qDiff = qStart - qPrev
-                    tDiff = tStart - tPrev
+                    qDiff = int(qStart) - qPrev
+                    tDiff = int(tStart) - tPrev
                     if qDiff > 0:
                         qDiffs.append(qDiff)
                     if tDiff > 0:
