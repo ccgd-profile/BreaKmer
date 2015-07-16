@@ -197,7 +197,8 @@ class SVResult:
         if svEvent.brkpts.diff_chr():
             # translocation event
             svEvent.set_brkpt_counts('trl')
-            self.discReadCount = svEvent.get_disc_read_count()
+            varReads = self.contig.get_var_reads('sv')
+            self.discReadCount = varReads.check_inter_readcounts()
             self.svType = 'rearrangement'
             self.svSubtype = 'trl'
             self.filterValues.set_trl_values(svEvent)
@@ -624,9 +625,11 @@ class SVEvent:
         discReadCount = 0
         # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
         targetBrkptChr, targetBrkptBp = self.get_genomic_brkpts()['target'][0]
+        print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         for otherBrkpts in self.get_genomic_brkpts()['other']:
             nonTargetBrkptChr = otherBrkpts[0]
             nonTargetBrkptBps = otherBrkpts[1:]
+            print 'Non-target brkpts', nonTargetBrkptBps
             for nonTargetBrkptBp in nonTargetBrkptBps:
                 if nonTargetBrkptChr in discReads:
                     for p1, p2 in discReads[nonTargetBrkptChr]:
