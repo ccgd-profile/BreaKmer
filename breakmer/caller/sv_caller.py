@@ -81,8 +81,8 @@ class FilterValues:
             # Store the minimum value.
             outputValues['breakpointCoverages'] = self.brkptCoverages[0]
             outputValues['minSeqEdgeRealignmentPercent'] = min(self.flankMatchPercents)
-            outputValues['deletedSequences'] = self.deletedSequences
-            outputValues['insertedSequences'] = self.insertedSequences
+            outputValues['deletedSequences'] = self.deletedSeqs
+            outputValues['insertedSequences'] = self.insertedSeqs
         elif svType == 'rearrangement':
             outputValues['minBrkptKmers'] = self.minBrkptKmers
             outputValues['minSegmentLen'] = self.minSegmentLen
