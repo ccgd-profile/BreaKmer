@@ -262,7 +262,7 @@ class RealignValues:
 
             for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
                 print bSize, qStart, tStart
-                if bSize != '' or qStart != '' or tStart != '':
+                if bSize == '' or qStart == '' or tStart == '':
                     continue
                 qEnd = int(qStart) + int(bSize)
                 tEnd = int(tStart) + int(bSize)
