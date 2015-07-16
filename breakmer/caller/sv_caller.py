@@ -197,7 +197,7 @@ class SVResult:
         if svEvent.brkpts.diff_chr():
             # translocation event
             svEvent.set_brkpt_counts('trl')
-            varReads = self.contig.get_var_reads('sv')
+            varReads = svEvent.contig.get_var_reads('sv')
             self.discReadCount = varReads.check_inter_readcounts()
             self.svType = 'rearrangement'
             self.svSubtype = 'trl'
