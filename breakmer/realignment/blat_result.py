@@ -482,9 +482,9 @@ class BlatResult:
     def get_indel_seqs(self, seqType):
         """ """
         if seqType == 'del':
-            return ','.join(self.values['insertSeqs'])
-        elif seqType == 'ins':
             return ','.join(self.values['deletionSeqs'])
+        elif seqType == 'ins':
+            return ','.join(self.values['insertSeqs'])
 
     def set_sv_brkpt(self, coords, svType, targetKey):
         """ """
