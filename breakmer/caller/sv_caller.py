@@ -30,11 +30,15 @@ class FilterValues:
         self.maxMeanCoverage = None
         self.nReadStrands = None
         self.maxRealignmentGap = None
+        self.deletedSeqs = None
+        self.insertedSeqs = None
 
     def set_indel_values(self, blatResult, brkptCoverages):
         """ """
         self.resultMeanHitFreq = blatResult.meanCov
         self.maxEventSize = blatResult.indel_maxevent_size[0]
+        self.deletedSeqs = blatResult.get_indel_seqs('del')
+        self.insertedSeqs = blatResult.get_indel_seqs('ins')
         self.brkptCoverages = [min(brkptCoverages), max(brkptCoverages)]
         self.flankMatchPercents = []
         for flankMatch in blatResult.indel_flank_match:
@@ -77,6 +81,8 @@ class FilterValues:
             # Store the minimum value.
             outputValues['breakpointCoverages'] = self.brkptCoverages[0]
             outputValues['minSeqEdgeRealignmentPercent'] = min(self.flankMatchPercents)
+            outputValues['deletedSequences'] = self.deletedSequences
+            outputValues['insertedSequences'] = self.insertedSequences
         elif svType == 'rearrangement':
             outputValues['minBrkptKmers'] = self.minBrkptKmers
             outputValues['minSegmentLen'] = self.minSegmentLen

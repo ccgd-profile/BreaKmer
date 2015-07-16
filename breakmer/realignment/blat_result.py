@@ -257,17 +257,14 @@ class RealignValues:
                               }
 
             if scope == 'target':
-                print alignRefFn
                 alignRefSeq = open(alignRefFn, "rU")
                 record = SeqIO.read(alignRefSeq, "fasta")
                 ref_target_seq = str(record.seq)
-
-                print self.valueDict
-                qDiffs = []
-                tDiffs = []
+                insertSeqs = []
+                delSeqs = []
                 listIter = 0
                 for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
-                    print bSize, qStart, tStart
+                    # print bSize, qStart, tStart
                     if bSize == '' or qStart == '' or tStart == '':
                         continue
                     qEnd = int(qStart) + int(bSize)
@@ -276,19 +273,20 @@ class RealignValues:
                         qDiff = int(qStart) - qPrev
                         tDiff = int(tStart) - tPrev
                         if qDiff > 0:
-                            print qPrev, int(qStart)
-                            print 'Insertion sequence', querySeq[qPrev:int(qStart)]
-                            qDiffs.append(qDiff)
+                            # print qPrev, int(qStart)
+                            # print 'Insertion sequence', querySeq[qPrev:int(qStart)]
+                            insertSeqs.append(querySeq[qPrev:int(qStart)])
+                            # qDiffs.append(qDiff)
                         if tDiff > 0:
-                            print tPrev, int(tStart)
-                            print 'Deleted sequence in ref', ref_target_seq[tPrev:int(tStart)]
-                            tDiffs.append(tDiff)
+                            # print tPrev, int(tStart)
+                            # print 'Deleted sequence in ref', ref_target_seq[tPrev:int(tStart)]
+                            delSeqs.append(ref_target_seq[tPrev:int(tStart)])
+                            # tDiffs.append(tDiff)
                     qPrev = int(qEnd)
                     tPrev = int(tEnd)
                     listIter += 1
-                print qDiffs, tDiffs
-                # sys.exit()
-
+                self.valueDict['deletionSeqs'] = delSeqs
+                self.valueDict['insertSeqs'] = insertSeqs
         elif self.program == 'blast':
             self.valueDict = {'qName': values[0],
                               'tName': values[1].replace('chr', ''),
@@ -385,9 +383,8 @@ class RealignValues:
             self.valueDict['tNumInsert'] = tInserts[0]
             self.valueDict['qBaseInsert'] = qInserts[1]
             self.valueDict['tBaseInsert'] = tInserts[1]
-
-            print insertSeqs
-            print delSeqs
+            self.valueDict['deletionSeqs'] = delSeqs
+            self.valueDict['insertSeqs'] = insertSeqs
 
     def adjust_values(self, refName, offset):
         """
@@ -481,6 +478,13 @@ class BlatResult:
             self.ngaps = realignVals.valueDict['ngaps']
 
         self.set_indel_locs()
+
+    def get_indel_seqs(self, seqType):
+        """ """
+        if seqType == 'del':
+            return ','.join(self.values['insertSeqs'])
+        elif seqType == 'ins':
+            return ','.join(self.values['deletionSeqs'])
 
     def set_sv_brkpt(self, coords, svType, targetKey):
         """ """
