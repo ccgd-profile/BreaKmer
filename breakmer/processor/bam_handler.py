@@ -478,6 +478,34 @@ class discReads:
                         counts[i] += 1
         return max(counts)
 
+    def check_inter_readcounts(self, targetBrkptChr, targetBrkptBp, nonTargetBrkpts):
+        """ """
+        # counts = [0] * len(brkpts)
+        # for i in range(len(brkpts)):
+        #     b = brkpts[i]
+        #     if 'other' not in self.reads['intra']:
+        #         break
+        #     for strand in self.reads['intra']['other']:
+        #         lStrand, rStrand = strand.split(':')
+        #         strandReads = self.reads['intra']['other'][strand]
+        #         for dRead in strandReads:
+        #             if abs(dRead.pos[0] - b) <= 300 or abs(dRead.pos[1] - b) <= 300:
+        #                 counts[i] += 1
+        # return max(counts)
+        print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
+        print 'Read storage dict', self.reads['inter']
+        # for otherBrkpts in nonTargetBrkpts:
+        #     nonTargetBrkptChr = otherBrkpts[0]
+        #     nonTargetBrkptBps = otherBrkpts[1:]
+        #     print 'Non-target brkpts', nonTargetBrkptBps
+        #     for nonTargetBrkptBp in nonTargetBrkptBps:
+        #         if nonTargetBrkptChr in self.reads['inter']:
+        #             for p1, p2 in discReads[nonTargetBrkptChr]:
+        #                 d1 = abs(p1 - targetBrkptBp)
+        #                 d2 = abs(p2 - nonTargetBrkptBp)
+        #                 if d1 <= 1000 and d2 <= 1000:
+        #                     discReadCount += 1
+
 
 class VariantReadTracker:
     """A class to track the reads that are identified to be 'misaligned' to
