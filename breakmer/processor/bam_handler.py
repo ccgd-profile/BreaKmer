@@ -494,17 +494,19 @@ class discReads:
         # return max(counts)
         print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         print 'Read storage dict', self.reads['inter']
-        # for otherBrkpts in nonTargetBrkpts:
-        #     nonTargetBrkptChr = otherBrkpts[0]
-        #     nonTargetBrkptBps = otherBrkpts[1:]
-        #     print 'Non-target brkpts', nonTargetBrkptBps
-        #     for nonTargetBrkptBp in nonTargetBrkptBps:
-        #         if nonTargetBrkptChr in self.reads['inter']:
-        #             for p1, p2 in discReads[nonTargetBrkptChr]:
-        #                 d1 = abs(p1 - targetBrkptBp)
-        #                 d2 = abs(p2 - nonTargetBrkptBp)
-        #                 if d1 <= 1000 and d2 <= 1000:
-        #                     discReadCount += 1
+        for otherBrkpts in nonTargetBrkpts:
+            nonTargetBrkptChr = otherBrkpts[0]
+            nonTargetBrkptBps = otherBrkpts[1:]
+            print 'Non-target brkpts', nonTargetBrkptBps
+            for nonTargetBrkptBp in nonTargetBrkptBps:
+                if nonTargetBrkptChr in self.reads['inter']:
+                    for strand in self.reads['inter']:
+                        for discReadPair in self.reads['inter'][strand]:
+                            d1 = abs(targetBrkptBp - discReadPair.pos[0])
+                            d2 = abs(nonTargetBrkptBp - discReadPair.pos[1])
+                            print 'distances', d1, d2
+                            if d1 <= 1000 and d2 <= 1000:
+                                discReadCount += 1
 
 
 class VariantReadTracker:
