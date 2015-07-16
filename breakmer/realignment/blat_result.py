@@ -281,7 +281,7 @@ class RealignValues:
                 tPrev = int(tEnd)
                 listIter += 1
             print qDiffs, tDiffs
-            sys.exit()
+            # sys.exit()
 
         elif self.program == 'blast':
             self.valueDict = {'qName': values[0],
