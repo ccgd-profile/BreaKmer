@@ -497,7 +497,7 @@ class discReads:
         for otherBrkpts in nonTargetBrkpts:
             nonTargetBrkptChr = otherBrkpts[0]
             nonTargetBrkptBps = otherBrkpts[1:]
-            print 'Non-target brkpts', nonTargetBrkptBps
+            print 'Non-target brkpts', nonTargetBrkptChr, nonTargetBrkptBps
             for nonTargetBrkptBp in nonTargetBrkptBps:
                 if nonTargetBrkptChr in self.reads['inter']:
                     for strand in self.reads['inter']:
