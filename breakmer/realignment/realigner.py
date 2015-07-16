@@ -130,7 +130,7 @@ class Realignment:
         if not os.path.isfile(resultFn):
             return False
         else:
-            self.results = AlignResults(alignProgram, scope, resultFn, self.contig)
+            self.results = AlignResults(alignProgram, scope, resultFn, self.contig, alignRef)
             # print self.results.resultFn
             return True
 
@@ -173,7 +173,7 @@ class Realignment:
 
 
 class AlignResults:
-    def __init__(self, program, scope, alignResultFn, contig):
+    def __init__(self, program, scope, alignResultFn, contig, alignRefFn):
         self.loggingName = 'breakmer.realignment.realigner'
         self.resultFn = alignResultFn
         self.program = program
@@ -187,6 +187,7 @@ class AlignResults:
         self.sortedResults = []
         self.clippedQs = []
         self.contig = contig
+        self.alignRefFn = alignRefFn
         self.set_values()
 
     def set_values(self):
@@ -229,7 +230,7 @@ class AlignResults:
             if line.find('#') > -1:
                 continue
             line = line.strip()
-            parsedResult = blat_result.BlatResult(line.split('\t'), refName, offset, self.program)
+            parsedResult = blat_result.BlatResult(line.split('\t'), refName, offset, self.program, self.alignRefFn)
             parsedResult.in_target_region(self.contig.get_target_region_coordinates())
             # parsedBlatResult.set_gene_annotations(self.contig.get_target_region_coordinates(), self.contig.get_gene_annotations())
             # parsedBlatResult.set_repeats(self.contig.get_repeat_annotations())

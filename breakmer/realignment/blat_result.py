@@ -181,10 +181,10 @@ class AlignValues:
 
 
 class RealignValues:
-    def __init__(self, values, program):
+    def __init__(self, values, program, alignRefFn):
         self.program = program
         self.valueDict = {}
-        self.set_values(values)
+        self.set_values(values, alignRefFn)
 
     def set_values(self, values):
         """
@@ -253,6 +253,8 @@ class RealignValues:
                               'qStarts': values[19],
                               'tStarts': values[20]
                               }
+            print alignRefFn
+            sys.exit()
 
         elif self.program == 'blast':
             self.valueDict = {'qName': values[0],
@@ -377,7 +379,7 @@ class RealignValues:
 class BlatResult:
     """
     """
-    def __init__(self, resultValues, refName, offset, programName):
+    def __init__(self, resultValues, refName, offset, programName, alignRefFn):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
         self.values = None # self.set_values(blatResultValues, refName, offset)
@@ -409,16 +411,16 @@ class BlatResult:
         self.indel_sizes = []
         self.indel_maxevent_size = [0, '']
         self.indel_flank_match = [0, 0]
-        self.set_values(resultValues, refName, offset)
+        self.set_values(resultValues, refName, offset, alignRefFn)
 
-    def set_values(self, resultValues, refName, offset):
+    def set_values(self, resultValues, refName, offset, alignRefFn):
         """Modify the blat values if refName and offset are not None
         Args:
             resultValues:  List of values from a realignment program
             refName:       String of chromosome AlignFragments
             offset:        Integer of genomic position for target alignment
         """
-        realignVals = RealignValues(resultValues, self.realignProgram)
+        realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn)
         realignVals.adjust_values(refName, offset)
 
         self.values = realignVals.valueDict
