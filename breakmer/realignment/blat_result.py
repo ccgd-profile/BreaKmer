@@ -186,7 +186,7 @@ class RealignValues:
         self.valueDict = {}
         self.set_values(values, alignRefFn)
 
-    def set_values(self, values):
+    def set_values(self, values, alignRefFn):
         """
         BLAT values
         1. matches - Number of matching bases that aren't repeats.
