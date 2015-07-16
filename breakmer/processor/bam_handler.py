@@ -501,8 +501,8 @@ class discReads:
             for nonTargetBrkptBp in nonTargetBrkptBps:
                 print 'non-target brkpt', nonTargetBrkptBp
                 if nonTargetBrkptChr in self.reads['inter']:
-                    for strand in self.reads['inter']:
-                        for discReadPair in self.reads['inter'][strand]:
+                    for strand in self.reads['inter'][nonTargetBrkptChr]:
+                        for discReadPair in self.reads['inter'][nonTargetBrkptChr][strand]:
                             d1 = abs(targetBrkptBp - discReadPair.pos[0])
                             d2 = abs(nonTargetBrkptBp - discReadPair.pos[1])
                             print 'distances', d1, d2
