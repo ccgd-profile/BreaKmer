@@ -253,7 +253,9 @@ class RealignValues:
                               'blockCount': int(values[17]),
                               'blockSizes': values[18],
                               'qStarts': values[19],
-                              'tStarts': values[20]
+                              'tStarts': values[20],
+                              'deletionSeqs': '',
+                              'insertSeqs': ''
                               }
 
             if scope == 'target':
@@ -315,7 +317,9 @@ class RealignValues:
                               'blockCount': None,
                               'blockSizes': None,
                               'qStarts': None,
-                              'tStarts': None
+                              'tStarts': None,
+                              'deletionSeqs': '',
+                              'insertSeqs': ''
                               }
 
             if self.valueDict['strand'] == 'plus':
