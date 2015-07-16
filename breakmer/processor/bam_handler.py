@@ -713,3 +713,7 @@ class VariantReadTracker:
     def check_other_readcounts(self, brkpts):
         """ """
         return self.discReadTracker.check_other_readcounts(brkpts)
+
+    def check_inter_readcounts(self, targetChr, targetBps, nonTargetBrkpts):
+        """ """
+        return self.discReadTracker.check_inter_readcounts(targetChr, targetBps, nonTargetBrkpts)

@@ -197,8 +197,7 @@ class SVResult:
         if svEvent.brkpts.diff_chr():
             # translocation event
             svEvent.set_brkpt_counts('trl')
-            varReads = svEvent.contig.get_var_reads('sv')
-            self.discReadCount = varReads.check_inter_readcounts()
+            self.discReadCount = svEvent.get_disc_read_count()
             self.svType = 'rearrangement'
             self.svSubtype = 'trl'
             self.filterValues.set_trl_values(svEvent)
@@ -621,23 +620,25 @@ class SVEvent:
     def get_disc_read_count(self):
         """
         """
-        discReads = self.contig.get_disc_reads()
+        varReads = self.contig.get_var_reads('sv')
+        # discReads = self.contig.get_disc_reads()
         discReadCount = 0
         # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
         targetBrkptChr, targetBrkptBp = self.get_genomic_brkpts()['target'][0]
-        print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
-        for otherBrkpts in self.get_genomic_brkpts()['other']:
-            nonTargetBrkptChr = otherBrkpts[0]
-            nonTargetBrkptBps = otherBrkpts[1:]
-            print 'Non-target brkpts', nonTargetBrkptBps
-            for nonTargetBrkptBp in nonTargetBrkptBps:
-                if nonTargetBrkptChr in discReads:
-                    for p1, p2 in discReads[nonTargetBrkptChr]:
-                        d1 = abs(p1 - targetBrkptBp)
-                        d2 = abs(p2 - nonTargetBrkptBp)
-                        if d1 <= 1000 and d2 <= 1000:
-                            discReadCount += 1
-        return discReadCount
+        varReads.check_inter_readcounts(targetBrkptChr, targetBrkptBp, self.get_genomic_brkpts()['other'])
+        # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
+        # for otherBrkpts in self.get_genomic_brkpts()['other']:
+        #     nonTargetBrkptChr = otherBrkpts[0]
+        #     nonTargetBrkptBps = otherBrkpts[1:]
+        #     print 'Non-target brkpts', nonTargetBrkptBps
+        #     for nonTargetBrkptBp in nonTargetBrkptBps:
+        #         if nonTargetBrkptChr in discReads:
+        #             for p1, p2 in discReads[nonTargetBrkptChr]:
+        #                 d1 = abs(p1 - targetBrkptBp)
+        #                 d2 = abs(p2 - nonTargetBrkptBp)
+        #                 if d1 <= 1000 and d2 <= 1000:
+        #                     discReadCount += 1
+        # return discReadCount
 
     def get_brkpt_str(self, targetKey=None):
         """ """
