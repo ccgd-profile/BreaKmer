@@ -3,6 +3,7 @@
 
 import math
 import sys
+from Bio import SeqIO
 import breakmer.utils as utils
 
 __author__ = "Ryan Abo"
@@ -182,12 +183,12 @@ class AlignValues:
 
 
 class RealignValues:
-    def __init__(self, values, program, alignRefFn):
+    def __init__(self, values, program, alignRefFn, querySeq):
         self.program = program
         self.valueDict = {}
-        self.set_values(values, alignRefFn)
+        self.set_values(values, alignRefFn, querySeq)
 
-    def set_values(self, values, alignRefFn):
+    def set_values(self, values, alignRefFn, querySeq):
         """
         BLAT values
         1. matches - Number of matching bases that aren't repeats.
@@ -255,6 +256,13 @@ class RealignValues:
                               'tStarts': values[20]
                               }
             print alignRefFn
+            alignRefSeq = open(alignRefFn, "rU")
+            record = SeqIO.read(alignRefSeq, "fasta")
+            ref_target_seq = str(record.seq)
+
+            for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
+                print bSize, qStart, tStart
+
             sys.exit()
 
         elif self.program == 'blast':
@@ -380,7 +388,7 @@ class RealignValues:
 class BlatResult:
     """
     """
-    def __init__(self, resultValues, refName, offset, programName, alignRefFn):
+    def __init__(self, resultValues, refName, offset, programName, alignRefFn, querySeq):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
         self.values = None # self.set_values(blatResultValues, refName, offset)
@@ -412,16 +420,16 @@ class BlatResult:
         self.indel_sizes = []
         self.indel_maxevent_size = [0, '']
         self.indel_flank_match = [0, 0]
-        self.set_values(resultValues, refName, offset, alignRefFn)
+        self.set_values(resultValues, refName, offset, alignRefFn, querySeq)
 
-    def set_values(self, resultValues, refName, offset, alignRefFn):
+    def set_values(self, resultValues, refName, offset, alignRefFn, querySeq):
         """Modify the blat values if refName and offset are not None
         Args:
             resultValues:  List of values from a realignment program
             refName:       String of chromosome AlignFragments
             offset:        Integer of genomic position for target alignment
         """
-        realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn)
+        realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq)
         realignVals.adjust_values(refName, offset)
 
         self.values = realignVals.valueDict
