@@ -261,14 +261,26 @@ class RealignValues:
             ref_target_seq = str(record.seq)
 
             print self.valueDict
+            qDiffs = []
+            tDiffs = []
+            listIter = 0
             for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
                 print bSize, qStart, tStart
                 if bSize == '' or qStart == '' or tStart == '':
                     continue
                 qEnd = int(qStart) + int(bSize)
                 tEnd = int(tStart) + int(bSize)
-                print qEnd, tEnd
-
+                if listIter > 0:
+                    qDiff = qStart - qPrev
+                    tDiff = tStart - tPrev
+                    if qDiff > 0:
+                        qDiffs.append(qDiff)
+                    if tDiff > 0:
+                        tDiffs.append(tDiff)
+                qPrev = qEnd
+                tPrev = tEnd
+                listIter += 1
+            print qDiffs, tDiffs
             sys.exit()
 
         elif self.program == 'blast':
