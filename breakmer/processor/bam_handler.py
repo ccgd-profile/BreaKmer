@@ -509,6 +509,7 @@ class discReads:
                             print 'distances', d1, d2
                             if d1 <= 1000 and d2 <= 1000:
                                 discReadCount += 1
+        return discReadCount
 
 
 class VariantReadTracker:
