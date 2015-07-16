@@ -302,6 +302,8 @@ class RealignValues:
             tIter = self.valueDict['tStart']
             qInserts = [0, 0]
             tInserts = [0, 0]
+            insertSeqs = []
+            delSeqs = []
             for qNuc, tNuc in zip(self.valueDict['qSeq'], self.valueDict['tSeq']):
                 # print qNuc, tNuc, blockSize, qStarts, tStarts, gap, previous, qIter, tIter
                 if qNuc != '-' and tNuc != '-':
@@ -325,11 +327,17 @@ class RealignValues:
                         tIter += 1
                         if startOfGap:
                             tInserts[0] += 1
+                            delSeqs.append(tNuc)
+                        else:
+                            delSeqs[-1] += tNuc
                         tInserts[1] += 1
                     elif tNuc == '-':
                         qIter += 1
                         if startOfGap:
                             qInserts[0] += 1
+                            insertSeqs.append(qNuc)
+                        else:
+                            insertSeqs[-1] += qNuc
                         qInserts[1] += 1
                     gap += 1
             if blockSize is not None:
@@ -342,6 +350,9 @@ class RealignValues:
             self.valueDict['tNumInsert'] = tInserts[0]
             self.valueDict['qBaseInsert'] = qInserts[1]
             self.valueDict['tBaseInsert'] = tInserts[1]
+
+            print insertSeqs
+            print delSeqs
 
     def adjust_values(self, refName, offset):
         """
@@ -356,8 +367,8 @@ class RealignValues:
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
-        self.valueDict['tStart'] = coordOffset + int( self.valueDict['tStart'])
-        self.valueDict['tEnd'] = coordOffset + int( self.valueDict['tEnd'])
+        self.valueDict['tStart'] = coordOffset + int(self.valueDict['tStart'])
+        self.valueDict['tEnd'] = coordOffset + int(self.valueDict['tEnd'])
 
         tstarts = [coordOffset + int(x) for x in self.valueDict['tStarts'].rstrip(",").split(",")]
         self.valueDict['tStarts'] = ",".join([str(x) for x in tstarts]) + ","
