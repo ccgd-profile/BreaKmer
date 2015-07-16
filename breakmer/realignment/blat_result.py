@@ -183,12 +183,12 @@ class AlignValues:
 
 
 class RealignValues:
-    def __init__(self, values, program, alignRefFn, querySeq):
+    def __init__(self, values, program, alignRefFn, querySeq, scope):
         self.program = program
         self.valueDict = {}
-        self.set_values(values, alignRefFn, querySeq)
+        self.set_values(values, alignRefFn, querySeq, scope)
 
-    def set_values(self, values, alignRefFn, querySeq):
+    def set_values(self, values, alignRefFn, querySeq, scope):
         """
         BLAT values
         1. matches - Number of matching bases that aren't repeats.
@@ -255,33 +255,35 @@ class RealignValues:
                               'qStarts': values[19],
                               'tStarts': values[20]
                               }
-            print alignRefFn
-            alignRefSeq = open(alignRefFn, "rU")
-            record = SeqIO.read(alignRefSeq, "fasta")
-            ref_target_seq = str(record.seq)
 
-            print self.valueDict
-            qDiffs = []
-            tDiffs = []
-            listIter = 0
-            for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
-                print bSize, qStart, tStart
-                if bSize == '' or qStart == '' or tStart == '':
-                    continue
-                qEnd = int(qStart) + int(bSize)
-                tEnd = int(tStart) + int(bSize)
-                if listIter > 0:
-                    qDiff = int(qStart) - qPrev
-                    tDiff = int(tStart) - tPrev
-                    if qDiff > 0:
-                        qDiffs.append(qDiff)
-                    if tDiff > 0:
-                        tDiffs.append(tDiff)
-                qPrev = int(qEnd)
-                tPrev = int(tEnd)
-                listIter += 1
-            print qDiffs, tDiffs
-            # sys.exit()
+            if scope == 'target':
+                print alignRefFn
+                alignRefSeq = open(alignRefFn, "rU")
+                record = SeqIO.read(alignRefSeq, "fasta")
+                ref_target_seq = str(record.seq)
+
+                print self.valueDict
+                qDiffs = []
+                tDiffs = []
+                listIter = 0
+                for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
+                    print bSize, qStart, tStart
+                    if bSize == '' or qStart == '' or tStart == '':
+                        continue
+                    qEnd = int(qStart) + int(bSize)
+                    tEnd = int(tStart) + int(bSize)
+                    if listIter > 0:
+                        qDiff = int(qStart) - qPrev
+                        tDiff = int(tStart) - tPrev
+                        if qDiff > 0:
+                            qDiffs.append(qDiff)
+                        if tDiff > 0:
+                            tDiffs.append(tDiff)
+                    qPrev = int(qEnd)
+                    tPrev = int(tEnd)
+                    listIter += 1
+                print qDiffs, tDiffs
+                # sys.exit()
 
         elif self.program == 'blast':
             self.valueDict = {'qName': values[0],
@@ -406,7 +408,7 @@ class RealignValues:
 class BlatResult:
     """
     """
-    def __init__(self, resultValues, refName, offset, programName, alignRefFn, querySeq):
+    def __init__(self, resultValues, refName, offset, programName, alignRefFn, querySeq, scope):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
         self.values = None # self.set_values(blatResultValues, refName, offset)
@@ -438,16 +440,16 @@ class BlatResult:
         self.indel_sizes = []
         self.indel_maxevent_size = [0, '']
         self.indel_flank_match = [0, 0]
-        self.set_values(resultValues, refName, offset, alignRefFn, querySeq)
+        self.set_values(resultValues, refName, offset, alignRefFn, querySeq, scope)
 
-    def set_values(self, resultValues, refName, offset, alignRefFn, querySeq):
+    def set_values(self, resultValues, refName, offset, alignRefFn, querySeq, scope):
         """Modify the blat values if refName and offset are not None
         Args:
             resultValues:  List of values from a realignment program
             refName:       String of chromosome AlignFragments
             offset:        Integer of genomic position for target alignment
         """
-        realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq)
+        realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq, scope)
         realignVals.adjust_values(refName, offset)
 
         self.values = realignVals.valueDict
