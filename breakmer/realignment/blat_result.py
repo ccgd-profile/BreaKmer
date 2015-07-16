@@ -277,8 +277,8 @@ class RealignValues:
                         qDiffs.append(qDiff)
                     if tDiff > 0:
                         tDiffs.append(tDiff)
-                qPrev = qEnd
-                tPrev = tEnd
+                qPrev = int(qEnd)
+                tPrev = int(tEnd)
                 listIter += 1
             print qDiffs, tDiffs
             sys.exit()
