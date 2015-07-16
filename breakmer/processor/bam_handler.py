@@ -495,7 +495,7 @@ class discReads:
         print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         print 'Read storage dict', self.reads['inter']
         for otherBrkpts in nonTargetBrkpts:
-            nonTargetBrkptChr = otherBrkpts[0]
+            nonTargetBrkptChr = otherBrkpts[0].replace('chr', '')
             nonTargetBrkptBps = otherBrkpts[1:]
             print 'Non-target brkpts', nonTargetBrkptChr, nonTargetBrkptBps
             for nonTargetBrkptBp in nonTargetBrkptBps:
