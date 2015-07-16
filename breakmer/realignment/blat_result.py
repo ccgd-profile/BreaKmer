@@ -260,6 +260,7 @@ class RealignValues:
             record = SeqIO.read(alignRefSeq, "fasta")
             ref_target_seq = str(record.seq)
 
+            print self.valueDict
             for bSize, qStart, tStart in zip(self.valueDict['blockSizes'].split(','), self.valueDict['qStarts'].split(','), self.valueDict['tStarts'].split(',')):
                 print bSize, qStart, tStart
                 if bSize == '' or qStart == '' or tStart == '':
