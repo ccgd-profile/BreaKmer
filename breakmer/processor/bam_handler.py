@@ -492,6 +492,7 @@ class discReads:
         #             if abs(dRead.pos[0] - b) <= 300 or abs(dRead.pos[1] - b) <= 300:
         #                 counts[i] += 1
         # return max(counts)
+        discReadCount = 0
         print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         print 'Read storage dict', self.reads['inter']
         for otherBrkpts in nonTargetBrkpts:
