@@ -245,6 +245,9 @@ class AlignResults:
         for i, blatResult in enumerate(self.sortedResults):
             blatResult.set_mean_cov(self.get_mean_cov(blatResult.qstart(), blatResult.qend()))
 
+        if len(self.results) == 0:
+            self.hasResults = False
+
     # def parse_blast_results(self):
     #     """ """
     #     refName = None
