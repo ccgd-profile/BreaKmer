@@ -921,7 +921,8 @@ class Contig:
         if self.svEventResult:
             self.meta.write_result(self.svEventResult, outputPath)
             readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
-            if self.meta.params.get_param('generate_image'):
+            if self.meta.params.get_param('generate_image') and not self.svEventResult.is_filtered():
+                # Generate image if option is set and the result is not being filtered out.
                 svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 
     def get_total_read_support(self):

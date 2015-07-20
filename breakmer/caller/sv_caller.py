@@ -337,6 +337,10 @@ class SVResult:
         outListStr.append(formattedFilterValsStr)
         return ('\t'.join(headerStr), '\t'.join(outListStr))
 
+    def is_filtered(self):
+        """ """
+        return self.filtered['status']
+
     # def format_result(self, values):
     #     res_lst = []
     #     if values:
@@ -794,6 +798,9 @@ class SVEvent:
         utils.log(self.loggingName, 'debug', 'Calculated %f missing coverage of blat query sequence at beginning and end' % percentMissing)
         return percentMissing
 
+    def is_filtered(self):
+        """"""
+        return self.resultValues.is_filtered()
 
 class ContigCaller:
     """
