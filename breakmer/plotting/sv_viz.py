@@ -831,8 +831,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        # print 'sv_viz.py plot_annotation_track segment', i
-        # print 'sv_viz.py plot_annotation_track segment', segmentTuple
+        print 'sv_viz.py plot_annotation_track segment', i
+        print 'sv_viz.py plot_annotation_track segment', segmentTuple
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
@@ -842,10 +842,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
-        # print 'segment position', segmentPos, 'segmentStrand', segment.strand
+        print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        # print 'Segment transcript ids', segTrxIds
+        print 'Segment transcript ids', segTrxIds
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
