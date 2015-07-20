@@ -50,6 +50,7 @@ def analyze_targets(targetList):
     """
     aggregateResults = {'contigs': [], 'discreads': []}
     for targetRegion in targetList:
+        print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         # If only presetting data stop here.

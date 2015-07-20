@@ -909,7 +909,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
             trxElements = []
 
-            # print 'Plot exons', plotExons
+            print 'Plot exons', plotExons
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
@@ -951,6 +951,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
+                        print 'trxElements', exon, trxElements
                 if exon[3] is not None:
                     if i == (len(plotExons) - 1) and segmentPos == 'first':
                         start += binSize
