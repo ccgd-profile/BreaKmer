@@ -208,7 +208,7 @@ class AlignSegments:
 def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
     """ """
     segmentManager = AlignSegments(svEventResult)
-    print 'sv_viz.py svEvent output', svEventResult.get_formatted_output_values()
+    # print 'sv_viz.py svEvent output', svEventResult.get_formatted_output_values()
     bamFile = pysam.Samfile(bamReadsFn, "rb")
     segmentManager.set_orderedseqs(pile_reads(bamFile.fetch(), svEventResult.contig.seq))
     plot_pileup(segmentManager, os.path.join(outPath, contigId))
@@ -244,7 +244,7 @@ def plot_pileup(segmentManager, outName):
     #     plotHeight = 20
 
     # Setup figure
-    print 'Plot height', plotHeight
+    # print 'Plot height', plotHeight
     fig = plt.figure(figsize=(35, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
@@ -404,8 +404,8 @@ def plot_indel_track(ax, yCoord, xOffset, segmentManager):
     """ """
     for i, segment in enumerate(segmentManager.segments):
         indelCoordinates = segment.indelCoordinates
-        print 'Indel coordinates', indelCoordinates
-        print 'Indel', segment.indelSizes
+        # print 'Indel coordinates', indelCoordinates
+        # print 'Indel', segment.indelSizes
         yCoord = yCoord + ((i + 0.75) * 0.50)
         for j, coord in enumerate(indelCoordinates):
             xCoord = xOffset + coord[0]
@@ -615,7 +615,7 @@ class AnnotationBrkpt:
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 selectedExons[bpCoord]['maxmincoords'] = maxminCoords
-        print 'Selected exons', selectedExons
+        # print 'Selected exons', selectedExons
         return selectedExons
 
 
@@ -648,16 +648,16 @@ def get_neighbor_exons(exons):
     bpExonBuffer = {}
     currentBp = None
     bpOverlaps = []
-    print 'Get neighbor exons', exons
+    # print 'Get neighbor exons', exons
     for exon in exons:
-        print 'Getting neighboring exons', exon
+        # print 'Getting neighboring exons', exon
         start, end, name, bpOverlapCoord = exon
         if name == 'breakpoint':
             bpExonBuffer[start] = {'left': leftExonBuffer, 'right': rightExonBuffer, 'add_to_list': False}
             currentBp = start
-            print 'Breakpoint saved with leftExonBuffer', leftExonBuffer
+            # print 'Breakpoint saved with leftExonBuffer', leftExonBuffer
             leftExonBuffer = []
-            print 'Current bp is', start
+            # print 'Current bp is', start
         elif currentBp is None:
             leftExonBuffer.append(exon)
             if bpOverlapCoord is not None:

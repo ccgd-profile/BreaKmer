@@ -802,6 +802,7 @@ class SVEvent:
         """"""
         return self.resultValues.is_filtered()
 
+
 class ContigCaller:
     """
     """

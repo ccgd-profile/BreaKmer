@@ -435,21 +435,21 @@ class discReads:
         brkpt2 = max(brkpts)
         counts = 0
         bpBuffer = 50
-        print 'Inversion reads', self.reads['intra']['inv']
-        print 'Brkpts', brkpts
+        # print 'Inversion reads', self.reads['intra']['inv']
+        # print 'Brkpts', brkpts
         for strand in self.reads['intra']['inv']:
             lStrand, rStrand = strand.split(':')
             strandReads = self.reads['intra']['inv'][strand]
             for dRead in strandReads:
-                print strand, dRead.pos
+                # print strand, dRead.pos
                 if lStrand == '+' and rStrand == '+':
                     if (dRead.pos[0] <= (brkpt1 + bpBuffer)) and (dRead.pos[1] <= (brkpt2 + bpBuffer) and dRead.pos[1] >= (brkpt1 - bpBuffer)):
                         counts += 1
                 else:
-                    print dRead.pos, brkpt1, brkpt2
+                    # print dRead.pos, brkpt1, brkpt2
                     if (dRead.pos[0] <= (brkpt2 + bpBuffer) and dRead.pos[0] >= (brkpt1 - bpBuffer)) and dRead.pos[1] >= (brkpt2 - bpBuffer):
                         counts += 1
-        print 'Counts', counts
+        # print 'Counts', counts
         return counts
 
     def check_td_readcounts(self, brkpts):
@@ -493,20 +493,20 @@ class discReads:
         #                 counts[i] += 1
         # return max(counts)
         discReadCount = 0
-        print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
-        print 'Read storage dict', self.reads['inter']
+        # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
+        # print 'Read storage dict', self.reads['inter']
         for otherBrkpts in nonTargetBrkpts:
             nonTargetBrkptChr = otherBrkpts[0].replace('chr', '')
             nonTargetBrkptBps = otherBrkpts[1:]
-            print 'Non-target brkpts', nonTargetBrkptChr, nonTargetBrkptBps
+            # print 'Non-target brkpts', nonTargetBrkptChr, nonTargetBrkptBps
             for nonTargetBrkptBp in nonTargetBrkptBps:
-                print 'non-target brkpt', nonTargetBrkptBp
+                # print 'non-target brkpt', nonTargetBrkptBp
                 if nonTargetBrkptChr in self.reads['inter']:
                     for strand in self.reads['inter'][nonTargetBrkptChr]:
                         for discReadPair in self.reads['inter'][nonTargetBrkptChr][strand]:
                             d1 = abs(targetBrkptBp - discReadPair.pos[0])
                             d2 = abs(nonTargetBrkptBp - discReadPair.pos[1])
-                            print 'distances', d1, d2
+                            # print 'distances', d1, d2
                             if d1 <= 1000 and d2 <= 1000:
                                 discReadCount += 1
         return discReadCount

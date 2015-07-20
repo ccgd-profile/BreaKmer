@@ -485,7 +485,7 @@ class BlatResult:
 
     def get_indel_seqs(self, seqType):
         """ """
-        print self.values
+        # print self.values
         if seqType == 'del':
             return ','.join(self.values['deletionSeqs'])
         elif seqType == 'ins':
