@@ -845,7 +845,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        print 'Segment transcript ids', segTrxIds
+        print 'Segment transcript ids', segTrxIds, segTrxs
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
