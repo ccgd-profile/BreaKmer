@@ -921,7 +921,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     height = 5
                     color = 'black'
                     exonStr = ''
-                    if i == (len(plotExons) - 1) and segmentPos == 'last':
+                    if i == (len(plotExons) - 1) and segmentPos == 'first':
                         start += binSize #- rectLen
                     minCoord = 0.2
                     if segTrx.svType != 'rearrangement':
