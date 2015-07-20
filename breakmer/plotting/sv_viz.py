@@ -615,7 +615,7 @@ class AnnotationBrkpt:
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 selectedExons[bpCoord]['maxmincoords'] = maxminCoords
-        # print 'Selected exons', selectedExons
+        print 'Selected exons', selectedExons
         return selectedExons
 
 
