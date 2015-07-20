@@ -573,7 +573,7 @@ class AnnotationBrkpt:
                 firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
                 bpOverlap = [False, None]
                 for exon in exons:
-                    print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
+                    print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode, estart, estop
                     add = False
                     estart = int(exon.start)
                     estop = int(exon.stop)
