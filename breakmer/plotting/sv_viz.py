@@ -952,7 +952,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
                 if exon[3] is not None:
-                    if i == (len(plotExons) - 1):
+                    if i == (len(plotExons) - 1) and segmentPos == 'first':
                         start += binSize
                     minCoord = 0.2
                     if segTrx.svType != 'rearrangement':
