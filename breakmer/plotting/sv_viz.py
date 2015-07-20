@@ -578,7 +578,7 @@ class AnnotationBrkpt:
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    print 'Exoncoords', exonCoords
+                    print 'Exoncoords', exonCoords, bpCoord
                     if (exonCode == 'left') and (estart <= bpCoord):
                         # Get all exons with start < bp
                         if bpCoord < estop:
