@@ -209,10 +209,12 @@ class AlignResults:
 
     def target_hit(self):
         """ """
-        cond1 = self.results[0].spans_query() and (self.ngaps > 0)
-        cond2 = (len(self.results) == 1) and self.get_query_coverage() >= 90.0 and (self.ngaps > 0)
-        cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
-        targetHit = cond1 or cond2 or cond3
+        targetHit = False
+        if self.hasResults:
+            cond1 = self.results[0].spans_query() and (self.ngaps > 0)
+            cond2 = (len(self.results) == 1) and self.get_query_coverage() >= 90.0 and (self.ngaps > 0)
+            cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
+            targetHit = cond1 or cond2 or cond3
         # print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % targetHit)
         return targetHit
