@@ -858,7 +858,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxOffset += 3
         segTrxIter = 0
         for segTrx in segTrxs:
-            # print 'segTRX svtype', segTrx.svType
+            print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
                 segLen = segLen - 3
                 for i in range(3):
