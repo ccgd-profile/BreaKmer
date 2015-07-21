@@ -76,6 +76,7 @@ class ResultFilter:
         if svEvent.svType == 'indel':
             self.filter_indel(svEvent)
         elif svEvent.svType == 'trl':
+            print 'Checking trl filters'
             self.filter_trl(svEvent)
         elif svEvent.svType == 'rearr':
             self.filter_rearr(svEvent)
@@ -201,6 +202,7 @@ class ResultFilter:
                 nStrictFiltersFail += 1
 
         svFilterValues = svEvent.resultValues.filterValues
+        print 'max breakpoint coverages', maxBrkptCoverages
         if not maxBrkptCoverages:
             logMsg = 'Maximum breakpoint coverages (%d) did not meet input threshold %d.' % (svFilterValues.brkptCoverages[1], self.params.get_sr_thresh('trl'))
             utils.log(self.loggingName, 'info', logMsg)
