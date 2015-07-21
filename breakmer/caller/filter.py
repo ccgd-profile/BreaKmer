@@ -153,6 +153,7 @@ class ResultFilter:
         # filter = (min(brkpt_counts['n']) < params.get_sr_thresh('rearrangement')) or self.blatResultsSorted[0][1] < params.get_min_segment_length('rearr') or (in_ff and span_ff) or (disc_read_count < 1) or (rearr_type == 'rearrangement') or (min(brkpt_kmers) == 0)
         svFilterValues = svEvent.resultValues.filterValues
         print self.params.get_sr_thresh('rearrangement')
+        print svFilterValues.brkptCoverages
         missingQueryCoverage = svFilterValues.missingQueryCoverage >= self.params.get_min_segment_length('rearr')
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
         minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
