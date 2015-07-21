@@ -185,17 +185,18 @@ class ResultFilter:
             svEvent.set_filtered(','.join(filteredReasons))
 
     def filter_trl(self, svEvent):
-        maxBrkptCoverages = svEvent.filterValues.brkptCoverages[1] >= self.params.get_sr_thresh('trl')
-        minBrkptCoverages = svEvent.filterValues.brkptCoverages[0] >= self.params.get_sr_thresh('trl')
+        svFilterValues = svEvent.resultValues.filterValues
+        maxBrkptCoverages = svFilterValues.brkptCoverages[1] >= self.params.get_sr_thresh('trl')
+        minBrkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('trl')
         discReadCount = svEvent.discReadCount
-        minSegmentLen = svEvent.filterValues.minSegmentLen >= self.params.get_min_segment_length('trl')
+        minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('trl')
         minBrkptKmers = svEvent.minBrkptKmers > 0
-        minSeqComplexity = svEvent.filterValues.seqComplexity >= 25.0
-        startEndMissingQueryCoverage = svEvent.filterValues.startEndMissingQueryCoverage <= 5.0
-        maxSegmentOverlap = svEvent.filterValues.maxSegmentOverlap < 5
-        maxMeanHitFreq = svEvent.filterValues.maxMeanCoverage < 10
-        nReadStrands = svEvent.filterValues.nReadStrands > 1
-        maxRealignmentGaps = svEvent.filterValues.maxRealignmentGaps
+        minSeqComplexity = svFilterValues.seqComplexity >= 25.0
+        startEndMissingQueryCoverage = svFilterValues.startEndMissingQueryCoverage <= 5.0
+        maxSegmentOverlap = svFilterValues.maxSegmentOverlap < 5
+        maxMeanHitFreq = svFilterValues.maxMeanCoverage < 10
+        nReadStrands = svFilterValues.nReadStrands > 1
+        maxRealignmentGaps = svFilterValues.maxRealignmentGaps
 
         strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxMeanHitFreq, nReadStrands]
         nStrictFiltersFail = 0
@@ -203,7 +204,6 @@ class ResultFilter:
             if not f:
                 nStrictFiltersFail += 1
 
-        svFilterValues = svEvent.resultValues.filterValues
         print 'max breakpoint coverages', maxBrkptCoverages
         if not maxBrkptCoverages:
             logMsg = 'Maximum breakpoint coverages (%d) did not meet input threshold %d.' % (svFilterValues.brkptCoverages[1], self.params.get_sr_thresh('trl'))
