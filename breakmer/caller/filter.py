@@ -76,11 +76,12 @@ class ResultFilter:
         print 'check filters', svEvent.resultValues.svType, svEvent.resultValues.svSubtype
         if svEvent.svType == 'indel':
             self.filter_indel(svEvent)
-        elif svEvent.svType == 'trl':
-            print 'Checking trl filters'
-            self.filter_trl(svEvent)
-        elif svEvent.svType == 'rearr':
-            self.filter_rearr(svEvent)
+        elif svEvent.resultValues.svType == 'rearrangement':
+            if svEvent.resultValues.svSubtype == 'trl':
+                print 'Checking trl filters'
+                self.filter_trl(svEvent)
+            else:
+                self.filter_rearr(svEvent)
 
     def check_defined_filters(self, svEvent):
         """The event must match
