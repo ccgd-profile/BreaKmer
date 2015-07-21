@@ -155,8 +155,8 @@ class ResultFilter:
         missingQueryCoverage = svFilterValues.missingQueryCoverage >= self.params.get_min_segment_length('rearr')
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
         minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
-        discReadCount = svEvent.discReadCount >= 1
-        minBrkptKmers = svEvent.minBrkptKmers > 0
+        discReadCount = svEvent.resultValues.discReadCount >= 1
+        minBrkptKmers = svFilterValues.minBrkptKmers > 0
 
         if brkptCoverages and minSegmentLen and discReadCount and minBrkptKmers:
             utils.log(self.loggingName, 'info', 'Rearrangement meets basic filtering requirements.')
