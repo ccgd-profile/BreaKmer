@@ -793,7 +793,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     rectLen = 0.5
                     height = 5
                     exonStr = ''
-                    if i == (len(newExons) - 1):
+                    if i == (len(newExons) - 1) and segmentPos == 'first':
                         start += binSize
                     ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
