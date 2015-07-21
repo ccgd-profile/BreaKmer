@@ -772,17 +772,10 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
             # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
-            tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
-            tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
-            ax.text(trxOffset, yCoord - 0.35, tStart, ha='left', va='center', size=8)
-            ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
-            exonLabel = 'exon1'
-            if trx.strand == '-':
-                exonLabel = 'exon' + str(len(exons))
-            ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
             print 'New exons', newExons
             print 'Offset', offset, binSize
+            exonHit = False
             for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
@@ -805,15 +798,26 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                 if exonStr != '':
-                    exstart = exon[0]
-                    exend = exon[1]
-                    if segment.strand == '-':
-                        exstart = exon[1]
-                        exend = exon[0]
-                    exstart = segment.chromName + ':' + str(exstart)
-                    exend = segment.chromName + ':' + str(exend)
-                    ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
+                    if not exonHit:
+                        tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
+                        tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
+                        ax.text(trxOffset, yCoord - 0.35, tStart, ha='left', va='center', size=8)
+                        ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
+                        exonLabel = 'exon1'
+                        if trx.strand == '-':
+                            exonLabel = 'exon' + str(len(exons))
+                        ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
+                        exonHit = True
+
+                    # exstart = exon[0]
+                    # exend = exon[1]
+                    # if segment.strand == '-':
+                    #     exstart = exon[1]
+                    #     exend = exon[0]
+                    # exstart = segment.chromName + ':' + str(exstart)
+                    # exend = segment.chromName + ':' + str(exend)
+                    # ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
+                    # ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
