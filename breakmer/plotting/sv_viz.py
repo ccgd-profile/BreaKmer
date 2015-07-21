@@ -782,7 +782,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
             print 'New exons', newExons
-            print 'Offset', offset
+            print 'Offset', offset, binSize
             for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
