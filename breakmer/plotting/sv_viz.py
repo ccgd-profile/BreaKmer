@@ -43,8 +43,10 @@ class AnnoTrx:
 def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx, svType):
     if trx.id in trxIds:
         idx = trxIds.index(trx.id)
+        print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
         trxItems[idx].add_brkpt(trxDist, svBreakpoint, brkptIdx, svType)
     else:
+        print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
         trxItems.append(AnnoTrx(trx, trxDist, svBreakpoint, brkptIdx, svType))
         trxIds.append(trx.id)
     return trxItems, trxIds
@@ -97,12 +99,14 @@ class Segment:
                         keepIdx = 1
                     # Left
                     trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
+                    print 'Left brkpt items', trxItems, trxIds
                     keepIdx = 0
                     if len(rightBpTrxList) > 1:
                         # Take the inner trxs
                         keepIdx = 0
                     # Right
                     trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
+                    print 'Right brkpt items', trxItems, trxIds
                 else:
                     # Single breakpoint
                     trxList, distList = annotatedTrxsDict[0]
