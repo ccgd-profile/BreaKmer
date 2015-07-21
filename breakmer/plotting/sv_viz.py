@@ -526,7 +526,7 @@ class AnnotationBrkpt:
 
     def select_exons(self, exons):
         selectedExons = {}
-        if len(self.bounds) > 0:
+        if len(self.bounds) > 1:
             print 'Bounds', self.bounds
             self.bounds.sort()
             bpCoordKey = '-'.join([str(x) for x in self.bounds])
