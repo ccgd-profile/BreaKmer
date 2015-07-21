@@ -66,6 +66,7 @@ class FilterValues:
         """ """
         breakpoints = svEvent.brkpts
         blatResult = svEvent.blatResultsSorted[0][0]
+        self.brkptCoverages = [min(breakpoints.counts['n']), max(breakpoints.counts['d'])]
         self.minBrkptKmers = min(breakpoints.kmers)
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
