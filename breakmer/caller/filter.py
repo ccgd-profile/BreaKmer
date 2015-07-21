@@ -177,7 +177,7 @@ class ResultFilter:
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
             if not discReadCount:
-                logMsg = 'The number of discordant read pairs supporting the event (%d) is less than 1.' % svEvent.discReadCount
+                logMsg = 'The number of discordant read pairs supporting the event (%d) is less than 1.' % svEvent.resultValues.discReadCount
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
             if not minBrkptKmers:
