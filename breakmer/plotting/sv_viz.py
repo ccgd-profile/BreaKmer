@@ -177,6 +177,7 @@ class AlignSegments:
     def setup(self):
         """ """
         for i, blatResult in enumerate(self.svEventResult.blatResults):
+            print i, blatResult.alignVals.query
             self.segments.append(Segment(blatResult[1], self.colors[i], i, len(self.svEventResult.blatResults)))
 
     def get_contig_seq(self):
