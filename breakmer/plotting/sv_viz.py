@@ -129,6 +129,7 @@ class Segment:
                             else:
                                 trx = trxList[1]
                                 trxDist = distList[1]
+                                print 'trx', trx, trxDist
                         trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
                         print 'trxItems, trxIds', trxItems, trxIds
                     else:
