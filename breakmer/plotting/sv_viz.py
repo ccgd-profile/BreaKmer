@@ -801,12 +801,12 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     if not exonHit:
                         tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
                         tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
-                        ax.text(trxOffset, yCoord - 0.35, tStart, ha='left', va='center', size=8)
+                        ax.text(start, yCoord - 0.35, tStart, ha='left', va='center', size=8)
                         ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
                         exonLabel = 'exon1'
                         if trx.strand == '-':
                             exonLabel = 'exon' + str(len(exons))
-                        ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
+                        ax.text(start, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
                         exonHit = True
 
                     # exstart = exon[0]
