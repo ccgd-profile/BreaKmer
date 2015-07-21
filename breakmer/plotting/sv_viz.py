@@ -77,10 +77,10 @@ class Segment:
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
-            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
+            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords, dKeys
             # If svBreakpoint type is 'indel' then there can be two trxs associated with the svBreakpoint
             # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
             # strand and the index of the segment.
