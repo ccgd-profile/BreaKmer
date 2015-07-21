@@ -73,6 +73,7 @@ class ResultFilter:
             # Check if event is in the pre-defined filters
             self.check_defined_filters(svEvent)
 
+        print 'check filters', svEvent.svType
         if svEvent.svType == 'indel':
             self.filter_indel(svEvent)
         elif svEvent.svType == 'trl':
