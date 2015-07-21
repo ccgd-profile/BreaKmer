@@ -188,9 +188,9 @@ class ResultFilter:
         svFilterValues = svEvent.resultValues.filterValues
         maxBrkptCoverages = svFilterValues.brkptCoverages[1] >= self.params.get_sr_thresh('trl')
         minBrkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('trl')
-        discReadCount = svEvent.discReadCount
+        discReadCount = svEvent.resultValues.discReadCount
         minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('trl')
-        minBrkptKmers = svEvent.minBrkptKmers > 0
+        minBrkptKmers = svFilterValues.minBrkptKmers > 0
         minSeqComplexity = svFilterValues.seqComplexity >= 25.0
         startEndMissingQueryCoverage = svFilterValues.startEndMissingQueryCoverage <= 5.0
         maxSegmentOverlap = svFilterValues.maxSegmentOverlap < 5
