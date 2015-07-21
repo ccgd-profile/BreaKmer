@@ -693,6 +693,7 @@ def get_neighbor_exons(exons):
 
 def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
     """ """
+    print 'PLOT GLOBAL TRX TRACK', '*'*20
     if not segmentManager.has_annotations():
         return
 
@@ -730,7 +731,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         for segTrx in segTrxs:
             # print 'Global trx ycoord', yCoord
             trxLen = float(segLen) / float(len(segTrxs))
-            # print 'TRX len', trxLen
+            print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
             # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
             # ax.add_patch(rect)
@@ -781,6 +782,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
             print 'New exons', newExons
+            print 'Offset', offset
             for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
@@ -797,7 +799,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
                 if exon[2] != 'breakpoint':
-                    # print 'Plotting rectangle', start, yCoord, rectLen, height
+                    print 'Plotting rectangle', start, yCoord, rectLen, height
                     rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                     trxElements.append(start)
