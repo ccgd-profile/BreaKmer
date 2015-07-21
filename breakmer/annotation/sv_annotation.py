@@ -218,8 +218,8 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
             else:
                 upTrx, upDist = upstream
                 downTrx, downDist = downstream
-                print 'Up', upTrx.id
-                print 'Down', downTrx.id
+                print 'Up', upTrx.id, upDist
+                print 'Down', downTrx.id, downDist
                 if params.get_param('generate_image') or True:
                     upTrx.get_exons(annotationFn, tmpFilePath)
                     downTrx.get_exons(annotationFn, tmpFilePath)
