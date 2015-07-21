@@ -788,6 +788,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 start = offset
                 color = segment.color
                 height = 0.35
+                print 'start', start
                 if exon[2] == 'breakpoint':
                     rectLen = 0.5
                     height = 5
