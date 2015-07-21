@@ -767,7 +767,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
             newExons = sorted(parsedExons, key=lambda x: x[0])
 
-            binSize = trxLen / (2 * len(exons) - 1)
+            binSize = trxLen / (2 * len(newExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
@@ -931,6 +931,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxElements = []
 
             print 'Plot exons', plotExons
+            print 'Offset$$$', offset, binSize, trxLen
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
