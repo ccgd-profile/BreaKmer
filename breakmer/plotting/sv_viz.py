@@ -788,6 +788,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 start = offset
                 color = segment.color
                 height = 0.35
+                exonStr = exon[2]
                 print 'start', start
                 if exon[2] == 'breakpoint':
                     rectLen = 0.5
@@ -803,8 +804,20 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     print 'Plotting rectangle', start, yCoord, rectLen, height
                     rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
-                    trxElements.append(start)
-                    trxElements.append(start + binSize)
+                if exonStr != '':
+                    exstart = exon[0]
+                    exend = exon[1]
+                    if segment.strand == '-':
+                        exstart = exon[1]
+                        exend = exon[0]
+                    exstart = segment.chromName + ':' + str(exstart)
+                    exend = segment.chromName + ':' + str(exend)
+                    ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
+                    ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
+                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                        trxElements.append(start)
+                        trxElements.append(start + binSize)
+                        print 'trxElements', exon, trxElements
             segTrxIter += 1
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             print 'TRX elements', trxElements, trxOffset, trxLen
@@ -924,6 +937,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 color = segment.color
                 height = 0.5
                 exonStr = exon[2]
+                print 'start$$$', start
                 if exon[2] == 'breakpoint':
                     rectLen = 0.5
                     height = 5
