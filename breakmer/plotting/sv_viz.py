@@ -72,12 +72,12 @@ class Segment:
 
     def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
-        # print 'sv_viz.py breakpoints', svBreakpoints
+        print 'sv_viz.py breakpoints', svBreakpoints
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
         trxIds = []
         for svBreakpoint in svBreakpoints:
-            # print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords
+            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
