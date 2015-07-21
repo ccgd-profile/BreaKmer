@@ -223,7 +223,7 @@ def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
                 if params.get_param('generate_image') or True:
                     upTrx.get_exons(annotationFn, tmpFilePath)
                     downTrx.get_exons(annotationFn, tmpFilePath)
-                blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([downTrx, upTrx], [upDist, downDist], coordIdx)
+                blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([upTrx, downTrx], [upDist, downDist], coordIdx)
 
 
 def write_brkpt_bed_file(bpBedFn, blatResults):
