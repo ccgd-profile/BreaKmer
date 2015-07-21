@@ -911,8 +911,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 trx_reverse = True
             exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
 
-            # for brkpt in brkpts:
-            #     print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+            for brkpt in brkpts:
+                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
             selectedExons = abrkpt.select_exons(exons)
