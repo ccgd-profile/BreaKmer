@@ -633,6 +633,7 @@ def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
     for brkpt in trxBrkpts:
         if brkpt.svType not in brkptTypes:
             brkptTypes[brkpt.svType] = []
+        print 'determine_annotation_brkpts', brkpt, brkpt.svType
         brkptTypes[brkpt.svType].append(brkpt)
 
     if 'rearr' in brkptTypes:
