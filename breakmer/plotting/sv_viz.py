@@ -106,7 +106,7 @@ class Segment:
                 else:
                     # Single breakpoint
                     trxList, distList = annotatedTrxsDict[0]
-                    print 'Selecting transcripts', trxList, distList
+                    print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
                         trx = trxList[0]
