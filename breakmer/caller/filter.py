@@ -196,7 +196,7 @@ class ResultFilter:
         maxSegmentOverlap = svFilterValues.maxSegmentOverlap < 5
         maxMeanHitFreq = svFilterValues.maxMeanCoverage < 10
         nReadStrands = svFilterValues.nReadStrands > 1
-        maxRealignmentGaps = svFilterValues.maxRealignmentGaps
+        maxRealignmentGaps = svFilterValues.maxRealignmentGap
 
         strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxMeanHitFreq, nReadStrands]
         nStrictFiltersFail = 0
