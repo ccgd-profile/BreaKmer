@@ -130,6 +130,7 @@ class Segment:
                                 trx = trxList[1]
                                 trxDist = distList[1]
                         trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
+                        print 'trxItems, trxIds', trxItems, trxIds
                     else:
                         # lands in a single trancript
                         trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
@@ -155,6 +156,7 @@ class Segment:
                     trx = rightBpTrxList[keepIdx]
                     trxDist = rightBpDistList[keepIdx]
                     trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
+        print 'Returning items', trxItems, trxIds
         return trxItems, trxIds
 
 
