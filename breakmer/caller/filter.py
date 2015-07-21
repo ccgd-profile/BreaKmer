@@ -151,13 +151,13 @@ class ResultFilter:
     def filter_rearr(self, svEvent):
         # in_ff, span_ff = filter_by_feature(brkpts, query_region, params.opts['keep_intron_vars'])
         # filter = (min(brkpt_counts['n']) < params.get_sr_thresh('rearrangement')) or self.blatResultsSorted[0][1] < params.get_min_segment_length('rearr') or (in_ff and span_ff) or (disc_read_count < 1) or (rearr_type == 'rearrangement') or (min(brkpt_kmers) == 0)
-        missingQueryCoverage = svEvent.filterValues.missingQueryCoverage >= self.params.get_min_segment_length('rearr')
-        brkptCoverages = svEvent.filterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
-        minSegmentLen = svEvent.filterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
+        svFilterValues = svEvent.resultValues.filterValues
+        missingQueryCoverage = svFilterValues.missingQueryCoverage >= self.params.get_min_segment_length('rearr')
+        brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
+        minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
         discReadCount = svEvent.discReadCount >= 1
         minBrkptKmers = svEvent.minBrkptKmers > 0
 
-        svFilterValues = svEvent.resultValues.filterValues
         if brkptCoverages and minSegmentLen and discReadCount and minBrkptKmers:
             utils.log(self.loggingName, 'info', 'Rearrangement meets basic filtering requirements.')
         else:
