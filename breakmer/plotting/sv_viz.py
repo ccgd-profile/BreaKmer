@@ -176,7 +176,8 @@ class AlignSegments:
 
     def setup(self):
         """ """
-        for i, blatResult in enumerate(self.svEventResult.blatResults):
+        realignResults = sorted(self.svEventResult.blatResults, key=lambda x: x[0])
+        for i, blatResult in enumerate(realignResults):
             print i, blatResult[1].alignVals.query
             self.segments.append(Segment(blatResult[1], self.colors[i], i, len(self.svEventResult.blatResults)))
 
