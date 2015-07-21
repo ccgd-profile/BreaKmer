@@ -747,7 +747,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
             bpPlotBins = []
             for brkpt in brkpts:
-                # print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
                 gCoord = brkpt.get_genomic_coord()
                 # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
                 if gCoord < trx.start or gCoord > trx.stop:
@@ -780,7 +780,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 exonLabel = 'exon' + str(len(exons))
             ax.text(trxOffset, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
             trxElements = []
-            # print 'New exons', newExons
+            print 'New exons', newExons
             for i, exon in enumerate(newExons):
                 rectLen = binSize
                 start = offset
@@ -804,11 +804,11 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     trxElements.append(start + binSize)
             segTrxIter += 1
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            # print 'TRX elements', trxElements, trxOffset, trxLen
+            print 'TRX elements', trxElements, trxOffset, trxLen
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
-            # print 'TRX max, min', trxMin, trxMax
-            # print 'Rectangle', trxMin, yCoord, trxMax - trxMin
+            print 'TRX max, min', trxMin, trxMax
+            print 'Rectangle', trxMin, yCoord, trxMax - trxMin
             rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
