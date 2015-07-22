@@ -154,10 +154,10 @@ class ResultFilter:
         svFilterValues = svEvent.resultValues.filterValues
         print self.params.get_sr_thresh('rearrangement')
         print svFilterValues.brkptCoverages
-        missingQueryCoverage = svFilterValues.missingQueryCoverage >= self.params.get_min_segment_length('rearr')
+        missingQueryCoverage = svFilterValues.missingQueryCoverage < self.params.get_min_segment_length('rearr')
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
         minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
-        discReadCount = svEvent.resultValues.discReadCount >= 1
+        # discReadCount = svEvent.resultValues.discReadCount >= 0
         minBrkptKmers = svFilterValues.minBrkptKmers > 0
 
         if brkptCoverages and minSegmentLen and discReadCount and minBrkptKmers:
@@ -176,10 +176,10 @@ class ResultFilter:
                 logMsg = 'The minimum realigned segment length (%d) is less than the input threshold %d.' % (svFilterValues.minSegmentLen, self.params.get_min_segment_length('rearr'))
                 utils.log(self.loggingName, 'info', logMsg)
                 filteredReasons.append(logMsg)
-            if not discReadCount:
-                logMsg = 'The number of discordant read pairs supporting the event (%d) is less than 1.' % svEvent.resultValues.discReadCount
-                utils.log(self.loggingName, 'info', logMsg)
-                filteredReasons.append(logMsg)
+            # if not discReadCount:
+            #     logMsg = 'The number of discordant read pairs supporting the event (%d) is less than 1.' % svEvent.resultValues.discReadCount
+            #     utils.log(self.loggingName, 'info', logMsg)
+            #     filteredReasons.append(logMsg)
             if not minBrkptKmers:
                 logMsg = 'There were no variant kmers at the one or more of the breakpoint locations.'
                 utils.log(self.loggingName, 'info', logMsg)
