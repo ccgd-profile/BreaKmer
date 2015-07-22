@@ -204,6 +204,7 @@ class SVResult:
             self.filterValues.set_trl_values(svEvent)
         else:
             svEvent.set_brkpt_counts('rearr')
+            print 'format_rearrangement_values(), defining rearr'
             rearrType, discReadCount = svEvent.define_rearr()
             self.svType = 'rearrangement'
             if rearrType != 'rearrangement':
