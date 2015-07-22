@@ -399,7 +399,7 @@ class ParamManager:
 
         try:
             int(self.opts['kmer_size'])
-        except TypeError:
+        except ValueError:
             print 'The specified kmer size is not an integer.'
             raise
         else:
