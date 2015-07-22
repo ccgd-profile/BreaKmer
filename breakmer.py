@@ -29,7 +29,7 @@ else:
         PARSER.add_argument('--indel_size', dest='indel_size', default=15, type=int, help='Indel size filter. [default: %(default)s]')
         PARSER.add_argument('--trl_sr_thresh', dest='trl_sr_thresh', default=2, type=int, help='Split read support threshold for translocations. [default: %(default)s]')
         PARSER.add_argument('--indel_sr_thresh', dest='indel_sr_thresh', default=5, type=int, help='Split read support threshold for indels. [default: %(default)s]')
-        PARSER.add_argument('--rearr_sr_thresh', dest='rearr_sr_thresh', default=3, type=int, help='Split read support threshold for rearrangements. [default: %(default)s]')
+        PARSER.add_argument('--rearr_sr_thresh', dest='rearr_sr_thresh', default=2, type=int, help='Split read support threshold for rearrangements. [default: %(default)s]')
         PARSER.add_argument('--rearr_min_seg_len', dest='rearr_minseg_len', default=30, type=int, help='Threshold for minimum segment to be rearranged. [default: %(default)s]')
         PARSER.add_argument('--trl_min_seg_len', dest='trl_minseg_len', default=25, type=int, help='Threshold for minimum length of translocation segment. [default: %(default)s]')
         PARSER.add_argument('--align_thresh', dest='align_thresh', default=.90, type=int, help='Threshold for minimum read alignment for assembly. [default: %(default)s]')
