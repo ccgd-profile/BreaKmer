@@ -741,6 +741,7 @@ class SVEvent:
                 #         utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %s, %s and positions %d, %d for breakpoint at %d' % (qname, r1s, r2s, r1p, r2p, b))
                 #         rs[i] += 1
             # rs = max(rs)
+        print 'define_rearr()', svType, rs
         return svType, rs
 
     def get_max_meanCoverage(self):
