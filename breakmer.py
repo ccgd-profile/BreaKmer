@@ -36,13 +36,13 @@ else:
         PARSER.add_argument('--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers. [default: %(default)s]')
         PARSER.add_argument('--discread_only_thresh', dest='discread_only_thresh', default=2, type=int, help='The number of discordant read pairs in a cluster to output without evidence from a split read event. [default: %(default)s]')
         PARSER.add_argument('--generate_image', dest='generate_image', default=False, action='store_true', help='Generate pileup image for events. [default: %(default)s]')
+        PARSER.add_argument('--hostname', dest='blat_hostname', default='localhost', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('-g', '--gene_list', dest='gene_list', default=None, help='Gene list to consider for analysis. [default: %(default)s]')
         PARSER.add_argument('-f', '--filter_list', dest='filterList', default=None, help='Input a set of events to filter out. [default: %(default)s]')
         PARSER.add_argument('-n', '--nprocessors', dest='nprocs', default=1, type=int, help='The number of processors to use for analysis. [default: %(default)s]')
         PARSER.add_argument('-s', '--start_blat_server', dest='start_blat_server', default=False, action='store_true', help='Start the blat server. Random port number and localhost will be used if neither specified. [default: %(default)s]')
         PARSER.add_argument('-k', '--keep_blat_server', dest='keep_blat_server', default=False, action='store_true', help='Keep the blat server alive. [default: %(default)s]')
         PARSER.add_argument('-p', '--port_number', dest='blat_port', default=None, type=int, help='The port number for the blat server. A random port number (8000-9500) will be used if not specified. [default: %(default)s]')
-        PARSER.add_argument('--hostname', dest='blat_hostname', default='localhost', help='The hostname for the blat server. Localhost will be used if not specified. [default: %(default)s]')
         PARSER.add_argument('-c', '--config', dest='config_fn', default=None, required=True, help='The configuration filename that contains additional parameters. [default: %(default)s]')
 
     elif fncCmd == 'start_blat_server':

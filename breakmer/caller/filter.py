@@ -160,7 +160,7 @@ class ResultFilter:
         # discReadCount = svEvent.resultValues.discReadCount >= 0
         minBrkptKmers = svFilterValues.minBrkptKmers > 0
 
-        if brkptCoverages and minSegmentLen and discReadCount and minBrkptKmers:
+        if brkptCoverages and minSegmentLen and minBrkptKmers:
             utils.log(self.loggingName, 'info', 'Rearrangement meets basic filtering requirements.')
         else:
             filteredReasons = []

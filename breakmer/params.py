@@ -26,12 +26,10 @@ class ParamManager:
         targets (dict):                Target region coordinates, key-values.
         paths (dict):                  Dictionary containing the top level directories for the analysis output.
         logging_name (str):            Logging string name object for logging messages.
-        repeat_mask: Dictionary containing chromosome IDs as keys with a list of tuples for each repeat
-                     feature (i.e., chr, left_bp, right_bp, repeat_name).
     """
 
     def __init__(self, fncCmd, arguments):
-        """Initializes params class.
+        """Initialize ParamManager class.
         Args:
             arguments: The argparse dictionary object from the command line parameters.
         Returns:
@@ -44,7 +42,7 @@ class ParamManager:
         self.filter = None
         self.targets = {}
         self.paths = {}
-        self.repeat_mask = None
+        # self.repeat_mask = None
         self.loggingName = 'breakmer.params'
         self.fncCmd = fncCmd
         self.set_params(arguments)
