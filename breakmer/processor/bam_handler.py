@@ -438,7 +438,7 @@ class discReads:
         # print 'Inversion reads', self.reads['intra']['inv']
         # print 'Brkpts', brkpts
         if 'inv' not in self.reads['intra']:
-            return
+            return counts
         for strand in self.reads['intra']['inv']:
             lStrand, rStrand = strand.split(':')
             strandReads = self.reads['intra']['inv'][strand]
@@ -461,7 +461,7 @@ class discReads:
         counts = 0
         bpBuffer = 50
         if 'td' not in self.reads['intra']:
-            return
+            return counts
         for dRead in self.reads['intra']['td']['-:+']:
             if (dRead.pos[0] >= (brkpt1 - bpBuffer) and dRead.pos[0] <= (brkpt2 + bpBuffer)) and (dRead.pos[1] <= (brkpt2 + bpBuffer) and dRead.pos[1] >= (brkpt1 - bpBuffer)):
                 counts += 1
@@ -473,7 +473,7 @@ class discReads:
         for i in range(len(brkpts)):
             b = brkpts[i]
             if 'other' not in self.reads['intra']:
-                break
+                return max(counts)
             for strand in self.reads['intra']['other']:
                 lStrand, rStrand = strand.split(':')
                 strandReads = self.reads['intra']['other'][strand]
