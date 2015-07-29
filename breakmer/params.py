@@ -176,7 +176,7 @@ class ParamManager:
                 binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
                 binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
-                self.set_param(binary) = binaryCheck
+                self.set_param(binary, binaryCheck)
             if not binaryCheck:
                 print 'Missing path/executable for', binary
                 utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
