@@ -15,6 +15,7 @@ __license__ = "MIT"
 class Matches:
     """
     """
+
     def __init__(self, values):
         self.match = values['matches']
         self.mismatch = values['mismatches']

@@ -40,7 +40,7 @@ class ParamManager:
         """
 
         self.opts = None
-        self.gene_annotations = None
+        # self.gene_annotations = None
         self.filter = None
         self.targets = {}
         self.paths = {}
@@ -65,15 +65,14 @@ class ParamManager:
         utils.log(self.loggingName, 'info', 'Setting up parameters')
 
         # Log all parameters passed in, warn for poor paths
-        for param in self.opts:
-            value = self.opts[param]
-            utils.log(self.loggingName, 'info', '%s = %s' % (param, value))
+        for paramKey, paramValue in self.opts.items():
+            utils.log(self.loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
-        self.set_targets(self.get_param('gene_list'))
+        self.set_targets()
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))
         self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
 
-        # If only preseting the reference data, then move on.
+        # If only preseting the reference data no need to continue.
         if self.fncCmd == 'prepare_reference_data':
             utils.log(self.loggingName, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
             return
@@ -98,36 +97,6 @@ class ParamManager:
         self.check_binaries()  # Check if Jellyfish and Cutadapt work.
         self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)  # Instantiate the filter class.
         self.set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
-
-    def set_insertsize_thresh(self):
-        """Store the insert sizes for a small number of "properly mapped" reads
-        and determine an upperbound cutoff to use to determine discordantly mapped read
-        pairs.
-        Args:
-            None
-        Returns:
-            None
-        Raises:
-            None
-        """
-
-        nSampleReads = 100000
-        bamF = pysam.Samfile(self.get_param('sample_bam_file'), 'rb')
-        testReads = bamF.fetch()
-        insertSizes = []
-        readIter = 0
-        for read in testReads:
-            proper_map = read.flag == 83 or read.flag == 99 and read.mapq > 0
-            if read.is_read1 and proper_map:  # Sample the read and store the insert size to its partner.
-                readIter += 1
-                insertSizes.append(abs(read.tlen))
-                if 'readLen' not in self.opts:  # Store the read length if it is not already stored.
-                    self.opts['readLen'] = read.rlen
-            if readIter == nSampleReads:
-                break
-        isMedian = utils.median(insertSizes)
-        isSD = utils.stddev(utils.remove_outliers(insertSizes))  # Calculate the standard deviation of the sample read pairs insert sizes.
-        self.opts['insertsize_thresh'] = isMedian + (5 * isSD)  # Set the threshold to be median + 5 standard deviations.
 
     def parse_opts(self, arguments):
         """Formats input parameters into self.opts dictionary. It first parses the configuration file and stores the key, values in the self.opts dictionary.
@@ -201,30 +170,34 @@ class ParamManager:
         """
 
         binaries = ('blat', 'gfserver', 'gfclient', 'fatotwobit', 'cutadapt', 'jellyfish')
-        for bin in binaries:
-            if bin in self.opts:
-                bin_path = self.opts[bin]  # Use the binary path specified in the config file.
-                bin_check = utils.which(bin_path)
+        for binary in binaries:
+            binaryPath = self.get_param(binary)
+            if binaryPath is not None:
+                binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
-                bin_check = utils.which(bin)  # Perform a which on the server to see if the binary is in the path.
-                self.opts[bin] = bin_check
+                binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
+                self.set_param(binary) = binaryCheck
             if not bin_check:
-                print 'Missing path/executable for', bin
-                utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % bin)
+                print 'Missing path/executable for', binary
+                utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
                 sys.exit(1)
-            utils.log(self.loggingName, 'info', '%s path = %s' % (bin, bin_check))
-        utils.log(self.loggingName, 'info', 'All the required binaries have been check successfully!')
+            utils.log(self.loggingName, 'info', '%s path = %s' % (binary, bin_check))
+        utils.log(self.loggingName, 'info', 'All the required binaries have been checked successfully!')
 
         # Test cutadapt and jellyfish binaries
-        test_dir = os.path.join(self.paths['analysis'], 'bin_test')
-        test_fq = os.path.join(test_dir, 'test.fq')
-        if not os.path.exists(test_dir):
-            os.makedirs(test_dir)
-        utils.write_test_fq(test_fq)
-        clean_fq, rc = utils.test_cutadapt(test_fq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
+        testDir = os.path.join(self.paths['analysis'], 'bin_test')
+        testFq = os.path.join(testDir, 'test.fq')
+        if not os.path.exists(testDir):
+            os.makedirs(testDir)
+
+        fq_f = open(fq_fn, 'w')
+        fq_f.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
+        fq_f.close()
+
+        clean_fq, rc = utils.test_cutadapt(testFq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
         if clean_fq:
             utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
-            jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], clean_fq, test_dir)
+            jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], clean_fq, testDir)
             if rc != 0:
                 utils.log(self.loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
@@ -233,8 +206,40 @@ class ParamManager:
         else:
             utils.log(self.loggingName, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
             sys.exit(1)
+        shutil.rmtree(testDir)  # Remove the test directory.
 
-    def set_targets(self, geneList):
+    def set_insertsize_thresh(self):
+        """Store the insert sizes for a small number of "properly mapped" reads
+        and determine an upperbound cutoff to use to determine discordantly mapped read
+        pairs.
+
+        Args:
+            None
+        Returns:
+            None
+        Raises:
+            None
+        """
+
+        nSampleReads = 100000
+        bamF = pysam.Samfile(self.get_param('sample_bam_file'), 'rb')
+        testReads = bamF.fetch()
+        insertSizes = []
+        readIter = 0
+        for read in testReads:
+            proper_map = read.flag == 83 or read.flag == 99 and read.mapq > 0
+            if read.is_read1 and proper_map:  # Sample the read and store the insert size to its partner.
+                readIter += 1
+                insertSizes.append(abs(read.tlen))
+                if 'readLen' not in self.opts:  # Store the read length if it is not already stored.
+                    self.opts['readLen'] = read.rlen
+            if readIter == nSampleReads:
+                break
+        isMedian = utils.median(insertSizes)
+        isSD = utils.stddev(utils.remove_outliers(insertSizes))  # Calculate the standard deviation of the sample read pairs insert sizes.
+        self.opts['insertsize_thresh'] = isMedian + (5 * isSD)  # Set the threshold to be median + 5 standard deviations.
+
+    def set_targets(self):
         """Parse the targets bed file and store them in a dictionary. Limit to a gene
         list if input.
 
@@ -248,14 +253,14 @@ class ParamManager:
         with the same name they are aggregated together under the same key.
 
         Args:
-            geneList (str):  The filename containing a list of gene names to be analyzed. Note that
-                             these names must match those in the target bed.
+            None
         Returns:
             None
         Raises:
             None
         """
 
+        geneList = self.get_param('gene_list')
         regionList = None
         if geneList:
             regionList = []
@@ -284,6 +289,17 @@ class ParamManager:
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
         utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
 
+    def get_target_names(self):
+        """Get a list of target names.
+
+        Args:
+            None
+        Returns:
+            A list of the target region names that were defined from the input bed file (list).
+        """
+
+        return self.targets.keys
+
     def check_blat_server(self):
         """Run a test query on the specified blat server to make sure it is running.
 
@@ -295,15 +311,15 @@ class ParamManager:
             None
         """
 
-        test_dir = os.path.join(self.paths['analysis'], 'blatserver_test')
-        test_fa_fn = os.path.join(test_dir, 'test.fa')
-        if not os.path.exists(test_dir):
-            os.makedirs(test_dir)
+        testDir = os.path.join(self.paths['analysis'], 'blatserver_test')
+        test_fa_fn = os.path.join(testDir, 'test.fa')
+        if not os.path.exists(testDir):
+            os.makedirs(testDir)
         test_fa = open(test_fa_fn, 'w')
         test_fa.write('>test\nCCAAGGGAGACTTCAAGCAGAAAATCTTTAAGGGACCCTTGCATAGCCAGAAGTCCTTTTCAGGCTGATGTACATAAAATATTTAGTAGCCAGGACAGTAGAAGGACTGAAGAGTGAGAGGAGCTCCCAGGGCCTGGAAAGGCCACTTTGTAAGCTCATTCTTG')
         test_fa.close()
 
-        resultFn = os.path.join(test_dir, 'blatserver_test.psl')
+        resultFn = os.path.join(testDir, 'blatserver_test.psl')
         cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (self.get_param('gfclient'), self.get_param('blat_hostname'), self.get_param('blat_port'), self.get_param('reference_fasta_dir'), test_fa_fn, resultFn)
         utils.log(self.loggingName, 'info', 'Blat server test system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -322,6 +338,7 @@ class ParamManager:
         file generated from that fasta file. The faToTwoBit program is used if the
         2bit file needs to be generated on the fly. The gfServer is started and
         we wait while the server is successfully started.
+
         Args:
             None
         Return:
@@ -406,17 +423,32 @@ class ParamManager:
             return int(self.opts['kmer_size'])
 
     def get_min_segment_length(self, type):
-        """
+        """Get the input segment length limit. This should be an integer value.
+
+        Args:
+            type (str): The variant type to get the minimum segment length - trl / rearr
+        Returns:
+            min_seg_len (int)
+        Raises:
+            TypeError when the value is not an integer.
         """
 
-        return int(self.opts[type + '_minseg_len'])
+        try:
+            int(self.opts[type + '_minseg_len'])
+        except ValueError:
+            print 'The specified minsegment limit is not an integer.'
+            raise
+        else:
+            return int(self.opts[type + '_minseg_len'])
 
     def get_sr_thresh(self, type):
         """Get the threshold input for the number of reads that are required to
         support a structural variant event.
 
         Args:
+            type (str): The variant type to get the read support threshold.
         Returns:
+            Integer of the split read threshold for specific events.
         Raises:
         """
 

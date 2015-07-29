@@ -17,25 +17,43 @@ __license__ = "MIT"
 
 
 def check_status(results):
-    notready = 0
+    """Check the status of the multiple processors running analysis
+
+    Args:
+        results (list): A list of results from the multiprocessing analysis.
+    Returns:
+        notReady (int): An integer value indicating the number of processors not complete.
+    Raises:
+        None
+    """
+
+    notReady = 0
     for r in results:
         if not r.ready():
-            notready += 1
-    return (notready)
+            notReady += 1
+    return (notReady)
 
 
 def wait(results):
-    njobs = check_status(results)
+    """Check if the nprocs are complete.
 
+    Args:
+        results (list): A list of results from the multiprocessing analysis.
+    Returns:
+        None
+    Raises:
+        None
+    """
+
+    njobs = check_status(results)
     while njobs > 0:
         time.sleep(10)
         jobs = check_status(results)
         if jobs < njobs:
-            # print '\n', jobs, '/', njobs, " jobs not complete."
             njobs = jobs
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
+        # else:
+        #     sys.stdout.write('.')
+        #     sys.stdout.flush()
 
 
 def analyze_targets(targetList):
@@ -43,21 +61,24 @@ def analyze_targets(targetList):
     A list of TargetManager objects are passed in to be analyzed independently.
     Each target ref data is set, if necessary, then the reads are extracted,
     contigs built, and calls made.
+
     Args:
-        targetList: A list of TargetManager objects, representing target regions.
+        targetList (list):          A list of TargetManager objects, representing target regions.
     Returns:
+        aggregateResults (dict):    A dictoinary containing lists of formatted output strings for the
+                                    contig-based calls and the discordant-only read clusters.
+    Raises:
         None
     """
+
     aggregateResults = {'contigs': [], 'discreads': []}
     for targetRegion in targetList:
         print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
-        # If only presetting data stop here.
-        if targetRegion.params.fncCmd == 'prepare_reference_data':
+        if targetRegion.params.fncCmd == 'prepare_reference_data':  # Stop here if only preparing ref data.
             continue
-        # targetRegion fails to find any interesting reads to use. Exiting.
-        if not targetRegion.find_sv_reads():
+        if not targetRegion.find_sv_reads():  # No SV reads extracted. Exiting.
             continue
         targetRegion.compare_kmers()
         targetRegion.resolve_sv()
@@ -74,11 +95,13 @@ class RunTracker:
     The params object is passed in with all the input information.
     The run() function creates the target region objects from the
     param inputs and then starts the analysis for each target.
+
     Args:
         params: ParamManager object.
     Returns:
         None
     """
+
     def __init__(self, params):
         self.params = params
         self.results = []
@@ -92,11 +115,13 @@ class RunTracker:
         The target objects are made and grouped for multiprocessing (if set)
         and these are all analyzed independently. This is where the analysis
         starts and ends.
+
         Args:
             None
         Returns
             None
         """
+
         startTime = time.clock()
 
         self.params.start_blat_server()
@@ -140,12 +165,14 @@ class RunTracker:
     def create_targets(self):
         """Create target objects and group them by the number of
         multiprocs that are specified (i.e. n=1 for 1 processor.)
+
         Args:
             None
         Returns:
-            trgtGroups: List of lists of target objects. Each list is
-                        analyzed by a processor.
+            trgtGroups (list): A list of lists containing target objects. Each toplevel list is
+                               analyzed by a processor.
         """
+
         nprocs = int(self.params.get_param('nprocs'))
         multiprocs = nprocs > 1
         ngroups = nprocs
@@ -157,7 +184,7 @@ class RunTracker:
         trgtGroups = []
         trgtGroup = []
 
-        targetNames = self.params.targets.keys()
+        targetNames = self.params.get_target_names()
         targetNames.sort()
         for targetName in targetNames:
             trgt = target.TargetManager(targetName, self.params)
@@ -181,18 +208,12 @@ class RunTracker:
         """Write the information for all results to file.
         Header is written at the top of the file if option to remove is not
         specified.
+
         Args:
-            None
+            aggregateResults (dict):    A dictionary containing the formatted output string values.
         Returns:
             None
         """
-        # contigResults = []
-        # discReadResults = []
-        # print aggregateResults, type(aggregateResults)
-        # for aResultDict in aggregateResults:
-        #     print aResultDict
-        #     contigResults.extend(aResultDict['contig'])
-        #     discReadResults.extend(aResultDict['discreads'])
 
         if len(aggregateResults['contigs']) > 0:
             resultFn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_svs.out")
@@ -215,28 +236,3 @@ class RunTracker:
                     resultFile.write(headerStr + '\n')
                 resultFile.write(formattedResultValuesStr + '\n')
             resultFile.close()
-
-        # resultFiles = {}
-        # for res in self.results:
-        #     tag = res[6]
-        #     if tag not in resultFiles:
-        #         header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
-        #         res_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name'] + "_" + tag + "_svs.out")
-        #         self.logger.info('Writing %s output file %s' % (tag, res_fn))
-        #         resultFiles[tag] = open(res_fn, 'w')
-        #         if not self.params.opts['no_output_header']:
-        #             resultFiles[tag].write(header)
-        #     resultFiles[tag].write("\t".join([str(x) for x in res]) + "\n")
-
-        # for f in resultFiles:
-        #     resultFiles[f].close()
-
-#        summary_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name']+"_summary.out")
-#        summary_f = open(summary_fn,'w')
-#        self.logger.info('Writing summary file to %s'%summary_fn)
-#        summary_f.write(self.summary_header+"\n")
-#        keys = self.summary.keys()
-#        keys.sort()
-#        for gene in keys :
-#            summary_f.write(self.summary[gene]+"\n")
-#        summary_f.close()

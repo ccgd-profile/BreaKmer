@@ -15,6 +15,7 @@ __license__ = "MIT"
 class AlignParams:
     """
     """
+
     def __init__(self, params, targetRefFns):
         self.program = {'target': 'blat', 'genome': 'blat'}
         self.extension = {'target': 'psl', 'genome': 'psl'}
@@ -47,6 +48,7 @@ class AlignParams:
 class RealignManager:
     """
     """
+
     def __init__(self, params, targetRefFns):
         self.realignment = None
         self.alignParams = AlignParams(params, targetRefFns)

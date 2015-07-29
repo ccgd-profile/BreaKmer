@@ -17,7 +17,37 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+def which(program):
+    """Determine the full path to a binary if it is in the system path for execution.
+
+    Args:
+        program (str):  Name of the binary to determine path.
+    Returns:
+        A file path to the binary file (str) or None if it doesn't exist.
+    Raises:
+        None
+    """
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fPath, fName = os.path.split(program)
+    if fPath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exeFile = os.path.join(path, program)
+        if is_exe(exeFile):
+            return exeFile
+    return None
+
+
 def median(lst):
+    """
+    """
+
     lst = sorted(lst)
     if len(lst) < 1:
             return None
@@ -37,6 +67,7 @@ def percentile(N, percent, key=lambda x: x):
 
     @return - the percentile of the values
     """
+
     if not N:
         return None
     N.sort()
@@ -51,6 +82,9 @@ def percentile(N, percent, key=lambda x: x):
 
 
 def remove_outliers(x):
+    """
+    """
+
     qnt1 = percentile(x, 0.25)
     qnt2 = percentile(x, 0.75)
     H = 1.5 * (qnt2 - qnt1)
@@ -71,7 +105,9 @@ def remove_outliers(x):
 
 
 def mean(lst):
-    """calculates mean"""
+    """calculates mean
+    """
+
     sum = 0
     for i in range(len(lst)):
         sum += lst[i]
@@ -79,7 +115,16 @@ def mean(lst):
 
 
 def stddev(lst):
-    """calculates standard deviation"""
+    """Calculates the standard deviation from the list of input  values.
+
+    Args:
+        lst (list): List of numeric values to calculate standard deviation
+    Returns:
+        Standard deviation (float)
+    Raises:
+        None
+    """
+
     sum = 0
     mn = mean(lst)
     for i in range(len(lst)):
@@ -90,6 +135,7 @@ def stddev(lst):
 def run_cutadapt(cutadapt, cutadapt_config_f, input_fn, output_fn, logging_src):
     """
     """
+
     cutadapt_parameters = stringify(cutadapt_config_f)
     cmd = '%s %s %s %s > %s' % (sys.executable, cutadapt, cutadapt_parameters, input_fn, output_fn)
     log(logging_src, 'debug', 'Cutadapt system command %s' % cmd)
@@ -101,93 +147,82 @@ def run_cutadapt(cutadapt, cutadapt_config_f, input_fn, output_fn, logging_src):
 
 
 def log(name, level, msg):
-        """Write log message to the appropriate level.
-        """
-        logger = logging.getLogger(name)
-        if level == 'info':
-                logger.info(msg)
-        elif level == 'debug':
-                logger.debug(msg)
-        elif level == 'error':
-                logger.error(msg)
+    """Write log message to the appropriate level.
+    """
+
+    logger = logging.getLogger(name)
+    if level == 'info':
+        logger.info(msg)
+    elif level == 'debug':
+        logger.debug(msg)
+    elif level == 'error':
+        logger.error(msg)
 
 
 def stringify(fn):
-        """Turn file contents into a space delimited string"""
+    """Turn file contents into a space delimited string
+    """
 
-        str = []
-        for line in open(fn, 'rU').readlines():
-                line = line.strip()
-                str.append(line)
-        return ' '.join(str)
+    str = []
+    for line in open(fn, 'rU').readlines():
+        line = line.strip()
+        str.append(line)
+    return ' '.join(str)
 
 
 def create_ref_test_fa(target_fa_in, test_fa_out):
-        """
-        """
-        if not os.path.isfile(get_marker_fn(test_fa_out)):
-                fa_in = open(target_fa_in, "rU")
-                fa_out = open(test_fa_out, "w")
+    """
+    """
 
-                record = SeqIO.read(fa_in, "fasta")
-                ref_target_seq = str(record.seq)
-                end = min(len(ref_target_seq), 1500)
-                start = max(0, len(ref_target_seq) - 1500)
-                fa_out.write(">" + record.id + "_start\n" + ref_target_seq[0:end] + "\n>" + record.id + "_end\n" + ref_target_seq[start:len(ref_target_seq)] + "\n")
-                fa_out.close()
+    if not os.path.isfile(get_marker_fn(test_fa_out)):
+        fa_in = open(target_fa_in, "rU")
+        fa_out = open(test_fa_out, "w")
 
-                cmd = 'touch %s' % get_marker_fn(test_fa_out)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                output, errors = p.communicate()
-                return True
-        else:
-                return False
+        record = SeqIO.read(fa_in, "fasta")
+        ref_target_seq = str(record.seq)
+        end = min(len(ref_target_seq), 1500)
+        start = max(0, len(ref_target_seq) - 1500)
+        fa_out.write(">" + record.id + "_start\n" + ref_target_seq[0:end] + "\n>" + record.id + "_end\n" + ref_target_seq[start:len(ref_target_seq)] + "\n")
+        fa_out.close()
 
-
-def get_altref_genecoords(blat_path, altref_fa, query_fa_fn, chr, out_fn):
-        altref_twobit = os.path.splitext(altref_fa)[0] + ".2bit"
-        blat_db = altref_twobit + ":" + str(chr)
-        cmd = "%s -noHead %s %s %s" % (blat_path, blat_db, query_fa_fn, out_fn)
+        cmd = 'touch %s' % get_marker_fn(test_fa_out)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-
-        coords = [[0, 0], [0, 0], False]
-        blat_res = open(out_fn, 'rU')
-        hits = [False, False]
-        for line in blat_res.readlines():
-                line = line.strip()
-                linesplit = line.split()
-                res_id = linesplit[9]
-                if res_id.find("start") > -1:
-                        if coords[0][0] < int(linesplit[0]):
-                                coords[0][0] = int(linesplit[0])
-                                coords[0][1] = int(linesplit[15])
-                                hits[0] = True
-                elif res_id.find("end") > -1:
-                        if coords[1][0] < int(linesplit[0]):
-                                coords[1][0] = int(linesplit[0])
-                                coords[1][1] = int(linesplit[16])
-                                hits[1] = True
-        coords[2] = hits[0] and hits[1]
-        blat_res.close()
-        return coords
+        return True
+    else:
+        return False
 
 
-def test_cutadapt(fq_fn, cutadapt_bin, cutadapt_config):
-        fq_clean = os.path.basename(fq_fn).split('.')[0] + "_cleaned.fq"
-        fq_clean_fn = os.path.join(os.path.dirname(fq_fn), fq_clean)
-        cutadapt_params = stringify(cutadapt_config)
-        cmd = '%s %s %s %s > %s' % (sys.executable, cutadapt_bin, cutadapt_params, fq_fn, fq_clean_fn)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        output, errors = p.communicate()
-        rc = p.returncode
-        if rc != 0:
-                return (None, rc)
-        else:
-                return (fq_clean_fn, rc)
+def test_cutadapt(fqFn, cutadaptBinary, cutadaptConfigFn):
+    """Test the functionality of Cutadapt on test data.
+
+    Args:
+        fqFn (str):             The full path to the fastq filename to run Cutadapt on.
+        cutadaptBinary (str):   The full path to the Cutadapt binary.
+        cutadaptConfigFn (str): The full path to the Cutadapt configuration file.
+    Returns:
+        A tuple with the clean fastq file and the return code.
+    Raise:
+        None
+    """
+
+    fqCleanBase = os.path.basename(fqFn).split('.')[0] + "_cleaned.fq"
+    fqCleanFn = os.path.join(os.path.dirname(fqFn), fqCleanBase)
+    cutadaptParams = stringify(cutadaptConfigFn)
+    cmd = '%s %s %s %s > %s' % (sys.executable, cutadaptBinary, cutadaptParams, fqFn, fqCleanFn)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output, errors = p.communicate()
+    returnCode = p.returncode
+    if returnCode != 0:
+        return (None, returnCode)
+    else:
+        return (fqCleanFn, returnCode)
 
 
 def test_jellyfish(jfish_bin, fa_fn, analysis_dir):
+    """
+    """
+
     cmd = '%s --version' % jfish_bin
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, errors = p.communicate()
@@ -212,30 +247,10 @@ def test_jellyfish(jfish_bin, fa_fn, analysis_dir):
     return ("Jellyfish", 0)
 
 
-def write_test_fq(fq_fn):
-    fq_f = open(fq_fn, 'w')
-    fq_f.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
-    fq_f.close()
-
-
-def which(program):
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-        if is_exe(exe_file):
-            return exe_file
-    return None
-
-
 def calc_contig_complexity(seq, N=3, w=6):
+    """
+    """
+
     cmers = []
     for i in range(len(seq)):
         s = max(0, i - w)
@@ -249,6 +264,9 @@ def calc_contig_complexity(seq, N=3, w=6):
 
 
 def count_nmers(seq, N):
+    """
+    """
+
     nmers = {}
     for i in range(len(seq) - (N - 1)):
         mer = str(seq[i:i + N]).upper()
@@ -259,6 +277,9 @@ def count_nmers(seq, N):
 
 
 def is_number(s):
+    """
+    """
+
     try:
         float(s)
         return True
@@ -276,6 +297,7 @@ def is_number(s):
 def filter_by_feature(brkpts, query_region, keep_intron_vars):
     """
     """
+
     in_filter = False
     span_filter = False
     if not keep_intron_vars:
@@ -296,6 +318,7 @@ def filter_by_feature(brkpts, query_region, keep_intron_vars):
 def check_intervals(breakpts, query_region):
     """
     """
+
     in_values = [False, [], []]
     span_values = [False, [], []]
     for bp in breakpts:
@@ -324,6 +347,7 @@ def setup_logger(logFnPath, name):
     Returns:
         Nothing is returned.
     """
+
     outputPath = os.path.abspath(logFnPath)
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
@@ -346,36 +370,43 @@ def setup_logger(logFnPath, name):
     logger.addHandler(consoleHandle)
 
 
-def check_repeat_regions(coords, repeat_locs):
-    """
-    """
-    start, end = coords
-    seg_len = float(end - start)
-    in_repeat = False
-    rep_overlap = 0.0
-    rep_coords = []
-    filter_reps_edges = [False, False]
-    for rloc in repeat_locs:
-        rchr, rbp1, rbp2, rname = rloc
-        if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
-            in_repeat = True
-            rep_overlap += float(min(rbp2, end) - max(rbp1, start))
-            rep_coords.append((rbp1, rbp2))
-            # Simple or low complexity seq repeat for filtering
-            if rname.find(")n") > -1 or rname.find("_rich") > -1:
-                if (rbp1 <= start and rbp2 >= start):
-                    filter_reps_edges[0] = True
-                elif (rbp1 <= end and rbp2 >= end):
-                    filter_reps_edges[1] = True
-    roverlap = round((float(min(rep_overlap, seg_len)) / float(seg_len)) * 100, 2)
-    return in_repeat, roverlap, rep_coords, filter_reps_edges
+# def check_repeat_regions(coords, repeat_locs):
+#     """
+#     """
+
+#     start, end = coords
+#     seg_len = float(end - start)
+#     in_repeat = False
+#     rep_overlap = 0.0
+#     rep_coords = []
+#     filter_reps_edges = [False, False]
+#     for rloc in repeat_locs:
+#         rchr, rbp1, rbp2, rname = rloc
+#         if (rbp1 >= start and rbp1 <= end) or (rbp2 >= start and rbp2 <= end) or (rbp1 <= start and rbp2 >= end):
+#             in_repeat = True
+#             rep_overlap += float(min(rbp2, end) - max(rbp1, start))
+#             rep_coords.append((rbp1, rbp2))
+#             # Simple or low complexity seq repeat for filtering
+#             if rname.find(")n") > -1 or rname.find("_rich") > -1:
+#                 if (rbp1 <= start and rbp2 >= start):
+#                     filter_reps_edges[0] = True
+#                 elif (rbp1 <= end and rbp2 >= end):
+#                     filter_reps_edges[1] = True
+#     roverlap = round((float(min(rep_overlap, seg_len)) / float(seg_len)) * 100, 2)
+#     return in_repeat, roverlap, rep_coords, filter_reps_edges
 
 
 def get_marker_fn(fn):
+    """
+    """
+
     return os.path.join(os.path.split(fn)[0], "." + os.path.basename(fn))
 
 
 def run_jellyfish(fa_fn, jellyfish, kmer_size):
+    """
+    """
+
     logger = logging.getLogger('root')
     file_path = os.path.split(fa_fn)[0]
     file_base = os.path.basename(fa_fn)
@@ -422,6 +453,9 @@ def run_jellyfish(fa_fn, jellyfish, kmer_size):
 
 
 def setup_ref_data(setup_params):
+    """
+    """
+
     genes = setup_params[0]
     rep_mask, ref_fa, altref_fa_fns, ref_path, jfish_path, blat_path, kmer_size = setup_params[1]
     logger = logging.getLogger('breakmer.utils')
@@ -471,6 +505,9 @@ def setup_ref_data(setup_params):
 
 
 def get_fastq_reads(fn, sv_reads):
+    """
+    """
+
     read_len = 0
     filtered_fq_fn = fn.split(".fastq")[0] + "_filtered.fastq"
     filt_fq = open(filtered_fq_fn, 'w')
@@ -518,6 +555,9 @@ def get_fastq_reads(fn, sv_reads):
 
 
 def get_fastq_reads_old(fn, sv_reads):
+    """
+    """
+
     read_len = 0
     fq_recs = {}
     f = open(fn, 'r')
@@ -555,73 +595,82 @@ def get_fastq_reads_old(fn, sv_reads):
 
 
 def load_kmers(fns, kmers):
-        if not fns:
-                return kmers
+    """
+    """
 
-        fns = fns.split(",")
-        for fn in fns:
-                f = open(fn, 'rU')
-                for line in f.readlines():
-                        line = line.strip()
-                        mer, count = line.split()
-                        if mer not in kmers:
-                                kmers[mer] = 0
-                        kmers[mer] += int(count)
-        return kmers
+    if not fns:
+            return kmers
 
-
-def setup_rmask_all(rmask_fn):
-    logger = logging.getLogger('root')
-
-    rmask = {}
-    f = open(rmask_fn, 'rU')
-    flines = f.readlines()
-    for line in flines:
-        line = line.strip()
-        rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
-        rchr = rchr.replace('chr', '')
-        if rchr not in rmask:
-            rmask[rchr] = []
-        rmask[rchr].append((rchr, int(rbp1), int(rbp2), rname))
-    return rmask
+    fns = fns.split(",")
+    for fn in fns:
+            f = open(fn, 'rU')
+            for line in f.readlines():
+                    line = line.strip()
+                    mer, count = line.split()
+                    if mer not in kmers:
+                            kmers[mer] = 0
+                    kmers[mer] += int(count)
+    return kmers
 
 
-def setup_rmask(gene_coords, ref_path, rmask_fn):
-    logger = logging.getLogger('root')
-    chrom, s, e, name, intervals = gene_coords
-    mask_out_fn = os.path.join(ref_path, name + '_rep_mask.bed')
-    marker_fn = get_marker_fn(mask_out_fn)
+# def setup_rmask_all(rmask_fn):
+#     """
+#     """
 
-    rmask = []
-    if not os.path.isfile(marker_fn):
-        fout = open(mask_out_fn, 'w')
-        f = open(rmask_fn, 'rU')
-        flines = f.readlines()
-        for line in flines:
-            line = line.strip()
-            rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
-            rchr = rchr.replace('chr', '')
-            if rchr == chrom:
-                if int(rbp1) >= int(s) and int(rbp2) <= int(e):
-                    fout.write("\t".join([str(x) for x in [rchr, int(rbp1), int(rbp2), rname]]) + "\n")
-                    rmask.append((rchr, int(rbp1), int(rbp2), rname))
-        f.close()
-        fout.close()
-        cmd = 'touch %s' % marker_fn
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        output, errors = p.communicate()
-        logger.info('Completed writing repeat mask file %s, touching marker file %s' % (mask_out_fn, marker_fn))
-    else:
-        rep_f = open(mask_out_fn, 'rU')
-        rep_flines = rep_f.readlines()
-        for line in rep_flines:
-            line = line.strip()
-            rchr, rbp1, rbp2, rname = line.split()
-            rmask.append((rchr, int(rbp1), int(rbp2), rname))
-    return rmask
+#     logger = logging.getLogger('root')
+
+#     rmask = {}
+#     f = open(rmask_fn, 'rU')
+#     flines = f.readlines()
+#     for line in flines:
+#         line = line.strip()
+#         rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
+#         rchr = rchr.replace('chr', '')
+#         if rchr not in rmask:
+#             rmask[rchr] = []
+#         rmask[rchr].append((rchr, int(rbp1), int(rbp2), rname))
+#     return rmask
+
+
+# def setup_rmask(gene_coords, ref_path, rmask_fn):
+#     logger = logging.getLogger('root')
+#     chrom, s, e, name, intervals = gene_coords
+#     mask_out_fn = os.path.join(ref_path, name + '_rep_mask.bed')
+#     marker_fn = get_marker_fn(mask_out_fn)
+
+#     rmask = []
+#     if not os.path.isfile(marker_fn):
+#         fout = open(mask_out_fn, 'w')
+#         f = open(rmask_fn, 'rU')
+#         flines = f.readlines()
+#         for line in flines:
+#             line = line.strip()
+#             rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
+#             rchr = rchr.replace('chr', '')
+#             if rchr == chrom:
+#                 if int(rbp1) >= int(s) and int(rbp2) <= int(e):
+#                     fout.write("\t".join([str(x) for x in [rchr, int(rbp1), int(rbp2), rname]]) + "\n")
+#                     rmask.append((rchr, int(rbp1), int(rbp2), rname))
+#         f.close()
+#         fout.close()
+#         cmd = 'touch %s' % marker_fn
+#         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+#         output, errors = p.communicate()
+#         logger.info('Completed writing repeat mask file %s, touching marker file %s' % (mask_out_fn, marker_fn))
+#     else:
+#         rep_f = open(mask_out_fn, 'rU')
+#         rep_flines = rep_f.readlines()
+#         for line in rep_flines:
+#             line = line.strip()
+#             rchr, rbp1, rbp2, rname = line.split()
+#             rmask.append((rchr, int(rbp1), int(rbp2), rname))
+#     return rmask
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
+    """
+    """
+
     logger = logging.getLogger('breakmer.utils')
     chrom = gene_coords[0]
     start = gene_coords[1]
@@ -650,6 +699,9 @@ def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
 
 
 def seq_trim(qual_str, min_qual):
+    """
+    """
+
     counter = 0
     while ord(qual_str[counter]) - 33 < min_qual:
         counter += 1
@@ -659,6 +711,9 @@ def seq_trim(qual_str, min_qual):
 
 
 def get_seq_readname(read):
+    """
+    """
+
     end = '1'
     if read.is_read2:
         end = '2'
@@ -666,6 +721,9 @@ def get_seq_readname(read):
 
 
 def trim_coords(qual_str, min_qual):
+    """
+    """
+
     q = []
     coords = [0, len(qual_str)]
     start = seq_trim(qual_str, min_qual)
@@ -678,6 +736,9 @@ def trim_coords(qual_str, min_qual):
 
 
 def trim_qual(read, min_qual, min_len):
+    """
+    """
+
     qual_str = read.qual
     q = []
     coords = [0, len(qual_str)]
@@ -697,6 +758,9 @@ def trim_qual(read, min_qual, min_len):
 
 
 def fq_line(read, indel_only, min_len, trim=True):
+    """
+    """
+
     add_val = '0'
     if indel_only:
         add_val = '1'
@@ -709,6 +773,9 @@ def fq_line(read, indel_only, min_len, trim=True):
 
 
 def get_overlap_index_nomm(a, b):
+    """
+    """
+
     i = 0
     while a[i:] != b[:len(a[i:])]:
         i += 1
@@ -832,55 +899,55 @@ class FastqFile(object):
         return (header, seq, qual)
 
 
-class Annotation:
-    def __init__(self):
-        self.genes = {}
-        self.logging_name = 'breakmer.utils.Annotation'
+# class Annotation:
+#     def __init__(self):
+#         self.genes = {}
+#         self.logging_name = 'breakmer.utils.Annotation'
 
-    def add_genes(self, gene_fn):
-        log(self.logging_name, 'info', 'Adding gene annotations from %s' % gene_fn)
-        gene_f = open(gene_fn, 'r')
-        gene_flines = gene_f.readlines()
-        for line in gene_flines[1:]:
-            line = line.strip()
-            linesplit = line.split()
-            chrom = linesplit[2]
-            start = int(linesplit[4])
-            end = int(linesplit[5])
-            geneid = linesplit[12]
-            if geneid in self.genes:
-                if start <= self.genes[geneid][1] and end >= self.genes[geneid][2]:
-                    self.genes[geneid] = [chrom, start, end]
-            else:
-                self.genes[geneid] = [chrom, start, end]
-        gene_f.close()
+#     def add_genes(self, gene_fn):
+#         log(self.logging_name, 'info', 'Adding gene annotations from %s' % gene_fn)
+#         gene_f = open(gene_fn, 'r')
+#         gene_flines = gene_f.readlines()
+#         for line in gene_flines[1:]:
+#             line = line.strip()
+#             linesplit = line.split()
+#             chrom = linesplit[2]
+#             start = int(linesplit[4])
+#             end = int(linesplit[5])
+#             geneid = linesplit[12]
+#             if geneid in self.genes:
+#                 if start <= self.genes[geneid][1] and end >= self.genes[geneid][2]:
+#                     self.genes[geneid] = [chrom, start, end]
+#             else:
+#                 self.genes[geneid] = [chrom, start, end]
+#         gene_f.close()
 
-    def add_regions(self, regions_bed_fn):
-        region_f = open(regions_bed_fn, 'rU')
-        region_lines = region_f.readlines()
-        for line in region_lines:
-            line = line.strip()
-            chrom, start, end, name = line.split()
-            if name not in self.genes:
-                self.genes[name] = [chrom, int(start), int(end)]
-        log(self.logging_name, 'info', 'Adding in %d other target regions' % len(region_lines))
+#     def add_regions(self, regions_bed_fn):
+#         region_f = open(regions_bed_fn, 'rU')
+#         region_lines = region_f.readlines()
+#         for line in region_lines:
+#             line = line.strip()
+#             chrom, start, end, name = line.split()
+#             if name not in self.genes:
+#                 self.genes[name] = [chrom, int(start), int(end)]
+#         log(self.logging_name, 'info', 'Adding in %d other target regions' % len(region_lines))
 
-    def set_gene(self, chrom, pos):
-        ann_genes = []
-        if chrom.find('chr') == -1:
-            chrom = 'chr' + str(chrom)
-        for g in self.genes:
-            gs = self.genes[g][1]
-            ge = self.genes[g][2]
-            if chrom == self.genes[g][0]:
-                if len(pos) == 1:
-                    if int(pos[0]) >= gs and int(pos[0]) <= ge:
-                        ann_genes.append(g)
-                        break
-                else:
-                    # Find genes between pos1 and pos2
-                    if (int(pos[0]) >= gs and int(pos[0]) <= ge) or (int(pos[1]) >= gs and int(pos[1]) <= ge):
-                        ann_genes.append(g)
-        if len(ann_genes) == 0:
-            ann_genes = ['intergenic']
-        return ",".join(ann_genes)
+#     def set_gene(self, chrom, pos):
+#         ann_genes = []
+#         if chrom.find('chr') == -1:
+#             chrom = 'chr' + str(chrom)
+#         for g in self.genes:
+#             gs = self.genes[g][1]
+#             ge = self.genes[g][2]
+#             if chrom == self.genes[g][0]:
+#                 if len(pos) == 1:
+#                     if int(pos[0]) >= gs and int(pos[0]) <= ge:
+#                         ann_genes.append(g)
+#                         break
+#                 else:
+#                     # Find genes between pos1 and pos2
+#                     if (int(pos[0]) >= gs and int(pos[0]) <= ge) or (int(pos[1]) >= gs and int(pos[1]) <= ge):
+#                         ann_genes.append(g)
+#         if len(ann_genes) == 0:
+#             ann_genes = ['intergenic']
+#         return ",".join(ann_genes)
