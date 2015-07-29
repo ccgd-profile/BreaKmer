@@ -176,13 +176,12 @@ class ParamManager:
                 binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
                 binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
-                print binary
                 self.set_param(binary) = binaryCheck
-            if not bin_check:
+            if not binaryCheck:
                 print 'Missing path/executable for', binary
                 utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
                 sys.exit(1)
-            utils.log(self.loggingName, 'info', '%s path = %s' % (binary, bin_check))
+            utils.log(self.loggingName, 'info', '%s path = %s' % (binary, binaryCheck))
         utils.log(self.loggingName, 'info', 'All the required binaries have been checked successfully!')
 
         # Test cutadapt and jellyfish binaries
@@ -299,7 +298,7 @@ class ParamManager:
             A list of the target region names that were defined from the input bed file (list).
         """
 
-        return self.targets.keys
+        return self.targets.keys()
 
     def check_blat_server(self):
         """Run a test query on the specified blat server to make sure it is running.
