@@ -176,6 +176,7 @@ class ParamManager:
                 binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
                 binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
+                print binary
                 self.set_param(binary) = binaryCheck
             if not bin_check:
                 print 'Missing path/executable for', binary
@@ -194,10 +195,10 @@ class ParamManager:
         fq_f.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
         fq_f.close()
 
-        clean_fq, rc = utils.test_cutadapt(testFq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
-        if clean_fq:
+        cleanFq, rc = utils.test_cutadapt(testFq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
+        if cleanFq:
             utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
-            jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], clean_fq, testDir)
+            jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], cleanFq, testDir)
             if rc != 0:
                 utils.log(self.loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
