@@ -238,7 +238,7 @@ class AlignResults:
             cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
             self.targetHit = cond1 or cond2 or cond3
         # print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
-        utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % targetHit)
+        utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % self.targetHit)
 
         if self.targetHit:
             if ((len(self.results) > 1) and (self.get_query_coverage() >= 90.0)) and (self.program == 'blast'):
@@ -253,6 +253,7 @@ class AlignResults:
                         break
                     else:
                         self.mergedRecords.append((i-1, i))
+        print 'Merged record indices', self.mergedRecords
         return self.targetHit
 
     def parse_result_file(self):
