@@ -66,6 +66,9 @@ class RealignManager:
         # print 'realigner.py realign() check target_aligned()', self.realignment.target_aligned()
         if not self.realignment.target_aligned():
             self.realignment.align(self.alignParams.get_values('genome'), 'genome')
+        else:
+            if self.realignment.targetHit and self.alignParams.get_values('target')[0] == 'blast':
+                self.realignment.check_record_merge()
 
     def get_result_fn(self):
         resultFn = None
@@ -99,47 +102,51 @@ class Realignment:
         self.loggingName = 'breakmer.realignment.realigner'
         self.scope = None
         self.results = None
+        self.targetHit = False
+        self.resultFn = None
+        self.alignParams = None
         self.contig = contig
 
     def align(self, alignParams, scope):
         """
         """
-        alignProgram, alignExt, alignBinary, binaryParams, alignRef = alignParams
+        self.alignParams = alignParams
+        alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
         self.scope = scope
 
-        resultFn = os.path.join(self.contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
+        self.resultFn = os.path.join(self.contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
         utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, resultFn))
 #        self.results = AlignResults(alignProgram, scope, resultFn)
 
         cmd = ''
         if alignProgram == 'blast':
-            cmd = "%s -task 'blastn-short' -db %s -query %s -evalue 0.01 -out %s -outfmt '7 qseqid sseqid pident qlen length mismatch gapopen qstart qend sstart send evalue bitscore gaps sstrand qseq sseq'" % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
+            cmd = "%s -task 'blastn-short' -db %s -query %s -evalue 0.01 -out %s -outfmt '7 qseqid sseqid pident qlen length mismatch gapopen qstart qend sstart send evalue bitscore gaps sstrand qseq sseq'" % (alignBinary, alignRef, self.contig.meta.fa_fn, self.resultFn)
         elif alignProgram == 'blat':
             if scope == 'genome':
                 # all blat server
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (alignBinary, binaryParams['hostname'], binaryParams['port'], alignRef, self.contig.meta.fa_fn, resultFn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (alignBinary, binaryParams['hostname'], binaryParams['port'], alignRef, self.contig.meta.fa_fn, self.resultFn)
             elif scope == 'target':
                 # target
-                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignBinary, alignRef, self.contig.meta.fa_fn, resultFn)
+                cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -stepSize=10 -minMatch=2 -repeats=lower -noHead %s %s %s' % (alignBinary, alignRef, self.contig.meta.fa_fn, self.resultFn)
 
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
+        utils.log(self.loggingName, 'info', 'Realignment output file %s' % self.resultFn)
         if errors != '':
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
 
-        if not os.path.isfile(resultFn):
+        if not os.path.isfile(self.resultFn):
             return False
         else:
-            self.results = AlignResults(alignProgram, scope, resultFn, self.contig, alignRef)
+            self.results = AlignResults(alignProgram, scope, self.resultFn, self.contig, alignRef)
             # print self.results.resultFn
             return True
 
     def get_result_fn(self):
         """ """
         if self.results is not None:
-            return self.results.resultFn
+            return self.resultFn
 
     def has_results(self):
         """ """
@@ -158,12 +165,12 @@ class Realignment:
         else:
             self.results.modify_blat_result_file()
             if self.results.target_hit():
-                targetHit = True
+                self.targetHit = True
                 utils.log(self.loggingName, 'debug', 'Top hit contains whole query sequence, indicating an indel variant within the target region.')
 
         # If there was a sufficient target hit or no alignment at all then return True
         # this effectively prevents a genome alignment.
-        return targetHit or noAlignmentResults
+        return self.targetHit or noAlignmentResults
 
     def get_blat_results(self):
         """
@@ -172,6 +179,17 @@ class Realignment:
 
     def store_clipped_queryseq(self, blatResultValues):
         self.clippedQs.append(blatResultValues)
+
+    def check_record_merge(self):
+        """ """
+        # Check if need to merge indels from blast results
+        if len(self.results.mergedRecords) > 0:
+            # Re-write a blast-style file and re-procress with merged records.
+            newResultFn = open(self.resultFn + '.merged_recs', 'w')
+            linesOut = self.results.merge_records()
+            newResultFn.close()
+            alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
+            self.results = AlignResults('blat', 'target', self.resultFn, self.contig, alignRef)
 
 
 class AlignResults:
@@ -190,6 +208,8 @@ class AlignResults:
         self.clippedQs = []
         self.contig = contig
         self.alignRefFn = alignRefFn
+        self.mergedRecords = [] # List of tuples containing indices of realignment records that need to be merged.
+        self.targetHit = False
         self.set_values()
 
     def set_values(self):
@@ -211,16 +231,29 @@ class AlignResults:
 
     def target_hit(self):
         """ """
-        targetHit = False
         if self.hasResults:
             # print 'realigner.py target_hit(), results', self.results
             cond1 = self.results[0].spans_query() and (self.ngaps > 0)
             cond2 = (len(self.results) == 1) and self.get_query_coverage() >= 90.0 and (self.ngaps > 0)
             cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
-            targetHit = cond1 or cond2 or cond3
+            self.targetHit = cond1 or cond2 or cond3
         # print 'realigner.py target_hit() indelHit', indelHit, self.results[0].spans_query(), len(self.results), self.get_query_coverage()
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % targetHit)
-        return targetHit
+
+        if self.targetHit:
+            if ((len(self.results) > 1) and (self.get_query_coverage() >= 90.0)) and (self.program == 'blast'):
+                # Check for a gapped Blast result.
+                for i in range(1, len(self.results)):
+                    lResult = self.results[i-1]
+                    rResult = self.results[i]
+                    qgap = lResult.qEnd - rResult.qStart
+                    tgap = lResult.tEnd - rResult.tStart
+                    if (tgap < 0) or (lResult.strand != rResult.strand):
+                        # Tandem dup or inversion
+                        break
+                    else:
+                        self.mergedRecords.append((i-1, i))
+        return self.targetHit
 
     def parse_result_file(self):
         """ """
@@ -249,6 +282,83 @@ class AlignResults:
 
         if len(self.results) == 0:
             self.hasResults = False
+
+    def merge_records(self):
+        """ """
+        mergedResults = []
+        mapResults = {}
+        for mergeIdx in self.mergedRecords:
+            lResult = self.results[mergeIdx[0]].resultValues
+            rResult = self.results[mergeIdx[1]].resultValues
+            newMergedIdx = len(mergedResults)
+            if mergeIdx[0] in mapResults:
+                # Merge a result and a previously merged result.
+                lResult = mergedResults[mapResults[mergedIdx[0]]]
+                newMergedIdx = mapResults[mergedIdx[0]]
+            # Merge right and left values
+            mergedResults[newMergedIdx] = self.merge_record_fields(lResult, rResult)
+            mapResults[mergeIdx[0]] = newMergedIdx
+            mapResults[mergeIdx[1]] = newMergedIdx
+        for i in enumerate(self.results):
+            if i in mapResults:
+                print 'New result', mergedResults[mapResults[i]]
+            else:
+                print 'Result', self.results[i].resultValues
+        sys.exit()
+
+    def merge_record_fields(self, lResult, rResult):
+        """ """
+
+        # self.valueDict = {'matches': int(values[0]),
+        #           'mismatches': int(values[1]),
+        #           'repmatches': int(values[2]),
+        #           'ncount': int(values[3]),
+        #           'qNumInsert': int(values[4]),
+        #           'qBaseInsert': int(values[5]),
+        #           'tNumInsert': int(values[6]),
+        #           'tBaseInsert': int(values[7]),
+        #           'strand': values[8],
+        #           'qName': values[9],
+        #           'qSize': int(values[10]),
+        #           'qStart': int(values[11]),
+        #           'qEnd': int(values[12]),
+        #           'tName': values[13].replace('chr', ''),
+        #           'tSize': int(values[14]),
+        #           'tStart': int(values[15]),
+        #           'tEnd': int(values[16]),
+        #           'blockCount': int(values[17]),
+        #           'blockSizes': values[18],
+        #           'qStarts': values[19],
+        #           'tStarts': values[20],
+
+        tGap = rResult['tStart'] - lResult['tEnd']
+        qGap = rResult['qStart'] - lResult['qEnd']
+        lqEnd = lResult['qEnd']
+
+        keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert', 'qSize', 'qStart', 'tStart']
+        for key in keys:
+            lResult[key] += rResult[key]
+        lResult['qEnd'] = rResult['qEnd']
+        lResult['tEnd'] = rResult['tEnd']
+        lResult['blockCount'] += 1
+        lResult['blockSizes'] += rResult['blockSizes']
+        lResult['qStarts'] += rResult['qStarts']
+        lResult['tStarts'] += rResult['tStarts']
+
+        if tGap > qGap:
+            # Del
+            lResult['qStarts'] += ',' + str(lqEnd) + ','
+            lResult['tStarts'] += ',' + str(rResult['tStart'])
+            lResult['tNumInsert'] += 1
+            lResult['tBaseInsert'] += tGap
+        else:
+            # Ins
+            lResult['qStarts'] += ',' + str(rResult['qStart'])
+            lResult['tStarts'] += ',' + str(lResult['tStart'] + lqEnd) + ','
+            lResult['qNumInsert'] += 1
+            lResult['qBaseInsert'] += qGap
+        return lResult
+
 
     # def parse_blast_results(self):
     #     """ """

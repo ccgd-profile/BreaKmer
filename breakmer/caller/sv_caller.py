@@ -692,6 +692,37 @@ class SVEvent:
             contained = True
         return contained
 
+    def which_rearr(self, tcoords, qcoords, strands, brkpts):
+        rearrValues = {'discReadCount': None, 'svType': 'rearrangement', 'svSubType': None, 'hit': False}
+        if not self.check_overlap(tcoords[0], tcoords[1]):
+            utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
+            if (strands[0] != strands[1]): # and (brkpts[0] < brkpts[1]):
+                # Inversion
+                # Get discordantly mapped read-pairs
+                utils.log(self.loggingName, 'debug', 'Inversion event identified.')
+                rearrValues['hit'] = True
+                rearrValues['svSubType'] = 'inversion'
+                rearrValues['discReadCount'] = varReads.check_inv_readcounts(brkpts)
+            elif (strands[0] == strands[1]):
+                tgap = brkpts[1] - brkpts[0]
+                qgap = qcoords[1] - qcoords[0]
+                if tgap < 0:
+                    utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svSubType'] = 'tandem_dup'
+                    rearrValues['discReadCount'] = varReads.check_td_readcounts(brkpts)
+                elif tgap > qgap:
+                    # Gapped deletion from Blast result
+                    utils.log(self.loggingName, 'debug', 'Deletion event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svType'] = 'indel'
+                else:
+                    # Gapped insertion from Blast result
+                    utils.log(self.loggingName, 'debug', 'Insertion event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svType'] = 'indel'
+        return rearrValues
+
     def define_rearr(self):
         # vrt = self.contig.get_read_variation()
         varReads = self.contig.get_var_reads('sv')
@@ -701,47 +732,11 @@ class SVEvent:
         svType = 'rearrangement'
         rs = 0
         hit = False
-        if len(strands) < 3:
-            if not self.check_overlap(tcoords[0], tcoords[1]):
-                utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
-                if (strands[0] != strands[1]): # and (brkpts[0] < brkpts[1]):
-                    # Inversion
-                    # Get discordantly mapped read-pairs
-                    utils.log(self.loggingName, 'debug', 'Inversion event identified.')
-                    hit = True
-                    svType = 'inversion'
-                    rs = varReads.check_inv_readcounts(brkpts)
-                    # for readPair in varReads.inv:
-                    #     r1p, r2p, r1s, r2s, qname = readPair
-                    #     if r1s == 1 and r2s == 1:
-                    #         if (r1p <= brkpts[0]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                    #             rs += 1
-                    #     else:
-                    #         if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
-                    #             rs += 1
-                elif (strands[0] == strands[1]): # and (brkpts[0] > brkpts[1]):
-                    utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
-                    hit = True
-                    svType = 'tandem_dup'
-                    # Tandem dup
-                    rs = varReads.check_td_readcounts(brkpts)
-                    # for readPair in varReads.td:
-                    #     r1p, r2p, r1s, r2s, qname = readPair
-                    #     if (r1p <= brkpts[0] and r1p >= brkpts[1]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                    #         rs += 1
+        for i in range(1, len(self.blatResults)):
+            vals = self.which_rearr(tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
-            # rs = [0] * len(brkpts)
-            # for i in range(len(brkpts)):
-            #     b = brkpts[i]
-                # rs = varReads.check_other_readcounts(b)
-                # for readPair in varReads.reads.other:
-                #     r1p, r2p, r1s, r2s, qname = readPair
-                #     if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
-                #         utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %s, %s and positions %d, %d for breakpoint at %d' % (qname, r1s, r2s, r1p, r2p, b))
-                #         rs[i] += 1
-            # rs = max(rs)
         print 'define_rearr()', svType, rs
         return svType, rs
 
