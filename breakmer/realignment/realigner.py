@@ -187,7 +187,10 @@ class Realignment:
             # Re-write a blast-style file and re-procress with merged records.
             newResultFn = open(self.resultFn + '.merged_recs', 'w')
             linesOut = self.results.merge_records()
+            for line in linesOut:
+                newResultFn.write(line)
             newResultFn.close()
+            self.resultFn = newResultFn
             alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
             self.results = AlignResults('blat', 'target', self.resultFn, self.contig, alignRef)
 
@@ -307,38 +310,51 @@ class AlignResults:
                 mergedResults.append(self.merge_record_fields(lResult, rResult))
             mapResults[mergeIdx[0]] = newMergedIdx
             mapResults[mergeIdx[1]] = newMergedIdx
+        outputIdx = []
+        lOuts = []
         for i, result in enumerate(self.results):
             if i in mapResults:
                 print 'New result', i, mergedResults[mapResults[i]]
+                if mapResults[i] not in outputIdx:
+                    outputIdx.append(mapResults[i])
+                    lOuts.append(self.format_to_blat_output(mergedResults[mapResults[i]]))
             else:
                 print 'Result', self.results[i].resultValues
-        sys.exit()
+                lOuts.append(self.format_to_blat_output(self.results[i].resultValues))
+        print lOuts
+        return lOuts
+
+    def format_to_blat_output(self, resultValues):
+        """ """
+#         matches': int(values[0]),
+# 'mismatches': int(values[1]),
+# 'repmatches': int(values[2]),
+# 'ncount': int(values[3]),
+# 'qNumInsert': int(values[4]),
+# 'qBaseInsert': int(values[5]),
+# 'tNumInsert': int(values[6]),
+# 'tBaseInsert': int(values[7]),
+# 'strand': values[8],
+# 'qName': values[9],
+# 'qSize': int(values[10]),
+# 'qStart': int(values[11]),
+# 'qEnd': int(values[12]),
+# 'tName': values[13].replace('chr', ''),
+# 'tSize': int(values[14]),
+# 'tStart': int(values[15]),
+# 'tEnd': int(values[16]),
+# 'blockCount': int(values[17]),
+# 'blockSizes': values[18],
+# 'qStarts': values[19],
+# 'tStarts': values[20],
+        outStr = []
+        keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert', 'strand', 'qName', 'qSize', 'qStart', 'qEnd', 'tName', 'tSize', 'tStart', 'tEnd', 'blockCount', 'blockSizes', 'qStarts', 'tStarts']
+        for key in keys:
+            outStr.append(resultValues[key])
+        return '\t'.join([str(x) for x in outStr]) + '\n'
 
     def merge_record_fields(self, lResult, rResult):
         """ """
-
-        # self.valueDict = {'matches': int(values[0]),
-        #           'mismatches': int(values[1]),
-        #           'repmatches': int(values[2]),
-        #           'ncount': int(values[3]),
-        #           'qNumInsert': int(values[4]),
-        #           'qBaseInsert': int(values[5]),
-        #           'tNumInsert': int(values[6]),
-        #           'tBaseInsert': int(values[7]),
-        #           'strand': values[8],
-        #           'qName': values[9],
-        #           'qSize': int(values[10]),
-        #           'qStart': int(values[11]),
-        #           'qEnd': int(values[12]),
-        #           'tName': values[13].replace('chr', ''),
-        #           'tSize': int(values[14]),
-        #           'tStart': int(values[15]),
-        #           'tEnd': int(values[16]),
-        #           'blockCount': int(values[17]),
-        #           'blockSizes': values[18],
-        #           'qStarts': values[19],
-        #           'tStarts': values[20],
-
         tGap = rResult['tStart'] - lResult['tEnd']
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
@@ -370,7 +386,6 @@ class AlignResults:
             lResult['qNumInsert'] += 1
             lResult['qBaseInsert'] += qGap
         return lResult
-
 
     # def parse_blast_results(self):
     #     """ """
