@@ -309,7 +309,7 @@ class AlignResults:
             mapResults[mergeIdx[1]] = newMergedIdx
         for i, result in enumerate(self.results):
             if i in mapResults:
-                print 'New result', mergedResults[mapResults[i]]
+                print 'New result', i, mergedResults[mapResults[i]]
             else:
                 print 'Result', self.results[i].resultValues
         sys.exit()
@@ -343,15 +343,15 @@ class AlignResults:
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
 
-        keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert', 'qSize', 'qStart', 'tStart']
+        keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert']
         for key in keys:
             lResult[key] += rResult[key]
         lResult['qEnd'] = rResult['qEnd']
         lResult['tEnd'] = rResult['tEnd']
         lResult['blockCount'] += 1
         lResult['blockSizes'] += rResult['blockSizes']
-        lResult['qStarts'] += rResult['qStarts']
-        lResult['tStarts'] += rResult['tStarts']
+        # lResult['qStarts'] += rResult['qStarts']
+        # lResult['tStarts'] += rResult['tStarts']
 
         if tGap > qGap:
             # Del
