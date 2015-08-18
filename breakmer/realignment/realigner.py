@@ -192,7 +192,7 @@ class Realignment:
             newResultFn.close()
             self.resultFn = self.resultFn + '.merged_recs'
             alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
-            self.results = AlignResults('blat', 'target', self.resultFn, self.contig, alignRef)
+            self.results = AlignResults('blat', 'blast_target', self.resultFn, self.contig, alignRef)
 
 
 class AlignResults:
