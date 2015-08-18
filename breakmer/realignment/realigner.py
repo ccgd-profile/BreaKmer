@@ -360,6 +360,7 @@ class AlignResults:
         lqEnd = lResult['qEnd']
 
         lResult['qStart'] = int(lResult['qStart']) - 1
+        rResult['qStart'] = int(rResult['qStart']) - 1
         lResult['blockSizes'] = str(int(lResult['blockSizes'].rstrip(',')) - 1) + ','
         if qGap < 0:
             rResult['blockSizes'] = str(int(rResult['blockSizes'].rstrip(',')) + qGap) + ','
