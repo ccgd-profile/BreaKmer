@@ -733,6 +733,7 @@ class SVEvent:
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords
+        qcoords = self.brkpts.qcoords
         svType = 'rearrangement'
         rs = 0
         hit = False
