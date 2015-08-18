@@ -294,6 +294,8 @@ class AlignResults:
         for mergeIdx in self.mergedRecords:
             lResult = self.results[mergeIdx[0]].resultValues
             rResult = self.results[mergeIdx[1]].resultValues
+            print 'left', lResult
+            print 'right', rResult
             newMergedIdx = len(mergedResults)
             if mergeIdx[0] in mapResults:
                 # Merge a result and a previously merged result.
