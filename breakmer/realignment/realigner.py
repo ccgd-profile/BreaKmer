@@ -248,7 +248,7 @@ class AlignResults:
                     lResult = self.results[i-1]
                     rResult = self.results[i]
                     qgap = rResult.qstart() - lResult.qend()
-                    tgap = rResult.tstart() - lesult.tend()
+                    tgap = rResult.tstart() - lResult.tend()
                     print 'tgap', tgap
                     print 'qgap', qgap
                     if (tgap < 0) or (lResult.strand != rResult.strand):
