@@ -344,7 +344,7 @@ class AlignResults:
         lqEnd = lResult['qEnd']
 
         if qGap < 0:
-            rResult['blockSizes'] = str(int(rResult['blockSizes'].lstrip(',')) + qGap) + ','
+            rResult['blockSizes'] = str(int(rResult['blockSizes'].rstrip(',')) + qGap) + ','
             rResult['matches'] += qGap - 1
         keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert']
         for key in keys:
