@@ -376,6 +376,7 @@ class SVBreakpoints:
         self.chrs = []
         self.brkptStr = []
         self.tcoords = []
+        self.qcoords = []
         self.f = []
         self.counts = {'n': [], 'd': [], 'b': []}
         self.kmers = []
@@ -393,6 +394,7 @@ class SVBreakpoints:
         targetKey = 'target' if br.in_target else 'other'
         self.chrs.append(br.get_seq_name('ref'))
         self.tcoords.append((ts, te))
+        self.qcoords.append((qs, qe))
         tbrkpt = []
         filt_rep_start = None
         if i == 0:
@@ -716,11 +718,13 @@ class SVEvent:
                     utils.log(self.loggingName, 'debug', 'Deletion event identified.')
                     rearrValues['hit'] = True
                     rearrValues['svType'] = 'indel'
+                    rearrValues['indelSize'] = 'D' + str(tgap)
                 else:
                     # Gapped insertion from Blast result
                     utils.log(self.loggingName, 'debug', 'Insertion event identified.')
                     rearrValues['hit'] = True
                     rearrValues['svType'] = 'indel'
+                    rearrValues['indelSize'] = 'I' + str(qgap)
         return rearrValues
 
     def define_rearr(self):
@@ -732,8 +736,10 @@ class SVEvent:
         svType = 'rearrangement'
         rs = 0
         hit = False
+        rearrHits = []
         for i in range(1, len(self.blatResults)):
             vals = self.which_rearr(tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
+
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
