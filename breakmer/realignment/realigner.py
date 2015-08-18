@@ -307,7 +307,7 @@ class AlignResults:
                 mergedResults.append(self.merge_record_fields(lResult, rResult))
             mapResults[mergeIdx[0]] = newMergedIdx
             mapResults[mergeIdx[1]] = newMergedIdx
-        for i in enumerate(self.results):
+        for i, result in enumerate(self.results):
             if i in mapResults:
                 print 'New result', mergedResults[mapResults[i]]
             else:
