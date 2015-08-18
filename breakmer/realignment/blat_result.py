@@ -458,7 +458,7 @@ class BlatResult:
         """
         realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq, scope)
         realignVals.adjust_values(refName, offset)
-        self.resultValues = realignVals
+        self.resultValues = realignVals.valueDict
         self.values = realignVals.valueDict
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
