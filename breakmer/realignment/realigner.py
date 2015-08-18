@@ -353,16 +353,20 @@ class AlignResults:
         # lResult['qStarts'] += rResult['qStarts']
         # lResult['tStarts'] += rResult['tStarts']
 
-        if tGap > qGap:
+        if tGap > 1:
             # Del
-            lResult['qStarts'] += ',' + str(lqEnd) + ','
-            lResult['tStarts'] += ',' + str(rResult['tStart'])
+            if qGap < 0:
+                # Overlap between blocks
+                lResult['matches'] += qGap
+
+            lResult['qStarts'] += str(lqEnd)
+            lResult['tStarts'] += str(rResult['tStart'])
             lResult['tNumInsert'] += 1
             lResult['tBaseInsert'] += tGap
-        else:
+        if qGap > 1:
             # Ins
-            lResult['qStarts'] += ',' + str(rResult['qStart'])
-            lResult['tStarts'] += ',' + str(lResult['tStart'] + lqEnd) + ','
+            lResult['qStarts'] += str(rResult['qStart'])
+            lResult['tStarts'] += str(lResult['tStart'] + lqEnd)
             lResult['qNumInsert'] += 1
             lResult['qBaseInsert'] += qGap
         return lResult
