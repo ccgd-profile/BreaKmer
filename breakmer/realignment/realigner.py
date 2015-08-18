@@ -301,9 +301,10 @@ class AlignResults:
                 # Merge a result and a previously merged result.
                 lResult = mergedResults[mapResults[mergedIdx[0]]]
                 newMergedIdx = mapResults[mergedIdx[0]]
-            # Merge right and left values
-            print 'new merged idx', newMergedIdx
-            mergedResults[newMergedIdx] = self.merge_record_fields(lResult, rResult)
+                mergedResults[newMergedIdx] = self.merge_record_fields(lResult, rResult)
+            else:
+                # Merge right and left values
+                mergedResults.append(self.merge_record_fields(lResult, rResult))
             mapResults[mergeIdx[0]] = newMergedIdx
             mapResults[mergeIdx[1]] = newMergedIdx
         for i in enumerate(self.results):
