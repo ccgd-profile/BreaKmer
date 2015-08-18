@@ -190,7 +190,7 @@ class Realignment:
             for line in linesOut:
                 newResultFn.write(line)
             newResultFn.close()
-            self.resultFn = newResultFn
+            self.resultFn = self.resultFn + '.merged_recs'
             alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
             self.results = AlignResults('blat', 'target', self.resultFn, self.contig, alignRef)
 
