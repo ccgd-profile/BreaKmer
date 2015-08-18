@@ -361,6 +361,20 @@ class AlignResults:
 
         lResult['qStart'] = int(lResult['qStart']) - 1
         rResult['qStart'] = int(rResult['qStart']) - 1
+
+        if tGap > 1:
+            # Del
+            lResult['qStarts'] += str(max(lResult['qEnd'], rResult['qStart']) - 1) + ','
+            lResult['tStarts'] += str(rResult['tStart']) + ','
+            lResult['tNumInsert'] += 1
+            lResult['tBaseInsert'] += tGap
+        if qGap > 1:
+            # Ins
+            lResult['qStarts'] += str(rResult['qStart']) + ','
+            lResult['tStarts'] += str(lResult['tStart'] + lqEnd) + ','
+            lResult['qNumInsert'] += 1
+            lResult['qBaseInsert'] += qGap
+
         lResult['blockSizes'] = str(int(lResult['blockSizes'].rstrip(',')) - 1) + ','
         if qGap < 0:
             rResult['blockSizes'] = str(int(rResult['blockSizes'].rstrip(',')) + qGap) + ','
@@ -375,18 +389,6 @@ class AlignResults:
         # lResult['qStarts'] += rResult['qStarts']
         # lResult['tStarts'] += rResult['tStarts']
 
-        if tGap > 1:
-            # Del
-            lResult['qStarts'] += str(max(lResult['qEnd'], rResult['qStart']) - 1) + ','
-            lResult['tStarts'] += str(rResult['tStart']) + ','
-            lResult['tNumInsert'] += 1
-            lResult['tBaseInsert'] += tGap
-        if qGap > 1:
-            # Ins
-            lResult['qStarts'] += str(rResult['qStart']) + ','
-            lResult['tStarts'] += str(lResult['tStart'] + lqEnd) + ','
-            lResult['qNumInsert'] += 1
-            lResult['qBaseInsert'] += qGap
         return lResult
 
     # def parse_blast_results(self):
