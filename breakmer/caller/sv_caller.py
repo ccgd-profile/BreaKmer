@@ -707,7 +707,7 @@ class SVEvent:
                 rearrValues['discReadCount'] = varReads.check_inv_readcounts(brkpts)
             elif (strands[0] == strands[1]):
                 tgap = brkpts[1] - brkpts[0]
-                qgap = qcoords[1] - qcoords[0]
+                qgap = qcoords[1][0] - qcoords[0][1]
                 if tgap < 0:
                     utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
                     rearrValues['hit'] = True
