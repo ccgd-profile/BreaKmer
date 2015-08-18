@@ -241,6 +241,7 @@ class AlignResults:
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % self.targetHit)
 
         if self.targetHit:
+            print len(self.results), self.get_query_coverage(), self.program
             if ((len(self.results) > 1) and (self.get_query_coverage() >= 90.0)) and (self.program == 'blast'):
                 # Check for a gapped Blast result.
                 for i in range(1, len(self.results)):
@@ -248,6 +249,8 @@ class AlignResults:
                     rResult = self.results[i]
                     qgap = lResult.qend() - rResult.qstart()
                     tgap = lResult.tend() - rResult.tstart()
+                    print 'tgap', tGap
+                    print 'qgap', qgap
                     if (tgap < 0) or (lResult.strand != rResult.strand):
                         # Tandem dup or inversion
                         break
