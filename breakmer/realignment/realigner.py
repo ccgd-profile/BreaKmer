@@ -343,6 +343,7 @@ class AlignResults:
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
 
+        lResult['blockSizes'] = str(int(rResult['blockSizes'].rstrip(',')) - 1) + ','
         if qGap < 0:
             rResult['blockSizes'] = str(int(rResult['blockSizes'].rstrip(',')) + qGap) + ','
             rResult['matches'] += qGap - 1
@@ -358,14 +359,14 @@ class AlignResults:
 
         if tGap > 1:
             # Del
-            lResult['qStarts'] += str(lqEnd)
-            lResult['tStarts'] += str(rResult['tStart'])
+            lResult['qStarts'] += str(lqEnd) + ','
+            lResult['tStarts'] += str(rResult['tStart']) + ','
             lResult['tNumInsert'] += 1
             lResult['tBaseInsert'] += tGap
         if qGap > 1:
             # Ins
-            lResult['qStarts'] += str(rResult['qStart'])
-            lResult['tStarts'] += str(lResult['tStart'] + lqEnd)
+            lResult['qStarts'] += str(rResult['qStart']) + ','
+            lResult['tStarts'] += str(lResult['tStart'] + lqEnd) + ','
             lResult['qNumInsert'] += 1
             lResult['qBaseInsert'] += qGap
         return lResult
