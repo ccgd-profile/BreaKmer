@@ -417,7 +417,7 @@ class BlatResult:
     def __init__(self, resultValues, refName, offset, programName, alignRefFn, querySeq, scope):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
-        self.resultValues = resultValues
+        self.resultValues = None
         self.values = None # self.set_values(blatResultValues, refName, offset)
         self.matches = None # Matches(self.values)
         self.gaps = None # Gaps(self.values)
@@ -458,7 +458,7 @@ class BlatResult:
         """
         realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq, scope)
         realignVals.adjust_values(refName, offset)
-
+        self.resultValues = realignVals
         self.values = realignVals.valueDict
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
