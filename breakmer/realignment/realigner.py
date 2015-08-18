@@ -249,7 +249,7 @@ class AlignResults:
                     rResult = self.results[i]
                     qgap = lResult.qend() - rResult.qstart()
                     tgap = lResult.tend() - rResult.tstart()
-                    print 'tgap', tGap
+                    print 'tgap', tgap
                     print 'qgap', qgap
                     if (tgap < 0) or (lResult.strand != rResult.strand):
                         # Tandem dup or inversion
