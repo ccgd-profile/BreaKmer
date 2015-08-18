@@ -694,7 +694,7 @@ class SVEvent:
             contained = True
         return contained
 
-    def which_rearr(self, tcoords, qcoords, strands, brkpts):
+    def which_rearr(self, varReads, tcoords, qcoords, strands, brkpts):
         rearrValues = {'discReadCount': None, 'svType': 'rearrangement', 'svSubType': None, 'hit': False}
         if not self.check_overlap(tcoords[0], tcoords[1]):
             utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
@@ -739,7 +739,7 @@ class SVEvent:
         hit = False
         rearrHits = []
         for i in range(1, len(self.blatResults)):
-            vals = self.which_rearr(tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
+            vals = self.which_rearr(varReads, tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
 
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
