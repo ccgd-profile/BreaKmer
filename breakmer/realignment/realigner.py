@@ -343,6 +343,9 @@ class AlignResults:
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
 
+        if qGap < 0:
+            rResult['blockSizes'] = str(int(rResult['blockSizes'].lstrip(',')) + qGap) + ','
+            rResult['matches'] += qGap - 1
         keys = ['matches', 'mismatches', 'repmatches', 'ncount', 'qNumInsert', 'qBaseInsert', 'tNumInsert', 'tBaseInsert']
         for key in keys:
             lResult[key] += rResult[key]
@@ -355,10 +358,6 @@ class AlignResults:
 
         if tGap > 1:
             # Del
-            if qGap < 0:
-                # Overlap between blocks
-                lResult['matches'] += qGap
-
             lResult['qStarts'] += str(lqEnd)
             lResult['tStarts'] += str(rResult['tStart'])
             lResult['tNumInsert'] += 1
