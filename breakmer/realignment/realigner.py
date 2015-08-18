@@ -246,8 +246,8 @@ class AlignResults:
                 for i in range(1, len(self.results)):
                     lResult = self.results[i-1]
                     rResult = self.results[i]
-                    qgap = lResult.qEnd - rResult.qStart
-                    tgap = lResult.tEnd - rResult.tStart
+                    qgap = lResult.qEnd() - rResult.qStart()
+                    tgap = lResult.tEnd() - rResult.tStart()
                     if (tgap < 0) or (lResult.strand != rResult.strand):
                         # Tandem dup or inversion
                         break
