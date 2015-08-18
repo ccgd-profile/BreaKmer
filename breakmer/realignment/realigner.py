@@ -115,7 +115,7 @@ class Realignment:
         self.scope = scope
 
         self.resultFn = os.path.join(self.contig.get_path(), '%s_res.%s.%s' % (alignProgram, scope, alignExt))
-        utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, resultFn))
+        utils.log(self.loggingName, 'info', 'Running realignment with %s, storing results in %s' % (alignProgram, self.resultFn))
 #        self.results = AlignResults(alignProgram, scope, resultFn)
 
         cmd = ''
