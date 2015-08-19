@@ -274,6 +274,7 @@ class AlignResults:
                     if addSegment and (result.get_query_span() - resultOverlap) > 20:
                         segments.append((result.qstart(), result.qend(), result))
                 print segments
+                segmentsSorted = sorted(segments, key=lambda x: x[0], reverse=True)
                 for i in range(1, len(segments)):
                     lResult = segments[i-1][2]
                     rResult = segments[i][2]
