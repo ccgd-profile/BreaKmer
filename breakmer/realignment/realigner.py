@@ -276,8 +276,8 @@ class AlignResults:
                 print segments
                 segmentsSorted = sorted(segments, key=lambda x: x[0])
                 for i in range(1, len(segmentsSorted)):
-                    lResult = segments[i-1][2]
-                    rResult = segments[i][2]
+                    lResult = segmentsSorted[i-1][2]
+                    rResult = segmentsSorted[i][2]
                     qgap = rResult.qstart() - lResult.qend()
                     tgap = rResult.tstart() - lResult.tend()
                     print rResult.tstart(), lResult.tend()
