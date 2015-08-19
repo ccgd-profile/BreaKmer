@@ -403,7 +403,7 @@ class AlignResults:
             lResult['tBaseInsert'] += tGap
         if qGap > 1:
             # Ins
-            lResult['qStarts'] += str(rResult['qStart']) + ','
+            lResult['qStarts'] += str(max(lResult['qEnd'], rResult['qStart']) - 1) + ','
             lResult['tStarts'] += str(lResult['tStart'] + lqEnd) + ','
             lResult['qNumInsert'] += 1
             lResult['qBaseInsert'] += qGap
