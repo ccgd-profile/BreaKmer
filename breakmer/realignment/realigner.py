@@ -345,7 +345,7 @@ class AlignResults:
             mapResults[mergeIdx[1]] = newMergedIdx
         outputIdx = []
         lOuts = []
-        for i, result[2] in enumerate(self.targetSegmentsSorted):
+        for i, result in enumerate(self.targetSegmentsSorted):
             if i in mapResults:
                 print 'New result', i, mergedResults[mapResults[i]]
                 if mapResults[i] not in outputIdx:
