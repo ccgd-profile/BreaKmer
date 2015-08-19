@@ -255,16 +255,19 @@ class AlignResults:
                         overlapSeg = (result.qstart() >= segment[0] and result.qstart() <= segment[1]) or (result.qend() >= segment[0] and result.qend() <= segment[1])
                         containSeg = result.qstart() >= segment[0] and result.qend() >= segment[1]
                         withinSeg = result.qstart() <= segment[0] and result.qend() <= segment[1]
+                        print i, result, containSeg, withinSeg, overlapSeg
                         if containSeg or withinSeg:
                             addSegment = False
                         elif overlapSeg:
                             if (result.qstart() >= segment[0] and result.qstart() <= segment[1]):
                                 overlapBp = segment[1] - result.qstart()
+                                print 'Overlapbp', overlapBp
                                 if overlapBp < 20:
                                     resultOverlap += overlapBp
                                     addSegment = True
                             elif (result.end() >= segment[0] and result.qend() <= segment[1]):
                                 overlapBp = result.end() - segment[0]
+                                print 'Overlapbp', overlapBp
                                 if overlapBp < 20:
                                     resultOverlap += overlapBp
                                     addSegment = True
