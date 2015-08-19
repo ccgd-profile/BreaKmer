@@ -284,7 +284,9 @@ class AlignResults:
                     print rResult.qstart(), lResult.qend()
                     print 'tgap', tgap
                     print 'qgap', qgap
-                    if (tgap < 0) or (lResult.strand != rResult.strand):
+                    print (tgap < 0 and (abs(tgap) > abs(qgap)))
+                    print (lResult.strand != rResult.strand)
+                    if (tgap < 0 and (abs(tgap) > abs(qgap))) or (lResult.strand != rResult.strand):
                         # Tandem dup or inversion
                         break
                     else:
