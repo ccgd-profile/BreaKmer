@@ -212,6 +212,7 @@ class AlignResults:
         self.contig = contig
         self.alignRefFn = alignRefFn
         self.mergedRecords = [] # List of tuples containing indices of realignment records that need to be merged.
+        self.targetSegmentsSorted = None
         self.targetHit = False
         self.set_values()
 
@@ -274,7 +275,7 @@ class AlignResults:
                     if addSegment and (result.get_query_span() - resultOverlap) > 20:
                         segments.append((result.qstart(), result.qend(), result))
                 print segments
-                segmentsSorted = sorted(segments, key=lambda x: x[0])
+                self.targetSegmentsSorted = sorted(segments, key=lambda x: x[0])
                 for i in range(1, len(segmentsSorted)):
                     lResult = segmentsSorted[i-1][2]
                     rResult = segmentsSorted[i][2]
@@ -327,8 +328,8 @@ class AlignResults:
         mergedResults = []
         mapResults = {}
         for mergeIdx in self.mergedRecords:
-            lResult = self.results[mergeIdx[0]].resultValues
-            rResult = self.results[mergeIdx[1]].resultValues
+            lResult = self.targetSegmentsSorted[mergeIdx[0]][2].resultValues
+            rResult = self.targetSegmentsSorted[mergeIdx[1]][2].resultValues
             print 'left', lResult
             print 'right', rResult
             newMergedIdx = len(mergedResults)
@@ -344,15 +345,15 @@ class AlignResults:
             mapResults[mergeIdx[1]] = newMergedIdx
         outputIdx = []
         lOuts = []
-        for i, result in enumerate(self.results):
+        for i, result[2] in enumerate(self.targetSegmentsSorted):
             if i in mapResults:
                 print 'New result', i, mergedResults[mapResults[i]]
                 if mapResults[i] not in outputIdx:
                     outputIdx.append(mapResults[i])
                     lOuts.append(self.format_to_blat_output(mergedResults[mapResults[i]]))
             else:
-                print 'Result', self.results[i].resultValues
-                lOuts.append(self.format_to_blat_output(self.results[i].resultValues))
+                print 'Result', self.targetSegmentsSorted[i][2].resultValues
+                lOuts.append(self.format_to_blat_output(self.targetSegmentsSorted[i][2].resultValues))
         print lOuts
         return lOuts
 
