@@ -254,7 +254,7 @@ class AlignResults:
                     for segment in segments:
                         overlapSeg = (result.qstart() >= segment[0] and result.qstart() <= segment[1]) or (result.qend() >= segment[0] and result.qend() <= segment[1])
                         containSeg = result.qstart() >= segment[0] and result.qend() >= segment[1]
-                        withinSeg = result.qstart() <= segment[0] and result.qend() <= segment[1]
+                        withinSeg = result.qstart() >= segment[0] and result.qend() <= segment[1]
                         print i, result, containSeg, withinSeg, overlapSeg
                         if containSeg or withinSeg:
                             addSegment = False
