@@ -397,14 +397,20 @@ class AlignResults:
 
         if tGap > 1:
             # Del
-            lResult['qStarts'] += str(max(lResult['qEnd']-1, rResult['qStart'])) + ','
+            newqStart = str(lResult['qEnd'] - 1)
+            if qGap > 0:
+                newqStart = str(rResult['qStart'])
+            lResult['qStarts'] += newqStart + ','
             lResult['tStarts'] += str(rResult['tStart']) + ','
             lResult['tNumInsert'] += 1
             lResult['tBaseInsert'] += tGap
         if qGap > 1:
             # Ins
-            lResult['qStarts'] += str(max(lResult['qEnd']-1, rResult['qStart'])) + ','
-            lResult['tStarts'] += str(lResult['tStart'] + lqEnd) + ','
+            newtStart = str(lResult['tEnd'] - 1)
+            if tGap > 0:
+                newtStart = str(rResult['tStart'])
+            lResult['qStarts'] += str(rResult['qStart']) + ','
+            lResult['tStarts'] += str(newtStart) + ','
             lResult['qNumInsert'] += 1
             lResult['qBaseInsert'] += qGap
 
