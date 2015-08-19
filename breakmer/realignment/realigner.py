@@ -247,9 +247,33 @@ class AlignResults:
             print len(self.results), self.get_query_coverage(), self.program
             if ((len(self.results) > 1) and (self.get_query_coverage() >= 90.0)) and (self.program == 'blast'):
                 # Check for a gapped Blast result.
-                for i in range(1, len(self.results)):
-                    lResult = self.results[i-1]
-                    rResult = self.results[i]
+                segments = []
+                for i, result in enumerate(self.results):
+                    resultOverlap = 0
+                    addSegment = False
+                    for segment in segments:
+                        overlapSeg = (result.qstart() >= segment[0] and result.qstart() <= segment[1]) or (result.end() >= segment[0] and result.qend() <= segment[1])
+                        containSeg = result.qstart() >= segment[0] and result.qend() >= segment[1]
+                        withinSeg = result.qstart() <= segment[0] and result.qend() <= segment[1]
+                        if containSeg or withinSeg:
+                            addSegment = False
+                        elif overlapSeg:
+                            if (result.qstart() >= segment[0] and result.qstart() <= segment[1]):
+                                overlapBp = segment[1] - result.qstart()
+                                if overlapBp < 20:
+                                    resultOverlap += overlapBp
+                                    addSegment = True
+                            elif (result.end() >= segment[0] and result.qend() <= segment[1]):
+                                overlapBp = result.end() - segment[0]
+                                if overlapBp < 20:
+                                    resultOverlap += overlapBp
+                                    addSegment = True
+                    if addSegment and (result.get_query_span() - resultOverlap) > 20:
+                        segments.append((result.qstart(), result.qend(), result))
+                print segments
+                for i in range(1, len(segments)):
+                    lResult = segments[i-1][2]
+                    rResult = segments[i][2]
                     qgap = rResult.qstart() - lResult.qend()
                     tgap = rResult.tstart() - lResult.tend()
                     print 'tgap', tgap
