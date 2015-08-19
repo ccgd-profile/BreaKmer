@@ -250,7 +250,7 @@ class AlignResults:
                 segments = []
                 for i, result in enumerate(self.results):
                     resultOverlap = 0
-                    addSegment = False
+                    addSegment = True
                     for segment in segments:
                         overlapSeg = (result.qstart() >= segment[0] and result.qstart() <= segment[1]) or (result.end() >= segment[0] and result.qend() <= segment[1])
                         containSeg = result.qstart() >= segment[0] and result.qend() >= segment[1]
