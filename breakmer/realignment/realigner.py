@@ -280,6 +280,8 @@ class AlignResults:
                     rResult = segments[i][2]
                     qgap = rResult.qstart() - lResult.qend()
                     tgap = rResult.tstart() - lResult.tend()
+                    print rResult.tstart(), lResult.tend()
+                    print rResult.qstart(), lResult.qend()
                     print 'tgap', tgap
                     print 'qgap', qgap
                     if (tgap < 0) or (lResult.strand != rResult.strand):
