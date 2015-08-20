@@ -905,9 +905,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     ax.add_patch(rect)
 
             trxLen = float(segLen) / float(len(segTrxs))
-            # print 'TRX len', trxLen
+            print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
-            # print 'TRX offset', trxOffset
+            print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             trx_reverse = False
