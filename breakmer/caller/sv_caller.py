@@ -129,6 +129,7 @@ class SVResult:
         self.realignmentUniqueness = None
         self.filtered = {'status': False, 'reason': ''}
         self.filterValues = FilterValues()
+        self.annotations = None
 
     def format_indel_values(self, svEvent):
         self.targetName = svEvent.contig.get_target_name()
@@ -156,6 +157,8 @@ class SVResult:
         # print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
+        if svEvent.annotated:
+            self.set_annotations(svEvent)
         # print 'Formatting indel values', self.contigSeq
         # print 'contig id', self.contigId
         # print 'target', self.targetName
@@ -205,11 +208,7 @@ class SVResult:
         else:
             svEvent.set_brkpt_counts('rearr')
             print 'format_rearrangement_values(), defining rearr'
-            rearrType, discReadCount = svEvent.define_rearr()
-            self.svType = 'rearrangement'
-            if rearrType != 'rearrangement':
-                self.svSubtype = rearrType
-            self.discReadCount = discReadCount
+            self.svType, self.svSubType, self.discReadCount = svEvent.define_rearr()
             self.genes = list(set(self.genes))
             self.filterValues.set_rearr_values(svEvent)
         self.targetName = svEvent.contig.get_target_name()
@@ -219,6 +218,8 @@ class SVResult:
         self.splitReadCount = svEvent.get_splitread_count()
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
+        if svEvent.annotated:
+            self.set_annotations(svEvent)
 
     # def get_output_type(self):
     #     """ """
@@ -226,6 +227,17 @@ class SVResult:
     #     if self.svSubtype != '':
     #         outputType += '_' + self.svSubtype
     #     return outputType
+
+    def set_annotations(self, svEvent):
+        """ """
+        if svEvent.svType == 'indel':
+            blatResult = svEvent.blatResults[0][1]
+            trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
+            print trxAnnots
+        else:
+            for i, blatResult in enumerate(svEvent.blatResults):
+                trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
+                print i, trxAnnots
 
     def set_filtered(self, filterReason):
         """ """
@@ -563,6 +575,7 @@ class SVEvent:
         self.queryCoverage = [0] * len(contig.seq)
         self.homology = {'non': [False, None], 'in': [False, None]}
         self.brkpts = SVBreakpoints()
+        self.rearrDesc = None
         self.resultValues = SVResult()
         self.add(blatResult)
 
@@ -735,17 +748,42 @@ class SVEvent:
         tcoords = self.brkpts.tcoords
         qcoords = self.brkpts.qcoords
         svType = 'rearrangement'
+        svSubType = None
         rs = 0
         hit = False
-        rearrHits = []
+        rearrHits = {}
         for i in range(1, len(self.blatResults)):
             vals = self.which_rearr(varReads, tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
+            if vals['hit']:
+                if vals['svType'] not in rearrHits:
+                    rearrHits[vals['svType']] = []
+                rearrHits[vals['svType']].append(vals)
 
+        if 'rearrangement' not in rearrHits:
+            utils.log(self.loggingName, 'debug', 'Error in realignment parsing. Indel found without rearrangement event.')
+
+        rearrHit = False
+        for rearr in rearrHits:
+            for i, rr in enumerate(rearrHits[rearr]):
+                if rearr == 'rearrangement':
+                    if not rearrHit:
+                        svSubtype = rearrHits[rearr][i]['svSubtype']
+                        rs = int(rearrHits[rearr][i]['discReadCount'])
+                        rearrHit = True
+                    else:
+                        if self.rearrDesc is None:
+                            self.rearrDesc = []
+                        self.rearrDesc.append(rearrHits[rearr][i]['svSubtype'])
+                else:
+                    if self.rearrDesc is None:
+                        self.rearrDesc = []
+                    self.rearrDesc.append(rearrHits[rearr][i]['indelSize'])
         if not hit:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
-        print 'define_rearr()', svType, rs
-        return svType, rs
+
+        print 'define_rearr()', svType, svSubType, rs
+        return svType, svSubtype, rs
 
     def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.

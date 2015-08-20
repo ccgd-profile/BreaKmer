@@ -502,6 +502,7 @@ class BlatResult:
         return self.breakpts.svBreakpoints
 
     def calcMilliBad(self):
+        """ """
         badAlign = 0.0
         queryAlignSize = self.qend() - self.qstart()
         refAlignSize = self.tend() - self.tstart()
