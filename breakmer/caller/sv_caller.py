@@ -276,7 +276,7 @@ class AnnotationBrkpt:
                         if bpDist[1] == None:
                             bpDist = [newbpDist < 0, newbpDist, eIter]
                         elif (newbpDist < 0) != bpDist[0]:
-                            print eIter, exon.start, exon.end, bpDist
+                            print eIter, exon.start, exon.stop, bpDist
                             bpDist = [newbpDist < 0, newbpDist, eIter - 1]
                             break
 
