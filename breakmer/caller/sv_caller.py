@@ -849,7 +849,7 @@ class SVEvent:
     def set_annotations(self):
         """ """
         self.annotated = True
-        self.resultValues.set_annotations()
+        self.resultValues.set_annotations(self)
 
 
 class ContigCaller:
