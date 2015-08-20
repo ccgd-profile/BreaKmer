@@ -757,7 +757,7 @@ class SVEvent:
             for i, rr in enumerate(rearrHits[rearr]):
                 if rearr == 'rearrangement':
                     if not rearrHit:
-                        svSubtype = rearrHits[rearr][i]['svSubType']
+                        svSubType = rearrHits[rearr][i]['svSubType']
                         rs = int(rearrHits[rearr][i]['discReadCount'])
                         rearrHit = True
                     else:
@@ -772,7 +772,8 @@ class SVEvent:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
 
-        return svType, svSubtype, rs
+        print 'define_rearr return', svType, svSubType, rs
+        return svType, svSubType, rs
 
     def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.
