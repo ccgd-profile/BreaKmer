@@ -432,98 +432,97 @@ class SVResult:
     #         outputType += '_' + self.svSubtype
     #     return outputType
 
-    def get_segment_trxs(self):
+    def get_segment_trxs(self, blatResult):
         """ """
-        for i, blatResult in enumerate(svEvent.blatResults):
-            svBreakpoints = blatResult[1].get_sv_brkpts()
-            print 'sv_viz.py breakpoints', svBreakpoints
-            # Determine the number of transcripts for this segment based on the sv breakpoints
-            trxItems = []
-            trxIds = []
-            for svBreakpoint in svBreakpoints:
-                annotatedTrxsDict = svBreakpoint.annotated_trxs
-                dKeys = annotatedTrxsDict.keys()
-                dKeys.sort()
-                print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords, dKeys
-                # If svBreakpoint type is 'indel' then there can be two trxs associated with the svBreakpoint
-                # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
-                # strand and the index of the segment.
-                brkptTrxs = []
+        svBreakpoints = blatResult.get_sv_brkpts()
+        print 'sv_viz.py breakpoints', svBreakpoints
+        # Determine the number of transcripts for this segment based on the sv breakpoints
+        trxItems = []
+        trxIds = []
+        for svBreakpoint in svBreakpoints:
+            annotatedTrxsDict = svBreakpoint.annotated_trxs
+            dKeys = annotatedTrxsDict.keys()
+            dKeys.sort()
+            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords, dKeys
+            # If svBreakpoint type is 'indel' then there can be two trxs associated with the svBreakpoint
+            # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
+            # strand and the index of the segment.
+            brkptTrxs = []
 
-                if svBreakpoint.svType == 'rearrangement':
-                    if len(dKeys) > 1:
-                        # This indicates that the segment is in the middle - key innner transcripts if the breakpoints are intergenic.
-                        leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
-                        rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
+            if svBreakpoint.svType == 'rearrangement':
+                if len(dKeys) > 1:
+                    # This indicates that the segment is in the middle - key innner transcripts if the breakpoints are intergenic.
+                    leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
+                    rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
+                    keepIdx = 0
+                    if len(leftBpTrxList) > 1:
+                        # Take the inner trxs
+                        keepIdx = 1
+                    # Left
+                    trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
+                    print 'Left brkpt items', trxItems, trxIds
+                    keepIdx = 0
+                    if len(rightBpTrxList) > 1:
+                        # Take the inner trxs
                         keepIdx = 0
-                        if len(leftBpTrxList) > 1:
-                            # Take the inner trxs
-                            keepIdx = 1
-                        # Left
-                        trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
-                        print 'Left brkpt items', trxItems, trxIds
-                        keepIdx = 0
-                        if len(rightBpTrxList) > 1:
-                            # Take the inner trxs
-                            keepIdx = 0
-                        # Right
-                        trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
-                        print 'Right brkpt items', trxItems, trxIds
+                    # Right
+                    trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
+                    print 'Right brkpt items', trxItems, trxIds
+                else:
+                    # Single breakpoint
+                    trxList, distList = annotatedTrxsDict[0]
+                    print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
+                    if len(trxList) > 1:
+                        # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
+                        trx = trxList[0]
+                        trxDist = distList[0]
+                        # print 'Index get_segment_trxs sv_viz.py', self.idx, self.nSegments, trxList, distList
+                        if self.idx == 0:
+                            # First
+                            if self.alignResult.strand == '-':
+                                # Get downstream gene
+                                trx = trxList[1]
+                                trxDist = distList[1]
+                            else:
+                                trx = trxList[0]
+                                trxDist = distList[0]
+                        elif self.idx == (self.nSegments - 1):
+                            if self.alignResult.strand == '-':
+                                # Get upstream gene
+                                trx = trxList[0]
+                                trxDist = distList[0]
+                            else:
+                                trx = trxList[1]
+                                trxDist = distList[1]
+                                print 'trx', trx, trxDist
+                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
+                        print 'trxItems, trxIds', trxItems, trxIds
                     else:
-                        # Single breakpoint
-                        trxList, distList = annotatedTrxsDict[0]
-                        print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
-                        if len(trxList) > 1:
-                            # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
-                            trx = trxList[0]
-                            trxDist = distList[0]
-                            # print 'Index get_segment_trxs sv_viz.py', self.idx, self.nSegments, trxList, distList
-                            if self.idx == 0:
-                                # First
-                                if self.alignResult.strand == '-':
-                                    # Get downstream gene
-                                    trx = trxList[1]
-                                    trxDist = distList[1]
-                                else:
-                                    trx = trxList[0]
-                                    trxDist = distList[0]
-                            elif self.idx == (self.nSegments - 1):
-                                if self.alignResult.strand == '-':
-                                    # Get upstream gene
-                                    trx = trxList[0]
-                                    trxDist = distList[0]
-                                else:
-                                    trx = trxList[1]
-                                    trxDist = distList[1]
-                                    print 'trx', trx, trxDist
-                            trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
-                            print 'trxItems, trxIds', trxItems, trxIds
-                        else:
-                            # lands in a single trancript
-                            trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
-                elif svBreakpoint.svType == 'indel':
-                    # print 'sv_viz.py', annotatedTrxsDict, dKeys
-                    if len(dKeys) == 1:
-                        # Insertion with one genomic breakpoint
-                        trxList, distList = annotatedTrxsDict[0]
-                        trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'ins')
-                    else:
-                        # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
-                        # print annotatedTrxsDict
-                        leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
-                        rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
-                        # Take the first trx no matter what
-                        trx = leftBpTrxList[0]
-                        trxDist = leftBpDistList[0]
-                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'del')
-                        keepIdx = 0
-                        if len(rightBpTrxList) > 1:
-                            # Take the outer trx
-                            keepIdx = 1
-                        trx = rightBpTrxList[keepIdx]
-                        trxDist = rightBpDistList[keepIdx]
-                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
-            print 'Returning items', trxItems, trxIds
+                        # lands in a single trancript
+                        trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
+            elif svBreakpoint.svType == 'indel':
+                # print 'sv_viz.py', annotatedTrxsDict, dKeys
+                if len(dKeys) == 1:
+                    # Insertion with one genomic breakpoint
+                    trxList, distList = annotatedTrxsDict[0]
+                    trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'ins')
+                else:
+                    # Deletion with two genomic breakpoints, if intergenic then keep the outer transcripts
+                    # print annotatedTrxsDict
+                    leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
+                    rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
+                    # Take the first trx no matter what
+                    trx = leftBpTrxList[0]
+                    trxDist = leftBpDistList[0]
+                    trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'del')
+                    keepIdx = 0
+                    if len(rightBpTrxList) > 1:
+                        # Take the outer trx
+                        keepIdx = 1
+                    trx = rightBpTrxList[keepIdx]
+                    trxDist = rightBpDistList[keepIdx]
+                    trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
+        print 'Returning items', trxItems, trxIds
 
     def set_annotations(self, svEvent):
         """ """
@@ -542,7 +541,7 @@ class SVResult:
                 elif i == (len(sortedSegs) - 1):
                     segmentPos = 'last'
             print 'segment position', segmentPos, 'segmentStrand', segment.strand
-            segTrxs, segTrxIds = segment.get_segment_trxs()
+            segTrxs, segTrxIds = self.get_segment_trxs(segment)
             print 'Segment transcript ids', segTrxIds, segTrxs
             segLen = segment.get_len()
             segStart, segEnd = segment.queryCoordinates
