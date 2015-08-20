@@ -751,7 +751,7 @@ class SVEvent:
 
         if 'rearrangement' not in rearrHits:
             utils.log(self.loggingName, 'debug', 'Error in realignment parsing. Indel found without rearrangement event.')
-
+        print rearrHits
         rearrHit = False
         for rearr in rearrHits:
             for i, rr in enumerate(rearrHits[rearr]):
