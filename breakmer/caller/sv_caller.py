@@ -158,6 +158,7 @@ def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
         abrkpt = AnnotationBrkpt(brkptTypes['ins'], segPos, segStrand)
     return abrkpt
 
+
 class AnnotationBrkpt:
     def __init__(self, trxBrkpts, segPos, segStrand):
         self.segPos = segPos
@@ -230,23 +231,6 @@ class AnnotationBrkpt:
                     if estart < self.bounds[0]:
                         bpOverlap = [True, self.bounds[0] - 1]
                         exonCoords[0] = self.bounds[0]
-                if add:
-                    # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
-                    # absDist = abs(bpCoord - int(exonCoords[0]))
-                    # if len(firstLastExons['nearest_exon']) == 0:
-                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    # elif absDist < firstLastExons['nearest_exon'][0]:
-                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    # if len(firstLastExons['furthest_exon']) == 0:
-                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    # elif absDist > firstLastExons['furthest_exon'][0]:
-                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-
-                    selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)], bpOverlap[1])
-                    if maxminCoords[0] > int(exonCoords[0]):
-                        maxminCoords[0] = int(exonCoords[0])
-                    if maxminCoords[1] < int(exonCoords[1]):
-                        maxminCoords[1] = int(exonCoords[1])
                 eIter += 1
             selectedExons[bpCoordKey]['maxmincoords'] = maxminCoords
         else:
@@ -262,12 +246,12 @@ class AnnotationBrkpt:
                 bpOverlap = [False, None]
                 bpDist = [0, None]
                 for exon in exons:
-                    #print 'Check exon', eIter, exon.start, exon.stop, exon.featureType, exonCode
+                    # print 'Check exon', eIter, exon.start, exon.stop, exon.featureType, exonCode
                     add = False
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
+                    # print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
                     if bpCoord >= exon.start and bpCoord <= exon.stop:
                         bpDist = [False, 0, eIter]
                         break
@@ -277,11 +261,13 @@ class AnnotationBrkpt:
                             bpDist = [newbpDist < 0, newbpDist, 'exon' + str(eIter)]
                         elif (newbpDist < 0) != bpDist[0]:
                             print eIter, exon.start, exon.stop, bpDist
+                            if newbpDist < 0:
+                                newbpDist = exon.start - bpCoord
                             bpDist = [newbpDist < 0, newbpDist, 'intron' + str(eIter - 1)]
                             break
                     eIter += 1
                 print bpDist
-                selectedExons[bpCoord]['exon'] = bpDist
+                selectedExons[bpCoord]['exon'] = bpDist[1:len(bpDist)]
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 # selectedExons[bpCoord]['maxmincoords'] = maxminCoords
@@ -547,7 +533,6 @@ class SVResult:
                 abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
                 selectedExons = abrkpt.select_exons(exons)
                 print selectedExons
-                sys.exit()
 
     def set_filtered(self, filterReason):
         """ """
@@ -1048,6 +1033,7 @@ class SVEvent:
                     rearrValues['hit'] = True
                     rearrValues['svType'] = 'indel'
                     rearrValues['indelSize'] = 'I' + str(qgap)
+        print rearrValues
         return rearrValues
 
     def define_rearr(self):
