@@ -256,7 +256,7 @@ class SVResult:
         #                 for trx, dist in zip(trxAnnots[bpCoord][0], trxAnnots[bpCoord][1]):
         #                     print dist, trx.geneName
         for i, blatResult in enumerate(svEvent.blatResults):
-            svBreakpoints = blatResult.get_sv_brkpts()
+            svBreakpoints = blatResult[1].get_sv_brkpts()
             print 'sv_viz.py breakpoints', svBreakpoints
             # Determine the number of transcripts for this segment based on the sv breakpoints
             trxItems = []
