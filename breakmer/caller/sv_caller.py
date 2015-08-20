@@ -209,7 +209,7 @@ class SVResult:
         else:
             svEvent.set_brkpt_counts('rearr')
             print 'format_rearrangement_values(), defining rearr'
-            self.svType, self.svSubType, self.discReadCount = svEvent.define_rearr()
+            self.svType, self.svSubtype, self.discReadCount = svEvent.define_rearr()
             self.genes = list(set(self.genes))
             self.filterValues.set_rearr_values(svEvent)
         self.targetName = svEvent.contig.get_target_name()
