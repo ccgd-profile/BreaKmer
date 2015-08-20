@@ -232,12 +232,14 @@ class SVResult:
         print 'Set annotations sv_caller.py'
         if svEvent.svType == 'indel':
             blatResult = svEvent.blatResults[0][1]
-            trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
-            print trxAnnots
+            for svBreakpoint in blatResult.breakpts.svBreakpoints:
+                trxAnnots = svBreakpoint.annotated_trxs
+                print trxAnnots
         else:
             for i, blatResult in enumerate(svEvent.blatResults):
-                trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
-                print i, trxAnnots
+                for svBreakpoint in blatResult.breakpts.svBreakpoints:
+                    trxAnnots = svBreakpoint.annotated_trxs
+                    print trxAnnots
         sys.exit()
 
     def set_filtered(self, filterReason):
