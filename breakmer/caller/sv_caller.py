@@ -158,6 +158,7 @@ class SVResult:
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
         if svEvent.annotated:
+            print 'Annotated event'
             self.set_annotations(svEvent)
         # print 'Formatting indel values', self.contigSeq
         # print 'contig id', self.contigId
@@ -230,6 +231,7 @@ class SVResult:
 
     def set_annotations(self, svEvent):
         """ """
+        print 'Set annotations sv_caller.py'
         if svEvent.svType == 'indel':
             blatResult = svEvent.blatResults[0][1]
             trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
@@ -238,6 +240,7 @@ class SVResult:
             for i, blatResult in enumerate(svEvent.blatResults):
                 trxAnnots = blatResult.breakpts.svBreakpoints.annotated_trxs
                 print i, trxAnnots
+        sys.exit()
 
     def set_filtered(self, filterReason):
         """ """
