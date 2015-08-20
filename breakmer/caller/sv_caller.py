@@ -160,6 +160,7 @@ class SVResult:
         # print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
+        print 'svEvent.annotated', svEvent.annotated
         if svEvent.annotated:
             print 'Annotated event'
             self.set_annotations(svEvent)
