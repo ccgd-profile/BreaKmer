@@ -115,6 +115,17 @@ def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx, svType
     return trxItems, trxIds
 
 
+class TrxBrkpt:
+    def __init__(self, distToTrx, svBrkpt, brkptIdx, svType):
+        self.dist = distToTrx
+        self.svBrkpt = svBrkpt
+        self.brkptIdx = brkptIdx
+        self.svType = svType
+
+    def get_genomic_coord(self):
+        return int(self.svBrkpt.genomicCoords[self.brkptIdx])
+
+
 class AnnoTrx:
     def __init__(self, trx, trxDist, svBreakpoint, brkptIdx, svType):
         self.trx = trx
