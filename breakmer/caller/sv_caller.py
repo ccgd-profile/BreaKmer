@@ -523,6 +523,7 @@ class SVResult:
                     trxDist = rightBpDistList[keepIdx]
                     trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
         print 'Returning items', trxItems, trxIds
+        return trxItems, trxIds
 
     def set_annotations(self, svEvent):
         """ """
