@@ -262,25 +262,26 @@ class AnnotationBrkpt:
                 bpOverlap = [False, None]
                 bpDist = [0, None]
                 for exon in exons:
-                    print 'Check exon', eIter, exon.start, exon.stop, exon.featureType, exonCode
+                    #print 'Check exon', eIter, exon.start, exon.stop, exon.featureType, exonCode
                     add = False
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
+                    #print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
                     if bpCoord >= exon.start and bpCoord <= exon.stop:
                         bpDist = [False, 0, eIter]
                         break
                     else:
                         newbpDist = bpCoord - exon.stop
                         if bpDist[1] == None:
-                            selectedExons[bpCoord]['exon'] = [newbpDist < 0, newbpDist, eIter, 'exon']
+                            bpDist = [newbpDist < 0, newbpDist, eIter, 'exon']
                         elif (newbpDist < 0) != bpDist[0]:
                             print eIter, exon.start, exon.stop, bpDist
-                            selectedExons[bpCoord]['exon'] = [newbpDist < 0, newbpDist, eIter - 1, 'introns']
+                            bpDist = [newbpDist < 0, newbpDist, eIter - 1, 'introns']
                             break
                     eIter += 1
                 print bpDist
+                selectedExons[bpCoord]['exon'] = bpDist
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 # selectedExons[bpCoord]['maxmincoords'] = maxminCoords
