@@ -267,7 +267,7 @@ class AnnotationBrkpt:
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    #print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
+                    print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
                     if bpCoord >= exon.start and bpCoord <= exon.stop:
                         bpDist = [False, 0, eIter]
                         break
