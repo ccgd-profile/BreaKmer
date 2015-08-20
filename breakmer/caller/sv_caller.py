@@ -211,6 +211,7 @@ class SVResult:
             print 'format_rearrangement_values(), defining rearr'
             self.svType, self.svSubtype, self.discReadCount = svEvent.define_rearr()
             self.genes = list(set(self.genes))
+            self.description = svEvent.rearrDesc
             self.filterValues.set_rearr_values(svEvent)
         self.targetName = svEvent.contig.get_target_name()
         self.fullBreakpointStr = svEvent.get_brkpt_str()
@@ -785,6 +786,7 @@ class SVEvent:
         for blatResult, nBasesAligned in self.blatResultsSorted:
             if int(blatResult.meanCov) > int(maxMeanCov):
                 maxMeanCov = int(blatResult.meanCov)
+        print 'get_max_meanCoverage', maxMeanCov
 
     def check_read_strands(self):
         """
