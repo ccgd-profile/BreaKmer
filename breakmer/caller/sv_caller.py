@@ -115,6 +115,16 @@ def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx, svType
     return trxItems, trxIds
 
 
+class AnnoTrx:
+    def __init__(self, trx, trxDist, svBreakpoint, brkptIdx, svType):
+        self.trx = trx
+        self.svType = svType
+        self.brkpts = [TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType)]
+
+    def add_brkpt(self, trxDist, svBreakpoint, brkptIdx, svType):
+        self.brkpts.append(TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType))
+
+
 class SVResult:
     """
     """
