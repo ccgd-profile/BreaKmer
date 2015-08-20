@@ -761,7 +761,7 @@ class SVEvent:
                     else:
                         if self.rearrDesc is None:
                             self.rearrDesc = []
-                        self.rearrDesc.append(rearrHits[rearr][i]['svSubtype'])
+                        self.rearrDesc.append(rearrHits[rearr][i]['svSubType'])
                 else:
                     if self.rearrDesc is None:
                         self.rearrDesc = []
@@ -770,7 +770,6 @@ class SVEvent:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
 
-        print 'define_rearr()', svType, svSubType, rs
         return svType, svSubtype, rs
 
     def get_max_meanCoverage(self):
