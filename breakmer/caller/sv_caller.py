@@ -136,6 +136,178 @@ class AnnoTrx:
         self.brkpts.append(TrxBrkpt(trxDist, svBreakpoint, brkptIdx, svType))
 
 
+def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
+    """ """
+    abrkpt = None
+    brkptTypes = {}
+    for brkpt in trxBrkpts:
+        if brkpt.svType not in brkptTypes:
+            brkptTypes[brkpt.svType] = []
+        print 'determine_annotation_brkpts', brkpt, brkpt.svType
+        brkptTypes[brkpt.svType].append(brkpt)
+
+    if 'rearr' in brkptTypes:
+        abrkpt = AnnotationBrkpt(brkptTypes['rearr'], segPos, segStrand)
+        if 'del' in brkptTypes:
+            abrkpt.add_brkpt(brkptTypes['del'])
+        if 'ins' in brkptTypes:
+            abrkpt.add_brkpt(brkptTypes['ins'])
+    elif 'del' in brkptTypes:
+        abrkpt = AnnotationBrkpt(brkptTypes['del'], segPos, segStrand)
+    else:
+        abrkpt = AnnotationBrkpt(brkptTypes['ins'], segPos, segStrand)
+    return abrkpt
+
+class AnnotationBrkpt:
+    def __init__(self, trxBrkpts, segPos, segStrand):
+        self.segPos = segPos
+        self.segStrand = segStrand
+        self.trxBrkpts = trxBrkpts
+        self.other_brkpts = None
+        self.bps = []
+        self.bounds = []
+        self.setup()
+
+    def setup(self):
+        """ """
+        for bp in self.trxBrkpts:
+            exonCode = 'right'
+            if self.segPos == 'only':
+                if bp.svType == 'del':
+                    if bp.brkptIdx == 0:
+                        exonCode = 'left'
+                elif bp.svType == 'ins':
+                    exonCode = 'all'
+            elif self.segPos == 'first':
+                if bp.svType == 'rearr':
+                    if self.segStrand == '+':
+                        exonCode = 'left'
+            elif self.segPos == 'middle':
+                if bp.svType == 'rearr':
+                    self.bounds.append(bp.get_genomic_coord())
+                    if bp.brkptIdx == 1:
+                        if self.segStrand == '+':
+                            exonCode = 'left'
+                    elif bp.brkptIdx == 0:
+                        if self.segStrand == '-':
+                            exonCode = 'left'
+            elif self.segPos == 'last':
+                if bp.svType == 'rearr':
+                    if self.segStrand == '-':
+                        exonCode = 'left'
+            # print 'sv_viz.py setup() adding breakpoint', (bp, bp.get_genomic_coord(), exonCode)
+            self.bps.append((bp, bp.get_genomic_coord(), exonCode))
+
+    def add_brkpt(self, trxBrkpts):
+        """ """
+        self.other_brkpts = trxBrkpts
+
+    def select_exons(self, exons):
+        selectedExons = {}
+        if len(self.bounds) > 1:
+            print 'Bounds', self.bounds
+            self.bounds.sort()
+            bpCoordKey = '-'.join([str(x) for x in self.bounds])
+            selectedExons[bpCoordKey] = {'coords': []}
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[0] - 1, self.bounds[0], 'breakpoint', None))
+            selectedExons[bpCoordKey]['coords'].append((self.bounds[1] - 1, self.bounds[1], 'breakpoint', None))
+            eIter = 1
+            maxminCoords = [self.bounds[0], self.bounds[1], self.bounds[0], self.bps[0][2]]
+            bpOverlap = [False, None]
+            for exon in exons:
+                # print 'Check exon', exon.start, exon.stop, exon.featureType
+                add = False
+                estart = int(exon.start)
+                estop = int(exon.stop)
+                exonCoords = [estart, estop]
+                if (estart >= self.bounds[0] and estart <= self.bounds[1]):
+                    add = True
+                    if estop > self.bounds[1]:
+                        bpOverlap = [True, self.bounds[1] - 1]
+                        exonCoords[1] = self.bounds[1]
+                elif (estop >= self.bounds[0] and estop <= self.bounds[1]):
+                    add = True
+                    if estart < self.bounds[0]:
+                        bpOverlap = [True, self.bounds[0] - 1]
+                        exonCoords[0] = self.bounds[0]
+                if add:
+                    # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
+                    # absDist = abs(bpCoord - int(exonCoords[0]))
+                    # if len(firstLastExons['nearest_exon']) == 0:
+                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # elif absDist < firstLastExons['nearest_exon'][0]:
+                    #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # if len(firstLastExons['furthest_exon']) == 0:
+                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                    # elif absDist > firstLastExons['furthest_exon'][0]:
+                    #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+
+                    selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)], bpOverlap[1])
+                    if maxminCoords[0] > int(exonCoords[0]):
+                        maxminCoords[0] = int(exonCoords[0])
+                    if maxminCoords[1] < int(exonCoords[1]):
+                        maxminCoords[1] = int(exonCoords[1])
+                eIter += 1
+            selectedExons[bpCoordKey]['maxmincoords'] = maxminCoords
+        else:
+            for bp in self.bps:
+                maxminCoords = []
+                bpObj, bpCoord, exonCode = bp
+                selectedExons[bpCoord] = {'coords': []}
+                selectedExons[bpCoord]['coords'].append((bpCoord - 1, bpCoord, 'breakpoint', None))
+                if len(maxminCoords) == 0:
+                    maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
+                eIter = 1
+                firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
+                bpOverlap = [False, None]
+                for exon in exons:
+                    print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
+                    add = False
+                    estart = int(exon.start)
+                    estop = int(exon.stop)
+                    exonCoords = [estart, estop]
+                    print 'Exoncoords', exonCoords, bpCoord
+                    if (exonCode == 'left') and (estart <= bpCoord):
+                        # Get all exons with start < bp
+                        if bpCoord < estop:
+                            # Breakpoint intersects with exon, reduce feature count to 2
+                            bpOverlap = [True, bpCoord - 1]
+                            exonCoords[1] = bpCoord
+                        add = True
+                    elif (exonCode == 'right') and (estop >= bpCoord):
+                        if bpCoord > estart:
+                            bpOverlap = [True, bpCoord - 1]
+                            exonCoords[0] = bpCoord
+                        add = True
+                    elif exonCode == 'all':
+                        # Single insertion in a gene
+                        if bpCoord >= estart and bpCoord <= estop:
+                            bpOverlap = [True, bpCoord - 1]
+                        add = True
+                    if add:
+                        # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
+                        # absDist = abs(bpCoord - int(exonCoords[0]))
+                        # if len(firstLastExons['nearest_exon']) == 0:
+                        #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        # elif absDist < firstLastExons['nearest_exon'][0]:
+                        #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        # if len(firstLastExons['furthest_exon']) == 0:
+                        #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        # elif absDist > firstLastExons['furthest_exon'][0]:
+                        #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
+                        selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter), bpOverlap[1]])
+                        if maxminCoords[0] > int(exonCoords[0]):
+                            maxminCoords[0] = int(exonCoords[0])
+                        if maxminCoords[1] < int(exonCoords[1]):
+                            maxminCoords[1] = int(exonCoords[1])
+                    eIter += 1
+                # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
+                # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
+                selectedExons[bpCoord]['maxmincoords'] = maxminCoords
+        print 'Selected exons', selectedExons
+        return selectedExons
+
+
 class SVResult:
     """
     """
@@ -260,22 +432,8 @@ class SVResult:
     #         outputType += '_' + self.svSubtype
     #     return outputType
 
-    def set_annotations(self, svEvent):
+    def get_segment_trxs(self):
         """ """
-        print 'Set annotations sv_caller.py'
-        # if svEvent.svType == 'indel':
-        #     blatResult = svEvent.blatResults[0][1]
-        #     for svBreakpoint in blatResult.breakpts.svBreakpoints:
-        #         trxAnnots = svBreakpoint.annotated_trxs
-        #         for bpCoord in trxAnnots:
-        #             for trx, dist in zip(trxAnnots[bpCoord][0], trxAnnots[bpCoord][1]):
-        #                 print dist, trx.geneName
-        # else:
-        #     for i, blatResult in enumerate(svEvent.blatResults):
-        #         for svBreakpoint in blatResult.breakpts.svBreakpoints:
-        #             for bpCoord in trxAnnots:
-        #                 for trx, dist in zip(trxAnnots[bpCoord][0], trxAnnots[bpCoord][1]):
-        #                     print dist, trx.geneName
         for i, blatResult in enumerate(svEvent.blatResults):
             svBreakpoints = blatResult[1].get_sv_brkpts()
             print 'sv_viz.py breakpoints', svBreakpoints
@@ -366,6 +524,51 @@ class SVResult:
                         trxDist = rightBpDistList[keepIdx]
                         trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
             print 'Returning items', trxItems, trxIds
+
+    def set_annotations(self, svEvent):
+        """ """
+        print 'Set annotations sv_caller.py'
+        sortedSegs = sorted(svEvent.blatResults, key=lambda x: x[0])
+        for i, segmentTuple in enumerate(sortedSegs):
+            print 'sv_viz.py plot_annotation_track segment', i
+            print 'sv_viz.py plot_annotation_track segment', segmentTuple
+            segment = segmentTuple[1]
+            segmentPos = 'only'
+            if len(sortedSegs) > 1:
+                if i == 0:
+                    segmentPos = 'first'
+                elif i > 0 and i < (len(sortedSegs) - 1):
+                    segmentPos = 'middle'
+                elif i == (len(sortedSegs) - 1):
+                    segmentPos = 'last'
+            print 'segment position', segmentPos, 'segmentStrand', segment.strand
+            segTrxs, segTrxIds = segment.get_segment_trxs()
+            print 'Segment transcript ids', segTrxIds, segTrxs
+            segLen = segment.get_len()
+            segStart, segEnd = segment.queryCoordinates
+            reverse = False
+
+            if segment.strand == '-':
+                reverse = True
+
+            trxOffset = segStart + xOffset
+            if (segmentPos == 'first' or segmentPos == 'only'):
+                trxOffset += 3
+            segTrxIter = 0
+            for segTrx in segTrxs:
+                print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
+                trx = segTrx.trx
+                brkpts = segTrx.brkpts
+                trx_reverse = False
+                if trx.strand == '-':
+                    trx_reverse = True
+                exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
+                for brkpt in brkpts:
+                    print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+                abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
+                selectedExons = abrkpt.select_exons(exons)
+                print selectedExons
+                sys.exit()
 
     def set_filtered(self, filterReason):
         """ """
