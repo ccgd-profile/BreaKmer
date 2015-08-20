@@ -277,7 +277,7 @@ class AnnotationBrkpt:
                             bpDist = [newbpDist < 0, newbpDist, eIter]
                         elif (newbpDist < 0) != bpDist[0]:
                             bpDist = [newbpDist < 0, newbpDist, eIter - 1]
-                print bpDist
+
                     # if (exonCode == 'left') and (estart <= bpCoord):
                     #     # Get all exons with start < bp
                     #     if bpCoord < estop:
@@ -312,9 +312,10 @@ class AnnotationBrkpt:
                     #     if maxminCoords[1] < int(exonCoords[1]):
                     #         maxminCoords[1] = int(exonCoords[1])
                     eIter += 1
+                print bpDist
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
-                selectedExons[bpCoord]['maxmincoords'] = maxminCoords
+                # selectedExons[bpCoord]['maxmincoords'] = maxminCoords
         print 'Selected exons', selectedExons
         return selectedExons
 
