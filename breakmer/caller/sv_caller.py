@@ -552,9 +552,6 @@ class SVResult:
             if segment.strand == '-':
                 reverse = True
 
-            trxOffset = segStart + xOffset
-            if (segmentPos == 'first' or segmentPos == 'only'):
-                trxOffset += 3
             segTrxIter = 0
             for segTrx in segTrxs:
                 print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
