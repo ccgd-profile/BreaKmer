@@ -269,50 +269,16 @@ class AnnotationBrkpt:
                     exonCoords = [estart, estop]
                     print 'Exoncoords', exonCoords, bpCoord, bpCoord - exon.stop
                     if bpCoord >= exon.start and bpCoord <= exon.stop:
-                        bpDist = [0, eIter]
+                        bpDist = [False, 0, eIter]
                         break
                     else:
                         newbpDist = bpCoord - exon.stop
                         if bpDist[1] == None:
-                            bpDist = [newbpDist < 0, newbpDist, eIter]
+                            selectedExons[bpCoord]['exon'] = [newbpDist < 0, newbpDist, eIter, 'exon']
                         elif (newbpDist < 0) != bpDist[0]:
                             print eIter, exon.start, exon.stop, bpDist
-                            bpDist = [newbpDist < 0, newbpDist, eIter - 1]
+                            selectedExons[bpCoord]['exon'] = [newbpDist < 0, newbpDist, eIter - 1, 'introns']
                             break
-
-                    # if (exonCode == 'left') and (estart <= bpCoord):
-                    #     # Get all exons with start < bp
-                    #     if bpCoord < estop:
-                    #         # Breakpoint intersects with exon, reduce feature count to 2
-                    #         bpOverlap = [True, bpCoord - 1]
-                    #         exonCoords[1] = bpCoord
-                    #     add = True
-                    # elif (exonCode == 'right') and (estop >= bpCoord):
-                    #     if bpCoord > estart:
-                    #         bpOverlap = [True, bpCoord - 1]
-                    #         exonCoords[0] = bpCoord
-                    #     add = True
-                    # elif exonCode == 'all':
-                    #     # Single insertion in a gene
-                    #     if bpCoord >= estart and bpCoord <= estop:
-                    #         bpOverlap = [True, bpCoord - 1]
-                    #     add = True
-                    # if add:
-                    #     # print 'sv_viz.py keep exon', bp, estart, estop, exonCode, exon.featureType
-                    #     # absDist = abs(bpCoord - int(exonCoords[0]))
-                    #     # if len(firstLastExons['nearest_exon']) == 0:
-                    #     #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    #     # elif absDist < firstLastExons['nearest_exon'][0]:
-                    #     #     firstLastExons['nearest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    #     # if len(firstLastExons['furthest_exon']) == 0:
-                    #     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    #     # elif absDist > firstLastExons['furthest_exon'][0]:
-                    #     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    #     selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter), bpOverlap[1]])
-                    #     if maxminCoords[0] > int(exonCoords[0]):
-                    #         maxminCoords[0] = int(exonCoords[0])
-                    #     if maxminCoords[1] < int(exonCoords[1]):
-                    #         maxminCoords[1] = int(exonCoords[1])
                     eIter += 1
                 print bpDist
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
