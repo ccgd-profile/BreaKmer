@@ -277,6 +277,7 @@ class AnnotationBrkpt:
                             bpDist = [newbpDist < 0, newbpDist, eIter]
                         elif (newbpDist < 0) != bpDist[0]:
                             bpDist = [newbpDist < 0, newbpDist, eIter - 1]
+                            break
 
                     # if (exonCode == 'left') and (estart <= bpCoord):
                     #     # Get all exons with start < bp
