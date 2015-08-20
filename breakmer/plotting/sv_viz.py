@@ -932,9 +932,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # print 'All Exons sorted', 10 * '#'
             # print allExons
             plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
+            numBrkpts = len(filter(lambda x: x[2] == 'breakpoint', plotExons))
             # print plotExons
 
-            binSize = trxLen / (2 * len(plotExons) - 1)
+            binSize = trxLen / (2 * (len(plotExons) - 2) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
