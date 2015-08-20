@@ -132,6 +132,9 @@ class SVResult:
         self.annotations = None
 
     def format_indel_values(self, svEvent):
+        """
+        """
+        print 'format_indel_values, sv_caller.py'
         self.targetName = svEvent.contig.get_target_name()
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
