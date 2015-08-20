@@ -1063,7 +1063,7 @@ class SVEvent:
             for i, rr in enumerate(rearrHits[rearr]):
                 if rearr == 'rearrangement':
                     if not rearrHit:
-                        svSubtype = rearrHits[rearr][i]['svSubtype']
+                        svSubtype = rearrHits[rearr][i]['svSubType']
                         rs = int(rearrHits[rearr][i]['discReadCount'])
                         rearrHit = True
                     else:
