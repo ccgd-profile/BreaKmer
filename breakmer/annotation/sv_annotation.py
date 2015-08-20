@@ -70,6 +70,7 @@ class Transcript:
 
 def annotate_event(svEventResult, contigMeta):
     """ """
+    svEventResult.annotated = True
     # Make sure annotation file is sorted for bedtools use.
     bedtools = contigMeta.params.get_param('bedtools')
     annotationFn = contigMeta.params.get_param('gene_annotation_file')
@@ -86,9 +87,9 @@ def annotate_event(svEventResult, contigMeta):
     trxMap = parse_bedtools_output(outputFiles)
     store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
     # Remove temporary bedtools output files.
-    print 'annotate_event, sv_annotation.py', svEventResult
-    svEventResult.set_annotations()
-    print 'svEvent annotated', svEventResult.annotated
+    # print 'annotate_event, sv_annotation.py', svEventResult
+    # svEventResult.set_annotations()
+    # print 'svEvent annotated', svEventResult.annotated
 
 
 def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
