@@ -751,6 +751,7 @@ class SVEvent:
 
         if 'rearrangement' not in rearrHits:
             utils.log(self.loggingName, 'debug', 'Error in realignment parsing. Indel found without rearrangement event.')
+
         print rearrHits
         rearrHit = False
         for rearr in rearrHits:
@@ -759,6 +760,7 @@ class SVEvent:
                     if not rearrHit:
                         svSubType = rearrHits[rearr][i]['svSubType']
                         rs = int(rearrHits[rearr][i]['discReadCount'])
+                        print 'Hit', rs
                         rearrHit = True
                     else:
                         if self.rearrDesc is None:
@@ -768,7 +770,8 @@ class SVEvent:
                     if self.rearrDesc is None:
                         self.rearrDesc = []
                     self.rearrDesc.append(rearrHits[rearr][i]['indelSize'])
-        if not hit:
+
+        if svSubType is None:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
 
