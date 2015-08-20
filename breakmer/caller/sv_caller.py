@@ -743,6 +743,7 @@ class SVEvent:
         rearrHits = {}
         for i in range(1, len(self.blatResults)):
             vals = self.which_rearr(varReads, tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
+            print 'define_rearr sv_caller.py, vals', vals
             if vals['hit']:
                 if vals['svType'] not in rearrHits:
                     rearrHits[vals['svType']] = []
