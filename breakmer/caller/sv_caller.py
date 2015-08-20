@@ -144,7 +144,7 @@ class SVResult:
         self.realignmentUniqueness = blatResult.meanCov
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
-        self.fullBreakpointStr = = svEvent.get_brkpt_str('target')
+        self.fullBreakpointStr = svEvent.get_brkpt_str('target')
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         # List of insertion or deletion sizes that coorespond with the breakpoints
