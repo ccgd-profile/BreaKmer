@@ -234,12 +234,15 @@ class SVResult:
             blatResult = svEvent.blatResults[0][1]
             for svBreakpoint in blatResult.breakpts.svBreakpoints:
                 trxAnnots = svBreakpoint.annotated_trxs
-                print trxAnnots
+                for bpCoord in trxAnnots:
+                    for trx, dist in zip(trxAnnots[bpCoord][0]):
+                        print dist, trx.geneName
         else:
             for i, blatResult in enumerate(svEvent.blatResults):
                 for svBreakpoint in blatResult.breakpts.svBreakpoints:
-                    trxAnnots = svBreakpoint.annotated_trxs
-                    print trxAnnots
+                    for bpCoord in trxAnnots:
+                        for trx, dist in zip(trxAnnots[bpCoord][0]):
+                            print dist, trx.geneName
         sys.exit()
 
     def set_filtered(self, filterReason):
