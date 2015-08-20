@@ -274,10 +274,10 @@ class AnnotationBrkpt:
                     else:
                         newbpDist = bpCoord - exon.stop
                         if bpDist[1] == None:
-                            bpDist = [newbpDist < 0, newbpDist, eIter, 'exon']
+                            bpDist = [newbpDist < 0, newbpDist, 'exon' + str(eIter)]
                         elif (newbpDist < 0) != bpDist[0]:
                             print eIter, exon.start, exon.stop, bpDist
-                            bpDist = [newbpDist < 0, newbpDist, eIter - 1, 'introns']
+                            bpDist = [newbpDist < 0, newbpDist, 'intron' + str(eIter - 1)]
                             break
                     eIter += 1
                 print bpDist
