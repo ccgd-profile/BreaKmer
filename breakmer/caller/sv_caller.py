@@ -235,13 +235,13 @@ class SVResult:
             for svBreakpoint in blatResult.breakpts.svBreakpoints:
                 trxAnnots = svBreakpoint.annotated_trxs
                 for bpCoord in trxAnnots:
-                    for trx, dist in zip(trxAnnots[bpCoord][0]):
+                    for trx, dist in zip(trxAnnots[bpCoord][0][0], trxAnnots[bpCoord][0][1]):
                         print dist, trx.geneName
         else:
             for i, blatResult in enumerate(svEvent.blatResults):
                 for svBreakpoint in blatResult.breakpts.svBreakpoints:
                     for bpCoord in trxAnnots:
-                        for trx, dist in zip(trxAnnots[bpCoord][0]):
+                        for trx, dist in zip(trxAnnots[bpCoord][0][0], trxAnnots[bpCoord][0][1]):
                             print dist, trx.geneName
         sys.exit()
 
