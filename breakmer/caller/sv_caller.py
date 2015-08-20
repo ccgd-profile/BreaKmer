@@ -545,7 +545,8 @@ class SVResult:
             segTrxs, segTrxIds = self.get_segment_trxs(segment)
             print 'Segment transcript ids', segTrxIds, segTrxs
             segLen = segment.get_len()
-            segStart, segEnd = segment.queryCoordinates
+            segStart = segment.qstart()
+            segEnd = segment.qend()
             reverse = False
 
             if segment.strand == '-':
