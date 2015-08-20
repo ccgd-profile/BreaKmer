@@ -675,7 +675,7 @@ class BlatResult:
         return "\t".join([str(x) for x in self.values])
 
     def get_len(self):
-        return self.qend - self.qstart
+        return self.qend() - self.qstart()
 
     def get_coords(self, alignType):
         """ """
