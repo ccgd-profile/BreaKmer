@@ -267,7 +267,7 @@ class AlignResults:
                                     resultOverlap += overlapBp
                                     addSegment = True
                             elif (result.qend() >= segment[0] and result.qend() <= segment[1]):
-                                overlapBp = result.end() - segment[0]
+                                overlapBp = result.qend() - segment[0]
                                 print 'Overlapbp', overlapBp
                                 if overlapBp < 20:
                                     resultOverlap += overlapBp
