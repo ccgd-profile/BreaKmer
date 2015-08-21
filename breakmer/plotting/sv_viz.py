@@ -852,17 +852,18 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
-    """ 
     """
+    """
+
     # Only plot the annotations if available!
     if not segmentManager.has_annotations():
         return
 
     # Sort the segments increasing in query coordinate.
-    segStarts = []
-    for i, segment in enumerate(segmentManager.segments):
-        segStarts.append((segment.queryCoordinates[0], segment))
-    sortedSegs = sorted(segStarts, key=lambda x: x[0])
+    # segStarts = [segment.queryCoordinates[0], segment for segment in segmentManager.segments]
+    # for i, segment in enumerate(segmentManager.segments):
+    #     segStarts.append((segment.queryCoordinates[0], segment))
+    sortedSegs = sorted([(segment.queryCoordinates[0], segment) for segment in segmentManager.segments], key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
         print 'sv_viz.py plot_annotation_track segment', i
@@ -942,10 +943,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             for item in selectedExons:
                 mergedExons.extend(selectedExons[item]['coords'])
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
-            # print 'All Exons sorted', 10 * '#'
-            # print allExons
 
-            # Only grab the nearest two (or one) exons to the breakpoints 
+            # Only grab the nearest two (or one) exons to the breakpoints
             plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
 
             '''
@@ -960,7 +959,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             3 exons = 2 * 3 - 1 = 5 bins
 
             Example for the first segment where the breakpoint lands in a transcript intron
-            exon1           exon2                   breakpoint                        
+            exon1           exon2                   breakpoint               
             ||||||||        ||||||||               |
             ----------------------------------------
             '''
