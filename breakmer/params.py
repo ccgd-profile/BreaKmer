@@ -21,6 +21,7 @@ __license__ = "MIT"
 class ParamManager:
     """ParamManager class stores all the input specifications provided to the program to run. These include
     file paths, thresholds, directories, etc...
+
     Attributes:
         opts (dict):                   Containing parameter options and input values as key-values.
         gene_annotations (Annotation): Tracks the annotation information.
@@ -31,6 +32,7 @@ class ParamManager:
 
     def __init__(self, fncCmd, arguments):
         """Initialize ParamManager class.
+
         Args:
             fncCmd (str):       The command to execute - run / prepare_reference_data / start_blat_server.
             arguments (dict):   The argparse dictionary object from the command line parameters.
@@ -40,8 +42,7 @@ class ParamManager:
             None
         """
 
-        self.opts = None
-        # self.gene_annotations = None
+        self.opts = {}
         self.filter = None
         self.targets = {}
         self.paths = {}
@@ -53,6 +54,7 @@ class ParamManager:
         """Organize and format all input parameters into class variables to access
         later. Specific instances of parameters are checked and set. All parameters that are
         set are logged. The target objects are set along with the paths.
+
         Args:
             arguments (dict): The argparse dictionary object from the command line options.
         Returns:
@@ -61,7 +63,7 @@ class ParamManager:
             None
         """
 
-        self.parse_opts(arguments)  # Parse the config file and command line parameters into a single dictionary
+        self.parse_opts(arguments)  # Parse the config file and command line parameters into the self.opts dictionary.
         utils.setup_logger(self.get_param('analysis_dir', True), 'breakmer')  # Create logging object.
         utils.log(self.loggingName, 'info', 'Setting up parameters')
 
@@ -70,8 +72,8 @@ class ParamManager:
             utils.log(self.loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
         self.set_targets()
-        self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))
-        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
+        self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir'])) # Path to target reference sequence fast files.
+        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0] # Path to genome fasta file.
 
         # If only preseting the reference data no need to continue.
         if self.fncCmd == 'prepare_reference_data':
@@ -86,11 +88,13 @@ class ParamManager:
         else:
             self.paths['targets'] = os.path.join(self.paths['analysis'], 'targets')
 
+        # Create all the paths.
         for path in self.paths:
             utils.log(self.loggingName, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
             if not os.path.exists(self.paths[path]):
                 os.makedirs(self.paths[path])
 
+        # If starting the blat server then return.
         if self.fncCmd == 'start_blat_server':
             utils.log(self.loggingName, 'info', 'Starting the blat server.')
             return
@@ -113,7 +117,6 @@ class ParamManager:
             None
         """
 
-        self.opts = {}  # Store all the parameters into the self.opts dict.
         for line in open(arguments.config_fn, 'rU'):
             line = line.strip()
             if line == '' or line.find('#') > -1:  # Allow for blank lines and comments
@@ -126,7 +129,7 @@ class ParamManager:
                 sys.exit(1)
             else:
                 key, value = linesplit
-                self.opts[key] = value
+                self.opts[key] = value # Store key-value in opts dictionary.
 
         for opt in vars(arguments):
             self.opts[opt] = vars(arguments)[opt]
@@ -177,8 +180,8 @@ class ParamManager:
                 binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
                 binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
-                self.set_param(binary, binaryCheck)
-            if not binaryCheck:
+                self.set_param(binary, binaryCheck) # Store the result in the opts dictionary.
+            if not binaryCheck: # No binary found or specified. Throw an error.
                 print 'Missing path/executable for', binary
                 utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
                 sys.exit(1)
@@ -253,6 +256,10 @@ class ParamManager:
         The name can be applied to multiple rows, and if multiple tiled regions are input
         with the same name they are aggregated together under the same key.
 
+        Store the target information in the self.target dictionary with the name as the key
+        and a list of tuples of interval genomic locations as the values.
+        self.target[gene_name] = [(chrom, start_bp, end_bp, name, feature),...]
+
         Args:
             None
         Returns:
@@ -301,13 +308,23 @@ class ParamManager:
 
         return self.targets.keys()
 
+    def get_target_intervals(self, targetName):
+        """Return the stored intervals for a specific target.
+        """
+
+        if targetName in self.targets:
+            return self.targets[targetName]
+        else:
+            utils.log(self.loggingName, 'debug', '%s target name not in target dictionary.' % targetName)
+            sys.exit(1)
+
     def check_blat_server(self):
-        """Run a test query on the specified blat server to make sure it is running.
+        """Run a test query on the specified blat server to make sure it is running. 
 
         Args:
             None
         Returns:
-            None
+            serverSuccess (boolean): Indicates whether the test ran without errors.
         Raises:
             None
         """
@@ -353,6 +370,7 @@ class ParamManager:
             hostname = self.get_param('blat_hostname')
             self.opts['blat_hostname'] = hostname
             self.opts['blat_port'] = port
+            # If no port is specified for this function, then randomly select a port between 8000-9500.
             if port is None:
                 self.opts['blat_port'] = random.randint(8000, 9500)
                 utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.opts['blat_port'], self.opts['blat_hostname']))    
@@ -410,7 +428,7 @@ class ParamManager:
         Args:
             None
         Returns:
-            kmer size (int)
+            kmer size (int): Kmer size that was input to use.
         Raises:
             TypeError when the kmer_size is not an integer.
         """
@@ -473,9 +491,9 @@ class ParamManager:
                        required: Boolean value to indicate if the key should be required to
                        be in the dictionary or not.
         Returns:
-            The value of the parameter if it is found. If the parameter is
-            required and not found the program will exit with error. If the parameter is
-            not required and not found, it will return None.
+            value (int, str, boolean): The value of the parameter if it is found. If the parameter is
+                                       required and not found the program will exit with error. If the parameter is
+                                       not required and not found, it will return None.
         Raises:
             None
         """
@@ -493,7 +511,7 @@ class ParamManager:
 
         Args:
             key (str):              Dictionary key
-            value (Variable type):  Value to store
+            value (int/str/boolean):  Value to store
         Returns:
             None
         Raises:

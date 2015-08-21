@@ -245,7 +245,7 @@ class AlignResults:
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % self.targetHit)
 
         if self.targetHit:
-            print len(self.results), self.get_query_coverage(), self.program
+            # print len(self.results), self.get_query_coverage(), self.program
             if ((len(self.results) > 1) and (self.get_query_coverage() >= 90.0)) and (self.program == 'blast'):
                 # Check for a gapped Blast result.
                 segments = []
@@ -256,43 +256,43 @@ class AlignResults:
                         overlapSeg = (result.qstart() >= segment[0] and result.qstart() <= segment[1]) or (result.qend() >= segment[0] and result.qend() <= segment[1])
                         containSeg = result.qstart() >= segment[0] and result.qend() >= segment[1]
                         withinSeg = result.qstart() >= segment[0] and result.qend() <= segment[1]
-                        print i, result, containSeg, withinSeg, overlapSeg
+                        # print i, result, containSeg, withinSeg, overlapSeg
                         if containSeg or withinSeg:
                             addSegment = False
                         elif overlapSeg:
                             if (result.qstart() >= segment[0] and result.qstart() <= segment[1]):
                                 overlapBp = segment[1] - result.qstart()
-                                print 'Overlapbp', overlapBp
+                                # print 'Overlapbp', overlapBp
                                 if overlapBp < 20:
                                     resultOverlap += overlapBp
                                     addSegment = True
                             elif (result.qend() >= segment[0] and result.qend() <= segment[1]):
                                 overlapBp = result.qend() - segment[0]
-                                print 'Overlapbp', overlapBp
+                                # print 'Overlapbp', overlapBp
                                 if overlapBp < 20:
                                     resultOverlap += overlapBp
                                     addSegment = True
                     if addSegment and (result.get_query_span() - resultOverlap) > 20:
                         segments.append((result.qstart(), result.qend(), result))
-                print segments
+                # print segments
                 self.targetSegmentsSorted = sorted(segments, key=lambda x: x[0])
                 for i in range(1, len(self.targetSegmentsSorted)):
                     lResult = self.targetSegmentsSorted[i-1][2]
                     rResult = self.targetSegmentsSorted[i][2]
                     qgap = rResult.qstart() - lResult.qend()
                     tgap = rResult.tstart() - lResult.tend()
-                    print rResult.tstart(), lResult.tend()
-                    print rResult.qstart(), lResult.qend()
-                    print 'tgap', tgap
-                    print 'qgap', qgap
-                    print (tgap < 0 and (abs(tgap) > abs(qgap)))
-                    print (lResult.strand != rResult.strand)
+                    # print rResult.tstart(), lResult.tend()
+                    # print rResult.qstart(), lResult.qend()
+                    # print 'tgap', tgap
+                    # print 'qgap', qgap
+                    # print (tgap < 0 and (abs(tgap) > abs(qgap)))
+                    # print (lResult.strand != rResult.strand)
                     if (tgap < 0 and (abs(tgap) > abs(qgap))) or (lResult.strand != rResult.strand):
                         # Tandem dup or inversion
                         break
                     else:
                         self.mergedRecords.append((i-1, i))
-        print 'Merged record indices', self.mergedRecords
+        # print 'Merged record indices', self.mergedRecords
         return self.targetHit
 
     def parse_result_file(self):
@@ -330,8 +330,8 @@ class AlignResults:
         for mergeIdx in self.mergedRecords:
             lResult = self.targetSegmentsSorted[mergeIdx[0]][2].resultValues
             rResult = self.targetSegmentsSorted[mergeIdx[1]][2].resultValues
-            print 'left', lResult
-            print 'right', rResult
+            # print 'left', lResult
+            # print 'right', rResult
             newMergedIdx = len(mergedResults)
             if mergeIdx[0] in mapResults:
                 # Merge a result and a previously merged result.
@@ -347,14 +347,14 @@ class AlignResults:
         lOuts = []
         for i, result in enumerate(self.targetSegmentsSorted):
             if i in mapResults:
-                print 'New result', i, mergedResults[mapResults[i]]
+                # print 'New result', i, mergedResults[mapResults[i]]
                 if mapResults[i] not in outputIdx:
                     outputIdx.append(mapResults[i])
                     lOuts.append(self.format_to_blat_output(mergedResults[mapResults[i]]))
             else:
-                print 'Result', self.targetSegmentsSorted[i][2].resultValues
+                # print 'Result', self.targetSegmentsSorted[i][2].resultValues
                 lOuts.append(self.format_to_blat_output(self.targetSegmentsSorted[i][2].resultValues))
-        print lOuts
+        # print lOuts
         return lOuts
 
     def format_to_blat_output(self, resultValues):
@@ -392,8 +392,8 @@ class AlignResults:
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
 
-        print 'left result', lResult
-        print 'right result', rResult
+        # print 'left result', lResult
+        # print 'right result', rResult
         lResult['qStart'] = int(lResult['qStart']) - 1
         rResult['qStart'] = int(rResult['qStart']) - 1
 

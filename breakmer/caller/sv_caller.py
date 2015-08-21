@@ -133,7 +133,7 @@ class SVResult:
     def format_indel_values(self, svEvent):
         """
         """
-        print 'format_indel_values, sv_caller.py'
+        # print 'format_indel_values, sv_caller.py'
         self.targetName = svEvent.contig.get_target_name()
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
@@ -208,7 +208,7 @@ class SVResult:
             self.filterValues.set_trl_values(svEvent)
         else:
             svEvent.set_brkpt_counts('rearr')
-            print 'format_rearrangement_values(), defining rearr'
+            # print 'format_rearrangement_values(), defining rearr'
             self.svType, self.svSubtype, self.discReadCount = svEvent.define_rearr()
             self.genes = list(set(self.genes))
             self.description = svEvent.rearrDesc
@@ -727,7 +727,7 @@ class SVEvent:
                     rearrValues['hit'] = True
                     rearrValues['svType'] = 'indel'
                     rearrValues['indelSize'] = 'I' + str(qgap)
-        print rearrValues
+        # print rearrValues
         return rearrValues
 
     def define_rearr(self):
@@ -744,7 +744,7 @@ class SVEvent:
         rearrHits = {}
         for i in range(1, len(self.blatResults)):
             vals = self.which_rearr(varReads, tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
-            print 'define_rearr sv_caller.py, vals', vals
+            # print 'define_rearr sv_caller.py, vals', vals
             if vals['hit']:
                 if vals['svType'] not in rearrHits:
                     rearrHits[vals['svType']] = []
@@ -753,7 +753,7 @@ class SVEvent:
         if 'rearrangement' not in rearrHits:
             utils.log(self.loggingName, 'debug', 'Error in realignment parsing. Indel found without rearrangement event.')
 
-        print rearrHits
+        # print rearrHits
         rearrHit = False
         for rearr in rearrHits:
             for i, rr in enumerate(rearrHits[rearr]):
@@ -761,7 +761,7 @@ class SVEvent:
                     if not rearrHit:
                         svSubType = rearrHits[rearr][i]['svSubType']
                         rs = int(rearrHits[rearr][i]['discReadCount'])
-                        print 'Hit', rs
+                        # print 'Hit', rs
                         rearrHit = True
                     else:
                         svSubType = None
@@ -777,7 +777,7 @@ class SVEvent:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
 
-        print 'define_rearr return', svType, svSubType, rs
+        # print 'define_rearr return', svType, svSubType, rs
         return svType, svSubType, rs
 
     def get_max_meanCoverage(self):
@@ -787,7 +787,7 @@ class SVEvent:
         for blatResult, nBasesAligned in self.blatResultsSorted:
             if int(blatResult.meanCov) > int(maxMeanCov):
                 maxMeanCov = int(blatResult.meanCov)
-        print 'get_max_meanCoverage', maxMeanCov
+        # print 'get_max_meanCoverage', maxMeanCov
 
     def check_read_strands(self):
         """

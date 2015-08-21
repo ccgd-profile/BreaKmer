@@ -908,13 +908,11 @@ class Contig:
         """
         if self.svEventResult is not None:
             svFilter = self.meta.params.filter
-            print 'contig.py check_filters'
             svFilter.check_filters(self.svEventResult)
 
     def annotate_calls(self):
         """ """
         if self.svEventResult and self.meta.params.get_param('gene_annotation_file') and self.meta.params.get_param('bedtools'):
-            print 'Annotating contig', self.meta.id
             annotator.annotate_event(self.svEventResult, self.meta)
 
     def output_calls(self, outputPath, svReadsBamFn):
@@ -924,7 +922,6 @@ class Contig:
             readBamFn = self.meta.write_bam(outputPath, svReadsBamFn, self.reads)
             if self.meta.params.get_param('generate_image') and not self.svEventResult.is_filtered():
                 # Generate image if option is set and the result is not being filtered out.
-                print 'Contig', self.meta.id
                 svplotter.generate_pileup_img(self.svEventResult, readBamFn, outputPath, self.get_id())
 
     def get_total_read_support(self):

@@ -11,6 +11,22 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+'''
+Main script that initiates the BreaKmer analysis or auxiliary functions to setup BreaKmer for analysis.
+
+There are three functions provided:
+1. run                    = perform analysis to detect structural variation.
+2. start_blat_server      = start the blat server in the background for analysis.
+3. prepare_reference_data = prepare the reference data for the target regions that are specified in the input files.
+
+The blat server provides a challenge in workflow. The best method is to:
+1. prepare reference data using 'prepare_reference_data' function
+2. start the blat server using 'start_blat_server' function
+    breakmer.py start_blat_server -p <port_number> --hostname <hostname> -c <config file>
+3. run the analysis and keep the blat server alive in the background for use in other analyses.
+    breakmer.py run -k -p <port_number> --hostname <hostname> -c <config file> -n <nprocessors> -g <gene_list>
+'''
+
 args = sys.argv
 if len(args) < 2:
     print 'No arguments provided. At least one command required (run, start_blat_server, prepare_reference_kmers).'
@@ -19,6 +35,7 @@ else:
     PARSER = argparse.ArgumentParser(description="Program to identify structural variants within targeted locations.", usage='%(prog)s [options]', add_help=True)
     fncCmd = args[1]
     if fncCmd == 'run':
+        # Features deprecated in the new release.
         # PARSER.add_argument('funcCommand', help='Command for BreaKmer function to execute. Required')
         # PARSER.add_argument('configFn', help='Path to the configuration file. Required')
         # PARSER.add_argument('-a', '--keep_repeat_regions', dest='keep_repeat_regions', default=False, action='store_true', help='Keep indels in repeat regions. No repeat mask bed file required if set. [default: False]')

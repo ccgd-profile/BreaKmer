@@ -43,10 +43,10 @@ class AnnoTrx:
 def check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, brkptIdx, svType):
     if trx.id in trxIds:
         idx = trxIds.index(trx.id)
-        print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
+        # print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
         trxItems[idx].add_brkpt(trxDist, svBreakpoint, brkptIdx, svType)
     else:
-        print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
+        # print 'Adding breakpoint', brkptIdx, svBreakpoint, trxDist
         trxItems.append(AnnoTrx(trx, trxDist, svBreakpoint, brkptIdx, svType))
         trxIds.append(trx.id)
     return trxItems, trxIds
@@ -74,7 +74,7 @@ class Segment:
 
     def get_segment_trxs(self):
         svBreakpoints = self.alignResult.get_sv_brkpts()
-        print 'sv_viz.py breakpoints', svBreakpoints
+        # print 'sv_viz.py breakpoints', svBreakpoints
         # Determine the number of transcripts for this segment based on the sv breakpoints
         trxItems = []
         trxIds = []
@@ -82,7 +82,7 @@ class Segment:
             annotatedTrxsDict = svBreakpoint.annotated_trxs
             dKeys = annotatedTrxsDict.keys()
             dKeys.sort()
-            print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords, dKeys
+            # print 'sv_viz.py breakpoint location', svBreakpoint.chrom, svBreakpoint.genomicCoords, dKeys
             # If svBreakpoint type is 'indel' then there can be two trxs associated with the svBreakpoint
             # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
             # strand and the index of the segment.
@@ -99,18 +99,18 @@ class Segment:
                         keepIdx = 1
                     # Left
                     trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
-                    print 'Left brkpt items', trxItems, trxIds
+                    # print 'Left brkpt items', trxItems, trxIds
                     keepIdx = 0
                     if len(rightBpTrxList) > 1:
                         # Take the inner trxs
                         keepIdx = 0
                     # Right
                     trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
-                    print 'Right brkpt items', trxItems, trxIds
+                    # print 'Right brkpt items', trxItems, trxIds
                 else:
                     # Single breakpoint
                     trxList, distList = annotatedTrxsDict[0]
-                    print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
+                    # print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
                     if len(trxList) > 1:
                         # Pick which transcript to keep based on strands, breakpoint is outside of a transcript
                         trx = trxList[0]
@@ -133,9 +133,9 @@ class Segment:
                             else:
                                 trx = trxList[1]
                                 trxDist = distList[1]
-                                print 'trx', trx, trxDist
+                                # print 'trx', trx, trxDist
                         trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
-                        print 'trxItems, trxIds', trxItems, trxIds
+                        # print 'trxItems, trxIds', trxItems, trxIds
                     else:
                         # lands in a single trancript
                         trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
@@ -161,7 +161,7 @@ class Segment:
                     trx = rightBpTrxList[keepIdx]
                     trxDist = rightBpDistList[keepIdx]
                     trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 1, 'del')
-        print 'Returning items', trxItems, trxIds
+        # print 'Returning items', trxItems, trxIds
         return trxItems, trxIds
 
 
@@ -527,7 +527,7 @@ class AnnotationBrkpt:
     def select_exons(self, exons):
         selectedExons = {}
         if len(self.bounds) > 1:
-            print 'Bounds', self.bounds
+            # print 'Bounds', self.bounds
             self.bounds.sort()
             bpCoordKey = '-'.join([str(x) for x in self.bounds])
             selectedExons[bpCoordKey] = {'coords': []}
@@ -563,7 +563,7 @@ class AnnotationBrkpt:
                     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     # elif absDist > firstLastExons['furthest_exon'][0]:
                     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                    print 'Adding exon', exonCoords, eIter, bpOverlap[1]
+                    # print 'Adding exon', exonCoords, eIter, bpOverlap[1]
                     selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)], bpOverlap[1])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
@@ -583,12 +583,12 @@ class AnnotationBrkpt:
                 firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
                 for exon in exons:
                     bpOverlap = [False, None]
-                    print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
+                    # print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
                     add = False
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    print 'Exoncoords', exonCoords, bpCoord
+                    # print 'Exoncoords', exonCoords, bpCoord
                     if (exonCode == 'left') and (estart <= bpCoord):
                         # Get all exons with start < bp
                         if bpCoord < estop:
@@ -617,7 +617,7 @@ class AnnotationBrkpt:
                         #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                         # elif absDist > firstLastExons['furthest_exon'][0]:
                         #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
-                        print 'Adding exon', exonCoords, eIter, bpOverlap[1]
+                        # print 'Adding exon', exonCoords, eIter, bpOverlap[1]
                         selectedExons[bpCoord]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter), bpOverlap[1]])
                         if maxminCoords[0] > int(exonCoords[0]):
                             maxminCoords[0] = int(exonCoords[0])
@@ -627,7 +627,7 @@ class AnnotationBrkpt:
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 selectedExons[bpCoord]['maxmincoords'] = maxminCoords
-        print 'Selected exons', selectedExons
+        # print 'Selected exons', selectedExons
         return selectedExons
 
 
@@ -638,7 +638,7 @@ def determine_annotation_brkpts(trxBrkpts, segPos, segStrand):
     for brkpt in trxBrkpts:
         if brkpt.svType not in brkptTypes:
             brkptTypes[brkpt.svType] = []
-        print 'determine_annotation_brkpts', brkpt, brkpt.svType
+        # print 'determine_annotation_brkpts', brkpt, brkpt.svType
         brkptTypes[brkpt.svType].append(brkpt)
 
     if 'rearr' in brkptTypes:
@@ -701,7 +701,7 @@ def get_neighbor_exons(exons):
 
 def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
     """ """
-    print 'PLOT GLOBAL TRX TRACK', '*'*20
+    # print 'PLOT GLOBAL TRX TRACK', '*'*20
     if not segmentManager.has_annotations():
         return
 
@@ -739,7 +739,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         for segTrx in segTrxs:
             # print 'Global trx ycoord', yCoord
             trxLen = float(segLen) / float(len(segTrxs))
-            print 'TRX len', trxLen
+            # print 'TRX len', trxLen
             trxOffset += segTrxIter * (trxLen)
             # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
             # ax.add_patch(rect)
@@ -756,7 +756,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
             bpPlotBins = []
             for brkpt in brkpts:
-                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+                # print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
                 gCoord = brkpt.get_genomic_coord()
                 # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
                 if gCoord < trx.start or gCoord > trx.stop:
@@ -781,8 +781,8 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
             # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
             # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
             trxElements = []
-            print 'New exons', newExons
-            print 'Offset', offset, binSize
+            # print 'New exons', newExons
+            # print 'Offset', offset, binSize
             exonHit = False
             for i, exon in enumerate(newExons):
                 rectLen = binSize
@@ -790,7 +790,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                 color = segment.color
                 height = 0.35
                 exonStr = exon[2]
-                print 'start', start
+                # print 'start', start
                 if exon[2] == 'breakpoint':
                     rectLen = 0.5
                     height = 5
@@ -802,7 +802,7 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
                 if exon[2] != 'breakpoint':
-                    print 'Plotting rectangle', start, yCoord, rectLen, height
+                    # print 'Plotting rectangle', start, yCoord, rectLen, height
                     rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
                     ax.add_patch(rect)
                 if exonStr != '':
@@ -829,14 +829,14 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
-                        print 'trxElements', exon, trxElements
+                        # print 'trxElements', exon, trxElements
             segTrxIter += 1
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            print 'TRX elements', trxElements, trxOffset, trxLen
+            # print 'TRX elements', trxElements, trxOffset, trxLen
             trxMin = max(min(trxElements), trxOffset)
             trxMax = min(max(trxElements), trxOffset + trxLen)
-            print 'TRX max, min', trxMin, trxMax
-            print 'Rectangle', trxMin, yCoord, trxMax - trxMin
+            # print 'TRX max, min', trxMin, trxMax
+            # print 'Rectangle', trxMin, yCoord, trxMax - trxMin
             rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
             ax.add_patch(rect)
 
@@ -867,8 +867,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
     sortedSegs = sorted([(segment.queryCoordinates[0], segment) for segment in segmentManager.segments], key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
-        print 'sv_viz.py plot_annotation_track segment', i
-        print 'sv_viz.py plot_annotation_track segment', segmentTuple
+        # print 'sv_viz.py plot_annotation_track segment', i
+        # print 'sv_viz.py plot_annotation_track segment', segmentTuple
         segment = segmentTuple[1]
         segmentPos = 'only'
         if len(sortedSegs) > 1:
@@ -878,10 +878,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 segmentPos = 'middle'
             elif i == (len(sortedSegs) - 1):
                 segmentPos = 'last'
-        print 'segment position', segmentPos, 'segmentStrand', segment.strand
+        # print 'segment position', segmentPos, 'segmentStrand', segment.strand
 
         segTrxs, segTrxIds = segment.get_segment_trxs()
-        print 'Segment transcript ids', segTrxIds, segTrxs
+        # print 'Segment transcript ids', segTrxIds, segTrxs
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
@@ -897,7 +897,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
 
         # Iterate through the segment transcripts.
         for segTrxIter, segTrx in enumerate(segTrxs):
-            print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
+            # print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
 
             # For the first and last segments, use ... at the beginning and end.
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
@@ -916,10 +916,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # Transcript plot length is the length of the segment divided by the number of transcripts
             # corresponding to that segment (i.e. 2 transcripts for an intergenic breakpoint.)
             trxLen = float(segLen) / float(len(segTrxs))
-            print 'TRX len', trxLen
+            # print 'TRX len', trxLen
             # Increment the transcript x-coordinate by transcript iterator * length.
             trxOffset += segTrxIter * (trxLen)
-            print 'TRX offset', trxOffset
+            # print 'TRX offset', trxOffset
             trx = segTrx.trx
             brkpts = segTrx.brkpts
             trx_reverse = False
@@ -971,8 +971,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
             trxElements = []
 
-            print 'Plot exons', plotExons
-            print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
+            # print 'Plot exons', plotExons
+            # print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
             for i, exon in enumerate(plotExons):
                 # exon list contains: exon.start, exon.stop, exon.number or breakpoint, breakpoint genomic coordinate
                 rectLen = binSize
@@ -980,7 +980,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 color = segment.color
                 height = 0.5
                 exonStr = exon[2]
-                print 'start$$$', start
+                # print 'start$$$', start
                 if exon[2] != 'breakpoint':
                     rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=segment.color)
                     ax.add_patch(rect)
@@ -998,7 +998,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
-                        print 'trxElements', exon, trxElements
+                        # print 'trxElements', exon, trxElements
 
                 if exon[2] == 'breakpoint' or exon[3] is not None:
                     # The exon lists contain the genomic coordinate for the breakpoint if it
@@ -1008,9 +1008,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if i == (len(plotExons) - 1):
                         # If the breakpoint is the last 'exon' to be plotted
                         # in the segment, then adjust the start by a binsize.
-                        print 'Exon', exon, 'adjusting start', start
+                        # print 'Exon', exon, 'adjusting start', start
                         start += binSize
-                        print 'New start', start
+                        # print 'New start', start
                     minCoord = 0.2
                     if segTrx.svType != 'rearrangement':
                         minCoord = yCoord - 0.5
@@ -1020,7 +1020,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
 
                 offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                # print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 # if exon[3] is not None:
                 #     # The exon lists contain the genomic coordinate for the breakpoint if it
                 #     # overlaps an exon element. This checks for that instance and plots the
@@ -1033,7 +1033,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 #     # print minCoord
                 #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            print 'trxMin Max', trxElements
+            # print 'trxMin Max', trxElements
             trxMin = max(min(trxElements), trxOffset)
             trxMax = max(max(trxElements), trxOffset + trxLen)
             rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)

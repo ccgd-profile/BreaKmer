@@ -73,12 +73,12 @@ class ResultFilter:
             # Check if event is in the pre-defined filters
             self.check_defined_filters(svEvent)
 
-        print 'check filters', svEvent.resultValues.svType, svEvent.resultValues.svSubtype
+        # print 'check filters', svEvent.resultValues.svType, svEvent.resultValues.svSubtype
         if svEvent.svType == 'indel':
             self.filter_indel(svEvent)
         elif svEvent.resultValues.svType == 'rearrangement':
             if svEvent.resultValues.svSubtype == 'trl':
-                print 'Checking trl filters'
+                # print 'Checking trl filters'
                 self.filter_trl(svEvent)
             else:
                 self.filter_rearr(svEvent)
@@ -152,8 +152,8 @@ class ResultFilter:
         # in_ff, span_ff = filter_by_feature(brkpts, query_region, params.opts['keep_intron_vars'])
         # filter = (min(brkpt_counts['n']) < params.get_sr_thresh('rearrangement')) or self.blatResultsSorted[0][1] < params.get_min_segment_length('rearr') or (in_ff and span_ff) or (disc_read_count < 1) or (rearr_type == 'rearrangement') or (min(brkpt_kmers) == 0)
         svFilterValues = svEvent.resultValues.filterValues
-        print self.params.get_sr_thresh('rearrangement')
-        print svFilterValues.brkptCoverages
+        # print self.params.get_sr_thresh('rearrangement')
+        # print svFilterValues.brkptCoverages
         missingQueryCoverage = svFilterValues.missingQueryCoverage < self.params.get_min_segment_length('rearr')
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('rearrangement')
         minSegmentLen = svFilterValues.minSegmentLen >= self.params.get_min_segment_length('rearr')
@@ -206,7 +206,7 @@ class ResultFilter:
             if not f:
                 nStrictFiltersFail += 1
 
-        print 'max breakpoint coverages', maxBrkptCoverages
+        # print 'max breakpoint coverages', maxBrkptCoverages
         if not maxBrkptCoverages:
             logMsg = 'Maximum breakpoint coverages (%d) did not meet input threshold %d.' % (svFilterValues.brkptCoverages[1], self.params.get_sr_thresh('trl'))
             utils.log(self.loggingName, 'info', logMsg)

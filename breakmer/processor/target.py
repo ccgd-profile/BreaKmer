@@ -21,7 +21,7 @@ def load_kmers(fns, kmers):
     containing it as the value.
 
     Args:
-        fns (str):      Filename of the kmer flat files.
+        fns (str):      Filenames of the kmer flat files.
         kmers (dict):   Dictionary of the kmer, count values,
     Returns:
         None
@@ -45,13 +45,26 @@ class Variation:
     """This class handles the storage and interaction of all the variant reads that could
     be contributing to the support of a structural variant.
 
-
+    Attributes:
+        params (ParamManager):      Parameters for breakmer analysis.
+        loggingName (str):          Module name for logging file purposes.
+        var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects.
+        cleaned_read_recs (dict):   Diciontary containing the cleaned reads.
+        start (int):                Genomic position for the target region (minimum value
+                                    among all intervals).
+        end (int):                  Genomic position for the target region (maximum value among
+                                    all intervals).
+        paths (dict):               Contains the analysis paths for this target.
+        files (dict):               Dicionary containing paths to file names needed for analysis.
+        read_len (int):             Length of a single read.
+        variation (Variation):      Stores data for variants identified within the target.
+        regionBuffer (int):         Base pairs to add or subtract from the target region end and start locations.
     """
 
     def __init__(self, params):
         self.params = params
         self.var_reads = {}
-        self.sv_reads = None
+        # self.sv_reads = None
         self.cleaned_read_recs = None
         self.kmer_clusters = []
         self.kmers = {}
@@ -107,11 +120,13 @@ class Variation:
     def get_sv_reads(self, type):
         """
         """
+
         return self.var_reads[type].sv
 
     def add_result(self, result):
         """
         """
+
         self.results.append(result)
 
     def set_var_reads(self, sampleType, bamFile, chrom, start, end, regionBuffer):
@@ -184,6 +199,7 @@ class Variation:
     def clean_reads(self, dataPath, name, sampleType):
         """Trim adapter sequences from the extracted reads, format and organize
         the cleaned reads into new files.
+
         Cutadapt is run to trim the adapter sequences from the sequence reads to
         remove any 'noise' that bogs down the assembly process or analysis. The
         cleaned reads output from cutadapt are then re-processed to determine
@@ -192,12 +208,12 @@ class Variation:
         fastq file is written.
 
         Args:
-            dataPath (str): The path to the data files for this target.
-            name (str):     The target name.
-            type (str):     A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+            dataPath (str):   The path to the data files for this target.
+            name (str):       The target name.
+            type (str):       A string indicating a tumor ('sv') or normal ('norm') sample being processed.
         Return:
-            check (boolean): A boolean to indicate whether the are any reads left after
-                             cleaning is complete.
+            check (boolean):  A boolean to indicate whether the are any reads left after
+                              cleaning is complete.
         """
 
         cutadapt = self.params.get_param('cutadapt')  # Cutadapt binary
@@ -383,7 +399,6 @@ class TargetManager:
         self.paths = {}
         self.files = {}
         self.read_len = params.get_param('readLen')
-        # self.repeat_mask = None
         self.variation = Variation(params)
         self.regionBuffer = 200
         self.setup()
@@ -397,7 +412,10 @@ class TargetManager:
             None
         """
 
-        intervals = self.params.targets[self.name]
+        # Define the target boundaries based on the intervals input.
+        # The target start is the minimum start of the intervals and the end
+        # is the maximum end of the intervals.
+        intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             chrom, start, end = values[0], int(values[1]), int(values[2])
             if not self.chrom:
@@ -412,6 +430,18 @@ class TargetManager:
                 self.end = end
 
         # Create the proper paths for the target analysis.
+        '''
+        Each target analyzed has a set of directories associated with it.
+        targets/
+            <target name>/
+                data/
+                contigs/
+                kmers/
+
+        There is separate directory for each target in the output directory.
+        output/
+            <target name>/
+        '''
         self.add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
         if self.params.fncCmd == 'run':
             self.add_path('base', os.path.join(self.params.paths['targets'], self.name))
@@ -419,6 +449,16 @@ class TargetManager:
             self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
             self.add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
             self.add_path('output', os.path.join(self.params.paths['output'], self.name))
+
+        '''
+        Each target has reference files associated with it.
+        <ref_data_dir>/
+            <target_name>/
+                <target_name>_forward_refseq.fa
+                <target_name>_reverse_refseq.fa
+                <target_name>_forward_refseq.fa_dump
+                <target_name>_reverse_refseq.fa_dump
+        '''
         self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa')]
         ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
         ref_fa_marker_f.write(self.params.opts['reference_fasta'])
@@ -443,7 +483,15 @@ class TargetManager:
             os.makedirs(self.paths[key])
 
     def set_ref_data(self):
-        """
+        """Write the reference sequence to a fasta file for this specific target if it does not
+        exist.
+
+        Args:
+            None
+        Returns:
+            None
+        Raise:
+            None
         """
 
         # Write reference fasta file if needed.
@@ -493,16 +541,19 @@ class TargetManager:
 
     def clean_reads(self, sampleType):
         """Wrapper for Variation clean_reads function.
+
         Args:
-            type (str): A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+            type (str):      A string indicating a tumor ('sv') or normal ('norm') sample being processed.
         Return:
             check (boolean): A boolean to indicate whether the are any reads left after
                              cleaning is complete.
         """
+
         return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
 
     def extract_bam_reads(self, sampleType):
-        """
+        """Wrapper for Variation extract_bam_reads function.
+
         Args:
             sampleType (str): Indicates a tumor ('sv') or normal ('norm') sample being processed.
         Return:
@@ -520,12 +571,22 @@ class TargetManager:
 
     def compare_kmers(self):
         """Obtain the sample only kmers and initiate assembly of reads with these kmers.
+
+        Args:
+            None
+        Returns:
+            None
         """
 
         self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len, self.files['target_ref_fn'])
 
     def resolve_sv(self):
-        """
+        """Perform operations on the contig object that was generated from the split reads in the target.
+
+        Args:
+            None
+        Returns:
+            None
         """
 
         iter = 1
