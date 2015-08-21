@@ -392,6 +392,8 @@ class AlignResults:
         qGap = rResult['qStart'] - lResult['qEnd']
         lqEnd = lResult['qEnd']
 
+        print 'left result', lResult
+        print 'right result', rResult
         lResult['qStart'] = int(lResult['qStart']) - 1
         rResult['qStart'] = int(rResult['qStart']) - 1
 
