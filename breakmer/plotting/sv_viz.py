@@ -948,7 +948,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             numBrkpts = len(filter(lambda x: x[2] == 'breakpoint', plotExons))
             # print plotExons
 
-
+            '''
+            offset
+            |
+            ||||||||        ||||||||        |   
+            ----------------------------------------
+            '''
+            # 40 / 2 * 3 - 1 40/5 = 8
+            # 40 / 2 * 2 -1 40/3 = 13.3
             binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
@@ -970,7 +977,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     height = 5
                     color = 'black'
                     exonStr = ''
-                    if i == (len(plotExons) - 1) and segmentPos == 'first':
+                    if i == (len(plotExons) - 1):
+                        # If the breakpoint is the last 'exon' to be plotted
+                        # in the segment, then adjust the start by a binsize.
                         print 'Exon', exon, 'adjusting start', start
                         start += binSize #- rectLen
                         print 'New start', start
