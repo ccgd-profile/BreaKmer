@@ -583,12 +583,12 @@ class AnnotationBrkpt:
                 firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
                 bpOverlap = [False, None]
                 for exon in exons:
-                    print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
+                    # print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
                     add = False
                     estart = int(exon.start)
                     estop = int(exon.stop)
                     exonCoords = [estart, estop]
-                    print 'Exoncoords', exonCoords, bpCoord
+                    # print 'Exoncoords', exonCoords, bpCoord
                     if (exonCode == 'left') and (estart <= bpCoord):
                         # Get all exons with start < bp
                         if bpCoord < estop:
@@ -626,7 +626,7 @@ class AnnotationBrkpt:
                 # selectedExons[bpCoord]['coords'][firstLastExons['nearest_exon'][1]][2] = firstLastExons['nearest_exon'][2]
                 # selectedExons[bpCoord]['coords'][firstLastExons['furthest_exon'][1]][2] = firstLastExons['furthest_exon'][2]
                 selectedExons[bpCoord]['maxmincoords'] = maxminCoords
-        print 'Selected exons', selectedExons
+        # print 'Selected exons', selectedExons
         return selectedExons
 
 
@@ -948,6 +948,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             numBrkpts = len(filter(lambda x: x[2] == 'breakpoint', plotExons))
             # print plotExons
 
+
             binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
@@ -956,7 +957,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trxElements = []
 
             print 'Plot exons', plotExons
-            print 'Offset$$$', offset, binSize, trxLen
+            print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
             for i, exon in enumerate(plotExons):
                 rectLen = binSize
                 start = offset
@@ -970,7 +971,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     color = 'black'
                     exonStr = ''
                     if i == (len(plotExons) - 1) and segmentPos == 'first':
+                        print 'Exon', exon, 'adjusting start', start
                         start += binSize #- rectLen
+                        print 'New start', start
                     minCoord = 0.2
                     if segTrx.svType != 'rearrangement':
                         minCoord = yCoord - 0.5
@@ -979,7 +982,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
                 offset += binSize + rectLen + (binSize - rectLen)
-                # print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
                 if exon[2] != 'breakpoint':
                     rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
                     ax.add_patch(rect)
