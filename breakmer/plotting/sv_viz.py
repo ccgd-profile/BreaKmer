@@ -966,13 +966,14 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             print 'Plot exons', plotExons
             print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
             for i, exon in enumerate(plotExons):
+                # exon list contains: exon.start, exon.stop, exon.number or breakpoint, breakpoint genomic coordinate
                 rectLen = binSize
                 start = offset
                 color = segment.color
                 height = 0.5
                 exonStr = exon[2]
                 print 'start$$$', start
-                if exon[2] == 'breakpoint':
+                if exon[2] == 'breakpoint' or exon[3] is not None:
                     rectLen = 0.5
                     height = 5
                     color = 'black'
@@ -986,12 +987,10 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     minCoord = 0.2
                     if segTrx.svType != 'rearrangement':
                         minCoord = yCoord - 0.5
-                    # print minCoord
                     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                     if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
                         trxElements.append(start)
-                offset += binSize + rectLen + (binSize - rectLen)
-                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+
                 if exon[2] != 'breakpoint':
                     rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
                     ax.add_patch(rect)
@@ -1012,14 +1011,20 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
                         print 'trxElements', exon, trxElements
-                if exon[3] is not None:
-                    if i == (len(plotExons) - 1) and segmentPos == 'first':
-                        start += binSize
-                    minCoord = 0.2
-                    if segTrx.svType != 'rearrangement':
-                        minCoord = yCoord - 0.5
-                    # print minCoord
-                    ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
+
+                offset += binSize + rectLen + (binSize - rectLen)
+                print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                # if exon[3] is not None:
+                #     # The exon lists contain the genomic coordinate for the breakpoint if it
+                #     # overlaps an exon element. This checks for that instance and plots the
+                #     # '|' for the breakpoint at the end of the exon.
+                #     if i == (len(plotExons) - 1):
+                #         start += binSize
+                #     minCoord = 0.2
+                #     if segTrx.svType != 'rearrangement':
+                #         minCoord = yCoord - 0.5
+                #     # print minCoord
+                #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
             # This guarantees that intergenic breakpoints don't appear to be in the transcript.
             print 'trxMin Max', trxElements
             trxMin = max(min(trxElements), trxOffset)
