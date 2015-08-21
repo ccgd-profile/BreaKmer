@@ -928,8 +928,8 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # Sort in decreasing order if the transcript is coded on the - strand.
             exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
 
-            for brkpt in brkpts:
-                print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+            # for brkpt in brkpts:
+            #     print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
 
             abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
             selectedExons = abrkpt.select_exons(exons)
@@ -944,18 +944,26 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
             # print 'All Exons sorted', 10 * '#'
             # print allExons
+
+            # Only grab the nearest two (or one) exons to the breakpoints 
             plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
-            numBrkpts = len(filter(lambda x: x[2] == 'breakpoint', plotExons))
-            # print plotExons
 
             '''
-            offset
-            |
-            ||||||||        ||||||||        |   
+            Annotated exons are uniformly plotted across the transcript length.
+            The introns between exons are given the same amount of space as well.
+            There must be 3 units for every two exons - this is including breakpoints that do
+            not land within exons.
+
+            binsize = transcript_length / (2 * number_exons) - 1
+            1 exon = 2 * 1 - 1 = 1 bin (note this scenario is unlikely.)
+            2 exons = 2 * 2 - 1 = 3 bins (i.e. 2 exons and 1 intron)
+            3 exons = 2 * 3 - 1 = 5 bins
+
+            Example for the first segment where the breakpoint lands in a transcript intron
+            exon1           exon2                   breakpoint                        
+            ||||||||        ||||||||               |
             ----------------------------------------
             '''
-            # 40 / 2 * 3 - 1 40/5 = 8
-            # 40 / 2 * 2 -1 40/3 = 13.3
             binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
@@ -973,31 +981,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 height = 0.5
                 exonStr = exon[2]
                 print 'start$$$', start
-                if exon[2] == 'breakpoint' or exon[3] is not None:
-                    rectLen = 0.5
-                    height = 5
-                    color = 'black'
-                    exonStr = ''
-                    if i == (len(plotExons) - 1):
-                        # If the breakpoint is the last 'exon' to be plotted
-                        # in the segment, then adjust the start by a binsize.
-                        print 'Exon', exon, 'adjusting start', start
-                        start += binSize #- rectLen
-                        print 'New start', start
-                    minCoord = 0.2
-                    if segTrx.svType != 'rearrangement':
-                        minCoord = yCoord - 0.5
-                    ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
-                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
-                        trxElements.append(start)
-
                 if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=color)
+                    rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=segment.color)
                     ax.add_patch(rect)
-                    # print 'Exon', exon
                     ax.text(start + (float(binSize) / float(2)), yCoord + 0.45, exonStr, ha='center', va='center', size=8)
-
-                if exonStr != '':
+                # if exonStr != '':
                     exstart = exon[0]
                     exend = exon[1]
                     if segment.strand == '-':
@@ -1011,6 +999,25 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                         trxElements.append(start)
                         trxElements.append(start + binSize)
                         print 'trxElements', exon, trxElements
+
+                if exon[2] == 'breakpoint' or exon[3] is not None:
+                    # The exon lists contain the genomic coordinate for the breakpoint if it
+                    # overlaps an exon element. This checks for that instance and plots the
+                    # '|' for the breakpoint at the end of the exon.
+                    exonStr = ''
+                    if i == (len(plotExons) - 1):
+                        # If the breakpoint is the last 'exon' to be plotted
+                        # in the segment, then adjust the start by a binsize.
+                        print 'Exon', exon, 'adjusting start', start
+                        start += binSize
+                        print 'New start', start
+                    minCoord = 0.2
+                    if segTrx.svType != 'rearrangement':
+                        minCoord = yCoord - 0.5
+                    ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
+
+                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                        trxElements.append(start)
 
                 offset += binSize + rectLen + (binSize - rectLen)
                 print 'Rect plot coords', start, yCoord, start + rectLen, binSize
