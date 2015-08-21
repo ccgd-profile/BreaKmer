@@ -581,8 +581,8 @@ class AnnotationBrkpt:
                     maxminCoords = [bpCoord - 1, bpCoord, bpCoord, exonCode]
                 eIter = 1
                 firstLastExons = {'nearest_exon': [], 'furthest_exon': []}
-                bpOverlap = [False, None]
                 for exon in exons:
+                    bpOverlap = [False, None]
                     print 'Check exon', exon.start, exon.stop, exon.featureType, exonCode
                     add = False
                     estart = int(exon.start)
