@@ -852,14 +852,16 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
-    """ """
+    """ 
+    """
+    # Only plot the annotations if available!
     if not segmentManager.has_annotations():
         return
 
+    # Sort the segments increasing in query coordinate.
     segStarts = []
     for i, segment in enumerate(segmentManager.segments):
         segStarts.append((segment.queryCoordinates[0], segment))
-
     sortedSegs = sorted(segStarts, key=lambda x: x[0])
 
     for i, segmentTuple in enumerate(sortedSegs):
@@ -881,17 +883,23 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
         segLen = segment.get_len()
         segStart, segEnd = segment.queryCoordinates
         reverse = False
-
         if segment.strand == '-':
             reverse = True
 
+        # Set the x-coordinate offset value for the transcript that will be plotted.
         trxOffset = segStart + xOffset
         if (segmentPos == 'first' or segmentPos == 'only'):
+            # Increase the offset by 3 units for the '...' for the first and
+            # last transcript plots.
             trxOffset += 3
-        segTrxIter = 0
-        for segTrx in segTrxs:
+
+        # Iterate through the segment transcripts.
+        for segTrxIter, segTrx in enumerate(segTrxs):
             print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
+
+            # For the first and last segments, use ... at the beginning and end.
             if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
+                # Decrease the segment length by 3 units for each '.'
                 segLen = segLen - 3
                 for i in range(3):
                     rect = patches.Rectangle((trxOffset - 3 + i, yCoord), 0.25, 0.1, color=segment.color)
@@ -899,13 +907,15 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
                 # Last segment and trx
                 segLen = segLen - 3
-                # print 'HELLO', '@'*20
                 for i in range(3):
                     rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord), 0.2, 0.1, color=segment.color)
                     ax.add_patch(rect)
 
+            # Transcript plot length is the length of the segment divided by the number of transcripts
+            # corresponding to that segment (i.e. 2 transcripts for an intergenic breakpoint.)
             trxLen = float(segLen) / float(len(segTrxs))
             print 'TRX len', trxLen
+            # Increment the transcript x-coordinate by transcript iterator * length.
             trxOffset += segTrxIter * (trxLen)
             print 'TRX offset', trxOffset
             trx = segTrx.trx
@@ -913,6 +923,9 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             trx_reverse = False
             if trx.strand == '-':
                 trx_reverse = True
+
+            # Sort the exons increasing in genome coordinate if the transcript is coded on the + strand.
+            # Sort in decreasing order if the transcript is coded on the - strand.
             exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
 
             for brkpt in brkpts:
@@ -935,7 +948,7 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             numBrkpts = len(filter(lambda x: x[2] == 'breakpoint', plotExons))
             # print plotExons
 
-            binSize = trxLen / (2 * len(plotExons) - numBrkpts)
+            binSize = trxLen / (2 * len(plotExons) - 1)
             offset = trxOffset
             ycoord = int(yCoord) - (float(segTrxIter) / float(5))
             labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'

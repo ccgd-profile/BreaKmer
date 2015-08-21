@@ -298,7 +298,7 @@ class RealignValues:
                               'matches': int(values[4]),
                               'mismatches': int(values[5]),
                               'ngaps': int(values[6]),
-                              'qStart': int(values[7]),
+                              'qStart': int(values[7]) - 1,
                               'qEnd': int(values[8]),
                               'tStart': int(values[9]) - 1,
                               'tEnd': int(values[10]),
