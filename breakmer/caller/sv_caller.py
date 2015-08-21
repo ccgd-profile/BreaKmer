@@ -764,8 +764,9 @@ class SVEvent:
                         print 'Hit', rs
                         rearrHit = True
                     else:
+                        svSubType = None
                         if self.rearrDesc is None:
-                            self.rearrDesc = []
+                            self.rearrDesc = [svSubType]
                         self.rearrDesc.append(rearrHits[rearr][i]['svSubType'])
                 else:
                     if self.rearrDesc is None:
