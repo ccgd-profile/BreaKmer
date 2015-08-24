@@ -634,6 +634,7 @@ class SVEvent:
         # discReads = self.contig.get_disc_reads()
         discReadCount = 0
         # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
+        print self.get_genomic_brkpts()['target'][0]
         targetBrkptChr, targetBrkptBp = self.get_genomic_brkpts()['target'][0]
         discReadCount = varReads.check_inter_readcounts(targetBrkptChr, targetBrkptBp, self.get_genomic_brkpts()['other'])
         return discReadCount
