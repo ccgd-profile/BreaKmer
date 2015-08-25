@@ -488,7 +488,7 @@ class TargetManager:
         '''
         self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa')]
         ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
-        ref_fa_marker_f.write(self.__params.opts['reference_fasta'])
+        ref_fa_marker_f.write(self.__params.get_param('reference_fasta'))
         ref_fa_marker_f.close()
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
