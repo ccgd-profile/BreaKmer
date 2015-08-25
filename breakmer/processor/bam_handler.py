@@ -1,6 +1,11 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""bam_handler.py module
+
+This module contains the classes and functions to handle the 
+"""
+
 import pysam
 
 __author__ = "Ryan Abo"
@@ -519,25 +524,29 @@ class discReads:
 class VariantReadTracker:
     """A class to track the reads that are identified to be 'misaligned' to
     the reference sequence.
+
     Attributes:
-        pair_indices: Dictionary of a dictionary tracking the index of paired
-                     reads in the valid list.
-        valid: List of read objects that are valid to consider for extraction.
-        disc: Dictionary of read IDs for read-pairs that are discordantly mapped.
-        unmapped: Dictionary of unmapped reads with mapped mate in the region.
-        unmapped_keep: List containing names of reads that are mapped but their mate is unmapped and wasn't
-                       kept on the first pass.
-        inv: List of tuples, each containing read-pair information that have alignments
-             suggestive of an inversion event.
-        td: List of tuples, each containing read-pair information that have alignments
-            suggestive of a tandem dup event.
-        other: List of tuples, each containing read-pair information that have alignments
-               suggestive of some uncategorized event.
-        sv: Dictionary
-        bam: BAM file source the reads came from.
+        pair_indices (dict):  Dictionary of a dictionary tracking the index of paired
+                              reads in the valid list.
+        valid (list):         List of read objects that are valid to consider for extraction.
+        disc (dict):          Dictionary of read IDs for read-pairs that are discordantly mapped.
+        unmapped (dict):      Dictionary of unmapped reads with mapped mate in the region.
+        unmapped_keep (list): List containing names of reads that are mapped but their mate is unmapped and wasn't
+                              kept on the first pass.
+        inv (list):           List of tuples, each containing read-pair information that have alignments
+                              suggestive of an inversion event.
+        td (list):            List of tuples, each containing read-pair information that have alignments
+                              suggestive of a tandem dup event.
+        other (list):         List of tuples, each containing read-pair information that have alignments
+                              suggestive of some uncategorized event.
+        sv (dict):            Dictionary
+        bam (str):            Bam file source the reads came from.
     """
 
     def __init__(self, bamFile, insertSizeThresh):
+        """
+        """
+
         self.pair_indices = {}
         self.valid = []
         self.discReadTracker = discReads(insertSizeThresh)
@@ -547,7 +556,9 @@ class VariantReadTracker:
         self.bam = bamFile
 
     def check_read(self, read):
-        """ """
+        """
+        """
+
         proper_map, overlapping_reads = pe_meta(read)
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
             self.discReadTracker.add_read_pair(self.bam, read)
@@ -559,56 +570,15 @@ class VariantReadTracker:
             self.pair_indices[read.qname][int(read.is_read1)] = len(self.valid) - 1
 
     def add_unmapped_read(self, read):
-        """Add read to unmapped dictionary with name as the key, object as the value"""
+        """Add read to unmapped dictionary with name as the key, object as the value
+        """
+
         self.unmapped[read.qname] = read
-
-    # def add_discordant_pe(self, read):
-    #     """Deprecated
-    #     Args:
-    #         read:
-    #     Return:
-    #         None
-    #     """
-    #     # Extract read-pairs that are mapped to different chromosomes or fair apart.
-    #     diff_chroms = read.rnext != -1 and read.tid != read.rnext
-    #     disc_ins_size = abs(read.tlen) >= 500
-    #     if read.mapq > 0 and not read.mate_is_unmapped and (diff_chroms or disc_ins_size):
-    #         mate_refid = self.bam.getrname(read.rnext)
-    #         mate_read = self.bam.mate(read)
-    #         if mate_read.mapq > 0:
-    #             if mate_refid not in self.disc:
-    #                 self.disc[mate_refid] = []
-    #             self.disc[mate_refid].append((read.pos, read.pnext))
-
-    #     if read.mapq > 0 and not read.mate_is_unmapped and read.tid == read.rnext:
-    #         if read.is_read1:
-    #             read_positions = None
-    #             if read.is_reverse and read.mate_is_reverse:
-    #                 # reverse -- reverse, samflag 115 (note: only considering read1, read2 samflag 179)
-    #                 read_positions = (read.pos, read.mpos, 0, 0, read.qname)
-    #                 if read.mpos < read.pos:
-    #                     read_positions = (read.mpos, read.pos, 0, 0, read.qname)
-    #                 self.inv.append(read_positions)
-    #             elif not read.is_reverse and not read.mate_is_reverse:
-    #                 # forward -- forward = samflag 67 (note: only considering read1, read2 samflag 131)
-    #                 read_positions = (read.pos, read.mpos, 1, 1, read.qname)
-    #                 if read.mpos < read.pos:
-    #                     read_positions = (read.mpos, read.pos, 1, 1, read.qname)
-    #                 self.inv.append(read_positions)
-    #             elif read.is_reverse and not read.mate_is_reverse and read.pos < read.mpos:
-    #                 # reverse -- forward = samflag 83 with positive insert (read2 samflag 163 with + insert size)
-    #                 read_positions = (read.pos, read.mpos, 0, 1, read.qname)
-    #                 self.td.append(read_positions)
-    #             elif not read.is_reverse and read.mate_is_reverse and read.mpos < read.pos:
-    #                 # reverse -- forward = samflag 99 with - insert (read2 samflag 147 with - insert)
-    #                 read_positions = (read.mpos, read.pos, 1, 0, read.qname)
-    #                 self.td.append(read_positions)
-    #             if read_positions:
-    #                 self.other.append(read_positions)
 
     def check_clippings(self, kmer_size, region_start_pos, region_end_pos):
         """
         """
+
         for read_vals in self.valid:
             read, proper_map, overlap_reads = read_vals
             if read.cigar or len(read.cigar) > 1:
@@ -693,19 +663,28 @@ class VariantReadTracker:
         self.bam.close()
 
     def clear_sv_reads(self):
+        """
+        """
+
         self.sv = None
 
     def get_disc_reads(self):
-        """This function needs to be updated to handle the new disc read storage."""
+        """This function needs to be updated to handle the new disc read storage.
+        """
+
         return self.discReadTracker.disc
 
     def cluster_discreads(self):
-        """ """
+        """
+        """
+
         dReadClusters = self.discReadTracker.cluster_discreads()
         return dReadClusters
 
     def check_inv_readcounts(self, brkpts):
-        """ """
+        """
+        """
+
         return self.discReadTracker.check_inv_readcounts(brkpts)
 
     def check_td_readcounts(self, brkpts):

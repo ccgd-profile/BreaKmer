@@ -48,12 +48,10 @@ class Variation:
     Attributes:
         params (ParamManager):      Parameters for breakmer analysis.
         loggingName (str):          Module name for logging file purposes.
-        var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects.
-        cleaned_read_recs (dict):   Diciontary containing the cleaned reads.
-        start (int):                Genomic position for the target region (minimum value
-                                    among all intervals).
-        end (int):                  Genomic position for the target region (maximum value among
-                                    all intervals).
+        var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects (breakmer.process.bam_handler.VariantReadTracker).
+        cleaned_read_recs (dict):   Dictionary containing the cleaned reads.
+        start (int):                Genomic position for the target region (minimum value among all intervals).
+        end (int):                  Genomic position for the target region (maximum value among all intervals).
         paths (dict):               Contains the analysis paths for this target.
         files (dict):               Dicionary containing paths to file names needed for analysis.
         read_len (int):             Length of a single read.
@@ -62,8 +60,8 @@ class Variation:
     """
 
     def __init__(self, params):
-        self.__loggingName = 'breakmer.processor.target'
-        self.__params = params
+        self.loggingName = 'breakmer.processor.target'
+        self.params = params
         self.var_reads = {}
         self.cleaned_read_recs = None
         self.kmer_clusters = []
@@ -78,7 +76,7 @@ class Variation:
         """Initiate the cleaned_read_recs dictionary for sample or normal data.
 
         Args:
-            sampleType (str): String indicating the sample type - sv / normal
+            sampleType (str): String indicating the sample type - sv or normal
         Returns:
             None
         Raises:
@@ -116,11 +114,11 @@ class Variation:
             check = False
         return check
 
-    def get_sv_reads(self, type):
+    def get_sv_reads(self, sampleType):
         """
         """
 
-        return self.var_reads[type].sv
+        return self.var_reads[sampleType].sv
 
     def add_result(self, result):
         """
@@ -145,9 +143,9 @@ class Variation:
         """
 
         # Get VariantReadTracker object from bam_handler module.
-        self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer, self.__params.get_param('insertsize_thresh'))
+        self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer, self.params.get_param('insertsize_thresh'))
         # Iterate through reads that are not perfectly aligned and store necessary information for downstream analysis.
-        self.var_reads[sampleType].check_clippings(self.__params.get_kmer_size(), start, end)
+        self.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), start, end)
 
         svBam = None
         if sampleType == 'sv':
@@ -155,15 +153,15 @@ class Variation:
         readsFq = open(self.files['%s_fq' % sampleType], 'w')
         scFa = open(self.files['%s_sc_unmapped_fa' % sampleType], 'w')
         # Write all the stored sequences into files.
-        self.var_reads[sampleType].write_seqs(scFa, readsFq, svBam, self.__params.get_kmer_size())
+        self.var_reads[sampleType].write_seqs(scFa, readsFq, svBam, self.params.get_kmer_size())
         readsFq.close()
         scFa.close()
 
         if sampleType == 'sv':
             svBam.close()
-            utils.log(self.__loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
+            utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
             pysam.sort(self.files['sv_bam'], self.files['sv_bam_sorted'].replace('.bam', ''))
-            utils.log(self.__loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
+            utils.log(self.loggingName, 'info', 'Indexing sorted bam file %s' % self.files['sv_bam_sorted'])
             pysam.index(self.files['sv_bam_sorted'])
 
     def setup_read_extraction_files(self, sampleType, dataPath, name):
@@ -215,18 +213,18 @@ class Variation:
                               cleaning is complete.
         """
 
-        cutadapt = self.__params.get_param('cutadapt')  # Cutadapt binary
-        cutadaptConfigFn = self.__params.get_param('cutadapt_config_file')
-        utils.log(self.__loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
+        cutadapt = self.params.get_param('cutadapt')  # Cutadapt binary
+        cutadaptConfigFn = self.params.get_param('cutadapt_config_file')
+        utils.log(self.loggingName, 'info', 'Cleaning reads using %s with configuration file %s' % (cutadapt, cutadaptConfigFn))
         self.files['%s_cleaned_fq' % sampleType] = os.path.join(dataPath, name + '_%s_reads_cleaned.fastq' % sampleType)
-        utils.log(self.__loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
-        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.__loggingName)
+        utils.log(self.loggingName, 'info', 'Writing clean reads to %s' % self.files['%s_cleaned_fq' % sampleType])
+        output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
         self.setup_cleaned_reads(sampleType)
         self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType] = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
         self.clear_sv_reads(sampleType)
         check = self.continue_analysis_check(sampleType)
-        utils.log(self.__loggingName, 'info', 'Clean reads exist %s' % check)
+        utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
         return check
 
     def set_reference_kmers(self, targetRefFns):
@@ -234,14 +232,14 @@ class Variation:
 
         self.kmers['ref'] = {}
         for i in range(len(targetRefFns)):
-            utils.log(self.__loggingName, 'info', 'Indexing kmers for reference sequence %s' % targetRefFns[i])
+            utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % targetRefFns[i])
             self.get_kmers(targetRefFns[i], self.kmers['ref'])
 
     def set_sample_kmers(self):
         """Set the sample kmers
         """
 
-        utils.log(self.__loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
+        utils.log(self.loggingName, 'info', 'Indexing kmers for sample sequence %s' % self.files['sv_cleaned_fq'])
         self.kmers['case'] = {}
         self.kmers['case_sc'] = {}
         self.get_kmers(self.files['sv_cleaned_fq'], self.kmers['case'])
@@ -251,8 +249,8 @@ class Variation:
         """Generic function to run jellyfish on a set of sequences
         """
 
-        jellyfish = self.__params.get_param('jellyfish')
-        kmer_size = self.__params.get_kmer_size()
+        jellyfish = self.params.get_param('jellyfish')
+        kmer_size = self.params.get_kmer_size()
         # Load the kmers into the kmer dictionary based on keyStr value.
         load_kmers(utils.run_jellyfish(seqFn, jellyfish, kmer_size), kmerDict)
 
@@ -270,7 +268,7 @@ class Variation:
         # Take the difference from the reference kmers.
         sampleOnlyKmers = list(scKmers.difference(set(self.kmers['ref'].keys())))
         # Add normal sample kmers if available.
-        if self.__params.get_param('normal_bam_file'):
+        if self.params.get_param('normal_bam_file'):
             normKmers = {}
             self.get_kmers(self.files['norm_cleaned_fq'], normKmers)
             sampleOnlyKmers = list(set(sampleOnlyKmers).difference(set(normKmers.keys())))
@@ -290,11 +288,11 @@ class Variation:
         self.kmers['case'] = {}
         self.kmers['case_sc'] = {}
 
-        utils.log(self.__loggingName, 'info', 'Writing %d sample-only kmers to file %s' % (len(self.kmers['case_only']), self.files['sample_kmers']))
+        utils.log(self.loggingName, 'info', 'Writing %d sample-only kmers to file %s' % (len(self.kmers['case_only']), self.files['sample_kmers']))
         self.files['kmer_clusters'] = os.path.join(kmerPath, name + "_sample_kmers_merged.out")
-        utils.log(self.__loggingName, 'info', 'Writing kmer clusters to file %s' % self.files['kmer_clusters'])
+        utils.log(self.loggingName, 'info', 'Writing kmer clusters to file %s' % self.files['kmer_clusters'])
 
-        self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], self.__params.get_kmer_size(), self.__params.get_sr_thresh('min'), readLen)
+        self.kmers['clusters'] = assembly.init_assembly(self.kmers['case_only'], self.cleaned_read_recs['sv'], self.params.get_kmer_size(), self.params.get_sr_thresh('min'), readLen)
         self.clear_cleaned_reads()
         self.kmers['case_only'] = {}
 
@@ -310,7 +308,7 @@ class Variation:
 
         if len(self.results) > 0:
             resultFn = os.path.join(outputPath, targetName + "_svs.out")
-            utils.log(self.__loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
+            utils.log(self.loggingName, 'info', 'Writing %s result file %s' % (targetName, resultFn))
             resultFile = open(resultFn, 'w')
             for i, result in enumerate(self.results):
                 headerStr, formattedResultValuesStr = result.get_formatted_output_values()
@@ -320,7 +318,7 @@ class Variation:
             resultFile.close()
         if len(self.discReadClusters) > 0:
             resultFn = os.path.join(outputPath, targetName + "_discreads.out")
-            utils.log(self.__loggingName, 'info', 'Writing %s discordant read cluster result file %s' % (targetName, resultFn))
+            utils.log(self.loggingName, 'info', 'Writing %s discordant read cluster result file %s' % (targetName, resultFn))
             resultFile = open(resultFn, 'w')
             for i, discReadRes in enumerate(self.discReadFormatted):
                 headerStr, outStr = discReadRes
@@ -351,7 +349,7 @@ class Variation:
         headerStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
-            if readCount < self.__params.get_param('discread_only_thresh'):
+            if readCount < self.params.get_param('discread_only_thresh'):
                 continue
             k1, k2, k3, c1, c2 = key.split('|')
             svType = 'inter-chromosomal'
@@ -388,8 +386,8 @@ class TargetManager:
     """
 
     def __init__(self, name, params):
-        self.__loggingName = 'breakmer.processor.target'
-        self.__params = params
+        self.loggingName = 'breakmer.processor.target'
+        self.params = params
         self.name = name
         self.chrom = None
         self.start = None
@@ -399,7 +397,7 @@ class TargetManager:
         self.readLen = int(params.get_param('readLen'))
         self.variation = Variation(params)
         self.regionBuffer = 200
-        self.__setup()
+        self.setup()
 
     @property
     def start(self):
@@ -444,9 +442,9 @@ class TargetManager:
         """Return the function of the program.
         """
 
-        return self.__params.fncCmd
+        return self.params.fncCmd
 
-    def __setup(self):
+    def setup(self):
         """Setup the TargetManager object with the input params.
 
         Define the location (chrom, start, end), file paths, directory paths, and name.
@@ -460,7 +458,7 @@ class TargetManager:
         # Define the target boundaries based on the intervals input.
         # The target start is the minimum start of the intervals and the end
         # is the maximum end of the intervals.
-        intervals = self.__params.get_target_intervals(self.name)
+        intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             self.chrom, self.start, self.end = values[0], int(values[1]), int(values[2])
 
@@ -477,13 +475,13 @@ class TargetManager:
         output/
             <target name>/
         '''
-        self.__add_path('ref_data', os.path.join(self.__params.paths['ref_data'], self.name))
-        if self.__params.fncCmd == 'run':
-            self.__add_path('base', os.path.join(self.__params.paths['targets'], self.name))
-            self.__add_path('data', os.path.join(self.paths['base'], 'data'))
-            self.__add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
-            self.__add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
-            self.__add_path('output', os.path.join(self.__params.paths['output'], self.name))
+        self.add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
+        if self.params.fncCmd == 'run':
+            self.add_path('base', os.path.join(self.params.paths['targets'], self.name))
+            self.add_path('data', os.path.join(self.paths['base'], 'data'))
+            self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
+            self.add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
+            self.add_path('output', os.path.join(self.params.paths['output'], self.name))
 
         '''
         Each target has reference files associated with it.
@@ -496,11 +494,11 @@ class TargetManager:
         '''
         self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa')]
         ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
-        ref_fa_marker_f.write(self.__params.get_param('reference_fasta'))
+        ref_fa_marker_f.write(self.params.get_param('reference_fasta'))
         ref_fa_marker_f.close()
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
-    def __add_path(self, key, path):
+    def add_path(self, key, path):
         """Utility function to create all the output directories.
 
         Args:
@@ -512,7 +510,7 @@ class TargetManager:
             None
         """
 
-        utils.log(self.__loggingName, 'info', 'Creating %s %s path (%s)' % (self.name, key, path))
+        utils.log(self.loggingName, 'info', 'Creating %s %s path (%s)' % (self.name, key, path))
         self.paths[key] = path
         if not os.path.exists(self.paths[key]):
             os.makedirs(self.paths[key])
@@ -532,28 +530,30 @@ class TargetManager:
         # Write reference fasta file if needed.
         for i in range(len(self.files['target_ref_fn'])):
             fn = self.files['target_ref_fn'][i]
-            direction = "forward"
-            if fn.find("forward") == -1:
-                direction = "reverse"
-            utils.log(self.__loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
-            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.__params.get_param('reference_fasta'), direction, fn)
+            direction = "forward" if fn..find("forward") != -1 else "reverse"
+            utils.log(self.loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
+            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.params.get_param('reference_fasta'), direction, fn)
 
-        blastn = self.__params.get_param('blast')
+        # If using blatn for target realignment, the db must be available.
+        blastn = self.params.get_param('blast')
         if blastn is not None:
             # Check if blast db files are available for each target.
             if not os.path.isfile(self.files['target_ref_fn'][0] + '.nin'):
                 makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')  # Create blast db
                 cmd = "%s -in %s -dbtype 'nucl' -out %s" % (makedb, self.files['target_ref_fn'][0], self.files['target_ref_fn'][0])
-                utils.log(self.__loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
+                utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 output, errors = p.communicate()
                 if errors != '':
-                    utils.log(self.__loggingName, 'debug', 'Failed to make blast db files using reference file %s' % self.files['target_ref_fn'][0])
+                    utils.log(self.loggingName, 'debug', 'Failed to make blast db files using reference file %s' % self.files['target_ref_fn'][0])
 
     def find_sv_reads(self):
         """Entry function to extract sequence reads from sample or normal bam file.
         It extracts and cleans the sample reads from the target region that may
         be used to build a variant contig.
+
+        1. Extract bam reads
+        2. Clean reads
 
         Args:
             None
@@ -564,7 +564,7 @@ class TargetManager:
         """
 
         self.extract_bam_reads('sv')  # Extract variant reads.
-        if self.__params.get_param('normal_bam_file'):  # Extract reads from normal sample, if input.
+        if self.params.get_param('normal_bam_file'):  # Extract reads from normal sample, if input.
             self.extract_bam_reads('norm')
             self.clean_reads('norm')
         check = True
@@ -572,18 +572,6 @@ class TargetManager:
             shutil.rmtree(self.paths['output'])  # Remove the output directory since there is nothing to analyze
             check = False
         return check
-
-    def clean_reads(self, sampleType):
-        """Wrapper for Variation clean_reads function.
-
-        Args:
-            type (str):      A string indicating a tumor ('sv') or normal ('norm') sample being processed.
-        Return:
-            check (boolean): A boolean to indicate whether the are any reads left after
-                             cleaning is complete.
-        """
-
-        return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
 
     def extract_bam_reads(self, sampleType):
         """Wrapper for Variation extract_bam_reads function.
@@ -599,9 +587,21 @@ class TargetManager:
         bamType = 'sample'
         if sampleType == 'norm':
             bamType = 'normal'
-        bamFile = self.__params.get_param('%s_bam_file' % bamType)
-        utils.log(self.__loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.variation.files['%s_fq' % sampleType]))
+        bamFile = self.params.get_param('%s_bam_file' % bamType)
+        utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.variation.files['%s_fq' % sampleType]))
         self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
+
+    def clean_reads(self, sampleType):
+        """Wrapper for Variation clean_reads function.
+
+        Args:
+            type (str):      A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+        Return:
+            check (boolean): A boolean to indicate whether the are any reads left after
+                             cleaning is complete.
+        """
+
+        return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
 
     def compare_kmers(self):
         """Obtain the sample only kmers and initiate assembly of reads with these kmers.
@@ -625,11 +625,11 @@ class TargetManager:
 
         iter = 1
         contigs = self.variation.kmers['clusters']
-        utils.log(self.__loggingName, 'info', 'Resolving structural variants from %d kmer clusters' % len(contigs))
+        utils.log(self.loggingName, 'info', 'Resolving structural variants from %d kmer clusters' % len(contigs))
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
-            utils.log(self.__loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
-            contig.set_meta_information(contigId, self.__params, self.values, self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
+            utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
+            contig.set_meta_information(contigId, self.params, self.values, self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
             contig.query_ref(self.files['target_ref_fn'])
             contig.make_calls()
             if contig.svEventResult:
@@ -638,7 +638,7 @@ class TargetManager:
                 contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
                 self.add_result(contig.svEventResult)
             else:
-                utils.log(self.__loggingName, 'info', '%s has no structural variant result.' % contigId)
+                utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
         self.variation.cluster_discreads(self.name, self.chrom)  # Cluster discordant reads.
 
@@ -655,7 +655,7 @@ class TargetManager:
         """Return the list of tuples defining intervals for this target
         """
 
-        return self.__params.targets[self.name]
+        return self.params.targets[self.name]
 
     def get_sv_reads(self, type):
         """ """

@@ -23,8 +23,6 @@ def check_status(results):
         results (list): A list of results from the multiprocessing analysis.
     Returns:
         notReady (int): An integer value indicating the number of processors not complete.
-    Raises:
-        None
     """
 
     notReady = 0
@@ -103,9 +101,9 @@ class RunTracker:
     """
 
     def __init__(self, params):
-        self.__params = params
-        self.__results = []
-        self.__loggingName = 'breakmer.processor.analysis'
+        self.params = params
+        # self.results = []
+        self.loggingName = 'breakmer.processor.analysis'
 
     def run(self):
         """Create and analyze the target regions.
@@ -121,17 +119,17 @@ class RunTracker:
 
         startTime = time.clock()  # Track the run time.
 
-        self.__params.start_blat_server()
-        if self.__params.fncCmd == 'start_blat_server':
+        self.params.start_blat_server()
+        if self.params.fncCmd == 'start_blat_server':
             print 'Server started!'
             return
 
-        targetAnalysisList = self.__create_targets()
+        targetAnalysisList = self.create_targets()
 
         aggResults = {'contigs': [], 'discreads': []}  # Buffer the formatted output strings for each target to write out in batch.
-        nprocs = int(self.__params.get_param('nprocs'))
+        nprocs = int(self.params.get_param('nprocs'))
         if nprocs > 1:  # Make use of multiprocessing by mapping targets to n jobs.
-            utils.log(self.__loggingName, 'info', 'Creating all reference data.')
+            utils.log(self.loggingName, 'info', 'Creating all reference data.')
             p = multiprocessing.Pool(nprocs)
             multiprocResults = []
             for targetList in targetAnalysisList:
@@ -144,19 +142,19 @@ class RunTracker:
         else:
             aggResults = analyze_targets(targetAnalysisList)
 
-        if self.__params.fncCmd == 'prepare_reference_data':
+        if self.params.fncCmd == 'prepare_reference_data':
             print 'Reference data setup!'
             return
 
-        self.__write_aggregated_output(aggResults)
-        utils.log(self.__loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
+        self.write_aggregated_output(aggResults)
+        utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
-        if not self.__params.get_param('keep_blat_server'):  # Keep blat server is specified.
-            cmd = '%s stop %s %d' % (self.__params.get_param('gfserver'), self.__params.get_param('blat_hostname'), int(self.__params.get_param('blat_port')))
+        if not self.params.get_param('keep_blat_server'):  # Keep blat server is specified.
+            cmd = '%s stop %s %d' % (self.params.get_param('gfserver'), self.params.get_param('blat_hostname'), int(self.params.get_param('blat_port')))
             os.system(cmd)
         print 'Analysis complete!'
 
-    def __create_targets(self):
+    def create_targets(self):
         """Create target objects and group them by the number of
         multiprocs that are specified (i.e. n=1 for 1 processor.)
 
@@ -175,10 +173,10 @@ class RunTracker:
                                analyzed by a processor.
         """
 
-        nprocs = int(self.__params.get_param('nprocs'))
+        nprocs = int(self.params.get_param('nprocs'))
         multiprocs = nprocs > 1
         ngroups = nprocs
-        ntargets = len(self.__params.targets)
+        ntargets = len(self.params.targets)
         ntargetsPerGroup = ntargets / nprocs
         modval = math.fmod(ntargets, nprocs)
         if modval > 0:
@@ -187,10 +185,10 @@ class RunTracker:
         trgtGroup = []
 
         # Iterate through the target name list, sorted alphabetically.
-        targetNames = self.__params.get_target_names()
+        targetNames = self.params.get_target_names()
         targetNames.sort()
         for targetName in targetNames:
-            targetManager = target.TargetManager(targetName, self.__params)
+            targetManager = target.TargetManager(targetName, self.params)
             if multiprocs:
                 if len(trgtGroup) == ntargetsPerGroup:
                     trgtGroups.append(trgtGroup)
@@ -208,7 +206,7 @@ class RunTracker:
                 trgtGroups.append(trgtGroup)
         return trgtGroups
 
-    def __write_aggregated_output(self, aggregateResults):
+    def write_aggregated_output(self, aggregateResults):
         """Write the SV calls to a top level file in the specified output directory.
         Header is written at the top of the file if option to remove is not
         specified.
@@ -218,31 +216,31 @@ class RunTracker:
             <output_dir>/<analysis_name>_discreads.out
 
         Args:
-            aggregateResults (dict):    A dictionary containing the formatted output string values.
+            aggregateResults (dict): A dictionary containing the formatted output string values.
         Returns:
             None
         """
 
         # Write assembled contig-based SV calls.
         if len(aggregateResults['contigs']) > 0:
-            resultFn = os.path.join(self.__params.paths['output'], self.__params.get_param('analysis_name') + "_svs.out")
-            utils.log(self.__loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
+            resultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.get_param('analysis_name'), resultFn))
             resultFile = open(resultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
-                if not self.__params.get_param('no_output_header') and i == 0:
+                if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
                 resultFile.write(formattedResultValuesStr + '\n')
             resultFile.close()
 
         # Write discordant read pair clusters.
         if len(aggregateResults['discreads']) > 0:
-            resultFn = os.path.join(self.__params.paths['output'], self.__params.get_param('analysis_name') + "_discreads.out")
-            utils.log(self.__loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
+            resultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_discreads.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.get_param('analysis_name'), resultFn))
             resultFile = open(resultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['discreads']):
                 headerStr, formattedResultValuesStr = formattedResultStr
-                if not self.__params.get_param('no_output_header') and i == 0:
+                if not self.params.get_param('no_output_header') and i == 0:
                     resultFile.write(headerStr + '\n')
                 resultFile.write(formattedResultValuesStr + '\n')
             resultFile.close()
