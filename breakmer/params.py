@@ -77,7 +77,7 @@ class ParamManager:
 
         # If only preseting the reference data no need to continue.
         if self.fncCmd == 'prepare_reference_data':
-            utils.log(self.loggingName, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
+            utils.log(self.__loggingName, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
             return
 
         # Setup directories
@@ -90,13 +90,13 @@ class ParamManager:
 
         # Create all the paths.
         for path in self.paths:
-            utils.log(self.loggingName, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
+            utils.log(self.__loggingName, 'info', 'Creating %s directory (%s)' % (path, self.paths[path]))
             if not os.path.exists(self.paths[path]):
                 os.makedirs(self.paths[path])
 
         # If starting the blat server then return.
         if self.fncCmd == 'start_blat_server':
-            utils.log(self.loggingName, 'info', 'Starting the blat server.')
+            utils.log(self.__loggingName, 'info', 'Starting the blat server.')
             return
 
         self.__check_binaries()  # Check if Jellyfish and Cutadapt work.
@@ -125,7 +125,7 @@ class ParamManager:
             if len(linesplit) == 1:  # Make sure the lines in the configuration file are set properly.
                 err_msg = 'Config line', line, ' not set correctly. Exiting.'
                 print err_msg
-                utils.log(self.loggingName, 'error', err_msg)
+                utils.log(self.__loggingName, 'error', err_msg)
                 sys.exit(1)
             else:
                 key, value = linesplit
@@ -183,10 +183,10 @@ class ParamManager:
                 self.set_param(binary, binaryCheck)  # Store the result in the opts dictionary.
             if not binaryCheck:  # No binary found or specified. Throw an error.
                 print 'Missing path/executable for', binary
-                utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
+                utils.log(self.__loggingName, 'error', 'Missing path/executable for %s' % binary)
                 sys.exit(1)
-            utils.log(self.loggingName, 'info', '%s path = %s' % (binary, binaryCheck))
-        utils.log(self.loggingName, 'info', 'All the required binaries have been checked successfully!')
+            utils.log(self.__loggingName, 'info', '%s path = %s' % (binary, binaryCheck))
+        utils.log(self.__loggingName, 'info', 'All the required binaries have been checked successfully!')
 
         # Test cutadapt and jellyfish binaries
         testDir = os.path.join(self.paths['analysis'], 'bin_test')
@@ -200,15 +200,15 @@ class ParamManager:
 
         cleanFq, rc = utils.test_cutadapt(testFq, self.__opts['cutadapt'], self.__opts['cutadapt_config_file'])
         if cleanFq:
-            utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
+            utils.log(self.__loggingName, 'info', 'Test cutadapt ran successfully')
             jfish_prgm, rc = utils.test_jellyfish(self.__opts['jellyfish'], cleanFq, testDir)
             if rc != 0:
-                utils.log(self.loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
+                utils.log(self.__loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
             else:
-                utils.log(self.loggingName, 'info', 'Test jellyfish ran successfully')
+                utils.log(self.__loggingName, 'info', 'Test jellyfish ran successfully')
         else:
-            utils.log(self.loggingName, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
+            utils.log(self.__loggingName, 'error', 'Cutadapt failed to run, exit code %s. Check installation and version.' % str(rc))
             sys.exit(1)
         shutil.rmtree(testDir)  # Remove the test directory.
 
@@ -276,7 +276,7 @@ class ParamManager:
                 line = line.strip()
                 regionList.append(line.upper())
 
-        utils.log(self.loggingName, 'info', 'Parsing target list')
+        utils.log(self.__loggingName, 'info', 'Parsing target list')
         # TODO: Check to make sure there aren't duplicate genes.
         cur_region = ['', []]
         for target in open(self.__opts['targets_bed_file'], 'rU'):
@@ -295,7 +295,7 @@ class ParamManager:
             if name.upper() not in self.targets:  # All the names are converted to uppercase.
                 self.targets[name.upper()] = []
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
-        utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
+        utils.log(self.__loggingName, 'info', '%d targets' % len(self.targets))
 
     def __check_blat_server(self):
         """Run a test query on the specified blat server to make sure it is running. 
@@ -318,14 +318,14 @@ class ParamManager:
 
         resultFn = os.path.join(testDir, 'blatserver_test.psl')
         cmd = '%s -t=dna -q=dna -out=psl -minScore=20 -nohead %s %d %s %s %s' % (self.get_param('gfclient'), self.get_param('blat_hostname'), self.get_param('blat_port'), self.get_param('reference_fasta_dir'), test_fa_fn, resultFn)
-        utils.log(self.loggingName, 'info', 'Blat server test system command %s' % cmd)
+        utils.log(self.__loggingName, 'info', 'Blat server test system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
-        utils.log(self.loggingName, 'info', 'Realignment output file %s' % resultFn)
+        utils.log(self.__loggingName, 'info', 'Realignment output file %s' % resultFn)
         serverSuccess = True
         if errors != '':
             serverSuccess = False
-            utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
+            utils.log(self.__loggingName, 'info', 'Realignment errors %s' % errors)
         return serverSuccess
 
     def start_blat_server(self):
@@ -352,28 +352,28 @@ class ParamManager:
             # If no port is specified for this function, then randomly select a port between 8000-9500.
             if port is None:
                 self.__opts['blat_port'] = random.randint(8000, 9500)
-                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))    
+                utils.log(self.__loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))    
         elif self.fncCmd == 'run':  # Start the blat server if it is not already running.
             if not self.get_param('start_blat_server'):  # Start blat server option is not set. Check that one is running, if not, start it.
                 port = self.get_param('blat_port')
                 hostname = self.get_param('blat_hostname')
                 self.__opts['blat_hostname'] = hostname
                 if port is None:  # No port is specified for a server that should be running. It will start a new one on a random numbered port.
-                    utils.log(self.loggingName, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
+                    utils.log(self.__loggingName, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
                     self.__opts['blat_port'] = random.randint(8000, 9500)
                 else:  # Blat server is already running in this instance. Check it to make sure with a test blat.
                     self.__opts['blat_port'] = int(self.get_param('blat_port'))
                     if self.__check_blat_server():  # Both port and hostname are specified. Check that the server is running.
                         return
                     else:
-                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))
+                        utils.log(self.__loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))
 
         self.__opts['reference_fasta_dir'] = os.path.split(self.__opts['reference_fasta'])[0]
         ref_fasta_name = os.path.basename(self.__opts['reference_fasta']).split(".fa")[0]
 
         self.__opts['blat_2bit'] = os.path.join(self.__opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
         if not os.path.exists(self.__opts['blat_2bit']):  # Create 2bit file to use for running the blat server.
-            utils.log(self.loggingName, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
+            utils.log(self.__loggingName, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
             curdir = os.getcwd()
             os.chdir(self.__opts['reference_fasta_dir'])
             cmd = '%s %s %s' % (self.__opts['fatotwobit'], ref_fasta_name + ".fa", ref_fasta_name + ".2bit")
@@ -386,7 +386,7 @@ class ParamManager:
         # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
         self.__opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.__opts['blat_port'])
         cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.__opts['gfserver'], self.__opts['gfserver_log'], self.__opts['blat_hostname'], self.__opts['blat_port'], ref_fasta_name + ".2bit")
-        utils.log(self.loggingName, 'info', "Starting gfServer %s" % cmd)
+        utils.log(self.__loggingName, 'info', "Starting gfServer %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         start_time = time.time()
 
@@ -394,11 +394,11 @@ class ParamManager:
             new_time = time.time()
             wait_time = new_time - start_time
             if wait_time > 1000:
-                utils.log(self.loggingName, 'error', 'gfServer wait time exceeded ~15 minutes, exiting')
+                utils.log(self.__loggingName, 'error', 'gfServer wait time exceeded ~15 minutes, exiting')
                 sys.exit(1)
-            utils.log(self.loggingName, 'info', 'Waiting for blat gfServer to load reference seq')
+            utils.log(self.__loggingName, 'info', 'Waiting for blat gfServer to load reference seq')
             time.sleep(60)
-        utils.log(self.loggingName, 'info', 'Server ready!')
+        utils.log(self.__loggingName, 'info', 'Server ready!')
         os.chdir(curdir)
 
     def get_target_names(self):
@@ -419,7 +419,7 @@ class ParamManager:
         if targetName in self.targets:
             return self.targets[targetName]
         else:
-            utils.log(self.loggingName, 'debug', '%s target name not in target dictionary.' % targetName)
+            utils.log(self.__loggingName, 'debug', '%s target name not in target dictionary.' % targetName)
             sys.exit(1)
 
     def get_kmer_size(self):
@@ -502,7 +502,7 @@ class ParamManager:
         if key in self.__opts:
             value = self.__opts[key]
         elif required:
-            utils.log(self.loggingName, 'error', 'Missing required parameter %s, exiting.' % key)
+            utils.log(self.__loggingName, 'error', 'Missing required parameter %s, exiting.' % key)
             sys.exit(1)
         return value
 
