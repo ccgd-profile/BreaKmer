@@ -541,7 +541,6 @@ def get_fastq_reads(fn, sv_reads):
                         if cleaned_seq.find(sc_seq) == -1:
                             # Don't add, just trimmed clipped portion.
                             add = False
-#    else: print qname, 'not in sv reads'
         if add:
             filt_fq.write(header + "\n" + seq + "\n+\n" + qual + "\n")
             fr = fq_read(header, seq, qual, indel_meta)

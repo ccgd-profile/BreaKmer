@@ -105,7 +105,6 @@ class RunTracker:
     def __init__(self, params):
         self.__params = params
         self.__results = []
-        # self.__targets = {}
         self.__loggingName = 'breakmer.processor.analysis'
 
     def run(self):
@@ -132,7 +131,7 @@ class RunTracker:
         aggResults = {'contigs': [], 'discreads': []}  # Buffer the formatted output strings for each target to write out in batch.
         nprocs = int(self.__params.get_param('nprocs'))
         if nprocs > 1:  # Make use of multiprocessing by mapping targets to n jobs.
-            utils.log(self.loggingName, 'info', 'Creating all reference data.')
+            utils.log(self.__loggingName, 'info', 'Creating all reference data.')
             p = multiprocessing.Pool(nprocs)
             multiprocResults = []
             for targetList in targetAnalysisList:
@@ -150,7 +149,7 @@ class RunTracker:
             return
 
         self.__write_aggregated_output(aggResults)
-        utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
+        utils.log(self.__loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
         if not self.__params.get_param('keep_blat_server'):  # Keep blat server is specified.
             cmd = '%s stop %s %d' % (self.__params.get_param('gfserver'), self.__params.get_param('blat_hostname'), int(self.__params.get_param('blat_port')))
@@ -227,7 +226,7 @@ class RunTracker:
         # Write assembled contig-based SV calls.
         if len(aggregateResults['contigs']) > 0:
             resultFn = os.path.join(self.__params.paths['output'], self.__params.get_param('analysis_name') + "_svs.out")
-            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
+            utils.log(self.__loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
             resultFile = open(resultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
@@ -239,7 +238,7 @@ class RunTracker:
         # Write discordant read pair clusters.
         if len(aggregateResults['discreads']) > 0:
             resultFn = os.path.join(self.__params.paths['output'], self.__params.get_param('analysis_name') + "_discreads.out")
-            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
+            utils.log(self.__loggingName, 'info', 'Writing %s aggregated results file %s' % (self.__params.get_param('analysis_name'), resultFn))
             resultFile = open(resultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['discreads']):
                 headerStr, formattedResultValuesStr = formattedResultStr

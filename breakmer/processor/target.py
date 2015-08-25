@@ -231,6 +231,7 @@ class Variation:
 
     def set_reference_kmers(self, targetRefFns):
         """Set the reference sequence kmers"""
+
         self.kmers['ref'] = {}
         for i in range(len(targetRefFns)):
             utils.log(self.__loggingName, 'info', 'Indexing kmers for reference sequence %s' % targetRefFns[i])
