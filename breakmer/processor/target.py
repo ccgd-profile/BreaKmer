@@ -398,7 +398,7 @@ class TargetManager:
         self.read_len = params.get_param('readLen')
         self.variation = Variation(params)
         self.regionBuffer = 200
-        self.setup()
+        self.__setup()
 
     @property
     def start(self):
@@ -469,13 +469,13 @@ class TargetManager:
         output/
             <target name>/
         '''
-        self.add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
+        self.__add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
         if self.params.fncCmd == 'run':
-            self.add_path('base', os.path.join(self.params.paths['targets'], self.name))
-            self.add_path('data', os.path.join(self.paths['base'], 'data'))
-            self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
-            self.add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
-            self.add_path('output', os.path.join(self.params.paths['output'], self.name))
+            self.__add_path('base', os.path.join(self.params.paths['targets'], self.name))
+            self.__add_path('data', os.path.join(self.paths['base'], 'data'))
+            self.__add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
+            self.__add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
+            self.__add_path('output', os.path.join(self.params.paths['output'], self.name))
 
         '''
         Each target has reference files associated with it.
