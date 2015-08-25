@@ -499,8 +499,8 @@ class ParamManager:
         """
 
         value = None
-        if key in self.opts:
-            value = self.opts[key]
+        if key in self.__opts:
+            value = self.__opts[key]
         elif required:
             utils.log(self.loggingName, 'error', 'Missing required parameter %s, exiting.' % key)
             sys.exit(1)
