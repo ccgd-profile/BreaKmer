@@ -465,6 +465,7 @@ class SVBreakpoints:
         """Determine if the stored realignment results are on multiple chromosomes - indicating a
         translocation event.
         """
+        print 'Rearr chrs', self.chrs, len(set(self.chrs))
         if len(set(self.chrs)) == 1:
             return False
         else:
