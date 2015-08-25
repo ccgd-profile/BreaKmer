@@ -63,17 +63,17 @@ class ParamManager:
             None
         """
 
-        self.__parse_opts(arguments)  # Parse the config file and command line parameters into the self.opts dictionary.
+        self.__parse_opts(arguments)  # Parse the config file and command line parameters into the self.__opts dictionary.
         utils.setup_logger(self.get_param('analysis_dir', True), 'breakmer')  # Create logging object.
         utils.log(self.__loggingName, 'info', 'Setting up parameters')
 
         # Log all parameters passed in, warn for poor paths
-        for paramKey, paramValue in self.opts.items():
+        for paramKey, paramValue in self.__opts.items():
             utils.log(self.__loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
         self.__set_targets()
-        self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir'])) # Path to target reference sequence fast files.
-        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0] # Path to genome fasta file.
+        self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.__opts['reference_data_dir']))  # Path to target reference sequence fast files.
+        self.__opts['reference_fasta_dir'] = os.path.split(self.__opts['reference_fasta'])[0]  # Path to genome fasta file.
 
         # If only preseting the reference data no need to continue.
         if self.fncCmd == 'prepare_reference_data':
@@ -81,10 +81,10 @@ class ParamManager:
             return
 
         # Setup directories
-        self.paths['analysis'] = os.path.abspath(os.path.normpath(self.opts['analysis_dir']))
+        self.paths['analysis'] = os.path.abspath(os.path.normpath(self.__opts['analysis_dir']))
         self.paths['output'] = os.path.join(self.paths['analysis'], 'output')
-        if 'targets_dir' in self.opts:
-            self.paths['targets'] = os.path.abspath(os.path.normpath(self.opts['targets_dir']))
+        if 'targets_dir' in self.__opts:
+            self.paths['targets'] = os.path.abspath(os.path.normpath(self.__opts['targets_dir']))
         else:
             self.paths['targets'] = os.path.join(self.paths['analysis'], 'targets')
 
@@ -104,7 +104,7 @@ class ParamManager:
         self.__set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
 
     def __parse_opts(self, arguments):
-        """Formats input parameters into self.opts dictionary. It first parses the configuration file and stores the key, values in the self.opts dictionary.
+        """Formats input parameters into self.__opts dictionary. It first parses the configuration file and stores the key, values in the self.__opts dictionary.
         It will exit with an error if the configuration file does not have lines in the proper format (i.e., key=value).
         It will also iterate through the command line paramaters and store the keys and values in the opts dictionary.
         A final check is performed for the required parameters depending on the parameters that have been passed.
@@ -198,10 +198,10 @@ class ParamManager:
         fq_f.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
         fq_f.close()
 
-        cleanFq, rc = utils.test_cutadapt(testFq, self.opts['cutadapt'], self.opts['cutadapt_config_file'])
+        cleanFq, rc = utils.test_cutadapt(testFq, self.__opts['cutadapt'], self.__opts['cutadapt_config_file'])
         if cleanFq:
             utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
-            jfish_prgm, rc = utils.test_jellyfish(self.opts['jellyfish'], cleanFq, testDir)
+            jfish_prgm, rc = utils.test_jellyfish(self.__opts['jellyfish'], cleanFq, testDir)
             if rc != 0:
                 utils.log(self.loggingName, 'error', '%s unable to run successfully, exit code %s. Check installation and correct version.' % (jfish_prgm, str(rc)))
                 sys.exit(1)
@@ -235,13 +235,13 @@ class ParamManager:
             if read.is_read1 and proper_map:  # Sample the read and store the insert size to its partner.
                 readIter += 1
                 insertSizes.append(abs(read.tlen))
-                if 'readLen' not in self.opts:  # Store the read length if it is not already stored.
-                    self.opts['readLen'] = read.rlen
+                if 'readLen' not in self.__opts:  # Store the read length if it is not already stored.
+                    self.__opts['readLen'] = read.rlen
             if readIter == nSampleReads:
                 break
         isMedian = utils.median(insertSizes)
         isSD = utils.stddev(utils.remove_outliers(insertSizes))  # Calculate the standard deviation of the sample read pairs insert sizes.
-        self.opts['insertsize_thresh'] = isMedian + (5 * isSD)  # Set the threshold to be median + 5 standard deviations.
+        self.__opts['insertsize_thresh'] = isMedian + (5 * isSD)  # Set the threshold to be median + 5 standard deviations.
 
     def __set_targets(self):
         """Parse the targets bed file and store them in a dictionary. Limit to a gene
@@ -279,7 +279,7 @@ class ParamManager:
         utils.log(self.loggingName, 'info', 'Parsing target list')
         # TODO: Check to make sure there aren't duplicate genes.
         cur_region = ['', []]
-        for target in open(self.opts['targets_bed_file'], 'rU'):
+        for target in open(self.__opts['targets_bed_file'], 'rU'):
             # Each target is formatted like a bed, chr bp1 bp2 name
             target = target.strip()
             targetsplit = target.split()
@@ -347,50 +347,50 @@ class ParamManager:
         elif self.fncCmd == 'start_blat_server':
             port = self.get_param('blat_port')
             hostname = self.get_param('blat_hostname')
-            self.opts['blat_hostname'] = hostname
-            self.opts['blat_port'] = port
+            self.__opts['blat_hostname'] = hostname
+            self.__opts['blat_port'] = port
             # If no port is specified for this function, then randomly select a port between 8000-9500.
             if port is None:
-                self.opts['blat_port'] = random.randint(8000, 9500)
-                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.opts['blat_port'], self.opts['blat_hostname']))    
+                self.__opts['blat_port'] = random.randint(8000, 9500)
+                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))    
         elif self.fncCmd == 'run':  # Start the blat server if it is not already running.
             if not self.get_param('start_blat_server'):  # Start blat server option is not set. Check that one is running, if not, start it.
                 port = self.get_param('blat_port')
                 hostname = self.get_param('blat_hostname')
-                self.opts['blat_hostname'] = hostname
+                self.__opts['blat_hostname'] = hostname
                 if port is None:  # No port is specified for a server that should be running. It will start a new one on a random numbered port.
                     utils.log(self.loggingName, 'debug', 'BreaKmer set to run and start_blat_server is set to False, but no blat server port is specified. Setting blat port to random value and starting blat server.')
-                    self.opts['blat_port'] = random.randint(8000, 9500)
+                    self.__opts['blat_port'] = random.randint(8000, 9500)
                 else:  # Blat server is already running in this instance. Check it to make sure with a test blat.
-                    self.opts['blat_port'] = int(self.get_param('blat_port'))
+                    self.__opts['blat_port'] = int(self.get_param('blat_port'))
                     if self.__check_blat_server():  # Both port and hostname are specified. Check that the server is running.
                         return
                     else:
-                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.opts['blat_port'], self.opts['blat_hostname']))
+                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.__opts['blat_port'], self.__opts['blat_hostname']))
 
-        self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0]
-        ref_fasta_name = os.path.basename(self.opts['reference_fasta']).split(".fa")[0]
+        self.__opts['reference_fasta_dir'] = os.path.split(self.__opts['reference_fasta'])[0]
+        ref_fasta_name = os.path.basename(self.__opts['reference_fasta']).split(".fa")[0]
 
-        self.opts['blat_2bit'] = os.path.join(self.opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
-        if not os.path.exists(self.opts['blat_2bit']):  # Create 2bit file to use for running the blat server.
+        self.__opts['blat_2bit'] = os.path.join(self.__opts['reference_fasta_dir'], ref_fasta_name + ".2bit")
+        if not os.path.exists(self.__opts['blat_2bit']):  # Create 2bit file to use for running the blat server.
             utils.log(self.loggingName, 'info', 'Creating 2bit from %s reference fasta' % ref_fasta_name + ".fa")
             curdir = os.getcwd()
-            os.chdir(self.opts['reference_fasta_dir'])
-            cmd = '%s %s %s' % (self.opts['fatotwobit'], ref_fasta_name + ".fa", ref_fasta_name + ".2bit")
+            os.chdir(self.__opts['reference_fasta_dir'])
+            cmd = '%s %s %s' % (self.__opts['fatotwobit'], ref_fasta_name + ".fa", ref_fasta_name + ".2bit")
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             output, errors = p.communicate()
             os.chdir(curdir)
 
         curdir = os.getcwd()
-        os.chdir(self.opts['reference_fasta_dir'])
+        os.chdir(self.__opts['reference_fasta_dir'])
         # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
-        self.opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.opts['blat_port'])
-        cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_hostname'], self.opts['blat_port'], ref_fasta_name + ".2bit")
+        self.__opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.__opts['blat_port'])
+        cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.__opts['gfserver'], self.__opts['gfserver_log'], self.__opts['blat_hostname'], self.__opts['blat_port'], ref_fasta_name + ".2bit")
         utils.log(self.loggingName, 'info', "Starting gfServer %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         start_time = time.time()
 
-        while not utils.server_ready(self.opts['gfserver_log']):  # Wait for the blat server to initiate. Timeout if it has not started in 15 minutes.
+        while not utils.server_ready(self.__opts['gfserver_log']):  # Wait for the blat server to initiate. Timeout if it has not started in 15 minutes.
             new_time = time.time()
             wait_time = new_time - start_time
             if wait_time > 1000:
@@ -434,12 +434,12 @@ class ParamManager:
         """
 
         try:
-            int(self.opts['kmer_size'])
+            int(self.__opts['kmer_size'])
         except ValueError:
             print 'The specified kmer size is not an integer.'
             raise
         else:
-            return int(self.opts['kmer_size'])
+            return int(self.__opts['kmer_size'])
 
     def get_min_segment_length(self, type):
         """Get the input segment length limit. This should be an integer value.
@@ -453,12 +453,12 @@ class ParamManager:
         """
 
         try:
-            int(self.opts[type + '_minseg_len'])
+            int(self.__opts[type + '_minseg_len'])
         except ValueError:
             print 'The specified minsegment limit is not an integer.'
             raise
         else:
-            return int(self.opts[type + '_minseg_len'])
+            return int(self.__opts[type + '_minseg_len'])
 
     def get_sr_thresh(self, type):
         """Get the threshold input for the number of reads that are required to
@@ -475,14 +475,14 @@ class ParamManager:
             return min(self.get_sr_thresh('trl'), self.get_sr_thresh('rearrangement'), self.get_sr_thresh('indel'))
         else:
             if type == 'trl':
-                return int(self.opts['trl_sr_thresh'])
+                return int(self.__opts['trl_sr_thresh'])
             elif type == 'rearrangement':
-                return int(self.opts['rearr_sr_thresh'])
+                return int(self.__opts['rearr_sr_thresh'])
             elif type == 'indel':
-                return int(self.opts['indel_sr_thresh'])
+                return int(self.__opts['indel_sr_thresh'])
 
     def get_param(self, key, required=False):
-        """Get the parameter value in the self.opts dictionary.
+        """Get the parameter value in the self.__opts dictionary.
 
         If the parameer is required to be availale, then exit the program
         and throw an error.
@@ -507,7 +507,7 @@ class ParamManager:
         return value
 
     def set_param(self, key, value):
-        """Set the parameter value in the self.opts dict.
+        """Set the parameter value in the self.__opts dict.
 
         Args:
             key (str):              Dictionary key
@@ -518,4 +518,4 @@ class ParamManager:
             None
         """
 
-        self.opts[key] = value
+        self.__opts[key] = value
