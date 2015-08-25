@@ -378,10 +378,8 @@ class TargetManager:
         loggingName (str):          Module name for logging file purposes.
         name (str):                 Target name specified in the input bed file.
         chrom (str):                Chromosome ID as specified in the input bed file.
-        start (int):                Genomic position for the target region (minimum value
-                                    among all intervals).
-        end (int):                  Genomic position for the target region (maximum value among
-                                    all intervals).
+        start (int):                Genomic position for the target region (minimum value among all intervals).
+        end (int):                  Genomic position for the target region (maximum value among all intervals).
         paths (dict):               Contains the analysis paths for this target.
         files (dict):               Dicionary containing paths to file names needed for analysis.
         read_len (int):             Length of a single read.

@@ -547,18 +547,10 @@ class SVEvent:
         self.blatResults = []
         self.blatResultsSorted = []
         self.annotated = False
-        # self.sample_bam = sample_bam
         self.qlen = 0
         self.nmatch = 0
         self.in_target = False
         self.contig = contig
-        # self.query_region = query_region
-        # self.contig_seq = contig_vals[0]
-        # self.contig_rcounts = contig_vals[1]
-        # self.contig_id = contig_vals[2]
-        # self.contig_reads = contig_vals[3]
-        # self.nkmers = contig_vals[4]
-        # self.contig_kmer_locs = contig_vals[5]
         self.valid = True
         self.in_rep = True
         self.querySize = None
@@ -629,13 +621,37 @@ class SVEvent:
         self.resultValues.format_rearrangement_values(self)
 
     def get_disc_read_count(self):
-        """
+        """Get the number of discordant read pairs that contribute evidence to a detected translocation
+        event between a target region and another genomic location.
+
+        It calls the check_inter_readcounts in breakmer.processor.bam_handler module with the target and
+        'other' breakpoints.
+
+        Args:
+            None
+        Returns:
+            discReadCount (int): The number of discordant read pairs that support a detected event with
+                                 specified breakpoints.
+
+        This needs to deal with the situation below where the are more than two realignment results.
+        In this general scenario, the target breakpoint nearest the non-target breakpoint needs to be
+        passed to the check_inter_readcounts function.
+
+        Example 1:
+        [blatResult1 (target), blatResult2 (non-target)] - most common scenario.
+
+        Example 2:
+        [blatResult1 (target), blatResult2 (target), blatResult3 (non-target)]
         """
 
         # Sort the blat results by lowest to highest query coordinate value.
         querySortedResults = sorted(self.blatResults, key=lambda x: x[0])
-        inTarget = [None, None]
-        targetBrkpt = None
+        inTarget = [None, None]  # Tracks the in_target state of the last realignment result and the breakpoint of that result.
+        targetBrkpt = None  # Track the target breakpoint nearest the non-target breakpoint result.
+
+        # Iterate through realignment results starting with the lowest query coordinate hit.
+        # If there is a state change for in_target status between the last result and the current result,
+        # then store the in_target breakpoint.
         for resultTuple in querySortedResults:
             result = resultTuple[1]
             if inTarget[0] is None:
@@ -645,6 +661,7 @@ class SVEvent:
                     targetBrkpt = inTarget[1]
                     if result.in_target:
                         targetBrkpt = result.tstart()
+                    break
 
         varReads = self.contig.get_var_reads('sv')
         # discReads = self.contig.get_disc_reads()
@@ -654,19 +671,6 @@ class SVEvent:
         targetBrkptValues = self.get_genomic_brkpts()['target'][0]
         discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], targetBrkpt, self.get_genomic_brkpts()['other'])
         return discReadCount
-        # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
-        # for otherBrkpts in self.get_genomic_brkpts()['other']:
-        #     nonTargetBrkptChr = otherBrkpts[0]
-        #     nonTargetBrkptBps = otherBrkpts[1:]
-        #     print 'Non-target brkpts', nonTargetBrkptBps
-        #     for nonTargetBrkptBp in nonTargetBrkptBps:
-        #         if nonTargetBrkptChr in discReads:
-        #             for p1, p2 in discReads[nonTargetBrkptChr]:
-        #                 d1 = abs(p1 - targetBrkptBp)
-        #                 d2 = abs(p2 - nonTargetBrkptBp)
-        #                 if d1 <= 1000 and d2 <= 1000:
-        #                     discReadCount += 1
-        # return discReadCount
 
     def get_brkpt_str(self, targetKey=None):
         """ """
