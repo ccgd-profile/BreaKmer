@@ -438,6 +438,13 @@ class TargetManager:
 
         return (self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
 
+    @property
+    def fnc(self):
+        """Return the function of the program.
+        """
+
+        return self.__params.fncCmd
+
     def __setup(self):
         """Setup the TargetManager object with the input params.
 

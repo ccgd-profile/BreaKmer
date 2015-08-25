@@ -76,7 +76,7 @@ def analyze_targets(targetList):
         print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
-        if targetRegion.params.fncCmd == 'prepare_reference_data':  # Stop here if only preparing ref data.
+        if targetRegion.fnc == 'prepare_reference_data':  # Stop here if only preparing ref data.
             continue
         if not targetRegion.find_sv_reads():  # No SV reads extracted. Exiting.
             continue
