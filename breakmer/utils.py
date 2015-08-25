@@ -508,7 +508,7 @@ def get_fastq_reads(fn, sv_reads):
     """
     """
 
-    read_len = 0
+    # read_len = 0
     filtered_fq_fn = fn.split(".fastq")[0] + "_filtered.fastq"
     filt_fq = open(filtered_fq_fn, 'w')
     fq_recs = {}
@@ -545,13 +545,13 @@ def get_fastq_reads(fn, sv_reads):
         if add:
             filt_fq.write(header + "\n" + seq + "\n+\n" + qual + "\n")
             fr = fq_read(header, seq, qual, indel_meta)
-            read_len = max(read_len, len(fr.seq))
+            # read_len = max(read_len, len(fr.seq))
             seq = fr.seq
             if seq not in fq_recs:
                 fq_recs[seq] = []
             fq_recs[seq].append(fr)
     filt_fq.close()
-    return filtered_fq_fn, fq_recs, read_len
+    return filtered_fq_fn, fq_recs
 
 
 def get_fastq_reads_old(fn, sv_reads):

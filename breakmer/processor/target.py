@@ -223,7 +223,7 @@ class Variation:
         output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.__loggingName)
 
         self.setup_cleaned_reads(sampleType)
-        self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
+        self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType] = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
         self.clear_sv_reads(sampleType)
         check = self.continue_analysis_check(sampleType)
         utils.log(self.__loggingName, 'info', 'Clean reads exist %s' % check)
@@ -395,7 +395,7 @@ class TargetManager:
         self.end = None
         self.paths = {}
         self.files = {}
-        self.read_len = params.get_param('readLen')
+        self.readLen = int(params.get_param('readLen'))
         self.variation = Variation(params)
         self.regionBuffer = 200
         self.__setup()
@@ -604,7 +604,7 @@ class TargetManager:
             None
         """
 
-        self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len, self.files['target_ref_fn'])
+        self.variation.compare_kmers(self.paths['kmers'], self.name, self.readLen, self.files['target_ref_fn'])
 
     def resolve_sv(self):
         """Perform operations on the contig object that was generated from the split reads in the target.
