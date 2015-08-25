@@ -129,10 +129,10 @@ class ParamManager:
                 sys.exit(1)
             else:
                 key, value = linesplit
-                self.opts[key] = value # Store key-value in opts dictionary.
+                self.__opts[key] = value  # Store key-value in opts dictionary.
 
         for opt in vars(arguments):
-            self.opts[opt] = vars(arguments)[opt]
+            self.__opts[opt] = vars(arguments)[opt]
 
         # Sanity check for required params
         # Required when preset_ref_data = True:
