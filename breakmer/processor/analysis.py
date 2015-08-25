@@ -191,14 +191,14 @@ class RunTracker:
         targetNames = self.__params.get_target_names()
         targetNames.sort()
         for targetName in targetNames:
-            target = target.TargetManager(targetName, self.__params)
+            targetManager = target.TargetManager(targetName, self.__params)
             if multiprocs:
                 if len(trgtGroup) == ntargetsPerGroup:
                     trgtGroups.append(trgtGroup)
                     trgtGroup = []
-                trgtGroup.append(target)
+                trgtGroup.append(targetManager)
             else:
-                trgtGroups.append(target)
+                trgtGroups.append(targetManager)
 
         # For the last batch, check if there are less elements than each group has
         # if so, then extend the last group to add them, otherwise create a new batch.
