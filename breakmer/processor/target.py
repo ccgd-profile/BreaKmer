@@ -528,7 +528,7 @@ class TargetManager:
             if fn.find("forward") == -1:
                 direction = "reverse"
             utils.log(self.__loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
-            utils.extract_refseq_fa(self.get_values(), self.paths['ref_data'], self.__params.opts['reference_fasta'], direction, fn)
+            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.__params.opts['reference_fasta'], direction, fn)
 
         blastn = self.__params.get_param('blast')
         if blastn is not None:
@@ -621,7 +621,7 @@ class TargetManager:
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
             utils.log(self.__loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
-            contig.set_meta_information(contigId, self.__params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
+            contig.set_meta_information(contigId, self.__params, self.values, self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
             contig.query_ref(self.files['target_ref_fn'])
             contig.make_calls()
             if contig.svEventResult:
