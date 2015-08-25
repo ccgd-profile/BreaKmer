@@ -65,11 +65,11 @@ class ParamManager:
 
         self.__parse_opts(arguments)  # Parse the config file and command line parameters into the self.opts dictionary.
         utils.setup_logger(self.get_param('analysis_dir', True), 'breakmer')  # Create logging object.
-        utils.log(self.loggingName, 'info', 'Setting up parameters')
+        utils.log(self.__loggingName, 'info', 'Setting up parameters')
 
         # Log all parameters passed in, warn for poor paths
         for paramKey, paramValue in self.opts.items():
-            utils.log(self.loggingName, 'info', '%s = %s' % (paramKey, paramValue))
+            utils.log(self.__loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
         self.__set_targets()
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir'])) # Path to target reference sequence fast files.
