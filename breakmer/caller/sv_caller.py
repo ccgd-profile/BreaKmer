@@ -631,13 +631,25 @@ class SVEvent:
     def get_disc_read_count(self):
         """
         """
+        querySortedResults = sorted(self.blatResults, key=lambda x: x[0])
+        in_target = [None, None]
+        trgtBp = None
+        for result in querySortedResults:
+            if in_target[0] is None:
+                in_target = [result.in_target, result.tend()]
+            else:
+                if result.in_target != in_target[0]:
+                    trgtBp = in_target[1]
+                    if result.in_target:
+                        trgtBp = result.tstart()
+
         varReads = self.contig.get_var_reads('sv')
         # discReads = self.contig.get_disc_reads()
         discReadCount = 0
         # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
         print self.get_genomic_brkpts()['target'][0]
-        targetBrkptChr, targetBrkptBp = self.get_genomic_brkpts()['target'][0]
-        discReadCount = varReads.check_inter_readcounts(targetBrkptChr, targetBrkptBp, self.get_genomic_brkpts()['other'])
+        targetBrkptValues = self.get_genomic_brkpts()['target'][0]
+        discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], trgtBp, self.get_genomic_brkpts()['other'])
         return discReadCount
         # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         # for otherBrkpts in self.get_genomic_brkpts()['other']:
