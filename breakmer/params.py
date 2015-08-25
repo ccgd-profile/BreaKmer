@@ -48,7 +48,7 @@ class ParamManager:
         self.targets = {}
         self.paths = {}
         self.fncCmd = fncCmd
-        self.set_params(arguments)
+        self.__set_params(arguments)
 
     def __set_params(self, arguments):
         """Organize and format all input parameters into class variables to access

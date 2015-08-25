@@ -534,7 +534,7 @@ class TargetManager:
         if blastn is not None:
             # Check if blast db files are available for each target.
             if not os.path.isfile(self.files['target_ref_fn'][0] + '.nin'):
-                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')  # Create blast db for querying.
+                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')  # Create blast db
                 cmd = "%s -in %s -dbtype 'nucl' -out %s" % (makedb, self.files['target_ref_fn'][0], self.files['target_ref_fn'][0])
                 utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
