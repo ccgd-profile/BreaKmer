@@ -631,17 +631,20 @@ class SVEvent:
     def get_disc_read_count(self):
         """
         """
+
+        # Sort the blat results by lowest to highest query coordinate value.
         querySortedResults = sorted(self.blatResults, key=lambda x: x[0])
-        in_target = [None, None]
-        trgtBp = None
-        for result in querySortedResults:
-            if in_target[0] is None:
-                in_target = [result.in_target, result.tend()]
+        inTarget = [None, None]
+        targetBrkpt = None
+        for resultTuple in querySortedResults:
+            result = resultTuple[1]
+            if inTarget[0] is None:
+                inTarget = [result.in_target, result.tend()]
             else:
-                if result.in_target != in_target[0]:
-                    trgtBp = in_target[1]
+                if result.in_target != inTarget[0]:
+                    targetBrkpt = inTarget[1]
                     if result.in_target:
-                        trgtBp = result.tstart()
+                        targetBrkpt = result.tstart()
 
         varReads = self.contig.get_var_reads('sv')
         # discReads = self.contig.get_disc_reads()
@@ -649,7 +652,7 @@ class SVEvent:
         # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
         print self.get_genomic_brkpts()['target'][0]
         targetBrkptValues = self.get_genomic_brkpts()['target'][0]
-        discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], trgtBp, self.get_genomic_brkpts()['other'])
+        discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], targetBrkpt, self.get_genomic_brkpts()['other'])
         return discReadCount
         # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
         # for otherBrkpts in self.get_genomic_brkpts()['other']:
@@ -927,7 +930,6 @@ class ContigCaller:
         if self.svEvent and self.svEvent.result_valid():
             return True
         else:
-            # print 'svs result invalid'
             self.svEvent = None
             return False
 
