@@ -105,7 +105,7 @@ class RunTracker:
     def __init__(self, params):
         self.__params = params
         self.__results = []
-        self.__targets = {}
+        # self.__targets = {}
         self.__loggingName = 'breakmer.processor.analysis'
 
     def run(self):
@@ -191,14 +191,14 @@ class RunTracker:
         targetNames = self.__params.get_target_names()
         targetNames.sort()
         for targetName in targetNames:
-            self.targets[targetName] = target.TargetManager(targetName, self.__params)
+            target = target.TargetManager(targetName, self.__params)
             if multiprocs:
                 if len(trgtGroup) == ntargetsPerGroup:
                     trgtGroups.append(trgtGroup)
                     trgtGroup = []
-                trgtGroup.append(self.targets[targetName])
+                trgtGroup.append(target)
             else:
-                trgtGroups.append(self.targets[targetName])
+                trgtGroups.append(target)
 
         # For the last batch, check if there are less elements than each group has
         # if so, then extend the last group to add them, otherwise create a new batch.
@@ -214,7 +214,7 @@ class RunTracker:
         Header is written at the top of the file if option to remove is not
         specified.
 
-        The output files are: 
+        The output files are:
             <output_dir>/<analysis_name>_svs.out
             <output_dir>/<analysis_name>_discreads.out
 
