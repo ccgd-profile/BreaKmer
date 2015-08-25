@@ -127,7 +127,7 @@ class RunTracker:
             print 'Server started!'
             return
 
-        targetAnalysisList = self.create_targets()
+        targetAnalysisList = self.__create_targets()
 
         aggResults = {'contigs': [], 'discreads': []}  # Buffer the formatted output strings for each target to write out in batch.
         nprocs = int(self.__params.get_param('nprocs'))
@@ -149,7 +149,7 @@ class RunTracker:
             print 'Reference data setup!'
             return
 
-        self.write_aggregated_output(aggResults)
+        self.__write_aggregated_output(aggResults)
         utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
         if not self.__params.get_param('keep_blat_server'):  # Keep blat server is specified.
