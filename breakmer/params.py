@@ -42,15 +42,15 @@ class ParamManager:
             None
         """
 
-        self.opts = {}
+        self.__loggingName = 'breakmer.params'
+        self.__opts = {}
         self.filter = None
         self.targets = {}
         self.paths = {}
-        self.loggingName = 'breakmer.params'
         self.fncCmd = fncCmd
         self.set_params(arguments)
 
-    def set_params(self, arguments):
+    def __set_params(self, arguments):
         """Organize and format all input parameters into class variables to access
         later. Specific instances of parameters are checked and set. All parameters that are
         set are logged. The target objects are set along with the paths.
@@ -103,7 +103,7 @@ class ParamManager:
         self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)  # Instantiate the filter class.
         self.set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
 
-    def parse_opts(self, arguments):
+    def __parse_opts(self, arguments):
         """Formats input parameters into self.opts dictionary. It first parses the configuration file and stores the key, values in the self.opts dictionary.
         It will exit with an error if the configuration file does not have lines in the proper format (i.e., key=value).
         It will also iterate through the command line paramaters and store the keys and values in the opts dictionary.
@@ -157,7 +157,7 @@ class ParamManager:
         for req in required:
             self.get_param(req, True)
 
-    def check_binaries(self):
+    def __check_binaries(self):
         """Check the required binaries.
         There are six required binaries to perform the complete analysis (blat, gfserver,
         gfclient, fatotwobit, cutadapt, jellyfish). Each binary is checked whether
@@ -212,7 +212,7 @@ class ParamManager:
             sys.exit(1)
         shutil.rmtree(testDir)  # Remove the test directory.
 
-    def set_insertsize_thresh(self):
+    def __set_insertsize_thresh(self):
         """Store the insert sizes for a small number of "properly mapped" reads
         and determine an upperbound cutoff to use to determine discordantly mapped read
         pairs.
@@ -243,7 +243,7 @@ class ParamManager:
         isSD = utils.stddev(utils.remove_outliers(insertSizes))  # Calculate the standard deviation of the sample read pairs insert sizes.
         self.opts['insertsize_thresh'] = isMedian + (5 * isSD)  # Set the threshold to be median + 5 standard deviations.
 
-    def set_targets(self):
+    def __set_targets(self):
         """Parse the targets bed file and store them in a dictionary. Limit to a gene
         list if input.
 
@@ -297,28 +297,7 @@ class ParamManager:
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
         utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
 
-    def get_target_names(self):
-        """Get a list of target names.
-
-        Args:
-            None
-        Returns:
-            A list of the target region names that were defined from the input bed file (list).
-        """
-
-        return self.targets.keys()
-
-    def get_target_intervals(self, targetName):
-        """Return the stored intervals for a specific target.
-        """
-
-        if targetName in self.targets:
-            return self.targets[targetName]
-        else:
-            utils.log(self.loggingName, 'debug', '%s target name not in target dictionary.' % targetName)
-            sys.exit(1)
-
-    def check_blat_server(self):
+    def __check_blat_server(self):
         """Run a test query on the specified blat server to make sure it is running. 
 
         Args:
@@ -421,6 +400,27 @@ class ParamManager:
             time.sleep(60)
         utils.log(self.loggingName, 'info', 'Server ready!')
         os.chdir(curdir)
+
+    def get_target_names(self):
+        """Get a list of target names.
+
+        Args:
+            None
+        Returns:
+            A list of the target region names that were defined from the input bed file (list).
+        """
+
+        return self.targets.keys()
+
+    def get_target_intervals(self, targetName):
+        """Return the stored intervals for a specific target.
+        """
+
+        if targetName in self.targets:
+            return self.targets[targetName]
+        else:
+            utils.log(self.loggingName, 'debug', '%s target name not in target dictionary.' % targetName)
+            sys.exit(1)
 
     def get_kmer_size(self):
         """Get the input kmer size. This should be an integer value.

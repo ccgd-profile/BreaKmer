@@ -62,9 +62,9 @@ class Variation:
     """
 
     def __init__(self, params):
-        self.params = params
+        self.__loggingName = 'breakmer.processor.target'
+        self.__params = params
         self.var_reads = {}
-        # self.sv_reads = None
         self.cleaned_read_recs = None
         self.kmer_clusters = []
         self.kmers = {}
@@ -73,7 +73,6 @@ class Variation:
         self.svs = {}
         self.discReadClusters = {}
         self.discReadFormatted = []
-        self.loggingName = 'breakmer.processor.target'
 
     def setup_cleaned_reads(self, sampleType):
         """Initiate the cleaned_read_recs dictionary for sample or normal data.
@@ -388,8 +387,8 @@ class TargetManager:
     """
 
     def __init__(self, name, params):
-        self.loggingName = 'breakmer.processor.target'
-        self.params = params
+        self.__loggingName = 'breakmer.processor.target'
+        self.__params = params
         self.name = name
         self.chrom = None
         self.start = None
@@ -401,8 +400,48 @@ class TargetManager:
         self.regionBuffer = 200
         self.setup()
 
-    def setup(self):
+    @property
+    def start(self):
+        return self.__start
+
+    @start.setter
+    def start(self, start):
+        if self.__start is None:
+            self.__start = int(start)
+        elif start < self.__start:
+            self.__start = int(start)
+
+    @property
+    def end(self):
+        return self.__end
+
+    @end.setter
+    def start(self, end):
+        if self.__end is None:
+            self.__end = int(end)
+        elif end < self.__end:
+            self.__end = int(end)
+
+    @property
+    def chrom(self):
+        return self._chrom
+
+    @chrom.setter
+    def chrom(self, chrom):
+        if self.__chrom is None:
+            self.__chrom = chrom
+
+    @property
+    def values(self):
+        """Return the defined features of this target
+        """
+
+        return (self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
+
+    def __setup(self):
         """Setup the TargetManager object with the input params.
+
+        Define the location (chrom, start, end), file paths, directory paths, and name.
 
         Args:
             None
@@ -415,17 +454,7 @@ class TargetManager:
         # is the maximum end of the intervals.
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
-            chrom, start, end = values[0], int(values[1]), int(values[2])
-            if not self.chrom:
-                self.chrom = chrom
-            if not self.start:
-                self.start = start
-            if not self.end:
-                self.end = end
-            if start < self.start:
-                self.start = start
-            if end > self.end:
-                self.end = end
+            self.chrom, self.start, self.end = values[0], int(values[1]), int(values[2])
 
         # Create the proper paths for the target analysis.
         '''
@@ -463,7 +492,7 @@ class TargetManager:
         ref_fa_marker_f.close()
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
-    def add_path(self, key, path):
+    def __add_path(self, key, path):
         """Utility function to create all the output directories.
 
         Args:
@@ -505,8 +534,7 @@ class TargetManager:
         if blastn is not None:
             # Check if blast db files are available for each target.
             if not os.path.isfile(self.files['target_ref_fn'][0] + '.nin'):
-                # Use makedb
-                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')
+                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')  # Create blast db for querying.
                 cmd = "%s -in %s -dbtype 'nucl' -out %s" % (makedb, self.files['target_ref_fn'][0], self.files['target_ref_fn'][0])
                 utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -621,12 +649,6 @@ class TargetManager:
 
         return self.params.targets[self.name]
 
-    def get_values(self):
-        """Return the defined features of this target
-        """
-
-        return(self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
-
     def get_sv_reads(self, type):
         """ """
 
@@ -662,7 +684,6 @@ class TargetManager:
         return self.variation.results
 
     def get_formatted_output(self):
-        """
-        """
+        """ """
 
         return self.variation.get_formatted_output()

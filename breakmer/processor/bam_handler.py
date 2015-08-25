@@ -540,23 +540,16 @@ class VariantReadTracker:
     def __init__(self, bamFile, insertSizeThresh):
         self.pair_indices = {}
         self.valid = []
-        # self.disc = {}
         self.discReadTracker = discReads(insertSizeThresh)
         self.unmapped = {}
         self.unmapped_keep = []
-        # self.inv = []
-        # self.td = []
-        # self.other = []
         self.sv = {}
         self.bam = bamFile
 
     def check_read(self, read):
         """ """
-        # proper_map = False
-        # overlapping_reads = False
         proper_map, overlapping_reads = pe_meta(read)
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
-            # self.add_discordant_pe(read)
             self.discReadTracker.add_read_pair(self.bam, read)
 
         self.valid.append((read, proper_map, overlapping_reads))
