@@ -528,7 +528,7 @@ class TargetManager:
             if fn.find("forward") == -1:
                 direction = "reverse"
             utils.log(self.__loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
-            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.__params.opts['reference_fasta'], direction, fn)
+            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.__params.get_param('reference_fasta'), direction, fn)
 
         blastn = self.__params.get_param('blast')
         if blastn is not None:
@@ -591,7 +591,7 @@ class TargetManager:
         bamType = 'sample'
         if sampleType == 'norm':
             bamType = 'normal'
-        bamFile = self.__params.opts['%s_bam_file' % bamType]
+        bamFile = self.__params.get_param('%s_bam_file' % bamType)
         utils.log(self.__loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.variation.files['%s_fq' % sampleType]))
         self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
 
