@@ -63,7 +63,7 @@ class ParamManager:
             None
         """
 
-        self.parse_opts(arguments)  # Parse the config file and command line parameters into the self.opts dictionary.
+        self.__parse_opts(arguments)  # Parse the config file and command line parameters into the self.opts dictionary.
         utils.setup_logger(self.get_param('analysis_dir', True), 'breakmer')  # Create logging object.
         utils.log(self.loggingName, 'info', 'Setting up parameters')
 
@@ -71,7 +71,7 @@ class ParamManager:
         for paramKey, paramValue in self.opts.items():
             utils.log(self.loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
-        self.set_targets()
+        self.__set_targets()
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir'])) # Path to target reference sequence fast files.
         self.opts['reference_fasta_dir'] = os.path.split(self.opts['reference_fasta'])[0] # Path to genome fasta file.
 
@@ -99,9 +99,9 @@ class ParamManager:
             utils.log(self.loggingName, 'info', 'Starting the blat server.')
             return
 
-        self.check_binaries()  # Check if Jellyfish and Cutadapt work.
+        self.__check_binaries()  # Check if Jellyfish and Cutadapt work.
         self.filter = resultfilter.ResultFilter(self.get_param('filterList'), self)  # Instantiate the filter class.
-        self.set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
+        self.__set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
 
     def __parse_opts(self, arguments):
         """Formats input parameters into self.opts dictionary. It first parses the configuration file and stores the key, values in the self.opts dictionary.
@@ -180,8 +180,8 @@ class ParamManager:
                 binaryCheck = utils.which(binaryPath)  # Use the binary path specified in the config file.
             else:
                 binaryCheck = utils.which(binary)  # Perform a which on the server to see if the binary is in the path.
-                self.set_param(binary, binaryCheck) # Store the result in the opts dictionary.
-            if not binaryCheck: # No binary found or specified. Throw an error.
+                self.set_param(binary, binaryCheck)  # Store the result in the opts dictionary.
+            if not binaryCheck:  # No binary found or specified. Throw an error.
                 print 'Missing path/executable for', binary
                 utils.log(self.loggingName, 'error', 'Missing path/executable for %s' % binary)
                 sys.exit(1)
@@ -363,7 +363,7 @@ class ParamManager:
                     self.opts['blat_port'] = random.randint(8000, 9500)
                 else:  # Blat server is already running in this instance. Check it to make sure with a test blat.
                     self.opts['blat_port'] = int(self.get_param('blat_port'))
-                    if self.check_blat_server():  # Both port and hostname are specified. Check that the server is running.
+                    if self.__check_blat_server():  # Both port and hostname are specified. Check that the server is running.
                         return
                     else:
                         utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.opts['blat_port'], self.opts['blat_hostname']))
