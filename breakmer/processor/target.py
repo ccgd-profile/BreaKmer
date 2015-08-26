@@ -532,7 +532,7 @@ class TargetManager:
         # Write reference fasta file if needed.
         for i in range(len(self.files['target_ref_fn'])):
             fn = self.files['target_ref_fn'][i]
-            direction = "forward" if fn..find("forward") != -1 else "reverse"
+            direction = "forward" if fn.find("forward") != -1 else "reverse"
             utils.log(self.loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
             utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.params.get_param('reference_fasta'), direction, fn)
 
