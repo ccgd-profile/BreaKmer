@@ -212,7 +212,7 @@ class ParamManager:
         fqFile.write("@H91H9ADXX140327:1:2102:19465:23489/2\nCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATC\n+\n69EEEFBAFBFABCCFFBEFFFDDEEHHDGH@FEFEFCAGGCDEEEBGEEBCGBCCGDFGCBBECFFEBDCDCEDEEEAABCCAEC@>>BB?@C\n@H91H9ADXX140327:2:2212:12198:89759/2\nTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGA\n+\nA@C>C;?AB@BBACDBCAABBDDCDDCDEFCDDDDEBBFCEABCGDBDEEF>@GBGCEDGEDGCGFECAACFEGDFFGFECB@DFGCBABFAECEB?=")
         fqFile.close()
 
-        cleanFq, returnCode = utils.test_cutadapt(testFq, self.get_param('cutadapt'), self.get_param('cutadapt_config_file')
+        cleanFq, returnCode = utils.test_cutadapt(testFq, self.get_param('cutadapt'), self.get_param('cutadapt_config_file'))
         if cleanFq:
             utils.log(self.loggingName, 'info', 'Test cutadapt ran successfully')
             jfish_prgm, rc = utils.test_jellyfish(self.get_param('jellyfish'), cleanFq, testDir)
