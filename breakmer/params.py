@@ -384,10 +384,10 @@ class ParamManager:
         refFastaName = os.path.basename(self.get_param('reference_fasta').split(".fa")[0])
 
         self.set_param('blat_2bit', os.path.join(self.get_param('reference_fasta_dir'), refFastaName + ".2bit"))
-        if not os.path.exists(self.get_param('blat_2bit'):  # Create 2bit file to use for running the blat server.
+        if not os.path.exists(self.get_param('blat_2bit')):  # Create 2bit file to use for running the blat server.
             utils.log(self.loggingName, 'info', 'Creating 2bit from %s reference fasta' % refFastaName + ".fa")
             curdir = os.getcwd()
-            os.chdir(self.get_param('reference_fasta_dir')
+            os.chdir(self.get_param('reference_fasta_dir'))
             cmd = '%s %s %s' % (self.get_param('fatotwobit'), refFastaName + ".fa", refFastaName + ".2bit")
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             output, errors = p.communicate()
@@ -396,12 +396,12 @@ class ParamManager:
         curdir = os.getcwd()
         os.chdir(self.get_param('reference_fasta_dir')
         # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
-        self.opts['gfserver_log'] = os.path.join(self.paths['output'], 'gfserver_%d.log' % self.get_param('blat_port'))
+        self.set_param('gfserver_log', os.path.join(self.paths['output'], 'gfserver_%d.log' % self.get_param('blat_port')))
         cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.get_param('gfserver'), self.get_param('gfserver_log'), self.get_param('blat_hostname'), self.get_param('blat_port'), refFastaName + ".2bit")
         utils.log(self.loggingName, 'info', "Starting gfServer %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         startTime = time.time()
-        while not utils.server_ready(self.get_param('gfserver_log'):  # Wait for the blat server to initiate. Timeout if it has not started in 15 minutes.
+        while not utils.server_ready(self.get_param('gfserver_log')):  # Wait for the blat server to initiate. Timeout if it has not started in 15 minutes.
             newTime = time.time()
             waitTime = newTime - startTime
             if waitTime > 1000:
