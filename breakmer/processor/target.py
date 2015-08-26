@@ -142,11 +142,13 @@ class Variation:
             None
         """
 
-        # Get VariantReadTracker object from bam_handler module.
+        # Get VariantReadTracker object from bam_handler module and extract reads.
         self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer, self.params.get_param('insertsize_thresh'))
         # Iterate through reads that are not perfectly aligned and store necessary information for downstream analysis.
+        # Store the reads with softclipped sequences that are high quality in VariantReadTracker.sv dictionary.
         self.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), start, end)
 
+        # Write the bam, fastq, and fasta files with the extracted reads.
         svBam = None
         if sampleType == 'sv':
             svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=pysam.Samfile(bamFile, 'rb'))
@@ -157,6 +159,7 @@ class Variation:
         readsFq.close()
         scFa.close()
 
+        # Close the bam file, sort and index.
         if sampleType == 'sv':
             svBam.close()
             utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
@@ -198,11 +201,11 @@ class Variation:
         the cleaned reads into new files.
 
         Cutadapt is run to trim the adapter sequences from the sequence reads to
-        remove any 'noise' that bogs down the assembly process or analysis. The
-        cleaned reads output from cutadapt are then re-processed to determine
-        if the soft-clipped sequences were trimmed off or not to further filter
-        out reads. The soft-clipped sequences that remain are stored and a new
-        fastq file is written.
+        remove any 'noise' from the assembly process. The cleaned reads output 
+        from cutadapt are then reprocessed to determine if the softclipped sequences 
+        were trimmed off or not to further filter out reads. 
+
+        The softclipped sequences that remain are stored and a new fastq file is written.
 
         Args:
             dataPath (str):   The path to the data files for this target.
