@@ -445,7 +445,7 @@ class ParamManager:
         """
 
         try:
-            int(self.get_param('kmer_size')
+            int(self.get_param('kmer_size'))
         except ValueError:
             print 'The specified kmer size is not an integer.'
             raise
