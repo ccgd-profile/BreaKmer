@@ -50,13 +50,12 @@ class Variation:
         loggingName (str):          Module name for logging file purposes.
         var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects (breakmer.process.bam_handler.VariantReadTracker).
         cleaned_read_recs (dict):   Dictionary containing the cleaned reads.
-        start (int):                Genomic position for the target region (minimum value among all intervals).
-        end (int):                  Genomic position for the target region (maximum value among all intervals).
-        paths (dict):               Contains the analysis paths for this target.
         files (dict):               Dicionary containing paths to file names needed for analysis.
-        read_len (int):             Length of a single read.
-        variation (Variation):      Stores data for variants identified within the target.
-        regionBuffer (int):         Base pairs to add or subtract from the target region end and start locations.
+        kmer_clusters (list):
+        kmers (dict):
+        results (list):
+        discReadClusters (dict):
+        discReadFormatted (list):
     """
 
     def __init__(self, params):
@@ -68,7 +67,7 @@ class Variation:
         self.kmers = {}
         self.results = []
         self.files = {}
-        self.svs = {}
+        # self.svs = {}
         self.discReadClusters = {}
         self.discReadFormatted = []
 

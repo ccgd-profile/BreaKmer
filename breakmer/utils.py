@@ -605,23 +605,23 @@ def get_fastq_reads_old(fn, sv_reads):
     return fq_recs, read_len
 
 
-def load_kmers(fns, kmers):
-    """
-    """
+# def load_kmers(fns, kmers):
+#     """
+#     """
 
-    if not fns:
-            return kmers
+#     if not fns:
+#             return kmers
 
-    fns = fns.split(",")
-    for fn in fns:
-            f = open(fn, 'rU')
-            for line in f.readlines():
-                    line = line.strip()
-                    mer, count = line.split()
-                    if mer not in kmers:
-                            kmers[mer] = 0
-                    kmers[mer] += int(count)
-    return kmers
+#     fns = fns.split(",")
+#     for fn in fns:
+#             f = open(fn, 'rU')
+#             for line in f.readlines():
+#                     line = line.strip()
+#                     mer, count = line.split()
+#                     if mer not in kmers:
+#                             kmers[mer] = 0
+#                     kmers[mer] += int(count)
+#     return kmers
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
