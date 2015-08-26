@@ -378,7 +378,7 @@ class ParamManager:
                     if self.check_blat_server():  # Both port and hostname are specified. Check that the server is running.
                         return
                     else:
-                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.get_param('blat_port'), self.get_param('blat_hostname'))
+                        utils.log(self.loggingName, 'debug', 'Blat server with port %d and hostname %s did not pass test query. Please check specifications.' % (self.get_param('blat_port'), self.get_param('blat_hostname')))
 
         self.set_param('reference_fasta_dir', os.path.split(self.get_param('reference_fasta')[0]))
         refFastaName = os.path.basename(self.get_param('reference_fasta').split(".fa")[0])
