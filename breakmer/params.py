@@ -394,7 +394,7 @@ class ParamManager:
             os.chdir(curdir)
 
         curdir = os.getcwd()
-        os.chdir(self.get_param('reference_fasta_dir')
+        os.chdir(self.get_param('reference_fasta_dir'))
         # Start gfServer, change dir to 2bit file, gfServer start localhost 8000 .2bit
         self.set_param('gfserver_log', os.path.join(self.paths['output'], 'gfserver_%d.log' % self.get_param('blat_port')))
         cmd = '%s -canStop -log=%s -stepSize=5 start %s %d %s &' % (self.get_param('gfserver'), self.get_param('gfserver_log'), self.get_param('blat_hostname'), self.get_param('blat_port'), refFastaName + ".2bit")
