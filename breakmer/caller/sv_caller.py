@@ -411,7 +411,7 @@ class SVBreakpoints:
         """Determine if the stored realignment results are on multiple chromosomes - indicating a
         translocation event.
         """
-        print 'Rearr chrs', self.chrs, len(set(self.chrs))
+        # print 'Rearr chrs', self.chrs, len(set(self.chrs))
         if len(set(self.chrs)) == 1:
             return False
         else:
@@ -600,7 +600,7 @@ class SVEvent:
 
         varReads = self.contig.get_var_reads('sv')
         discReadCount = 0
-        print self.get_genomic_brkpts()['target'][0]
+        # print self.get_genomic_brkpts()['target'][0]
         targetBrkptValues = self.get_genomic_brkpts()['target'][0]
         discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], targetBrkpt, self.get_genomic_brkpts()['other'])
         return discReadCount
