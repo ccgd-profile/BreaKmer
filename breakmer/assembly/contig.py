@@ -944,7 +944,8 @@ class Contig:
         """Return file path to contig results"""
         return self.meta.path
 
-    def get_id(self):
+    @property
+    def id(self):
         """Return contig id"""
         return self.meta.id
 

@@ -204,7 +204,7 @@ class SVResult:
             self.description = svEvent.rearrDesc
             self.filterValues.set_rearr_values(svEvent)
         self.targetName = svEvent.contig.get_target_name()
-        self.fullBreakpointStr = svEvent.get_brkpt_str()
+        self.fullBreakpointStr = svEvent.get_brkpt_str('all')
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         self.splitReadCount = svEvent.get_splitread_count()
@@ -345,7 +345,7 @@ class SVBreakpoints:
         # Standard format for storing genomic breakpoints for outputtting rsults
         # List of tuples containing ('chr#', bp1, bp2), there will be multiple bp for deletions and
         # only one bp for insertions or rearrangment breakpoints.
-        self.genomicBrkpts = {'target': [], 'other': []}
+        self.genomicBrkpts = {'target': [], 'other': [], 'all': []}
 
     def update_brkpt_info(self, br, i, last_iter):
         """Infer the breakpoint information from the blat result for rearrangments.
@@ -368,6 +368,7 @@ class SVBreakpoints:
                 tbrkpt = [ts]
                 filt_rep_start = br.filter_reps_edges[0]
             self.genomicBrkpts[targetKey].append((chrom, tbrkpt[0]))
+            self.genomicBrkpts['all'].append((chrom, tbrkpt[0]))
             br.set_sv_brkpt((chrom, tbrkpt[0]), 'rearrangement', targetKey)
         elif last_iter:
             self.q[1][-1][2] = qe - self.q[1][-1][0]
@@ -378,6 +379,7 @@ class SVBreakpoints:
                 tbrkpt = [te]
                 filt_rep_start = br.filter_reps_edges[1]
             self.genomicBrkpts[targetKey].append((chrom, tbrkpt[0]))
+            self.genomicBrkpts['all'].append((chrom, tbrkpt[0]))
             br.set_sv_brkpt((chrom, tbrkpt[0]), 'rearrangement', targetKey)
         else:
             self.q[1][-1][2] = qe - self.q[1][-1][1]
@@ -385,13 +387,15 @@ class SVBreakpoints:
             self.q[1].append([qe, qe - qs, None])
             self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
-            self.genomicBrkpts[targetKey].append((chrom, ts, te))
             if br.strand == '+':
                 br.set_sv_brkpt((chrom, ts, te), 'rearrangement', targetKey)
+                self.genomicBrkpts[targetKey].append((chrom, ts, te))
+                self.genomicBrkpts['all'].append((chrom, ts, te))
             if br.strand == '-':
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
                 self.genomicBrkpts[targetKey].append((chrom, te, ts))
+                self.genomicBrkpts['all'].append((chrom, te, ts))
                 br.set_sv_brkpt((chrom, te, ts), 'rearrangement', targetKey)
 
         self.brkptStr.append('chr' + str(br.get_seq_name('ref')) + ":" + "-".join([str(x) for x in tbrkpt]))
