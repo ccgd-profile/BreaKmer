@@ -1,0 +1,505 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Breakmer by a-bioinformatician</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Breakmer</h1>
+        <p>A method to identify structural variation from sequencing data in target regions</p>
+
+        <p class="view"><a href="https://github.com/a-bioinformatician/BreaKmer">View the Project on GitHub <small>a-bioinformatician/BreaKmer</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/a-bioinformatician/BreaKmer/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/a-bioinformatician/BreaKmer/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/a-bioinformatician/BreaKmer">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="breakmer" class="anchor" href="#breakmer" aria-hidden="true"><span class="octicon octicon-link"></span></a>BreaKmer</h1>
+
+<p>A method to identify genomic structural variation in target regions/genes from reference-aligned high-throughput sequence data. It uses a “kmer” strategy to assemble misaligned sequence reads for predicting insertions, deletions, inversions, tandem duplications, and translocations at base-pair resolution.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>The following are required for installation:</p>
+
+<ul>
+<li><a href="https://www.python.org/download/releases/2.7">Python 2.7</a></li>
+</ul>
+
+<p>Download the python scripts and run the command:</p>
+
+<pre><code>python setup.py install
+</code></pre>
+
+<p>Use appropriate commands for installing locally:</p>
+
+<pre><code>python setup.py install --user
+</code></pre>
+
+<p>Using the setup.py script for installation should setup the required python module dependencies for appropriate usage. If the install script is not used, the two modules need to be downloaded and installed if not already:</p>
+
+<ul>
+<li><a href="http://biopython.org/wiki/Main_Page">Biopython 1.62</a></li>
+<li><a href="https://code.google.com/p/pysam/">Pysam 0.6</a></li>
+</ul>
+
+<p>BreaKmer has currently been installed and tested on:</p>
+
+<ul>
+<li>64bit linux using CentOS release 5.5 and python2.7.2 </li>
+<li>64bit linux using Ubuntu release 14.04 and python2.7.6</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>List the available command line parameters.</p>
+
+<pre><code>python &lt;PATH_TO_BREAKMER_DIR&gt;/breakmer.py -h
+</code></pre>
+
+<p>Analyze all the target genes specified in the targets bed file.</p>
+
+<pre><code>python &lt;path to breakmer scripts&gt;/breakmer.py &lt;options&gt; &lt;path to breakmer configuration file&gt;
+</code></pre>
+
+<p>Analyze a subset of genes specified in a file.</p>
+
+<pre><code>python &lt;path to breakmer scripts&gt;/breakmer.py -g &lt;file containing list of target genes to analyze&gt; &lt;path to breakmer configuration file&gt;
+</code></pre>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<h3>
+<a id="programs" class="anchor" href="#programs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Programs</h3>
+
+<ul>
+<li>BLAT standalone and server binaries (<a href="http://hgdownload.cse.ucsc.edu/admin/exe/">blat, gfServer, gfClient, faToTwoBit</a>).
+
+<ul>
+<li>Re-alignment to reference sequence.</li>
+<li>Versions tested :
+
+<ul>
+<li>standalone BLAT v35x1</li>
+<li>gfServer v35x1</li>
+<li>gfClient v35x1</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="https://code.google.com/p/cutadapt/">Cutadapt</a>
+
+<ul>
+<li>Trims adapter sequence from aligned reads.</li>
+<li>v1.5 tested</li>
+</ul>
+</li>
+<li>
+<a href="http://www.cbcb.umd.edu/software/jellyfish">Jellyfish</a>
+
+<ul>
+<li>Generating kmers.</li>
+<li>
+<a href="http://www.cbcb.umd.edu/software/jellyfish/jellyfish-1.1.11.tar.gz">v1.1.11</a> tested</li>
+<li>
+<a href="http://www.genome.umd.edu/jellyfish.html">v2.1.3</a> tested</li>
+</ul>
+</li>
+</ul>
+
+<p>When these programs are installed, the paths to the binaries can be either be specified in the BreaKmer configuration file or put in the path (e.g. export PATH=$PATH:/path/to/binary).</p>
+
+<h3>
+<a id="sequence-data" class="anchor" href="#sequence-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sequence data</h3>
+
+<ul>
+<li>Sample bam file
+
+<ul>
+<li>BreaKmer requires sequence reads that have been aligned to a reference sequence in a binary alignment format (BAM). The alignment program must soft-clip or trim reads that can be partially aligned to the reference sequence (e.g., bwa, bowtie, novoalign, mosaik). The partially aligned reads and unmapped reads with mapped mates (paired-end data) are used to build contigs with potential SV. This bam file is required as input in the configuration file as the "sample_bam_file".
+
+<ul>
+<li>The BAM files need to be sorted and indexed, with the indexed files in the same directory as the BAM file.</li>
+<li>There are a number of aligners that soft-clip partially aligned sequences, bwa and Bowtie are two well-known tools:
+
+<ul>
+<li><a href="http://bio-bwa.sourceforge.net/">bwa</a></li>
+<li><a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a></li>
+</ul>
+</li>
+<li>It is also useful to mark duplicate reads prior to using BreaKmer, as these will inflate read counts for identified variants.
+
+<ul>
+<li><a href="http://picard.sourceforge.net/command-line-overview.shtml#MarkDuplicates">Picard MarkDuplicates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Normal bam file
+
+<ul>
+<li>A matched normal with similarly targeted sequencing data as the sample can be input to help filter germline events. The sequences in the normal bam file are processed for each target in a similar manner to the sample sequences and used to further filter our kmers. This is an optional input in the configuration file as "normal_bam_file".</li>
+</ul>
+</li>
+</ul>
+
+<h3>
+<a id="reference-data" class="anchor" href="#reference-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference data</h3>
+
+<ul>
+<li>Reference fasta file 
+
+<ul>
+<li>BreaKmer makes use of reference sequence data throughout the program. The genomic reference sequence used to align the short sequence reads is required as an input in the configuration file as the "reference_fasta".</li>
+<li>Format: single fasta file with chromosome number/id as names (i.e. '&gt;1', '&gt;2', '&gt;3')</li>
+<li>Hg19 fasta files can be downloaded from UCSC Genome Browser(<a href="http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/">http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/</a>)</li>
+<li>This file should be placed in a writeable directory. A 2bit file will be generated from this file to start the blat server.</li>
+</ul>
+</li>
+<li>Reference genome annotation 
+
+<ul>
+<li>This file is used by BreaKmer to annotate the locations of the breakpoints identified and the genes involved. This is required as input in the configuration file as the "gene_annotation_file".</li>
+<li>Format: tab delimited file containing a row for each RefSeq transcript with multiple columns describing the coding coordinates of the transcript.</li>
+<li>Hg19 RefSeq annotation file can be downloaded from UCSC Genome Browser <a href="http://genome.ucsc.edu/cgi-bin/hgTables?command=start">Table Browser</a> using assembly: Feb. 2009 (GRCh37/hg19), group: Genes and Gene Predictions, track: RefSeq Genes, table: refGene</li>
+</ul>
+</li>
+<li>Repeat mask bed file 
+
+<ul>
+<li>This file is used by BreaKmer to determine whether breakpoints and identified variants lie within simple and low-complexity repeat regions that have been annotated. This is an optional input in the configuration file as "repeat_mask_file".</li>
+<li>Format: tab delimited file containing the coordinates for the various repeat regions.</li>
+<li>Hg19 repeat regions bed file can be downloaded from UCSC Genome Browser <a href="http://genome.ucsc.edu/cgi-bin/hgTables?command=start">Table Browser</a> with group = Repeats, track = RepeatMasker, table = rmsk, output format: BED</li>
+</ul>
+</li>
+<li>Alternate reference assembly sequences 
+
+<ul>
+<li>This is an optional input in the configuration file as the "alternate_fastas". These are used to supplement the required reference fasta sequence and helpful for removing indel variants that exist in the reference sequence but not either of the alternate assembly sequences.</li>
+<li>Format: single fasta file with chromosome number/id as names (i.e. '&gt;1', '&gt;2', '&gt;3')</li>
+<li>There are two alternate assemblies available for human, <a href="http://www.ncbi.nlm.nih.gov/assembly/GCF_000306695.2/">CHM1_1.1</a> and <a href="http://www.ncbi.nlm.nih.gov/assembly/GCA_000002125.2">HuRef</a>.</li>
+</ul>
+</li>
+</ul>
+
+<h3>
+<a id="other-files" class="anchor" href="#other-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other files</h3>
+
+<ul>
+<li>Target regions bed file
+
+<ul>
+<li>The target regions sequenced need to be specified in a bed file for BreaKmer to know the coordinates of the regions sequenced and which are to be analyzed. This is a required input in the configuration file as the "targets_bed_file".</li>
+<li>Format: a tab delimited file containing the chromosome, start, end, HUGO gene name, and exon/intron feature of a tile region of the genome. The tiled regions should not be overlapping.</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="configuration-file" class="anchor" href="#configuration-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration file</h2>
+
+<ul>
+<li>A template configuration file with all the options is available, breakmer.cfg.</li>
+<li>Below lists and describes the parameters that can be used in the configuration file. Do not keep commented text (i.e., #Required parameters) in the configuration file.</li>
+<li>Note that the paths to the six required program binaries (Cutadapt, Jellyfish, blat, gfServer, and gfClient) can be set in the configuration file
+or these binaries can be included in the users path (e.g., for linux users: export PATH=$PATH:/path/to/binary).</li>
+<li>Use full paths (e.g., /home/bob and not ~/)</li>
+</ul>
+
+<pre><code># Required parameters
+analysis_name=&lt;sample_id, string value that all the output files will contain&gt;
+targets_bed_file=&lt;path to bed file containing locations of target regions&gt;
+sample_bam_file=&lt;path to sorted and indexed sample bam file&gt;
+analysis_dir=&lt;path to analysis directory, location where analysis and final output files will be located&gt;
+reference_data_dir=&lt;path to where reference files will/are stored for each of the targeted genes analyzed&gt; 
+cutadapt=&lt;path to cutadapt binary v1.5, i.e. /usr/bin/cutadapt-1.5/bin/cutadapt&gt; 
+cutadapt_config_file=&lt;path to cutadapt configuration file&gt; 
+jellyfish=&lt;path to Jellyfish binary, i.e. /usr/bin/jellyfish&gt;
+blat=&lt;path to blat binary, i.e. /usr/bin/blat&gt;
+gfserver=&lt;path to gfServer binary, i.e. /usr/bin/gfServer&gt;
+gfclient=&lt;path to gfClient binary, i.e. /usr/bin/gfClient&gt;
+fatotwobit=&lt;path to faToTwoBit binary, i.e. /usr/bin/faToTwoBit&gt;
+reference_fasta=&lt;path to whole genome reference fasta file, one file with all records&gt;
+gene_annotation_file=&lt;path to gene annotation file, e.g., ucsc_hg19_refgene.txt&gt;
+kmer_size=15
+
+# Optional parameters
+other_regions_file=&lt;path to bed file containing coordinates for targeted unannotated cluster regions if they exist, such as IGH, IGK&gt; 
+normal_bam_file=&lt;path to normal bam file, can be used to filter germline events with matched-normal sample&gt;
+alternate_fastas=&lt;comma delimited list of the paths to alternate fasta files, such as HuRef or CHM1&gt;
+repeat_mask_file=&lt;path to ucsc_hg19_rmsk.bed&gt; # Only used when available, useful for helping filtering events in simple repeat regions.
+</code></pre>
+
+<h2>
+<a id="input-file-formats" class="anchor" href="#input-file-formats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Input file formats</h2>
+
+<ul>
+<li>targets_bed_file = tab-delimited file with columns: chr, start, end, region_name, feature_name
+
+<ul>
+<li>Each "target" region can contain multiple subregions that are annotated by feature type (i.e., intron, exon). These feature types are used in the filtering steps with certain parameters. Note that the minimum coordinate and maximum coordinate +/- 200 bp are used as the boundaries for each region (e.g., 45003745-200,45008540+200 for B2M).</li>
+</ul>
+</li>
+</ul>
+
+<pre><code>15      45003745        45003811        B2M     exon
+15      45007621        45007922        B2M     exon
+15      45008527        45008540        B2M     exon
+</code></pre>
+
+<ul>
+<li>other_regions_file = tab-delimited file with columns: chr, start, end, region_name
+
+<ul>
+<li>This file is intended to cover regions that are not annotated in the annotation file. These are useful for cluster regions that are not well annotated in the annotation files.</li>
+</ul>
+</li>
+</ul>
+
+<pre><code>14   22090057        23021075        TRA
+7    141998851       142510972       TRB
+</code></pre>
+
+<ul>
+<li>cutadapt_config_file = each row corresponds to a parameter for cutadapt (see cutadapt.cfg example file or cutadapt documentation)
+
+<ul>
+<li>The file provided is intended for data generated using the paired-end Illumina TruSeq library.</li>
+<li>Many of the Illumina library sequences have been annotated <a href="https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors">elsewhere</a>.</li>
+</ul>
+</li>
+<li>reference_fasta = genome reference fasta formatted file containing all the chromosome reference sequences that were used to initially align the data.
+
+<ul>
+<li>This shold be a single file containing all the sequences.</li>
+</ul>
+</li>
+<li>gene_annotation = Annotation file containing the location of reference genes. These can be downloaded from UCSC Genome Browser, (i.e., <a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/">hg19 refGene table</a>)</li>
+</ul>
+
+<pre><code>#bin    name    chrom   strand  txStart txEnd   cdsStart        cdsEnd  exonCount       exonStarts      exonEnds        score   name2   cdsStartStat    cdsEndStat      exonFrames
+0       NM_032291       chr1    +       66999824        67210768        67000041        67208778        25      66999824,67091529,67098752,67101626,67105459,67108492,67109226,67126195,67
+133212,67136677,67137626,67138963,67142686,67145360,67147551,67154830,67155872,67161116,67184976,67194946,67199430,67205017,67206340,67206954,67208755, 67000051,67091593,67098777,6710169
+8,67105516,67108547,67109402,67126207,67133224,67136702,67137678,67139049,67142779,67145435,67148052,67154958,67155999,67161176,67185088,67195102,67199563,67205220,67206405,67207119,6721
+0768,   0       SGIP1   cmpl    cmpl    0,1,2,0,0,0,1,0,0,0,1,2,1,1,1,1,0,1,1,2,2,0,2,1,1,
+1       NM_032785       chr1    -       48998526        50489626        48999844        50489468        14      48998526,49000561,49005313,49052675,49056504,49100164,49119008,49128823,49
+332862,49511255,49711441,50162984,50317067,50489434,    48999965,49000588,49005410,49052838,49056657,49100276,49119123,49128913,49332902,49511472,49711536,50163109,50317190,50489626,  0AGBL4    cmpl    cmpl    2,2,1,0,0,2,1,1,0,2,0,1,1,0,
+1       NM_018090       chr1    +       16767166        16786584        16767256        16785385        8       16767166,16770126,16774364,16774554,16775587,16778332,16782312,16785336, 16767348,16770227,16774469,16774636,16775696,16778510,16782388,16786584, 0       NECAP2  cmpl    cmpl    0,2,1,1,2,0,1,2,
+1       NM_052998       chr1    +       33546713        33585995        33547850        33585783        12      33546713,33546988,33547201,33547778,33549554,33557650,33558882,33560148,33
+562307,33563667,33583502,33585644,      33546895,33547109,33547413,33547955,33549728,33557823,33559017,33560314,33562470,33563780,33583717,33585995,    0       ADC     cmpl    cmpl    -1
+,-1,-1,0,0,0,2,2,0,1,0,2,
+...
+</code></pre>
+
+<ul>
+<li>repeat_mask_file = A BED formatted file containing repeat masked regions. These can be found from <a href="http://genome.ucsc.edu/cgi-bin/hgTables?hgsid=370921603_HSUaLVPi7dEbtDqCy5W1ANaqC7Fz">UCSC Genome Table Browser</a> with group = Repeats, track = RepeatMasker, table = rmsk</li>
+</ul>
+
+<pre><code>chr1    16777160        16777470        AluSp   2147    +
+chr1    25165800        25166089        AluY    2626    -
+chr1    33553606        33554646        L2b     626     +
+chr1    50330063        50332153        L1PA10  12545   +
+chr1    58720067        58720973        L1PA2   8050    -
+chr1    75496180        75498100        L1MB7   10586   +
+chr1    83886030        83886750        ERVL-E-int      980     -
+chr1    100662895       100663391       L2a     1422    -
+chr1    117440426       117440514       L1ME1   532     +
+chr1    117440494       117441457       L1ME1   4025    +
+...
+</code></pre>
+
+<h2>
+<a id="breakmer-parameters" class="anchor" href="#breakmer-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>BreaKmer parameters</h2>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-l, --log_level</td>
+<td>Logging level</td>
+<td>Debug</td>
+</tr>
+<tr>
+<td>-a, --keep_repeat_regions</td>
+<td>Keep indels in repeat regions. No repeat mask bed file required if set.</td>
+<td>False</td>
+</tr>
+<tr>
+<td>-p, --preset_ref_data</td>
+<td>Preset all the reference dta for all the target regions before running analysis.</td>
+<td>False</td>
+</tr>
+<tr>
+<td>-s, --indel_size</td>
+<td>Indel size filter</td>
+<td>15</td>
+</tr>
+<tr>
+<td>-c, --trl_sr_thresh</td>
+<td>Assembled read support threshold for translocations</td>
+<td>2</td>
+</tr>
+<tr>
+<td>-d, --indel_sr_thresh</td>
+<td>Assembled read support threshold for indels</td>
+<td>5</td>
+</tr>
+<tr>
+<td>-r, --rearr_sr_thresh</td>
+<td>Assembled read support threshold for inversions and tandem duplications</td>
+<td>3</td>
+</tr>
+<tr>
+<td>-g, --gene_list</td>
+<td>File containing a list of target region names to consider for analysis. Names must match targets_bed_file region names.</td>
+<td>None</td>
+</tr>
+<tr>
+<td>-k, --keep_intron_vars</td>
+<td>Keep indels or rearrangements with breakpoints in intron regions</td>
+<td>False</td>
+</tr>
+<tr>
+<td>-v, --var_filter</td>
+<td>Variant types to report (all, indel, trl, rearrangement)</td>
+<td>all</td>
+</tr>
+<tr>
+<td>-m, --rearr_min_seg_len</td>
+<td>Threshold for minimum segment length to be rearranged</td>
+<td>30</td>
+</tr>
+<tr>
+<td>-n, --trl_min_seg_len</td>
+<td>Threshold for minimum length of a translocation segment</td>
+<td>25</td>
+</tr>
+<tr>
+<td>-t, --align_thresh</td>
+<td>Threshold for minimum read alignment for assembly</td>
+<td>.90</td>
+</tr>
+<tr>
+<td>-z, --no_output_header</td>
+<td>Suppress headers on output files.</td>
+<td>False</td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li>kmer_size = option to change the length of the kmer size used (default = 15 bp).</li>
+</ul>
+
+<h2>
+<a id="output-files-and-formats" class="anchor" href="#output-files-and-formats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Output files and formats</h2>
+
+<ul>
+<li>While the program is running a log file analysis_dir/log.txt will continually be updated with information regarding the status of the analysis. </li>
+</ul>
+
+<h3>
+<a id="logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h3>
+
+<ul>
+<li>While the program is running a log file will (&lt;analysis_directory&gt;/log.txt) continually be updated with information regarding the status of the analysis.</li>
+</ul>
+
+<h3>
+<a id="target-data" class="anchor" href="#target-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Target data</h3>
+
+<ul>
+<li>For each region analyzed, a directory with the name of the region, as specified in the targets bed file, is created in a 'targets' directory (&lt;analysis_dir&gt;/targets).</li>
+<li>Each target directory contains 'data', 'contigs', and 'kmers' directories. 
+
+<ul>
+<li>data - Contains the extracted reference-aligned reads from this target region as well as the kmers created from these extracted reads.</li>
+<li>contigs - Contains a directory for each contig that was created, which contains the contig sequence in fasta format, and the reads used to assemble the contig in fastq format. The BLAT results are also stored with formatted output if a SV was called.</li>
+<li>kmers - Contains the file with all the sample-only kmer sequences and how many reads in which it was contained as well as a file with the kmers and read ids that were used in assembling each contig.</li>
+</ul>
+</li>
+</ul>
+
+<h3>
+<a id="final-output" class="anchor" href="#final-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final output</h3>
+
+<ul>
+<li>When the program completes, the final output files are directed into a directory labeled 'output' within the specified analysis directory. </li>
+<li>Summary file
+
+<ul>
+<li>A summary file labeled &lt;analysis_name&gt;_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.</li>
+</ul>
+</li>
+<li>Output for each SV type are put in respective tab-delimited files, labeled &lt;analysis_name&gt;_&lt;indel,trl,inv_rearrangement,td_rearrangement&gt;_svs.out
+
+<ul>
+<li>The columns are:
+
+<ul>
+<li>genes - Gene/Target names</li>
+<li>target_breakpoints - Target genomic breakpoints (chr:pos) (I/D for indels)</li>
+<li>align_cigar - Re-alignment CIGAR string</li>
+<li>mismatches - Number of re-alignment mismatches</li>
+<li>strands - Strand(s) of contig when realigned</li>
+<li>rep_overlap_segment_len - Percentage re-alignment overlaps with repeat regions:length of aligned BLAT segments</li>
+<li>sv_type - Type of variation detected</li>
+<li>split_read_count - Number of assembled reads that cover the assembled contig at the inferred breakpoint</li>
+<li>nkmers - Number of kmers used to assemble the contig</li>
+<li>disc_read_count - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).</li>
+<li>breakpoint_coverages - Number of non-duplicated reads aligned at the inferred breakpoint locations.</li>
+<li>contig_id - Contig ID</li>
+<li>contig_seq - Contig sequence. </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Each target gene in which a SV was detected has a separate output directory (&lt;analysis_dir&gt;/output/&lt;target_name&gt;) containing formatted output specific to the target and the related reference-aligned sequence reads for the contigs that contain the structural variants detected in BAM format.</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/a-bioinformatician">a-bioinformatician</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-67035322-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
