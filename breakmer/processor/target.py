@@ -432,9 +432,13 @@ class TargetManager(object):
             chrom, start, end = values[0], int(values[1]), int(values[2])
             if chrom is None:
                 self.chrom = chrom
-            if start < self.start:
+            if self.start is None:
                 self.start = start
-            if end > self.end:
+            elif start < self.start:
+                self.start = start
+            if self.end is None:
+                self.end = end
+            elif end > self.end:
                 self.end = end
         print 'Region coords', self.chrom, self.start, self.end
 
