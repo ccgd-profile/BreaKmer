@@ -391,9 +391,9 @@ class TargetManager(object):
         self.loggingName = 'breakmer.processor.target'
         self.params = params
         self.name = name
-        self._chrom = None
-        self._start = None
-        self._end = None
+        self.chrom = None
+        self.start = None
+        self.end = None
         self.paths = {}
         self.files = {}
         self.readLen = int(params.get_param('readLen'))
