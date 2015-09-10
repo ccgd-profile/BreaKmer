@@ -128,7 +128,7 @@ class ResultFilter:
 
         # Determine the uniqueness of the realignment.
         svFilterValues = svEvent.resultValues.filterValues
-        uniqRealignment = svFilterValues.resultMeanHitFreq < 2
+        uniqRealignment = svFilterValues.realignFreq < 2
         indelSize = svFilterValues.maxEventSize >= indelSizeThresh
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('indel')
         minFlankMatches = min(svFilterValues.flankMatchPercents) >= 10.0
@@ -196,11 +196,11 @@ class ResultFilter:
         minSeqComplexity = svFilterValues.seqComplexity >= 25.0
         startEndMissingQueryCoverage = svFilterValues.startEndMissingQueryCoverage <= 5.0
         maxSegmentOverlap = svFilterValues.maxSegmentOverlap < 5
-        maxMeanHitFreq = svFilterValues.maxMeanCoverage < 10
+        maxAlignFreq = max(svFilterValues.realignFreq) < 10
         nReadStrands = svFilterValues.nReadStrands > 1
         maxRealignmentGaps = svFilterValues.maxRealignmentGap
 
-        strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxMeanHitFreq, nReadStrands]
+        strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxAlignFreq, nReadStrands]
         nStrictFiltersFail = 0
         for f in strictFilter:
             if not f:
