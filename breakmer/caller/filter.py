@@ -139,7 +139,7 @@ class ResultFilter:
             utils.log(self.loggingName, 'debug', 'Indel filtered due to non-unique realignment (%r), less than input size threshold (%r), low coverage at breakpoints (%r), or contig edge realignment not long enough (%r), filter status set to True.' % (uniqRealignment, indelSize, brkptCoverages, minFlankMatches))
             filterReasons = []
             if not uniqRealignment:
-                filterReasons.append('Non-unique realignment (%d) > 2' % svFilterValues.resultMeanHitFreq)
+                filterReasons.append('Non-unique realignment (%d) > 2' % svFilterValues.realignFreq)
             if not indelSize:
                 filterReasons.append('Max indel size (%d) is less than %d' % (svFilterValues.maxEventSize, indelSizeThresh))
             if not brkptCoverages:
