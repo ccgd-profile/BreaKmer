@@ -223,15 +223,21 @@ class RunTracker:
 
         # Write assembled contig-based SV calls.
         if len(aggregateResults['contigs']) > 0:
-            resultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
-            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.get_param('analysis_name'), resultFn))
-            resultFile = open(resultFn, 'w')
+            allResultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.all.out")
+            filteredResultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results files: all result - %s and filtered results - %s' % (self.params.get_param('analysis_name'), allResultFn, filteredResultFn))
+            allResultFile = open(allResultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
-                    resultFile.write(headerStr + '\n')
-                resultFile.write(formattedResultValuesStr + '\n')
-            resultFile.close()
+                    allResultFile.write(headerStr + '\n')
+                    filteredResultFile.write(headerStr + '\n')
+                allResultFile.write(formattedResultValuesStr + '\n')
+                resultValues = formattedResultStr.split('\t')
+                if resultValues[-2] != "True":
+                    filteredResultFile.write(formattedResultValuesStr + '\n')
+            allResultFile.close()
+            filteredResultFile.close()
 
         # Write discordant read pair clusters.
         if len(aggregateResults['discreads']) > 0:
