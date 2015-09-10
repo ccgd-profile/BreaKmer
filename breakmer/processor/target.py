@@ -368,7 +368,7 @@ class Variation:
             self.discReadFormatted.append((headerStr, outStr))
 
 
-class TargetManager:
+class TargetManager(object):
     """TargetManager class handles all the high level information relating to a target.
     The analysis is peformed at the target level, so this class contains all the information
     necessary to perform an independent analysis.
