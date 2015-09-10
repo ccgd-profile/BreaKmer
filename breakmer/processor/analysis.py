@@ -234,7 +234,7 @@ class RunTracker:
                     allResultFile.write(headerStr + '\n')
                     filteredResultFile.write(headerStr + '\n')
                 allResultFile.write(formattedResultValuesStr + '\n')
-                resultValues = formattedResultStr.split('\t')
+                resultValues = formattedResultValuesStr.split('\t')
                 if resultValues[-2] != "True":
                     filteredResultFile.write(formattedResultValuesStr + '\n')
             allResultFile.close()
