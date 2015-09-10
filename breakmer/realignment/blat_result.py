@@ -404,6 +404,7 @@ class RealignValues:
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
+        print 'Offset', offset
         self.valueDict['tStart'] = coordOffset + int(self.valueDict['tStart'])
         self.valueDict['tEnd'] = coordOffset + int(self.valueDict['tEnd'])
 

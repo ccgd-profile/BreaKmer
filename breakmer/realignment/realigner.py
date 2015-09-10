@@ -288,6 +288,7 @@ class AlignResults:
             # Need to reset the chrom name and coordinates for blat results.
             refName = self.contig.get_chr()
             offset = self.contig.get_target_start() - self.contig.get_target_buffer()
+            print 'Offset', offset
 
         for line in open(self.resultFn, 'r'):
             if line.find('#') > -1:
