@@ -227,6 +227,7 @@ class RunTracker:
             filteredResultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
             utils.log(self.loggingName, 'info', 'Writing %s aggregated results files: all result - %s and filtered results - %s' % (self.params.get_param('analysis_name'), allResultFn, filteredResultFn))
             allResultFile = open(allResultFn, 'w')
+            filteredResultFile = open(filteredResultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
