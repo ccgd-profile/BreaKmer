@@ -461,6 +461,7 @@ class TargetManager(object):
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             self.chrom, self.start, self.end = values[0], int(values[1]), int(values[2])
+        print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
         '''
