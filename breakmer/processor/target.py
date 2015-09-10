@@ -391,9 +391,9 @@ class TargetManager(object):
         self.loggingName = 'breakmer.processor.target'
         self.params = params
         self.name = name
-        self.chrom = None
-        self.start = None
-        self.end = None
+        self._chrom = None
+        self._start = None
+        self._end = None
         self.paths = {}
         self.files = {}
         self.readLen = int(params.get_param('readLen'))
@@ -403,25 +403,25 @@ class TargetManager(object):
 
     @property
     def start(self):
-        return self.__start
+        return self._start
 
     @start.setter
     def start(self, start):
-        if self.__start is None:
-            self.__start = int(start)
-        elif start < self.__start:
-            self.__start = int(start)
+        if self._start is None:
+            self._start = int(start)
+        elif start < self._start:
+            self._start = int(start)
 
     @property
     def end(self):
-        return self.__end
+        return self._end
 
     @end.setter
-    def start(self, end):
-        if self.__end is None:
-            self.__end = int(end)
-        elif end < self.__end:
-            self.__end = int(end)
+    def end(self, end):
+        if self._end is None:
+            self._end = int(end)
+        elif end < self._end:
+            self._end = int(end)
 
     @property
     def chrom(self):
@@ -429,21 +429,19 @@ class TargetManager(object):
 
     @chrom.setter
     def chrom(self, chrom):
-        if self.__chrom is None:
-            self.__chrom = chrom
+        if self._chrom is None:
+            self._chrom = chrom
 
     @property
     def values(self):
         """Return the defined features of this target
         """
-
         return (self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
 
     @property
     def fnc(self):
         """Return the function of the program.
         """
-
         return self.params.fncCmd
 
     def setup(self):
