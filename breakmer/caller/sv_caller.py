@@ -180,7 +180,7 @@ class SVResult:
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
             self.repeatOverlapPercent.append(blatResult.repeat_overlap)
-            self.realignmentUniqueness.append(blatResult.meanCov)
+            self.realignmentUniqueness.append(blatResult.alignFreq)
             self.totalMatching.append(blatResult.get_nmatch_total())
             self.genes.append(blatResult.get_gene_anno())
             self.alignCigar.append(blatResult.cigar)
@@ -735,17 +735,17 @@ class SVEvent:
     def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.
         """
-        maxMeanCov = 0
+        maxAlignFreq = 0
         for blatResult, nBasesAligned in self.blatResultsSorted:
-            if int(blatResult.meanCov) > int(maxMeanCov):
-                maxMeanCov = int(blatResult.meanCov)
+            if int(blatResult.alignFreq) > int(maxAlignFreq):
+                maxAlignFreq = int(blatResult.alignFreq)
 
     def get_realign_freq(self):
         """
         """
         realignFreqs = []
         for blatResult, nBasesAligned in self.blatResultsSorted:
-            realignFreqs.append(int(blatResult.meanCov))
+            realignFreqs.append(int(blatResult.alignFreq))
         return realignFreqs
 
     def check_read_strands(self):
