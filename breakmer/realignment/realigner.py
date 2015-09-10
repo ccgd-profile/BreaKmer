@@ -303,7 +303,7 @@ class AlignResults:
         self.sortedResults = sorted(self.results, key=lambda x: (-x.alignScore, -x.perc_ident, x.get_total_num_gaps()))
 
         for i, blatResult in enumerate(self.sortedResults):
-            blatResult.set_mean_cov(self.get_mean_cov(blatResult.qstart(), blatResult.qend()))
+            blatResult.set_realign_freq(self.get_align_freq(blatResult.qstart(), blatResult.qend()))
 
         if len(self.results) == 0:
             self.hasResults = False
@@ -429,5 +429,5 @@ class AlignResults:
                 nhits += 1
         return round((float(nhits) / float(self.querySize)) * 100, 2)
 
-    def get_mean_cov(self, s, e):
+    def get_align_freq(self, s, e):
         return float(sum(self.alignmentFreq[s:e])) / float(len(self.alignmentFreq[s:e]))

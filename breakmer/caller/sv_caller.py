@@ -18,7 +18,7 @@ class FilterValues:
     """
     def __init__(self):
         self.maxEventSize = None
-        self.resultMeanHitFreq = None
+        self.realignFreq = None
         self.brkptCoverages = None
         self.flankMatchPercents = None
         self.minSegmentLen = None
@@ -27,7 +27,7 @@ class FilterValues:
         self.startEndMissingQueryCoverage = None
         self.missingQueryCoverage = None
         self.maxSegmentOverlap = None
-        self.maxMeanCoverage = None
+        # self.maxMeanCoverage = None
         self.nReadStrands = None
         self.maxRealignmentGap = None
         self.deletedSeqs = None
@@ -35,7 +35,7 @@ class FilterValues:
 
     def set_indel_values(self, blatResult, brkptCoverages):
         """ """
-        self.resultMeanHitFreq = blatResult.meanCov
+        self.realignFreq = blatResult.alignFreq
         self.maxEventSize = blatResult.indel_maxevent_size[0]
         self.deletedSeqs = blatResult.get_indel_seqs('del')
         self.insertedSeqs = blatResult.get_indel_seqs('ins')
@@ -60,7 +60,7 @@ class FilterValues:
         self.nReadStrands = svEvent.check_read_strands()
         self.maxRealignmentGap = max(blatResult.gaps.get_gap_sizes())
         # Use this value to determine the uniqueness of the realignment
-        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
+        self.realignFreq = svEvent.get_realign_freq()
 
     def set_rearr_values(self, svEvent):
         """ """
@@ -71,14 +71,14 @@ class FilterValues:
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
         self.maxSegmentOverlap = max(blatResult.seg_overlap)
-        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
+        self.realignFreq = svEvent.get_realign_freq()
 
     def get_formatted_output_values(self, svType, svSubtype):
         """ """
         outputValues = {}
         if svType == 'indel':
             outputValues['maxeventSize'] = self.maxEventSize
-            outputValues['meanHitFreq'] = self.resultMeanHitFreq
+            outputValues['realignFreq'] = self.realignFreq
             # Store the minimum value.
             outputValues['breakpointCoverages'] = self.brkptCoverages[0]
             outputValues['minSeqEdgeRealignmentPercent'] = min(self.flankMatchPercents)
@@ -89,9 +89,9 @@ class FilterValues:
             outputValues['minSegmentLen'] = self.minSegmentLen
             outputValues['missingQueryCoverage'] = self.missingQueryCoverage
             outputValues['maxSegmentOverlap'] = self.maxSegmentOverlap
-            outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
+            outputValues['realignFreq'] = ",".join([str(x) for x in self.realignFreq])
             if svSubtype == 'trl':
-                outputValues['breakpointCoverages'] = self.brkptCoverages
+                outputValues['breakpointCoverages'] = ",".join([str(x) for x in self.brkptCoverages])
                 outputValues['sequenceComplexity'] = self.seqComplexity
                 outputValues['startEndMissingQueryCoverage'] = self.startEndMissingQueryCoverage
                 outputValues['nReadStrands'] = self.nReadStrands
@@ -141,7 +141,7 @@ class SVResult:
         self.genes = blatResult.get_gene_anno()
         self.repeatOverlapPercent = 0.0
         self.totalMatching = blatResult.get_nmatch_total()
-        self.realignmentUniqueness = blatResult.meanCov
+        self.realignmentUniqueness = blatResult.alignFreq
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
         self.fullBreakpointStr = svEvent.get_brkpt_str('target')
@@ -203,6 +203,7 @@ class SVResult:
             self.genes = list(set(self.genes))
             self.description = svEvent.rearrDesc
             self.filterValues.set_rearr_values(svEvent)
+        self.realignmentUniqueness = self.filterValues.realignFreq
         self.targetName = svEvent.contig.get_target_name()
         self.fullBreakpointStr = svEvent.get_brkpt_str()
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
@@ -284,6 +285,7 @@ class SVResult:
                      'Strands',
                      'Total_mismatches',
                      'Total_matching',
+                     'Realignment_uniqueness',
                      'Contig_ID',
                      'Contig_length',
                      'Contig_sequence',
@@ -305,6 +307,7 @@ class SVResult:
                    self.strands,
                    self.totalMismatches,
                    self.totalMatching,
+                   self.realignmentUniqueness,
                    self.contigId,
                    len(self.contigSeq),
                    self.contigSeq,
@@ -736,6 +739,14 @@ class SVEvent:
         for blatResult, nBasesAligned in self.blatResultsSorted:
             if int(blatResult.meanCov) > int(maxMeanCov):
                 maxMeanCov = int(blatResult.meanCov)
+
+    def get_realign_freq(self):
+        """
+        """
+        realignFreqs = []
+        for blatResult, nBasesAligned in self.blatResultsSorted:
+            realignFreqs.append(int(blatResult.meanCov))
+        return realignFreqs
 
     def check_read_strands(self):
         """
