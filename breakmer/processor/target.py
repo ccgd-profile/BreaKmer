@@ -402,37 +402,6 @@ class TargetManager(object):
         self.setup()
 
     @property
-    def start(self):
-        return self._start
-
-    @start.setter
-    def start(self, start):
-        if self._start is None:
-            self._start = int(start)
-        elif start < self._start:
-            self._start = int(start)
-
-    @property
-    def end(self):
-        return self._end
-
-    @end.setter
-    def end(self, end):
-        if self._end is None:
-            self._end = int(end)
-        elif end < self._end:
-            self._end = int(end)
-
-    @property
-    def chrom(self):
-        return self._chrom
-
-    @chrom.setter
-    def chrom(self, chrom):
-        if self._chrom is None:
-            self._chrom = chrom
-
-    @property
     def values(self):
         """Return the defined features of this target
         """
@@ -460,7 +429,13 @@ class TargetManager(object):
         # is the maximum end of the intervals.
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
-            self.chrom, self.start, self.end = values[0], int(values[1]), int(values[2])
+            chrom, start, end = values[0], int(values[1]), int(values[2])
+            if chrom is None:
+                self.chrom = chrom
+            if start < self.start:
+                self.start = start
+            if end > self.end:
+                self.end = end
         print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
