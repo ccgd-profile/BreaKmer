@@ -149,16 +149,19 @@ class ParamManager:
 
         # Store all the arguments into the self.opts dictionary.
         for opt in vars(arguments):
-            self.set_param(opt, vars(arguments)[opt])
+            if (self.get_param(opt) is not None) and (vars(arguments)[opt] is None):
+                utils.log(self.loggingName, 'info', 'Parameter %s is set in config file and not on the command line. Using config file value %s.' % (opt, self.get_param(opt)))
+            else:
+                self.set_param(opt, vars(arguments)[opt])
 
         # Check that the required parameters are set.
-        required = ['analysis_name', 
-                    'targets_bed_file', 
-                    'sample_bam_file', 
-                    'analysis_dir', 
-                    'reference_data_dir', 
-                    'cutadapt_config_file', 
-                    'reference_fasta', 
+        required = ['analysis_name',
+                    'targets_bed_file',
+                    'sample_bam_file',
+                    'analysis_dir',
+                    'reference_data_dir',
+                    'cutadapt_config_file',
+                    'reference_fasta',
                     'gene_annotation_file']
         if self.fncCmd == 'prepare_reference_data':
             required = ['reference_data_dir', 'reference_fasta', 'targets_bed_file']
