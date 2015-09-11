@@ -524,6 +524,8 @@ class TargetManager(object):
                 utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 output, errors = p.communicate()
+                p.close()
+                del p
                 if errors != '':
                     utils.log(self.loggingName, 'debug', 'Failed to make blast db files using reference file %s' % self.files['target_ref_fn'][0])
 

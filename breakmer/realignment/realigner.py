@@ -129,6 +129,8 @@ class Realignment:
         utils.log(self.loggingName, 'info', 'Realignment system command %s' % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, errors = p.communicate()
+        p.close()
+        del p
         utils.log(self.loggingName, 'info', 'Realignment output file %s' % self.resultFn)
         if errors != '':
             utils.log(self.loggingName, 'info', 'Realignment errors %s' % errors)
