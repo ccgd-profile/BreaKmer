@@ -127,7 +127,7 @@ class SVResult:
         self.genes = None
         self.repeatOverlapPercent = None
         self.realignmentUniqueness = None
-        self.filtered = {'status': False, 'reason': ''}
+        self.filtered = {'status': False, 'reason': []}
         self.filterValues = FilterValues()
 
     def format_indel_values(self, svEvent):
@@ -215,7 +215,7 @@ class SVResult:
     def set_filtered(self, filterReason):
         """ """
         self.filtered['status'] = True
-        self.filtered['reason'] = filterReason
+        self.filtered['reason'].append(filterReason)
 
     def get_old_formatted_output_values(self):
         """ """
@@ -312,7 +312,7 @@ class SVResult:
                    len(self.contigSeq),
                    self.contigSeq,
                    self.filtered['status'],
-                   self.filtered['reason']
+                   ','.join(self.filtered['reason'])
                    ]
 
         outListStr = []
