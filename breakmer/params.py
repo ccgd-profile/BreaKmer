@@ -307,7 +307,7 @@ class ParamManager:
             feature = None if len(targetsplit) <= 4 else targetsplit[4]
             self.targets.setdefault(name.upper(), [])
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
-        print 'Targets', self.targets
+        # print 'Targets', self.targets
         utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
 
     def check_blat_server(self):

@@ -71,7 +71,7 @@ def analyze_targets(targetList):
 
     aggregateResults = {'contigs': [], 'discreads': []}  # Formatted output strings for contig based calls and discordant read calls are different.
     for targetRegion in targetList:
-        print 'Analyzing', targetRegion.name
+        # print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         if targetRegion.fnc == 'prepare_reference_data':  # Stop here if only preparing ref data.
