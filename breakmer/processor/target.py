@@ -430,7 +430,7 @@ class TargetManager(object):
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             chrom, start, end = values[0], int(values[1]), int(values[2])
-            if self.nchrom is None:
+            if self.chrom is None:
                 self.chrom = chrom
             if self.start is None:
                 self.start = start
