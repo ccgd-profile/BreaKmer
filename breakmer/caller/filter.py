@@ -115,6 +115,7 @@ class ResultFilter:
                                 match = True
                                 break
                 boMatches = bpMatches and match
+            print nameMatch, typeMatch, bpMatches
             if nameMatch and typeMatch and bpMatches:
                 svEvent.set_filtered('Matched input filter variant')
 
