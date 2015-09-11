@@ -430,7 +430,7 @@ class TargetManager(object):
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             chrom, start, end = values[0], int(values[1]), int(values[2])
-            if self.chrom is None:
+            if self.nchrom is None:
                 self.chrom = chrom
             if self.start is None:
                 self.start = start
@@ -440,7 +440,7 @@ class TargetManager(object):
                 self.end = end
             elif end > self.end:
                 self.end = end
-        print 'Region coords', self.chrom, self.start, self.end
+        # print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
         '''
