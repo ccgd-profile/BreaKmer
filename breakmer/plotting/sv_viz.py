@@ -172,6 +172,7 @@ class AlignSegments:
         self.segments = []
         self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
         self.orderedSeqs = None
+        self.readsSampled = False
         self.setup()
 
     def has_annotations(self):
@@ -193,9 +194,10 @@ class AlignSegments:
         """ """
         return self.svEventResult.contig.get_id()
 
-    def set_orderedseqs(self, orderedSeqs):
+    def set_orderedseqs(self, orderedSeqValues):
         """ """
-        self.orderedSeqs = orderedSeqs
+        self.orderedSeqs = orderedSeqValues[0]
+        self.readsSampled = orderedSeqValues[1]
 
     def get_segment_color(self, nucIter):
         """ """
@@ -246,9 +248,11 @@ def pile_reads(reads, contigSeq):
         readCounts += 1
     os = sorted(orderedSeqs, key=lambda x: x[0])
 
+    readsSampled = False
     returnReads = []
     readSampleCounter = 0
     if len(os) > 50:
+        readsSampled = True
         sampleIdx = readCounts / 50
         for read in os:
             if readSampleCounter == sampleIdx:
@@ -258,7 +262,7 @@ def pile_reads(reads, contigSeq):
                 readSampleCounter += 1
     else:
         returnReads = os
-    return returnReads
+    return (returnReads, readsSampled)
 
 
 def plot_pileup(segmentManager, outName):
@@ -464,6 +468,9 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
             nucIter += 1
+    if segmentManager.readsSampled:
+        ax.text(xOffset, seqYidx, "* Reads were subsampled for plotting.", ha='left', va='top', size=12, color='red')
+
         # print seq, idx, nucIter
 
 
