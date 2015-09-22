@@ -227,6 +227,7 @@ def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
 def pile_reads(reads, contigSeq):
     """ """
 
+    readCounts = 0
     orderedSeqs = []
     for read in reads:
         idx = contigSeq.find(read.seq)
@@ -242,11 +243,12 @@ def pile_reads(reads, contigSeq):
                 seq = aln2[0]
         if add:
             orderedSeqs.append((idx, ' ' * idx + seq))
+        readCounts += 1
     os = sorted(orderedSeqs, key=lambda x: x[0])
 
     returnReads = []
     if len(os) > 50:
-        sampleIdx = int(len(os)) / 50
+        sampleIdx = readCounts / 50
         for read in os:
             if readSampleCounter == sampleIdx:
                 readSampleCounter = 0
