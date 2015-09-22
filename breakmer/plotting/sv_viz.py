@@ -247,6 +247,7 @@ def pile_reads(reads, contigSeq):
     os = sorted(orderedSeqs, key=lambda x: x[0])
 
     returnReads = []
+    readSampleCounter = 0
     if len(os) > 50:
         sampleIdx = readCounts / 50
         for read in os:
