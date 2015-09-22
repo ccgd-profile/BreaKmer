@@ -77,6 +77,7 @@ class ParamManager:
 
         # If only preseting the reference data no need to continue.
         if self.fncCmd == 'prepare_reference_data':
+            self.set_insertsize_thresh()  # Set the expected insert size threshold from the properly mapped read pairs.
             utils.log(self.loggingName, 'info', 'Preset reference data option set! Only the reference data directory will be setup.')
             return
 
