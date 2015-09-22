@@ -246,7 +246,7 @@ def pile_reads(reads, contigSeq):
 
     returnReads = []
     if len(os) > 50:
-        sampleIdx = int(len(reads)) / 50
+        sampleIdx = int(len(os)) / 50
         for read in os:
             if readSampleCounter == sampleIdx:
                 readSampleCounter = 0
