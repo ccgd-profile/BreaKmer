@@ -274,7 +274,7 @@ def plot_pileup(segmentManager, outName):
     #     plotHeight = 20
 
     # Setup figure
-    print 'Plot height', plotHeight
+    # print 'Plot height', plotHeight
     fig = plt.figure(figsize=(35, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
@@ -469,7 +469,7 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             seqTextOff += xInc
             nucIter += 1
     if segmentManager.readsSampled:
-        ax.text(xOffset, seqYidx, "* Reads were subsampled for plotting.", ha='left', va='top', size=12, color='red')
+        ax.text(xOffset, seqYidx, "* Sequence reads were subsampled for plotting, only 50 are shown here.", ha='left', va='top', size=12, color='red')
 
         # print seq, idx, nucIter
 
