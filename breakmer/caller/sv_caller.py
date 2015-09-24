@@ -490,6 +490,7 @@ class SVEvent:
         self.blatResults = []
         self.blatResultsSorted = []
         self.annotated = False
+        self.failed_annotation = False
         self.qlen = 0
         self.nmatch = 0
         self.in_target = False
@@ -526,9 +527,13 @@ class SVEvent:
             valid = True
         return valid
 
+    def check_annotated(self):
+        """ """
+        return self.annotated and not self.failed_annotation
+
     def has_annotations(self):
         """ """
-        return True
+        return self.annotated
 
     def get_genomic_brkpts(self):
         """ """
@@ -803,6 +808,10 @@ class SVEvent:
     def set_annotations(self):
         """ """
         self.annotated = True
+
+    def set_failed_annotation(self):
+        """ """
+        self.failed_annotation = True
 
 
 class ContigCaller:

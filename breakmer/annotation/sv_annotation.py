@@ -85,19 +85,20 @@ def annotate_event(svEventResult, contigMeta):
     # print 'sv_annotation.py bpMap', bpMap
     outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
     trxMap = parse_bedtools_output(outputFiles)
-    store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
+    store_annotations(svEventResult, bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
     # Remove temporary bedtools output files.
     # print 'annotate_event, sv_annotation.py', svEventResult
-    # svEventResult.set_annotations()
+    svEventResult.set_annotations()
     # print 'svEvent annotated', svEventResult.annotated
 
 
-def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
+def store_annotations(svEventResult, bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
         # print 'sv_annotation store_annotations', bpKey, bpMap[bpKey]
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
+            svEventResult.set_failed_annotation()
         else:
             svBreakpoint = blatResult.get_sv_brkpts()[svBrkptIdx]
             trxMappings = trxMap[bpKey]
@@ -181,11 +182,16 @@ def parse_bedtools_file(fn, fileKey, trxMap):
         line = line.strip()
         linesplit = line.split('\t')
         bpChrom, bpStart, bpEnd, bpKey = linesplit[0:4]
-        trx = Transcript(linesplit[4:])
-        dist = int(linesplit[-1])
+
+        # No value found for this breakpoint. This could be due to the chromsome not existing in the
+        # annotation file.
+        if linesplit[4] == '.':
+            return
+
         if bpKey not in trxMap:
             trxMap[bpKey] = {'intersect': None, 'upstream': None, 'downstream': None}
-
+        trx = Transcript(linesplit[4:])
+        dist = int(linesplit[-1])
         checkStorage = ((fileKey != 'intersect') and (trxMap[bpKey]['intersect'] is None)) or (fileKey == 'intersect')
         if checkStorage:
             if trxMap[bpKey][fileKey] is None:
