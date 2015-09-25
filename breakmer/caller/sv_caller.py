@@ -805,6 +805,10 @@ class SVEvent:
         """"""
         return self.resultValues.is_filtered()
 
+    def set_filtered(self, filterReason):
+        """ """
+        self.resultValues.set_filtered(filterReason)
+
     def set_annotations(self):
         """ """
         self.annotated = True
