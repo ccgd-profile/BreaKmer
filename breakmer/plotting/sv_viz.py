@@ -362,6 +362,7 @@ def plot_pileup(segmentManager, outName):
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.svg')
+    plt.close(fig)
 
 
 # def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
