@@ -276,7 +276,7 @@ def plot_pileup(segmentManager, outName):
     # Setup figure
     print 'Plot height', plotHeight
     # fig = plt.figure(figsize=(35, plotHeight), frameon=False)
-    fig = plt.figure(figsize=(12, plotHeight), frameon=False, dpi=96)
+    fig = plt.figure(figsize=(25, plotHeight), frameon=False, dpi=96)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
