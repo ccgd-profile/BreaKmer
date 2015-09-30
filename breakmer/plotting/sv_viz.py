@@ -269,14 +269,14 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = round(seqPlotSize) + 10 # seqPlotSize*1.5
+    plotHeight = round(seqPlotSize) + 8 # seqPlotSize*1.5
     # if len(segmentManager.orderedSeqs) > 10:
     #     plotHeight = 20
 
     # Setup figure
     print 'Plot height', plotHeight
     # fig = plt.figure(figsize=(35, plotHeight), frameon=False)
-    fig = plt.figure(figsize=(10.96, plotHeight), frameon=False)
+    fig = plt.figure(figsize=(12, plotHeight), frameon=False, dpi=96)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
