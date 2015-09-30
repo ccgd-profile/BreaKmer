@@ -276,7 +276,7 @@ def plot_pileup(segmentManager, outName):
     # Setup figure
     print 'Plot height', plotHeight
     # fig = plt.figure(figsize=(35, plotHeight), frameon=False)
-    fig = plt.figure(figsize=(3.25, float(plotHeight) / float(15.0)), frameon=False)
+    fig = plt.figure(figsize=(35, plotHeight), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
@@ -361,7 +361,7 @@ def plot_pileup(segmentManager, outName):
     ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 10
     ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 5, 10])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
-    plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
+    plt.savefig(outName + '.png', bbox_inches='tight', dpi=30)
     plt.savefig(outName + '.svg')
     plt.close(fig)
 
