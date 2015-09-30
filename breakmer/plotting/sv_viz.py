@@ -269,7 +269,7 @@ def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = round(seqPlotSize) + 8 # seqPlotSize*1.5
+    plotHeight = round(seqPlotSize) + 6 # seqPlotSize*1.5
     # if len(segmentManager.orderedSeqs) > 10:
     #     plotHeight = 20
 
@@ -362,7 +362,7 @@ def plot_pileup(segmentManager, outName):
     ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 5, 10])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
-    plt.savefig(outName + '.svg', bbox_inches='tight', dpi=300)
+    plt.savefig(outName + '.svg', bbox_inches='tight', dpi=96)
     plt.close(fig)
 
 
