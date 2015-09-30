@@ -361,7 +361,7 @@ def plot_pileup(segmentManager, outName):
     ySize = (len(segmentManager.orderedSeqs) + 1) * 0.75 + 1.5 + 10
     ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 5, 10])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
-    plt.savefig(outName + '.png', bbox_inches='tight', dpi=30)
+    plt.savefig(outName + '.png', bbox_inches='tight', dpi=80)
     plt.savefig(outName + '.svg')
     plt.close(fig)
 
