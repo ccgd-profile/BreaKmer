@@ -7,7 +7,7 @@ import re
 import pysam
 from math import log
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import patches
@@ -172,17 +172,18 @@ class AlignSegments:
         self.segments = []
         self.colors = ['green', 'orange', 'blue', 'orange', 'purple']
         self.orderedSeqs = None
+        self.readsSampled = False
         self.setup()
 
     def has_annotations(self):
         """ """
-        return self.svEventResult.annotated
+        return self.svEventResult.check_annotated()
 
     def setup(self):
         """ """
         realignResults = sorted(self.svEventResult.blatResults, key=lambda x: x[0])
         for i, blatResult in enumerate(realignResults):
-            print i, blatResult[1].alignVals.query
+            # print i, blatResult[1].alignVals.query
             self.segments.append(Segment(blatResult[1], self.colors[i], i, len(self.svEventResult.blatResults)))
 
     def get_contig_seq(self):
@@ -193,9 +194,10 @@ class AlignSegments:
         """ """
         return self.svEventResult.contig.get_id()
 
-    def set_orderedseqs(self, orderedSeqs):
+    def set_orderedseqs(self, orderedSeqValues):
         """ """
-        self.orderedSeqs = orderedSeqs
+        self.orderedSeqs = orderedSeqValues[0]
+        self.readsSampled = orderedSeqValues[1]
 
     def get_segment_color(self, nucIter):
         """ """
@@ -226,6 +228,8 @@ def generate_pileup_img(svEventResult, bamReadsFn, outPath, contigId):
 
 def pile_reads(reads, contigSeq):
     """ """
+
+    readCounts = 0
     orderedSeqs = []
     for read in reads:
         idx = contigSeq.find(read.seq)
@@ -241,21 +245,38 @@ def pile_reads(reads, contigSeq):
                 seq = aln2[0]
         if add:
             orderedSeqs.append((idx, ' ' * idx + seq))
+        readCounts += 1
     os = sorted(orderedSeqs, key=lambda x: x[0])
-    return os
+
+    readsSampled = False
+    returnReads = []
+    readSampleCounter = 0
+    if len(os) > 50:
+        readsSampled = True
+        sampleIdx = readCounts / 50
+        for read in os:
+            if readSampleCounter == sampleIdx:
+                readSampleCounter = 0
+                returnReads.append(read)
+            else:
+                readSampleCounter += 1
+    else:
+        returnReads = os
+    return (returnReads, readsSampled)
 
 
 def plot_pileup(segmentManager, outName):
     """ """
     # Determine coordinate constants
     seqPlotSize = (len(segmentManager.orderedSeqs) + 1) * 0.75
-    plotHeight = round(seqPlotSize) + 10 # seqPlotSize*1.5
+    plotHeight = round(seqPlotSize) + 6 # seqPlotSize*1.5
     # if len(segmentManager.orderedSeqs) > 10:
     #     plotHeight = 20
 
     # Setup figure
     # print 'Plot height', plotHeight
     fig = plt.figure(figsize=(35, plotHeight), frameon=False)
+    # fig = plt.figure(figsize=(15, 10), frameon=False)
     ax = fig.add_subplot(111)
     ax.axis('off')
 
@@ -341,7 +362,8 @@ def plot_pileup(segmentManager, outName):
     ax.axis([0, len(segmentManager.get_contig_seq()) + 8, -seqPlotSize - 5, 10])
     plt.savefig(outName + '.pdf', bbox_inches='tight', dpi=300)
     plt.savefig(outName + '.png', bbox_inches='tight', dpi=300)
-    plt.savefig(outName + '.svg')
+    plt.savefig(outName + '.svg', bbox_inches='tight', dpi=96)
+    plt.close(fig)
 
 
 # def plot_realignment_strands(ax, seqYidx, xOffset, segmentManager):
@@ -448,6 +470,9 @@ def plot_pileup_seq(ax, seqYidx, xOffset, segmentManager):
             add_seq_text(ax, seqTextOff, seqYidx, nuc, nucColor)
             seqTextOff += xInc
             nucIter += 1
+    if segmentManager.readsSampled:
+        ax.text(xOffset, seqYidx, "* Sequence reads were subsampled for plotting, only 50 are shown here.", ha='left', va='top', size=12, color='red')
+
         # print seq, idx, nucIter
 
 

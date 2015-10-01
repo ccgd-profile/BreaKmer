@@ -368,7 +368,7 @@ class Variation:
             self.discReadFormatted.append((headerStr, outStr))
 
 
-class TargetManager:
+class TargetManager(object):
     """TargetManager class handles all the high level information relating to a target.
     The analysis is peformed at the target level, so this class contains all the information
     necessary to perform an independent analysis.
@@ -402,48 +402,15 @@ class TargetManager:
         self.setup()
 
     @property
-    def start(self):
-        return self.__start
-
-    @start.setter
-    def start(self, start):
-        if self.__start is None:
-            self.__start = int(start)
-        elif start < self.__start:
-            self.__start = int(start)
-
-    @property
-    def end(self):
-        return self.__end
-
-    @end.setter
-    def start(self, end):
-        if self.__end is None:
-            self.__end = int(end)
-        elif end < self.__end:
-            self.__end = int(end)
-
-    @property
-    def chrom(self):
-        return self._chrom
-
-    @chrom.setter
-    def chrom(self, chrom):
-        if self.__chrom is None:
-            self.__chrom = chrom
-
-    @property
     def values(self):
         """Return the defined features of this target
         """
-
         return (self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
 
     @property
     def fnc(self):
         """Return the function of the program.
         """
-
         return self.params.fncCmd
 
     def setup(self):
@@ -462,7 +429,18 @@ class TargetManager:
         # is the maximum end of the intervals.
         intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
-            self.chrom, self.start, self.end = values[0], int(values[1]), int(values[2])
+            chrom, start, end = values[0], int(values[1]), int(values[2])
+            if self.chrom is None:
+                self.chrom = chrom
+            if self.start is None:
+                self.start = start
+            elif start < self.start:
+                self.start = start
+            if self.end is None:
+                self.end = end
+            elif end > self.end:
+                self.end = end
+        # print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
         '''

@@ -70,34 +70,39 @@ class Transcript:
 
 def annotate_event(svEventResult, contigMeta):
     """ """
-    svEventResult.annotated = True
-    # Make sure annotation file is sorted for bedtools use.
-    bedtools = contigMeta.params.get_param('bedtools')
-    annotationFn = contigMeta.params.get_param('gene_annotation_file')
-    brkptBedFn = os.path.join(contigMeta.path, contigMeta.id + '_breakpoints.bed')
+    if svEventResult.is_filtered():
+        svEventResult.annotated = False
+    else:
+        svEventResult.annotated = True
+        # Make sure annotation file is sorted for bedtools use.
+        bedtools = contigMeta.params.get_param('bedtools')
+        annotationFn = contigMeta.params.get_param('gene_annotation_file')
+        brkptBedFn = os.path.join(contigMeta.path, contigMeta.id + '_breakpoints.bed')
 
-    # Dictionary with 'targets' and 'other' breakpoint lists
-    # Deletions have two breakpoints in reference.
-    # Insertions have one breakpoint in reference.
-    # Rearrangements have breakpoints for each segment that is rearranged.
-    #  genomicBrkpts = svEventResult.get_genomic_brkpts()
-    bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
-    # print 'sv_annotation.py bpMap', bpMap
-    outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
-    trxMap = parse_bedtools_output(outputFiles)
-    store_annotations(bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
-    # Remove temporary bedtools output files.
-    # print 'annotate_event, sv_annotation.py', svEventResult
-    # svEventResult.set_annotations()
-    # print 'svEvent annotated', svEventResult.annotated
+        # Dictionary with 'targets' and 'other' breakpoint lists
+        # Deletions have two breakpoints in reference.
+        # Insertions have one breakpoint in reference.
+        # Rearrangements have breakpoints for each segment that is rearranged.
+        #  genomicBrkpts = svEventResult.get_genomic_brkpts()
+        bpMap = write_brkpt_bed_file(brkptBedFn, svEventResult.blatResults)
+        # print 'sv_annotation.py bpMap', bpMap
+        outputFiles = run_bedtools(bedtools, annotationFn, brkptBedFn, contigMeta.path)
+        trxMap = parse_bedtools_output(outputFiles)
+        store_annotations(svEventResult, bpMap, trxMap, annotationFn, contigMeta.params, contigMeta.path)
+        # Remove temporary bedtools output files.
+        # print 'annotate_event, sv_annotation.py', svEventResult
+        # svEventResult.set_annotations()
+        # print 'svEvent annotated', svEventResult.annotated
 
 
-def store_annotations(bpMap, trxMap, annotationFn, params, tmpFilePath):
+def store_annotations(svEventResult, bpMap, trxMap, annotationFn, params, tmpFilePath):
     for bpKey in bpMap:
         blatResult, svBrkptIdx, coordIdx = bpMap[bpKey]
         # print 'sv_annotation store_annotations', bpKey, bpMap[bpKey]
         if bpKey not in trxMap:
             print 'Missing a breakpoint annotation', bpKey
+            svEventResult.set_failed_annotation()
+            svEventResult.set_filtered('Breakpoints are not fully annotated. Typically due to non-primary chromosome.')
         else:
             svBreakpoint = blatResult.get_sv_brkpts()[svBrkptIdx]
             trxMappings = trxMap[bpKey]
@@ -181,11 +186,16 @@ def parse_bedtools_file(fn, fileKey, trxMap):
         line = line.strip()
         linesplit = line.split('\t')
         bpChrom, bpStart, bpEnd, bpKey = linesplit[0:4]
-        trx = Transcript(linesplit[4:])
-        dist = int(linesplit[-1])
+
+        # No value found for this breakpoint. This could be due to the chromsome not existing in the
+        # annotation file.
+        if linesplit[4] == '.':
+            return
+
         if bpKey not in trxMap:
             trxMap[bpKey] = {'intersect': None, 'upstream': None, 'downstream': None}
-
+        trx = Transcript(linesplit[4:])
+        dist = int(linesplit[-1])
         checkStorage = ((fileKey != 'intersect') and (trxMap[bpKey]['intersect'] is None)) or (fileKey == 'intersect')
         if checkStorage:
             if trxMap[bpKey][fileKey] is None:

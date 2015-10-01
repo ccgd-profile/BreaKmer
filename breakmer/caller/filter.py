@@ -94,12 +94,14 @@ class ResultFilter:
             nameMatch = svEvent.contig.get_target_name().lower() == SVFilter.name
             typeMatch = svEvent.svType == SVFilter.svType
             eventBrkpts = svEvent.get_genomic_brkpts()
+            # print 'Event breakpoints', eventBrkpts
             ebps = []
             for key in eventBrkpts:
                 ebps.extend(eventBrkpts[key])
             bpMatches = True
             for eventBrkpt in ebps:
                 # Should be a tuple with chr, bp1, bp2 or chr, bp1
+                # print 'Event breakpoint', eventBrkpt
                 match = False
                 for filterBrkpt in SVFilter.breakpoints:
                     if len(eventBrkpt) == len(filterBrkpt):
@@ -114,7 +116,8 @@ class ResultFilter:
                             if bpMatch:
                                 match = True
                                 break
-                boMatches = bpMatches and match
+                bpMatches = bpMatches and match
+            # print nameMatch, typeMatch, bpMatches
             if nameMatch and typeMatch and bpMatches:
                 svEvent.set_filtered('Matched input filter variant')
 
@@ -123,12 +126,12 @@ class ResultFilter:
         indelSizeThresh = int(self.params.get_param('indel_size'))
         utils.log(self.loggingName, 'info', 'Checking if blat result contains an indel variant')
         blatResult = svEvent.blatResults[0][1]
-        keep_br = blatResult.valid and blatResult.meanCov < 2 and blatResult.in_target and (blatResult.indel_maxevent_size[0] >= indelSizeThresh)
+        keep_br = blatResult.valid and blatResult.alignFreq < 2 and blatResult.in_target and (blatResult.indel_maxevent_size[0] >= indelSizeThresh)
         utils.log(self.loggingName, 'debug', 'Keep blat result %r' % keep_br)
 
         # Determine the uniqueness of the realignment.
         svFilterValues = svEvent.resultValues.filterValues
-        uniqRealignment = svFilterValues.resultMeanHitFreq < 2
+        uniqRealignment = svFilterValues.realignFreq < 2
         indelSize = svFilterValues.maxEventSize >= indelSizeThresh
         brkptCoverages = svFilterValues.brkptCoverages[0] >= self.params.get_sr_thresh('indel')
         minFlankMatches = min(svFilterValues.flankMatchPercents) >= 10.0
@@ -139,7 +142,7 @@ class ResultFilter:
             utils.log(self.loggingName, 'debug', 'Indel filtered due to non-unique realignment (%r), less than input size threshold (%r), low coverage at breakpoints (%r), or contig edge realignment not long enough (%r), filter status set to True.' % (uniqRealignment, indelSize, brkptCoverages, minFlankMatches))
             filterReasons = []
             if not uniqRealignment:
-                filterReasons.append('Non-unique realignment (%d) > 2' % svFilterValues.resultMeanHitFreq)
+                filterReasons.append('Non-unique realignment (%d) > 2' % svFilterValues.realignFreq)
             if not indelSize:
                 filterReasons.append('Max indel size (%d) is less than %d' % (svFilterValues.maxEventSize, indelSizeThresh))
             if not brkptCoverages:
@@ -196,11 +199,11 @@ class ResultFilter:
         minSeqComplexity = svFilterValues.seqComplexity >= 25.0
         startEndMissingQueryCoverage = svFilterValues.startEndMissingQueryCoverage <= 5.0
         maxSegmentOverlap = svFilterValues.maxSegmentOverlap < 5
-        maxMeanHitFreq = svFilterValues.maxMeanCoverage < 10
+        maxAlignFreq = max(svFilterValues.realignFreq) < 10
         nReadStrands = svFilterValues.nReadStrands > 1
         maxRealignmentGaps = svFilterValues.maxRealignmentGap
 
-        strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxMeanHitFreq, nReadStrands]
+        strictFilter = [minSeqComplexity, startEndMissingQueryCoverage, minSegmentLen, maxRealignmentGaps, maxAlignFreq, nReadStrands]
         nStrictFiltersFail = 0
         for f in strictFilter:
             if not f:

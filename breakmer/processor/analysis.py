@@ -71,7 +71,7 @@ def analyze_targets(targetList):
 
     aggregateResults = {'contigs': [], 'discreads': []}  # Formatted output strings for contig based calls and discordant read calls are different.
     for targetRegion in targetList:
-        print 'Analyzing', targetRegion.name
+        # print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         if targetRegion.fnc == 'prepare_reference_data':  # Stop here if only preparing ref data.
@@ -223,15 +223,22 @@ class RunTracker:
 
         # Write assembled contig-based SV calls.
         if len(aggregateResults['contigs']) > 0:
-            resultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
-            utils.log(self.loggingName, 'info', 'Writing %s aggregated results file %s' % (self.params.get_param('analysis_name'), resultFn))
-            resultFile = open(resultFn, 'w')
+            allResultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.all.out")
+            filteredResultFn = os.path.join(self.params.paths['output'], self.params.get_param('analysis_name') + "_svs.out")
+            utils.log(self.loggingName, 'info', 'Writing %s aggregated results files: all result - %s and filtered results - %s' % (self.params.get_param('analysis_name'), allResultFn, filteredResultFn))
+            allResultFile = open(allResultFn, 'w')
+            filteredResultFile = open(filteredResultFn, 'w')
             for i, formattedResultStr in enumerate(aggregateResults['contigs']):
                 headerStr, formattedResultValuesStr = formattedResultStr
                 if not self.params.get_param('no_output_header') and i == 0:
-                    resultFile.write(headerStr + '\n')
-                resultFile.write(formattedResultValuesStr + '\n')
-            resultFile.close()
+                    allResultFile.write(headerStr + '\n')
+                    filteredResultFile.write(headerStr + '\n')
+                allResultFile.write(formattedResultValuesStr + '\n')
+                resultValues = formattedResultValuesStr.split('\t')
+                if resultValues[-3] != "True":
+                    filteredResultFile.write(formattedResultValuesStr + '\n')
+            allResultFile.close()
+            filteredResultFile.close()
 
         # Write discordant read pair clusters.
         if len(aggregateResults['discreads']) > 0:

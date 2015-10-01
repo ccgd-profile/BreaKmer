@@ -404,6 +404,7 @@ class RealignValues:
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
+        # print 'Offset', offset
         self.valueDict['tStart'] = coordOffset + int(self.valueDict['tStart'])
         self.valueDict['tEnd'] = coordOffset + int(self.valueDict['tEnd'])
 
@@ -430,7 +431,7 @@ class BlatResult:
         self.alignScore = None #self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
         self.ngaps = None # self.get_total_num_gaps()
 
-        self.meanCov = 0.0
+        self.alignFreq = 0.0
         self.seg_overlap = [0, 0]
         self.cigar = ''
 
@@ -518,8 +519,8 @@ class BlatResult:
             badAlign = (1000 * (self.matches.get_mismatches() + insertFactor + round(3 * math.log(1 + sizeDif)))) / totalMatches
         return badAlign * 0.1
 
-    def set_mean_cov(self, meanCov):
-        self.meanCov = meanCov
+    def set_realign_freq(self, alignFreq):
+        self.alignFreq = alignFreq
 
     def set_segment_overlap(self, right, left):
         self.seg_overlap = [left, right]

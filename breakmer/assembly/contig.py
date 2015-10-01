@@ -358,8 +358,8 @@ class Builder:
             # There appears to be overlap, figure out how to assemble.
             else:
                 match = False
-                indx1 = alignManager.get_kmer_align_index(0, kmerObj.seq)
-                indx2 = alignManager.get_kmer_align_index(1, kmerObj.seq)
+                indx1 = alignManager.get_kmer_align_indices(0, kmerObj.seq)
+                indx2 = alignManager.get_kmer_align_indices(1, kmerObj.seq)
                 if indx1[0] > -1 and indx1[1] > -1:
                     # Read overlaps off front of contig sequence.
                     if (indx2[0] == -1 and indx2[1] == -1) or (abs(indx2[0] - indx2[1]) > abs(indx1[0] - indx1[1])):
