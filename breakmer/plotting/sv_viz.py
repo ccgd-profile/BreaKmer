@@ -7,7 +7,7 @@ import re
 import pysam
 from math import log
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import patches
@@ -274,7 +274,7 @@ def plot_pileup(segmentManager, outName):
     #     plotHeight = 20
 
     # Setup figure
-    print 'Plot height', plotHeight
+    # print 'Plot height', plotHeight
     fig = plt.figure(figsize=(35, plotHeight), frameon=False)
     # fig = plt.figure(figsize=(15, 10), frameon=False)
     ax = fig.add_subplot(111)
