@@ -7,7 +7,7 @@ import re
 import pysam
 from math import log
 import matplotlib
-matplotlib.use('Cairo')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import patches
