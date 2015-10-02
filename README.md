@@ -181,41 +181,41 @@ chr21   HAVANA  UTR     10863065        10863067        .       +       .       
 
 BreaKmer parameters
 -------------
-| Parameter | Description | Default |
-|---------- | ----------- | ------- |
-| run | Perform structural variant detection analysis | NA |
-| -h, --help | Show the help message and exit | NA |
-| --log_level | The level of logging detail to record while program is running. | DEBUG |
-| --indel_size | The minimum indel size (in base pairs) to keep and output. | 15 |
-| --trl_sr_thresh | Split read support threshold for translocation events (i.e., the minimum number of split reads required to keep a translocation event). | 2 |
-| --indel_sr_thresh | Split read support threshold for indels | 5 |
-| --rearr_sr_thresh | Split read support threshold for general rearrangements, inversions, tandem duplications, or other unclassified rearrangements. | 2 |
-| --rearr_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a rearrangement event (inversions, tandem duplications, other unclassified rearrangements). | 30 |
-| --trl_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a translocation event. | 25 |
-| --align_thresh | Threshold for minimum read alignment during assembly. | 0.9 |
-| --no_output_header | Suppress column headers in output files. | False |
-| --discread_only_thresh | The number of discordant read pairs in a cluster to output without evidence from a split read event. | 2 |
-| --generate_image | Generate a plot containing the assembled reads used to create a contig sequence with a called variant along with genes and transcripts associated with the event - requires gene_annotation_file in configuration file to be set with GTF file containing transcript annotations. | False |
-| --hostname | The hostname for the blat server. | localhost |
-| -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
-| -f, --filter_list | A file containing specific variant events to filter out. | None |
-| -n, --nprocessors | The number of processors to use for analysis. | 1 |
-| -s, --start_blat_sever | Option to indicate that a blat server needs to be started before analysis begins. A random part number and the localhost will be used if neither is specified. | False |
-| -k, --keep_blat_server | Option to keep the blat server running after the analysis completes. | False |
-| -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
-| -c, --config | The configuration filename that contains additional parameters. | None |
-| | | |
-| start_blat_server | Start the blat server prior to performing the analysis | NA |
-| -h, --help | Show the help message and exit. | NA |
-| --hostname | The hostname for the blat server. | localhost |
-| -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
-| -c, --config | The configuration filename that contains additional parameters. | None |
-| | | |
-| prepare_reference_data | Extract the reference sequence from all the input target regions and store them in files to access during analysis. | NA |
-| -h, --help | Show the help message and exit | NA |
-| -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
-| -c, --config | The configuration filename that contains additional parameters. | None |
-| -n, --nprocessors | The number of processors to use for analysis. | 1 |
+| Program Mode | Parameter | Description | Default |
+| -------- |---------- | ----------- | ------- |
+| run | | Perform structural variant detection analysis | NA |
+| | -h, --help | Show the help message and exit | NA |
+| | --log_level | The level of logging detail to record while program is running. | DEBUG |
+| | --indel_size | The minimum indel size (in base pairs) to keep and output. | 15 |
+| | --trl_sr_thresh | Split read support threshold for translocation events (i.e., the minimum number of split reads required to keep a translocation event). | 2 |
+| | --indel_sr_thresh | Split read support threshold for indels | 5 |
+| | --rearr_sr_thresh | Split read support threshold for general rearrangements, inversions, tandem duplications, or other unclassified rearrangements. | 2 |
+| | --rearr_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a rearrangement event (inversions, tandem duplications, other unclassified rearrangements). | 30 |
+| | --trl_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a translocation event. | 25 |
+| | --align_thresh | Threshold for minimum read alignment during assembly. | 0.9 |
+| | --no_output_header | Suppress column headers in output files. | False |
+| | --discread_only_thresh | The number of discordant read pairs in a cluster to output without evidence from a split read event. | 2 |
+| | --generate_image | Generate a plot containing the assembled reads used to create a contig sequence with a called variant along with genes and transcripts associated with the event - requires gene_annotation_file in configuration file to be set with GTF file containing transcript annotations. | False |
+| | --hostname | The hostname for the blat server. | localhost |
+| | -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
+| | -f, --filter_list | A file containing specific variant events to filter out. | None |
+| | -n, --nprocessors | The number of processors to use for analysis. | 1 |
+| | -s, --start_blat_sever | Option to indicate that a blat server needs to be started before analysis begins. A random part number and the localhost will be used if neither is specified. | False |
+| | -k, --keep_blat_server | Option to keep the blat server running after the analysis completes. | False |
+| | -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
+| | -c, --config | The configuration filename that contains additional parameters. | None |
+| | | | |
+| start_blat_server | | Start the blat server prior to performing the analysis | NA |
+| | -h, --help | Show the help message and exit. | NA |
+| | --hostname | The hostname for the blat server. | localhost |
+| | -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
+| | -c, --config | The configuration filename that contains additional parameters. | None |
+| | | | |
+| prepare_reference_data | | Extract the reference sequence from all the input target regions and store them in files to access during analysis. | NA |
+| | -h, --help | Show the help message and exit | NA |
+| | -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
+| | -c, --config | The configuration filename that contains additional parameters. | None |
+| | -n, --nprocessors | The number of processors to use for analysis. | 1 |
 
 Output files and formats
 -----------
