@@ -36,7 +36,17 @@ python <PATH_TO_BREAKMER_DIR>/breakmer.py -h
 
 Analyze all the target genes specified in the targets bed file.
 ```
-python <path to breakmer scripts>/breakmer.py <options> <path to breakmer configuration file>
+python <path to breakmer scripts>/breakmer.py run <options> -c <path to breakmer configuration file>
+```
+
+Prepare the reference data files before starting the analysis.
+```
+python <path to breakmer scripts>/breakmer.py prepare_reference_data <options> -c <path to breakmer configuration file>
+```
+
+Start the blat server on a specific host and port.
+```
+python <path to breakmer scripts>/breakmer.py start_blat_server <options> -c <path to breakmer configuration file>
 ```
 
 Analyze a subset of genes specified in a file.
