@@ -30,7 +30,7 @@ class ParamManager:
         logging_name (str):            Logging string name object for logging messages.
     """
 
-    def __init__(self, fncCmd, arguments):
+    def __init__(self, arguments):
         """Initialize ParamManager class.
 
         Args:
@@ -47,7 +47,7 @@ class ParamManager:
         self.filter = None
         self.targets = {}
         self.paths = {}
-        self.fncCmd = fncCmd
+        self.fncCmd = arguments.fncCmd
         self.set_params(arguments)
 
     def set_params(self, arguments):
