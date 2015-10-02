@@ -204,11 +204,13 @@ BreaKmer parameters
 | -k, --keep_blat_server | Option to keep the blat server running after the analysis completes. | False |
 | -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
 | -c, --config | The configuration filename that contains additional parameters. | None |
+| | | |
 | start_blat_server | Start the blat server prior to performing the analysis | NA |
 | -h, --help | Show the help message and exit. | NA |
 | --hostname | The hostname for the blat server. | localhost |
 | -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
 | -c, --config | The configuration filename that contains additional parameters. | None |
+| | | |
 | prepare_reference_data | Extract the reference sequence from all the input target regions and store them in files to access during analysis. | NA |
 | -h, --help | Show the help message and exit | NA |
 | -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
