@@ -298,7 +298,7 @@ class RealignValues:
                               'matches': int(values[4]),
                               'mismatches': int(values[5]),
                               'ngaps': int(values[6]),
-                              'qStart': int(values[7]),
+                              'qStart': int(values[7]) - 1,
                               'qEnd': int(values[8]),
                               'tStart': int(values[9]) - 1,
                               'tEnd': int(values[10]),
@@ -404,6 +404,7 @@ class RealignValues:
         coordOffset = 0
         if offset is not None:
             coordOffset = offset
+        # print 'Offset', offset
         self.valueDict['tStart'] = coordOffset + int(self.valueDict['tStart'])
         self.valueDict['tEnd'] = coordOffset + int(self.valueDict['tEnd'])
 
@@ -417,6 +418,7 @@ class BlatResult:
     def __init__(self, resultValues, refName, offset, programName, alignRefFn, querySeq, scope):
         self.loggingName = 'breakmer.realignment.blat_result'
         self.realignProgram = programName
+        self.resultValues = None
         self.values = None # self.set_values(blatResultValues, refName, offset)
         self.matches = None # Matches(self.values)
         self.gaps = None # Gaps(self.values)
@@ -429,7 +431,7 @@ class BlatResult:
         self.alignScore = None #self.get_nmatch_total() + (float(self.get_nmatch_total()) / float(self.get_seq_size('query')))
         self.ngaps = None # self.get_total_num_gaps()
 
-        self.meanCov = 0.0
+        self.alignFreq = 0.0
         self.seg_overlap = [0, 0]
         self.cigar = ''
 
@@ -457,7 +459,7 @@ class BlatResult:
         """
         realignVals = RealignValues(resultValues, self.realignProgram, alignRefFn, querySeq, scope)
         realignVals.adjust_values(refName, offset)
-
+        self.resultValues = realignVals.valueDict
         self.values = realignVals.valueDict
         self.matches = Matches(self.values)
         self.gaps = Gaps(self.values)
@@ -501,6 +503,7 @@ class BlatResult:
         return self.breakpts.svBreakpoints
 
     def calcMilliBad(self):
+        """ """
         badAlign = 0.0
         queryAlignSize = self.qend() - self.qstart()
         refAlignSize = self.tend() - self.tstart()
@@ -516,8 +519,8 @@ class BlatResult:
             badAlign = (1000 * (self.matches.get_mismatches() + insertFactor + round(3 * math.log(1 + sizeDif)))) / totalMatches
         return badAlign * 0.1
 
-    def set_mean_cov(self, meanCov):
-        self.meanCov = meanCov
+    def set_realign_freq(self, alignFreq):
+        self.alignFreq = alignFreq
 
     def set_segment_overlap(self, right, left):
         self.seg_overlap = [left, right]
@@ -673,7 +676,7 @@ class BlatResult:
         return "\t".join([str(x) for x in self.values])
 
     def get_len(self):
-        return self.qend - self.qstart
+        return self.qend() - self.qstart()
 
     def get_coords(self, alignType):
         """ """

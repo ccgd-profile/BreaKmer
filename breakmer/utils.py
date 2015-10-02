@@ -45,27 +45,32 @@ def which(program):
 
 
 def median(lst):
-    """
+    """Returns the median value of a list of values.
+
+    Args:
+        lst (list):       List of numeric values
+    Returns:
+        median (numeric): Median value from list.
     """
 
     lst = sorted(lst)
     if len(lst) < 1:
-            return None
+        return None
     if len(lst) % 2 == 1:
-            return lst[((len(lst) + 1) / 2) - 1]
+        return lst[((len(lst) + 1) / 2) - 1]
     else:
-            return float(sum(lst[(len(lst) / 2) - 1:(len(lst) / 2) + 1])) / 2.0
+        return float(sum(lst[(len(lst) / 2) - 1:(len(lst) / 2) + 1])) / 2.0
 
 
 def percentile(N, percent, key=lambda x: x):
-    """
-    Find the percentile of a list of values.
+    """Find the percentile of a list of values.
 
-    @parameter N - is a list of values. Note N MUST BE already sorted.
-    @parameter percent - a float value from 0.0 to 1.0.
-    @parameter key - optional key function to compute value from each element of N.
-
-    @return - the percentile of the values
+    Args:
+        N (list):             List of numeric values. N MUST BE sorted.
+        percent (float):      Percentage value ranging from 0.0 to 1.0.
+        key (lambda):         A function to compute a value from each element of N.
+    Returns:
+        percentile (numeric): The percentile of the values
     """
 
     if not N:
@@ -148,6 +153,13 @@ def run_cutadapt(cutadapt, cutadapt_config_f, input_fn, output_fn, logging_src):
 
 def log(name, level, msg):
     """Write log message to the appropriate level.
+
+    Args:
+        name (str):  The logger name, typically the module name.
+        level (str): The level of debugging classification.
+        msg (str):   The message to log.
+    Returns:
+        None
     """
 
     logger = logging.getLogger(name)
@@ -508,7 +520,7 @@ def get_fastq_reads(fn, sv_reads):
     """
     """
 
-    read_len = 0
+    # read_len = 0
     filtered_fq_fn = fn.split(".fastq")[0] + "_filtered.fastq"
     filt_fq = open(filtered_fq_fn, 'w')
     fq_recs = {}
@@ -541,17 +553,16 @@ def get_fastq_reads(fn, sv_reads):
                         if cleaned_seq.find(sc_seq) == -1:
                             # Don't add, just trimmed clipped portion.
                             add = False
-#    else: print qname, 'not in sv reads'
         if add:
             filt_fq.write(header + "\n" + seq + "\n+\n" + qual + "\n")
             fr = fq_read(header, seq, qual, indel_meta)
-            read_len = max(read_len, len(fr.seq))
+            # read_len = max(read_len, len(fr.seq))
             seq = fr.seq
             if seq not in fq_recs:
                 fq_recs[seq] = []
             fq_recs[seq].append(fr)
     filt_fq.close()
-    return filtered_fq_fn, fq_recs, read_len
+    return filtered_fq_fn, fq_recs
 
 
 def get_fastq_reads_old(fn, sv_reads):
@@ -594,77 +605,23 @@ def get_fastq_reads_old(fn, sv_reads):
     return fq_recs, read_len
 
 
-def load_kmers(fns, kmers):
-    """
-    """
-
-    if not fns:
-            return kmers
-
-    fns = fns.split(",")
-    for fn in fns:
-            f = open(fn, 'rU')
-            for line in f.readlines():
-                    line = line.strip()
-                    mer, count = line.split()
-                    if mer not in kmers:
-                            kmers[mer] = 0
-                    kmers[mer] += int(count)
-    return kmers
-
-
-# def setup_rmask_all(rmask_fn):
+# def load_kmers(fns, kmers):
 #     """
 #     """
 
-#     logger = logging.getLogger('root')
+#     if not fns:
+#             return kmers
 
-#     rmask = {}
-#     f = open(rmask_fn, 'rU')
-#     flines = f.readlines()
-#     for line in flines:
-#         line = line.strip()
-#         rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
-#         rchr = rchr.replace('chr', '')
-#         if rchr not in rmask:
-#             rmask[rchr] = []
-#         rmask[rchr].append((rchr, int(rbp1), int(rbp2), rname))
-#     return rmask
-
-
-# def setup_rmask(gene_coords, ref_path, rmask_fn):
-#     logger = logging.getLogger('root')
-#     chrom, s, e, name, intervals = gene_coords
-#     mask_out_fn = os.path.join(ref_path, name + '_rep_mask.bed')
-#     marker_fn = get_marker_fn(mask_out_fn)
-
-#     rmask = []
-#     if not os.path.isfile(marker_fn):
-#         fout = open(mask_out_fn, 'w')
-#         f = open(rmask_fn, 'rU')
-#         flines = f.readlines()
-#         for line in flines:
-#             line = line.strip()
-#             rchr, rbp1, rbp2, rname = line.split("\t")[0:4]
-#             rchr = rchr.replace('chr', '')
-#             if rchr == chrom:
-#                 if int(rbp1) >= int(s) and int(rbp2) <= int(e):
-#                     fout.write("\t".join([str(x) for x in [rchr, int(rbp1), int(rbp2), rname]]) + "\n")
-#                     rmask.append((rchr, int(rbp1), int(rbp2), rname))
-#         f.close()
-#         fout.close()
-#         cmd = 'touch %s' % marker_fn
-#         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#         output, errors = p.communicate()
-#         logger.info('Completed writing repeat mask file %s, touching marker file %s' % (mask_out_fn, marker_fn))
-#     else:
-#         rep_f = open(mask_out_fn, 'rU')
-#         rep_flines = rep_f.readlines()
-#         for line in rep_flines:
-#             line = line.strip()
-#             rchr, rbp1, rbp2, rname = line.split()
-#             rmask.append((rchr, int(rbp1), int(rbp2), rname))
-#     return rmask
+#     fns = fns.split(",")
+#     for fn in fns:
+#             f = open(fn, 'rU')
+#             for line in f.readlines():
+#                     line = line.strip()
+#                     mer, count = line.split()
+#                     if mer not in kmers:
+#                             kmers[mer] = 0
+#                     kmers[mer] += int(count)
+#     return kmers
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):
@@ -808,7 +765,6 @@ def get_overlap_index_mm(a, b):
             if nmismatch[0] > 1 or nmismatch[1] > 3:
                 break
             c += 1
-#    print c, match_len, i, c== match_len, a[i:], b[:len(a[i:])]
         if c == match_len:
             match = True
         i += 1
@@ -835,8 +791,6 @@ def get_overlap_index(a, b):
             if aa != bb:
                 nmismatch += 1
         i += 1
-#  while a[i:] != b[:len(a[i:])]:
-#    i += 1
     return i - 1
 
 
@@ -897,57 +851,3 @@ class FastqFile(object):
                        'end': end,
                        'bc': bc}
         return (header, seq, qual)
-
-
-# class Annotation:
-#     def __init__(self):
-#         self.genes = {}
-#         self.logging_name = 'breakmer.utils.Annotation'
-
-#     def add_genes(self, gene_fn):
-#         log(self.logging_name, 'info', 'Adding gene annotations from %s' % gene_fn)
-#         gene_f = open(gene_fn, 'r')
-#         gene_flines = gene_f.readlines()
-#         for line in gene_flines[1:]:
-#             line = line.strip()
-#             linesplit = line.split()
-#             chrom = linesplit[2]
-#             start = int(linesplit[4])
-#             end = int(linesplit[5])
-#             geneid = linesplit[12]
-#             if geneid in self.genes:
-#                 if start <= self.genes[geneid][1] and end >= self.genes[geneid][2]:
-#                     self.genes[geneid] = [chrom, start, end]
-#             else:
-#                 self.genes[geneid] = [chrom, start, end]
-#         gene_f.close()
-
-#     def add_regions(self, regions_bed_fn):
-#         region_f = open(regions_bed_fn, 'rU')
-#         region_lines = region_f.readlines()
-#         for line in region_lines:
-#             line = line.strip()
-#             chrom, start, end, name = line.split()
-#             if name not in self.genes:
-#                 self.genes[name] = [chrom, int(start), int(end)]
-#         log(self.logging_name, 'info', 'Adding in %d other target regions' % len(region_lines))
-
-#     def set_gene(self, chrom, pos):
-#         ann_genes = []
-#         if chrom.find('chr') == -1:
-#             chrom = 'chr' + str(chrom)
-#         for g in self.genes:
-#             gs = self.genes[g][1]
-#             ge = self.genes[g][2]
-#             if chrom == self.genes[g][0]:
-#                 if len(pos) == 1:
-#                     if int(pos[0]) >= gs and int(pos[0]) <= ge:
-#                         ann_genes.append(g)
-#                         break
-#                 else:
-#                     # Find genes between pos1 and pos2
-#                     if (int(pos[0]) >= gs and int(pos[0]) <= ge) or (int(pos[1]) >= gs and int(pos[1]) <= ge):
-#                         ann_genes.append(g)
-#         if len(ann_genes) == 0:
-#             ann_genes = ['intergenic']
-#         return ",".join(ann_genes)

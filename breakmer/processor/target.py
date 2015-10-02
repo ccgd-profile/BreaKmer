@@ -21,7 +21,7 @@ def load_kmers(fns, kmers):
     containing it as the value.
 
     Args:
-        fns (str):      Filename of the kmer flat files.
+        fns (str):      Filenames of the kmer flat files.
         kmers (dict):   Dictionary of the kmer, count values,
     Returns:
         None
@@ -45,28 +45,37 @@ class Variation:
     """This class handles the storage and interaction of all the variant reads that could
     be contributing to the support of a structural variant.
 
-
+    Attributes:
+        params (ParamManager):      Parameters for breakmer analysis.
+        loggingName (str):          Module name for logging file purposes.
+        var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects (breakmer.process.bam_handler.VariantReadTracker).
+        cleaned_read_recs (dict):   Dictionary containing the cleaned reads.
+        files (dict):               Dicionary containing paths to file names needed for analysis.
+        kmer_clusters (list):
+        kmers (dict):
+        results (list):
+        discReadClusters (dict):
+        discReadFormatted (list):
     """
 
     def __init__(self, params):
+        self.loggingName = 'breakmer.processor.target'
         self.params = params
         self.var_reads = {}
-        self.sv_reads = None
         self.cleaned_read_recs = None
         self.kmer_clusters = []
         self.kmers = {}
         self.results = []
         self.files = {}
-        self.svs = {}
+        # self.svs = {}
         self.discReadClusters = {}
         self.discReadFormatted = []
-        self.loggingName = 'breakmer.processor.target'
 
     def setup_cleaned_reads(self, sampleType):
         """Initiate the cleaned_read_recs dictionary for sample or normal data.
 
         Args:
-            sampleType (str): String indicating the sample type - sv / normal
+            sampleType (str): String indicating the sample type - sv or normal
         Returns:
             None
         Raises:
@@ -104,14 +113,16 @@ class Variation:
             check = False
         return check
 
-    def get_sv_reads(self, type):
+    def get_sv_reads(self, sampleType):
         """
         """
-        return self.var_reads[type].sv
+
+        return self.var_reads[sampleType].sv
 
     def add_result(self, result):
         """
         """
+
         self.results.append(result)
 
     def set_var_reads(self, sampleType, bamFile, chrom, start, end, regionBuffer):
@@ -130,11 +141,13 @@ class Variation:
             None
         """
 
-        # Get VariantReadTracker object from bam_handler module.
+        # Get VariantReadTracker object from bam_handler module and extract reads.
         self.var_reads[sampleType] = bam_handler.get_variant_reads(bamFile, chrom, start - regionBuffer, end - regionBuffer, self.params.get_param('insertsize_thresh'))
         # Iterate through reads that are not perfectly aligned and store necessary information for downstream analysis.
+        # Store the reads with softclipped sequences that are high quality in VariantReadTracker.sv dictionary.
         self.var_reads[sampleType].check_clippings(self.params.get_kmer_size(), start, end)
 
+        # Write the bam, fastq, and fasta files with the extracted reads.
         svBam = None
         if sampleType == 'sv':
             svBam = pysam.Samfile(self.files['sv_bam'], 'wb', template=pysam.Samfile(bamFile, 'rb'))
@@ -145,6 +158,7 @@ class Variation:
         readsFq.close()
         scFa.close()
 
+        # Close the bam file, sort and index.
         if sampleType == 'sv':
             svBam.close()
             utils.log(self.loggingName, 'info', 'Sorting bam file %s to %s' % (self.files['sv_bam'], self.files['sv_bam_sorted']))
@@ -184,20 +198,21 @@ class Variation:
     def clean_reads(self, dataPath, name, sampleType):
         """Trim adapter sequences from the extracted reads, format and organize
         the cleaned reads into new files.
+
         Cutadapt is run to trim the adapter sequences from the sequence reads to
-        remove any 'noise' that bogs down the assembly process or analysis. The
-        cleaned reads output from cutadapt are then re-processed to determine
-        if the soft-clipped sequences were trimmed off or not to further filter
-        out reads. The soft-clipped sequences that remain are stored and a new
-        fastq file is written.
+        remove any 'noise' from the assembly process. The cleaned reads output 
+        from cutadapt are then reprocessed to determine if the softclipped sequences 
+        were trimmed off or not to further filter out reads. 
+
+        The softclipped sequences that remain are stored and a new fastq file is written.
 
         Args:
-            dataPath (str): The path to the data files for this target.
-            name (str):     The target name.
-            type (str):     A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+            dataPath (str):   The path to the data files for this target.
+            name (str):       The target name.
+            type (str):       A string indicating a tumor ('sv') or normal ('norm') sample being processed.
         Return:
-            check (boolean): A boolean to indicate whether the are any reads left after
-                             cleaning is complete.
+            check (boolean):  A boolean to indicate whether the are any reads left after
+                              cleaning is complete.
         """
 
         cutadapt = self.params.get_param('cutadapt')  # Cutadapt binary
@@ -208,7 +223,7 @@ class Variation:
         output, errors = utils.run_cutadapt(cutadapt, cutadaptConfigFn, self.files['%s_fq' % sampleType], self.files['%s_cleaned_fq' % sampleType], self.loggingName)
 
         self.setup_cleaned_reads(sampleType)
-        self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType], self.read_len = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
+        self.files['%s_cleaned_fq' % sampleType], self.cleaned_read_recs[sampleType] = utils.get_fastq_reads(self.files['%s_cleaned_fq' % sampleType], self.get_sv_reads(sampleType))
         self.clear_sv_reads(sampleType)
         check = self.continue_analysis_check(sampleType)
         utils.log(self.loggingName, 'info', 'Clean reads exist %s' % check)
@@ -216,6 +231,7 @@ class Variation:
 
     def set_reference_kmers(self, targetRefFns):
         """Set the reference sequence kmers"""
+
         self.kmers['ref'] = {}
         for i in range(len(targetRefFns)):
             utils.log(self.loggingName, 'info', 'Indexing kmers for reference sequence %s' % targetRefFns[i])
@@ -352,7 +368,7 @@ class Variation:
             self.discReadFormatted.append((headerStr, outStr))
 
 
-class TargetManager:
+class TargetManager(object):
     """TargetManager class handles all the high level information relating to a target.
     The analysis is peformed at the target level, so this class contains all the information
     necessary to perform an independent analysis.
@@ -362,10 +378,8 @@ class TargetManager:
         loggingName (str):          Module name for logging file purposes.
         name (str):                 Target name specified in the input bed file.
         chrom (str):                Chromosome ID as specified in the input bed file.
-        start (int):                Genomic position for the target region (minimum value
-                                    among all intervals).
-        end (int):                  Genomic position for the target region (maximum value among
-                                    all intervals).
+        start (int):                Genomic position for the target region (minimum value among all intervals).
+        end (int):                  Genomic position for the target region (maximum value among all intervals).
         paths (dict):               Contains the analysis paths for this target.
         files (dict):               Dicionary containing paths to file names needed for analysis.
         read_len (int):             Length of a single read.
@@ -382,14 +396,27 @@ class TargetManager:
         self.end = None
         self.paths = {}
         self.files = {}
-        self.read_len = params.get_param('readLen')
-        # self.repeat_mask = None
+        self.readLen = int(params.get_param('readLen'))
         self.variation = Variation(params)
         self.regionBuffer = 200
         self.setup()
 
+    @property
+    def values(self):
+        """Return the defined features of this target
+        """
+        return (self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
+
+    @property
+    def fnc(self):
+        """Return the function of the program.
+        """
+        return self.params.fncCmd
+
     def setup(self):
         """Setup the TargetManager object with the input params.
+
+        Define the location (chrom, start, end), file paths, directory paths, and name.
 
         Args:
             None
@@ -397,21 +424,37 @@ class TargetManager:
             None
         """
 
-        intervals = self.params.targets[self.name]
+        # Define the target boundaries based on the intervals input.
+        # The target start is the minimum start of the intervals and the end
+        # is the maximum end of the intervals.
+        intervals = self.params.get_target_intervals(self.name)
         for values in intervals:
             chrom, start, end = values[0], int(values[1]), int(values[2])
-            if not self.chrom:
+            if self.chrom is None:
                 self.chrom = chrom
-            if not self.start:
+            if self.start is None:
                 self.start = start
-            if not self.end:
-                self.end = end
-            if start < self.start:
+            elif start < self.start:
                 self.start = start
-            if end > self.end:
+            if self.end is None:
                 self.end = end
+            elif end > self.end:
+                self.end = end
+        # print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
+        '''
+        Each target analyzed has a set of directories associated with it.
+        targets/
+            <target name>/
+                data/
+                contigs/
+                kmers/
+
+        There is separate directory for each target in the output directory.
+        output/
+            <target name>/
+        '''
         self.add_path('ref_data', os.path.join(self.params.paths['ref_data'], self.name))
         if self.params.fncCmd == 'run':
             self.add_path('base', os.path.join(self.params.paths['targets'], self.name))
@@ -419,10 +462,20 @@ class TargetManager:
             self.add_path('contigs', os.path.join(self.paths['base'], 'contigs'))
             self.add_path('kmers', os.path.join(self.paths['base'], 'kmers'))
             self.add_path('output', os.path.join(self.params.paths['output'], self.name))
+
+        '''
+        Each target has reference files associated with it.
+        <ref_data_dir>/
+            <target_name>/
+                <target_name>_forward_refseq.fa
+                <target_name>_reverse_refseq.fa
+                <target_name>_forward_refseq.fa_dump
+                <target_name>_reverse_refseq.fa_dump
+        '''
         self.files['target_ref_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa')]
-        ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
-        ref_fa_marker_f.write(self.params.opts['reference_fasta'])
-        ref_fa_marker_f.close()
+        # ref_fa_marker_f = open(os.path.join(self.paths['ref_data'], '.reference_fasta'), 'w')
+        # ref_fa_marker_f.write(self.params.get_param('reference_fasta'))
+        # ref_fa_marker_f.close()
         self.files['ref_kmer_dump_fn'] = [os.path.join(self.paths['ref_data'], self.name + '_forward_refseq.fa_dump'), os.path.join(self.paths['ref_data'], self.name + '_reverse_refseq.fa_dump')]
 
     def add_path(self, key, path):
@@ -443,24 +496,30 @@ class TargetManager:
             os.makedirs(self.paths[key])
 
     def set_ref_data(self):
-        """
+        """Write the reference sequence to a fasta file for this specific target if it does not
+        exist.
+
+        Args:
+            None
+        Returns:
+            None
+        Raise:
+            None
         """
 
         # Write reference fasta file if needed.
         for i in range(len(self.files['target_ref_fn'])):
             fn = self.files['target_ref_fn'][i]
-            direction = "forward"
-            if fn.find("forward") == -1:
-                direction = "reverse"
+            direction = "forward" if fn.find("forward") != -1 else "reverse"
             utils.log(self.loggingName, 'info', 'Extracting refseq sequence and writing %s' % fn)
-            utils.extract_refseq_fa(self.get_values(), self.paths['ref_data'], self.params.opts['reference_fasta'], direction, fn)
+            utils.extract_refseq_fa(self.values, self.paths['ref_data'], self.params.get_param('reference_fasta'), direction, fn)
 
+        # If using blatn for target realignment, the db must be available.
         blastn = self.params.get_param('blast')
         if blastn is not None:
             # Check if blast db files are available for each target.
             if not os.path.isfile(self.files['target_ref_fn'][0] + '.nin'):
-                # Use makedb
-                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')
+                makedb = os.path.join(os.path.split(blastn)[0], 'makeblastdb')  # Create blast db
                 cmd = "%s -in %s -dbtype 'nucl' -out %s" % (makedb, self.files['target_ref_fn'][0], self.files['target_ref_fn'][0])
                 utils.log(self.loggingName, 'info', 'Creating blast db files for target %s with reference file %s' % (self.name, self.files['target_ref_fn'][0]))
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -472,6 +531,9 @@ class TargetManager:
         """Entry function to extract sequence reads from sample or normal bam file.
         It extracts and cleans the sample reads from the target region that may
         be used to build a variant contig.
+
+        1. Extract bam reads
+        2. Clean reads
 
         Args:
             None
@@ -491,18 +553,9 @@ class TargetManager:
             check = False
         return check
 
-    def clean_reads(self, sampleType):
-        """Wrapper for Variation clean_reads function.
-        Args:
-            type (str): A string indicating a tumor ('sv') or normal ('norm') sample being processed.
-        Return:
-            check (boolean): A boolean to indicate whether the are any reads left after
-                             cleaning is complete.
-        """
-        return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
-
     def extract_bam_reads(self, sampleType):
-        """
+        """Wrapper for Variation extract_bam_reads function.
+
         Args:
             sampleType (str): Indicates a tumor ('sv') or normal ('norm') sample being processed.
         Return:
@@ -514,18 +567,40 @@ class TargetManager:
         bamType = 'sample'
         if sampleType == 'norm':
             bamType = 'normal'
-        bamFile = self.params.opts['%s_bam_file' % bamType]
+        bamFile = self.params.get_param('%s_bam_file' % bamType)
         utils.log(self.loggingName, 'info', 'Extracting bam reads from %s to %s' % (bamFile, self.variation.files['%s_fq' % sampleType]))
         self.variation.set_var_reads(sampleType, bamFile, self.chrom, self.start, self.end, self.regionBuffer)
 
+    def clean_reads(self, sampleType):
+        """Wrapper for Variation clean_reads function.
+
+        Args:
+            type (str):      A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+        Return:
+            check (boolean): A boolean to indicate whether the are any reads left after
+                             cleaning is complete.
+        """
+
+        return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
+
     def compare_kmers(self):
         """Obtain the sample only kmers and initiate assembly of reads with these kmers.
+
+        Args:
+            None
+        Returns:
+            None
         """
 
-        self.variation.compare_kmers(self.paths['kmers'], self.name, self.read_len, self.files['target_ref_fn'])
+        self.variation.compare_kmers(self.paths['kmers'], self.name, self.readLen, self.files['target_ref_fn'])
 
     def resolve_sv(self):
-        """
+        """Perform operations on the contig object that was generated from the split reads in the target.
+
+        Args:
+            None
+        Returns:
+            None
         """
 
         iter = 1
@@ -534,7 +609,7 @@ class TargetManager:
         for contig in contigs:
             contigId = self.name + '_contig' + str(iter)
             utils.log(self.loggingName, 'info', 'Assessing contig %s, %s' % (contigId, contig.seq))
-            contig.set_meta_information(contigId, self.params, self.get_values(), self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
+            contig.set_meta_information(contigId, self.params, self.values, self.paths['contigs'], self.variation.files['kmer_clusters'], self.variation)
             contig.query_ref(self.files['target_ref_fn'])
             contig.make_calls()
             if contig.svEventResult:
@@ -561,12 +636,6 @@ class TargetManager:
         """
 
         return self.params.targets[self.name]
-
-    def get_values(self):
-        """Return the defined features of this target
-        """
-
-        return(self.chrom, self.start, self.end, self.name, self.get_target_intervals(), self.regionBuffer)
 
     def get_sv_reads(self, type):
         """ """
@@ -603,7 +672,6 @@ class TargetManager:
         return self.variation.results
 
     def get_formatted_output(self):
-        """
-        """
+        """ """
 
         return self.variation.get_formatted_output()

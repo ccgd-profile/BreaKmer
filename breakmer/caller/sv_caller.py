@@ -18,7 +18,7 @@ class FilterValues:
     """
     def __init__(self):
         self.maxEventSize = None
-        self.resultMeanHitFreq = None
+        self.realignFreq = None
         self.brkptCoverages = None
         self.flankMatchPercents = None
         self.minSegmentLen = None
@@ -27,7 +27,7 @@ class FilterValues:
         self.startEndMissingQueryCoverage = None
         self.missingQueryCoverage = None
         self.maxSegmentOverlap = None
-        self.maxMeanCoverage = None
+        # self.maxMeanCoverage = None
         self.nReadStrands = None
         self.maxRealignmentGap = None
         self.deletedSeqs = None
@@ -35,7 +35,7 @@ class FilterValues:
 
     def set_indel_values(self, blatResult, brkptCoverages):
         """ """
-        self.resultMeanHitFreq = blatResult.meanCov
+        self.realignFreq = blatResult.alignFreq
         self.maxEventSize = blatResult.indel_maxevent_size[0]
         self.deletedSeqs = blatResult.get_indel_seqs('del')
         self.insertedSeqs = blatResult.get_indel_seqs('ins')
@@ -60,7 +60,7 @@ class FilterValues:
         self.nReadStrands = svEvent.check_read_strands()
         self.maxRealignmentGap = max(blatResult.gaps.get_gap_sizes())
         # Use this value to determine the uniqueness of the realignment
-        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
+        self.realignFreq = svEvent.get_realign_freq()
 
     def set_rearr_values(self, svEvent):
         """ """
@@ -71,14 +71,14 @@ class FilterValues:
         self.minSegmentLen = blatResult.get_nmatch_total()
         self.missingQueryCoverage = svEvent.get_missing_query_coverage()
         self.maxSegmentOverlap = max(blatResult.seg_overlap)
-        self.maxMeanCoverage = svEvent.get_max_meanCoverage()
+        self.realignFreq = svEvent.get_realign_freq()
 
     def get_formatted_output_values(self, svType, svSubtype):
         """ """
         outputValues = {}
         if svType == 'indel':
             outputValues['maxeventSize'] = self.maxEventSize
-            outputValues['meanHitFreq'] = self.resultMeanHitFreq
+            outputValues['realignFreq'] = self.realignFreq
             # Store the minimum value.
             outputValues['breakpointCoverages'] = self.brkptCoverages[0]
             outputValues['minSeqEdgeRealignmentPercent'] = min(self.flankMatchPercents)
@@ -89,9 +89,9 @@ class FilterValues:
             outputValues['minSegmentLen'] = self.minSegmentLen
             outputValues['missingQueryCoverage'] = self.missingQueryCoverage
             outputValues['maxSegmentOverlap'] = self.maxSegmentOverlap
-            outputValues['maxSegmentMeanHitFreq'] = self.maxMeanCoverage
+            outputValues['realignFreq'] = ",".join([str(x) for x in self.realignFreq])
             if svSubtype == 'trl':
-                outputValues['breakpointCoverages'] = self.brkptCoverages
+                outputValues['breakpointCoverages'] = ",".join([str(x) for x in self.brkptCoverages])
                 outputValues['sequenceComplexity'] = self.seqComplexity
                 outputValues['startEndMissingQueryCoverage'] = self.startEndMissingQueryCoverage
                 outputValues['nReadStrands'] = self.nReadStrands
@@ -127,10 +127,13 @@ class SVResult:
         self.genes = None
         self.repeatOverlapPercent = None
         self.realignmentUniqueness = None
-        self.filtered = {'status': False, 'reason': ''}
+        self.filtered = {'status': False, 'reason': []}
         self.filterValues = FilterValues()
 
     def format_indel_values(self, svEvent):
+        """
+        """
+
         self.targetName = svEvent.contig.get_target_name()
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
@@ -138,9 +141,10 @@ class SVResult:
         self.genes = blatResult.get_gene_anno()
         self.repeatOverlapPercent = 0.0
         self.totalMatching = blatResult.get_nmatch_total()
-        self.realignmentUniqueness = blatResult.meanCov
+        self.realignmentUniqueness = blatResult.alignFreq
         self.totalMismatches = blatResult.get_nmatches('mismatch')
         self.strands = blatResult.strand
+        self.fullBreakpointStr = svEvent.get_brkpt_str('target')
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
         self.breakpointCoverageDepth = svEvent.get_brkpt_depths()
         # List of insertion or deletion sizes that coorespond with the breakpoints
@@ -149,24 +153,17 @@ class SVResult:
         self.svType = 'indel'
         contigCountTracker = svEvent.contig.get_contig_count_tracker()
         contigBrkpts = []
-        # print 'sv_caller.py format_indel_values() contigBreakpoints', blatResult.breakpts.contigBreakpoints
         for x in blatResult.breakpts.contigBreakpoints:
             for bp in x:
                 contigBrkpts.append(bp)
-        # print 'sv_caller.py format_indel_values() contigBrkpts', contigBrkpts
         self.splitReadCount = [contigCountTracker.get_counts(x, x, 'indel') for x in contigBrkpts]
         self.filterValues.set_indel_values(blatResult, self.splitReadCount)
-        # print 'Formatting indel values', self.contigSeq
-        # print 'contig id', self.contigId
-        # print 'target', self.targetName
 
     def format_rearrangement_values(self, svEvent):
         """ """
         utils.log(self.loggingName, 'info', 'Resolving SVs call from blat results')
         # Sort the stored blat results by the number of matches to the reference sequence.
         blatResSorted = sorted(svEvent.blatResults, key=lambda x: x[0])
-        # brkpts = SVBreakpoints() # {'t':{'in_target':None, 'other':None }, 'formatted':[], 'r':[], 'q': [[0,0],[]], 'chrs':[], 'brkpt_str':[], 'tcoords':[], 'f': []}
-        # res_values = {'target_breakpoints':[], 'align_cigar':[], 'sv_type':'', 'strands':[], 'mismatches':[], 'repeat_matching':[], 'anno_genes': [], 'disc_read_count': 0}
         resultValid = {'valid': True, 'repeatValid': True}
         maxRepeat = 0.0
 
@@ -181,11 +178,9 @@ class SVResult:
         for i, blatResultTuple in enumerate(blatResSorted):
             blatResult = blatResultTuple[1]
             resultValid['valid'] = resultValid['valid'] and blatResult.valid
-            # resultValid['repeatValid'] = resultValid['repeatValid'] and (blatResult.rep_man.simple_rep_overlap > 75.0)
             maxRepeat = max(maxRepeat, blatResult.repeat_overlap)
-            # self.repeatMatching.append(":".join([str(blatResult.repeat_overlap), str(blatResult.get_nmatch_total()), str(round(blatResult.mean_cov, 3))]))
             self.repeatOverlapPercent.append(blatResult.repeat_overlap)
-            self.realignmentUniqueness.append(blatResult.meanCov)
+            self.realignmentUniqueness.append(blatResult.alignFreq)
             self.totalMatching.append(blatResult.get_nmatch_total())
             self.genes.append(blatResult.get_gene_anno())
             self.alignCigar.append(blatResult.cigar)
@@ -204,14 +199,11 @@ class SVResult:
             self.filterValues.set_trl_values(svEvent)
         else:
             svEvent.set_brkpt_counts('rearr')
-            print 'format_rearrangement_values(), defining rearr'
-            rearrType, discReadCount = svEvent.define_rearr()
-            self.svType = 'rearrangement'
-            if rearrType != 'rearrangement':
-                self.svSubtype = rearrType
-            self.discReadCount = discReadCount
+            self.svType, self.svSubtype, self.discReadCount = svEvent.define_rearr()
             self.genes = list(set(self.genes))
+            self.description = svEvent.rearrDesc
             self.filterValues.set_rearr_values(svEvent)
+        self.realignmentUniqueness = self.filterValues.realignFreq
         self.targetName = svEvent.contig.get_target_name()
         self.fullBreakpointStr = svEvent.get_brkpt_str()
         self.targetBreakpointStr = svEvent.get_brkpt_str('target')
@@ -220,17 +212,10 @@ class SVResult:
         self.contigSeq = svEvent.get_contig_seq()
         self.contigId = svEvent.get_contig_id()
 
-    # def get_output_type(self):
-    #     """ """
-    #     outputType = self.svType
-    #     if self.svSubtype != '':
-    #         outputType += '_' + self.svSubtype
-    #     return outputType
-
     def set_filtered(self, filterReason):
         """ """
         self.filtered['status'] = True
-        self.filtered['reason'] = filterReason
+        self.filtered['reason'].append(filterReason)
 
     def get_old_formatted_output_values(self):
         """ """
@@ -300,6 +285,7 @@ class SVResult:
                      'Strands',
                      'Total_mismatches',
                      'Total_matching',
+                     'Realignment_uniqueness',
                      'Contig_ID',
                      'Contig_length',
                      'Contig_sequence',
@@ -321,11 +307,12 @@ class SVResult:
                    self.strands,
                    self.totalMismatches,
                    self.totalMatching,
+                   self.realignmentUniqueness,
                    self.contigId,
                    len(self.contigSeq),
                    self.contigSeq,
                    self.filtered['status'],
-                   self.filtered['reason']
+                   ','.join(self.filtered['reason'])
                    ]
 
         outListStr = []
@@ -343,28 +330,6 @@ class SVResult:
         """ """
         return self.filtered['status']
 
-    # def format_result(self, values):
-    #     res_lst = []
-    #     if values:
-    #         for v in values:
-    #             if not isinstance(values[v], list):
-    #                 values[v] = [values[v]]
-    #             self.resultValues[v] = ",".join([str(x) for x in values[v]])
-    #     if self.resultValues['sv_subtype']:
-    #         self.resultValues['sv_type'] += '_' + self.resultValues['sv_subtype']
-    #     return self.get_values()
-
-    # def get_values(self):
-    #     lst = ['anno_genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'repeat_matching', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']
-    #     out_lst = []
-    #     for l in lst:
-    #         if self.resultValues[l] == 'trl':
-    #             self.resultValues[l] = 'rearrangement'
-    #         out_lst.append(str(self.resultValues[l]))
-    #         if l == 'target_breakpoints':
-    #             self.resultValues['breakpoint_coverages'] = self.get_brkpt_coverages()
-    #     return out_lst
-
 
 class SVBreakpoints:
     def __init__(self):
@@ -376,6 +341,7 @@ class SVBreakpoints:
         self.chrs = []
         self.brkptStr = []
         self.tcoords = []
+        self.qcoords = []
         self.f = []
         self.counts = {'n': [], 'd': [], 'b': []}
         self.kmers = []
@@ -393,6 +359,7 @@ class SVBreakpoints:
         targetKey = 'target' if br.in_target else 'other'
         self.chrs.append(br.get_seq_name('ref'))
         self.tcoords.append((ts, te))
+        self.qcoords.append((qs, qe))
         tbrkpt = []
         filt_rep_start = None
         if i == 0:
@@ -442,26 +409,12 @@ class SVBreakpoints:
         self.genomicBrkpts['target'] = blatResult.get_genomic_brkpts()
         for brkpt in self.genomicBrkpts['target']:
             blatResult.set_sv_brkpt(brkpt, 'indel', 'target')
-        # brkpt_out = []
-        # bp_str = []
-        # chrm = 'chr' + str(blatResult.get_seq_name('ref'))
-        # if len(self.breakpts) > 0:
-        #     for b, s in zip(self.breakpts, self.indel_sizes):
-        #         if len(b) > 1:
-        #             bb = "-".join([str(x) for x in b])
-        #         else:
-        #             bb = str(b[0])
-        #         bstr = chrm + ":" + bb
-        #         if with_sizes:
-        #             bstr += " " + "(" + s + ")"
-        #         bp_str.append(bstr)
-        #     brkpt_out.append(",".join(bp_str))
-        # return ",".join(brkpt_out)
 
     def diff_chr(self):
         """Determine if the stored realignment results are on multiple chromosomes - indicating a
         translocation event.
         """
+        # print 'Rearr chrs', self.chrs, len(set(self.chrs))
         if len(set(self.chrs)) == 1:
             return False
         else:
@@ -469,7 +422,7 @@ class SVBreakpoints:
 
     def get_target_brkpt(self, key):
         """ """
-        return self.genomicBrkpts['target'] # target[key]
+        return self.genomicBrkpts['target']  # target[key]
 
     def get_brkpt_str(self, targetKey):
         """ """
@@ -514,10 +467,7 @@ class SVBreakpoints:
 
     def set_counts(self, svType, contig):
         """ """
-        # avg_comp, comp_vec = calc_contig_complexity(self.contig_seq)
-        # brkpt_rep_filt = False
-        # brkpt_counts = {'n': [], 'd': [], 'b': []}
-        # brkpt_kmers = []
+
         contigCountTracker = contig.get_contig_count_tracker()
         for qb in self.q[1]:
             left_idx = qb[0] - min(qb[1], 5)
@@ -527,11 +477,8 @@ class SVBreakpoints:
             self.counts['d'].append(min(contigCountTracker.get_counts((qb[0] - 1), (qb[0] + 1), svType)))
             self.counts['b'].append(contigCountTracker.get_counts(qb[0], qb[0], svType))
             self.kmers.append(contig.get_kmer_locs()[qb[0]])
-            # brkpt_rep_filt = brkpt_rep_filt or (comp_vec[qb[0]] < (avg_comp / 2))
             utils.log(self.loggingName, 'debug', 'Read count around breakpoint %d : %s' % (qb[0], ",".join([str(x) for x in bc])))
         utils.log(self.loggingName, 'debug', 'Kmer count around breakpoints %s' % (",".join([str(x) for x in self.kmers])))
-        # brkpt_rep_filt = brkpt_rep_filt or (len(filter(lambda x: x, brkpts['f'])) > 0)
-        # return brkpt_counts, brkpt_kmers, brkpt_rep_filt
 
 
 class SVEvent:
@@ -543,24 +490,17 @@ class SVEvent:
         self.blatResults = []
         self.blatResultsSorted = []
         self.annotated = False
-        # self.sample_bam = sample_bam
+        self.failed_annotation = False
         self.qlen = 0
         self.nmatch = 0
         self.in_target = False
         self.contig = contig
-        # self.query_region = query_region
-        # self.contig_seq = contig_vals[0]
-        # self.contig_rcounts = contig_vals[1]
-        # self.contig_id = contig_vals[2]
-        # self.contig_reads = contig_vals[3]
-        # self.nkmers = contig_vals[4]
-        # self.contig_kmer_locs = contig_vals[5]
         self.valid = True
         self.in_rep = True
         self.querySize = None
         self.queryCoverage = [0] * len(contig.seq)
-        self.homology = {'non': [False, None], 'in': [False, None]}
         self.brkpts = SVBreakpoints()
+        self.rearrDesc = None
         self.resultValues = SVResult()
         self.add(blatResult)
 
@@ -571,7 +511,6 @@ class SVEvent:
 
         # Add the number of hits to the query region
         for i in range(queryStartCoord, queryEndCoord):
-            # print 'incrementing query cov', i, self.queryCoverage, len(self.queryCoverage), blatResult.get_coords('query')
             self.queryCoverage[i] += 1
         if not self.querySize:
             self.querySize = blatResult.get_seq_size('query')
@@ -586,18 +525,19 @@ class SVEvent:
         valid = False
         if (len(self.blatResults) > 1) and self.in_target:
             valid = True
-            # nMissingQueryCoverage = len(filter(lambda y: y, map(lambda x: x == 0, self.queryCoverage)))
-            # if nMissingQueryCoverage < self.meta_dict['params'].get_min_segment_length('trl'):
-            #     valid = True
         return valid
+
+    def check_annotated(self):
+        """ """
+        return self.annotated and not self.failed_annotation
 
     def has_annotations(self):
         """ """
-        return True
+        return self.annotated
 
     def get_genomic_brkpts(self):
         """ """
-        # print self.brkpts.genomicBrkpts
+
         return self.brkpts.genomicBrkpts
 
     def check_previous_add(self, br):
@@ -624,28 +564,54 @@ class SVEvent:
         self.resultValues.format_rearrangement_values(self)
 
     def get_disc_read_count(self):
+        """Get the number of discordant read pairs that contribute evidence to a detected translocation
+        event between a target region and another genomic location.
+
+        It calls the check_inter_readcounts in breakmer.processor.bam_handler module with the target and
+        'other' breakpoints.
+
+        Args:
+            None
+        Returns:
+            discReadCount (int): The number of discordant read pairs that support a detected event with
+                                 specified breakpoints.
+
+        This needs to deal with the situation below where the are more than two realignment results.
+        In this general scenario, the target breakpoint nearest the non-target breakpoint needs to be
+        passed to the check_inter_readcounts function.
+
+        Example 1:
+        [blatResult1 (target), blatResult2 (non-target)] - most common scenario.
+
+        Example 2:
+        [blatResult1 (target), blatResult2 (target), blatResult3 (non-target)]
         """
-        """
+
+        # Sort the blat results by lowest to highest query coordinate value.
+        querySortedResults = sorted(self.blatResults, key=lambda x: x[0])
+        inTarget = [None, None]  # Tracks the in_target state of the last realignment result and the breakpoint of that result.
+        targetBrkpt = None  # Track the target breakpoint nearest the non-target breakpoint result.
+
+        # Iterate through realignment results starting with the lowest query coordinate hit.
+        # If there is a state change for in_target status between the last result and the current result,
+        # then store the in_target breakpoint.
+        for resultTuple in querySortedResults:
+            result = resultTuple[1]
+            if inTarget[0] is None:
+                inTarget = [result.in_target, result.tend()]
+            else:
+                if result.in_target != inTarget[0]:
+                    targetBrkpt = inTarget[1]
+                    if result.in_target:
+                        targetBrkpt = result.tstart()
+                    break
+
         varReads = self.contig.get_var_reads('sv')
-        # discReads = self.contig.get_disc_reads()
         discReadCount = 0
-        # nonTargetBrkptChr, nonTargetBrkptBp = self.get_genomic_brkpts()['other']
-        targetBrkptChr, targetBrkptBp = self.get_genomic_brkpts()['target'][0]
-        discReadCount = varReads.check_inter_readcounts(targetBrkptChr, targetBrkptBp, self.get_genomic_brkpts()['other'])
+        # print self.get_genomic_brkpts()['target'][0]
+        targetBrkptValues = self.get_genomic_brkpts()['target'][0]
+        discReadCount = varReads.check_inter_readcounts(targetBrkptValues[0], targetBrkpt, self.get_genomic_brkpts()['other'])
         return discReadCount
-        # print 'sv_caller.py get_disc_read_count', targetBrkptChr, targetBrkptBp
-        # for otherBrkpts in self.get_genomic_brkpts()['other']:
-        #     nonTargetBrkptChr = otherBrkpts[0]
-        #     nonTargetBrkptBps = otherBrkpts[1:]
-        #     print 'Non-target brkpts', nonTargetBrkptBps
-        #     for nonTargetBrkptBp in nonTargetBrkptBps:
-        #         if nonTargetBrkptChr in discReads:
-        #             for p1, p2 in discReads[nonTargetBrkptChr]:
-        #                 d1 = abs(p1 - targetBrkptBp)
-        #                 d2 = abs(p2 - nonTargetBrkptBp)
-        #                 if d1 <= 1000 and d2 <= 1000:
-        #                     discReadCount += 1
-        # return discReadCount
 
     def get_brkpt_str(self, targetKey=None):
         """ """
@@ -692,66 +658,100 @@ class SVEvent:
             contained = True
         return contained
 
+    def which_rearr(self, varReads, tcoords, qcoords, strands, brkpts):
+        rearrValues = {'discReadCount': None, 'svType': 'rearrangement', 'svSubType': None, 'hit': False}
+        if not self.check_overlap(tcoords[0], tcoords[1]):
+            utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
+            if (strands[0] != strands[1]): # and (brkpts[0] < brkpts[1]):
+                # Inversion
+                # Get discordantly mapped read-pairs
+                utils.log(self.loggingName, 'debug', 'Inversion event identified.')
+                rearrValues['hit'] = True
+                rearrValues['svSubType'] = 'inversion'
+                rearrValues['discReadCount'] = varReads.check_inv_readcounts(brkpts)
+            elif (strands[0] == strands[1]):
+                tgap = brkpts[1] - brkpts[0]
+                qgap = qcoords[1][0] - qcoords[0][1]
+                if tgap < 0:
+                    utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svSubType'] = 'tandem_dup'
+                    rearrValues['discReadCount'] = varReads.check_td_readcounts(brkpts)
+                elif tgap > qgap:
+                    # Gapped deletion from Blast result
+                    utils.log(self.loggingName, 'debug', 'Deletion event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svType'] = 'indel'
+                    rearrValues['indelSize'] = 'D' + str(tgap)
+                else:
+                    # Gapped insertion from Blast result
+                    utils.log(self.loggingName, 'debug', 'Insertion event identified.')
+                    rearrValues['hit'] = True
+                    rearrValues['svType'] = 'indel'
+                    rearrValues['indelSize'] = 'I' + str(qgap)
+        return rearrValues
+
     def define_rearr(self):
-        # vrt = self.contig.get_read_variation()
+        """ """
         varReads = self.contig.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
         tcoords = self.brkpts.tcoords
+        qcoords = self.brkpts.qcoords
         svType = 'rearrangement'
+        svSubType = None
         rs = 0
         hit = False
-        if len(strands) < 3:
-            if not self.check_overlap(tcoords[0], tcoords[1]):
-                utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
-                if (strands[0] != strands[1]): # and (brkpts[0] < brkpts[1]):
-                    # Inversion
-                    # Get discordantly mapped read-pairs
-                    utils.log(self.loggingName, 'debug', 'Inversion event identified.')
-                    hit = True
-                    svType = 'inversion'
-                    rs = varReads.check_inv_readcounts(brkpts)
-                    # for readPair in varReads.inv:
-                    #     r1p, r2p, r1s, r2s, qname = readPair
-                    #     if r1s == 1 and r2s == 1:
-                    #         if (r1p <= brkpts[0]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                    #             rs += 1
-                    #     else:
-                    #         if (r1p <= brkpts[1] and r1p >= brkpts[0]) and r2p >= brkpts[1]:
-                    #             rs += 1
-                elif (strands[0] == strands[1]): # and (brkpts[0] > brkpts[1]):
-                    utils.log(self.loggingName, 'debug', 'Tandem duplication event identified.')
-                    hit = True
-                    svType = 'tandem_dup'
-                    # Tandem dup
-                    rs = varReads.check_td_readcounts(brkpts)
-                    # for readPair in varReads.td:
-                    #     r1p, r2p, r1s, r2s, qname = readPair
-                    #     if (r1p <= brkpts[0] and r1p >= brkpts[1]) and (r2p <= brkpts[1] and r2p >= brkpts[0]):
-                    #         rs += 1
-        if not hit:
+        rearrHits = {}
+        for i in range(1, len(self.blatResults)):
+            vals = self.which_rearr(varReads, tcoords[(i - 1):(i + 1)], qcoords[(i - 1):(i + 1)], strands[(i - 1):(i + 1)], brkpts[(i - 1):(i + 1)])
+            if vals['hit']:
+                if vals['svType'] not in rearrHits:
+                    rearrHits[vals['svType']] = []
+                rearrHits[vals['svType']].append(vals)
+
+        if 'rearrangement' not in rearrHits:
+            utils.log(self.loggingName, 'debug', 'Error in realignment parsing. Indel found without rearrangement event.')
+
+        rearrHit = False
+        for rearr in rearrHits:
+            for i, rr in enumerate(rearrHits[rearr]):
+                if rearr == 'rearrangement':
+                    if not rearrHit:
+                        svSubType = rearrHits[rearr][i]['svSubType']
+                        rs = int(rearrHits[rearr][i]['discReadCount'])
+                        rearrHit = True
+                    else:
+                        svSubType = None
+                        if self.rearrDesc is None:
+                            self.rearrDesc = [svSubType]
+                        self.rearrDesc.append(rearrHits[rearr][i]['svSubType'])
+                else:
+                    if self.rearrDesc is None:
+                        self.rearrDesc = []
+                    self.rearrDesc.append(rearrHits[rearr][i]['indelSize'])
+
+        if svSubType is None:
             utils.log(self.loggingName, 'debug', 'Not inversion or tandem dup, checking for odd read pairs around breakpoints')
             rs = varReads.check_other_readcounts(brkpts)
-            # rs = [0] * len(brkpts)
-            # for i in range(len(brkpts)):
-            #     b = brkpts[i]
-                # rs = varReads.check_other_readcounts(b)
-                # for readPair in varReads.reads.other:
-                #     r1p, r2p, r1s, r2s, qname = readPair
-                #     if abs(r1p - b) <= 300 or abs(r2p - b) <= 300:
-                #         utils.log(self.loggingName, 'debug', 'Adding read support from read %s, with strands %s, %s and positions %d, %d for breakpoint at %d' % (qname, r1s, r2s, r1p, r2p, b))
-                #         rs[i] += 1
-            # rs = max(rs)
-        print 'define_rearr()', svType, rs
-        return svType, rs
+
+        return svType, svSubType, rs
 
     def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.
         """
-        maxMeanCov = 0
+        maxAlignFreq = 0
         for blatResult, nBasesAligned in self.blatResultsSorted:
-            if int(blatResult.meanCov) > int(maxMeanCov):
-                maxMeanCov = int(blatResult.meanCov)
+            if int(blatResult.alignFreq) > int(maxAlignFreq):
+                maxAlignFreq = int(blatResult.alignFreq)
+
+    def get_realign_freq(self):
+        """
+        """
+        realignFreqs = []
+        for blatResult, nBasesAligned in self.blatResultsSorted:
+            realignFreqs.append(int(blatResult.alignFreq))
+        return realignFreqs
 
     def check_read_strands(self):
         """
@@ -805,6 +805,18 @@ class SVEvent:
         """"""
         return self.resultValues.is_filtered()
 
+    def set_filtered(self, filterReason):
+        """ """
+        self.resultValues.set_filtered(filterReason)
+
+    def set_annotations(self):
+        """ """
+        self.annotated = True
+
+    def set_failed_annotation(self):
+        """ """
+        self.failed_annotation = True
+
 
 class ContigCaller:
     """
@@ -819,22 +831,15 @@ class ContigCaller:
 
     def call_svs(self):
         """ """
-        # print 'realigment results', self.realignment.has_results()
+
         if not self.realignment.has_results():
             utils.log(self.loggingName, 'info', 'No blat results file exists, no calls for %s.' % self.contig.get_id())
         else:
-            # print 'Results exist'
             utils.log(self.loggingName, 'info', 'Making variant calls from blat results %s' % self.realignment.get_result_fn())
             if self.check_indels():
-                # print 'Check indels passed'
-                # self.result = self.realignment.get_indel_result()
                 self.svEvent.format_indel_values()
             elif self.check_svs():
-                # print 'Check svs passed'
-                # self.result = self.realignment.get_svs_result()
                 self.svEvent.format_rearr_values()
-        # Format the result into a
-        # print 'result', self.svEvent
         return self.svEvent
 
     def check_indels(self):
@@ -850,7 +855,6 @@ class ContigCaller:
             else:
                 utils.log(self.loggingName, 'debug', 'Storing clipped blat result start %d, end %d' % (blatResult.qstart(), blatResult.qend()))
                 self.clippedQs.append((blatResult.qstart(), blatResult.qend(), blatResult, i))
-                # self.realignment.store_clipped_queryseq((blatResult.qstart(), blatResult.qend(), blatResult, i))
         utils.log(self.loggingName, 'info', 'Contig does not have indel, return %r' % hasIndel)
         return hasIndel
 
@@ -873,7 +877,6 @@ class ContigCaller:
         if self.svEvent and self.svEvent.result_valid():
             return True
         else:
-            # print 'svs result invalid'
             self.svEvent = None
             return False
 
