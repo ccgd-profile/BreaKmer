@@ -93,17 +93,9 @@ When these programs are installed, the paths to the binaries can be either be sp
   - Hg19 fasta files can be downloaded from UCSC Genome Browser(http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/)
   - This file should be placed in a writeable directory. A 2bit file will be generated from this file to start the blat server.
 - Reference genome annotation 
-  - This file is used by BreaKmer to annotate the locations of the breakpoints identified and the genes involved. This is required as input in the configuration file as the "gene_annotation_file".
-  - Format: tab delimited file containing a row for each RefSeq transcript with multiple columns describing the coding coordinates of the transcript.
-  - Hg19 RefSeq annotation file can be downloaded from UCSC Genome Browser [Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?command=start) using assembly: Feb. 2009 (GRCh37/hg19), group: Genes and Gene Predictions, track: RefSeq Genes, table: refGene
-- Repeat mask bed file 
-  - This file is used by BreaKmer to determine whether breakpoints and identified variants lie within simple and low-complexity repeat regions that have been annotated. This is an optional input in the configuration file as "repeat_mask_file".
-  - Format: tab delimited file containing the coordinates for the various repeat regions.
-  - Hg19 repeat regions bed file can be downloaded from UCSC Genome Browser [Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?command=start) with group = Repeats, track = RepeatMasker, table = rmsk, output format: BED
-- Alternate reference assembly sequences 
-  - This is an optional input in the configuration file as the "alternate_fastas". These are used to supplement the required reference fasta sequence and helpful for removing indel variants that exist in the reference sequence but not either of the alternate assembly sequences.
-  - Format: single fasta file with chromosome number/id as names (i.e. '>1', '>2', '>3')
-  - There are two alternate assemblies available for human, [CHM1_1.1](http://www.ncbi.nlm.nih.gov/assembly/GCF_000306695.2/) and [HuRef](http://www.ncbi.nlm.nih.gov/assembly/GCA_000002125.2).
+  - This file is used by BreaKmer to annotate the locations of the breakpoints identified and the genes involved. This is required as input in the configuration file as the "gene_annotation_file" only when annotation is desired for the output files (currently not implemented) or when the --generate_image option is set and the corresponding genes and transcripts of the variant are to be visualized.
+  - Format: GTF formatted file (see below).
+  - Gencode transcript annotation file can be downloaded from [Gencode Release 19 (GRCh37.p13)](http://www.gencodegenes.org/releases/19.html).
 
 ### Other files
 - Target regions bed file
@@ -133,14 +125,12 @@ gfserver=<path to gfServer binary, i.e. /usr/bin/gfServer>
 gfclient=<path to gfClient binary, i.e. /usr/bin/gfClient>
 fatotwobit=<path to faToTwoBit binary, i.e. /usr/bin/faToTwoBit>
 reference_fasta=<path to whole genome reference fasta file, one file with all records>
-gene_annotation_file=<path to gene annotation file, e.g., ucsc_hg19_refgene.txt>
+gene_annotation_file=<path to gene annotation file>
 kmer_size=15
 
 # Optional parameters
 other_regions_file=<path to bed file containing coordinates for targeted unannotated cluster regions if they exist, such as IGH, IGK> 
 normal_bam_file=<path to normal bam file, can be used to filter germline events with matched-normal sample>
-alternate_fastas=<comma delimited list of the paths to alternate fasta files, such as HuRef or CHM1>
-repeat_mask_file=<path to ucsc_hg19_rmsk.bed> # Only used when available, useful for helping filtering events in simple repeat regions.
 ```
 
 Input file formats
@@ -164,33 +154,28 @@ Input file formats
   - Many of the Illumina library sequences have been annotated [elsewhere](https://wikis.utexas.edu/display/GSAF/Illumina+-+all+flavors).
 - reference_fasta = genome reference fasta formatted file containing all the chromosome reference sequences that were used to initially align the data.
   - This shold be a single file containing all the sequences.
-- gene_annotation = Annotation file containing the location of reference genes. These can be downloaded from UCSC Genome Browser, (i.e., [hg19 refGene table](http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/))
+  - Note that the chromosome IDs should match the chromosome IDs of the alignment file (i.e., using chr1 vs. 1).
+- gene_annotation = Annotation file containing the genomic coordinates for annotated gene transcripts and their corresponding exon regions. These can be downloaded from Gencode, (i.e., [Gencode Release 19 (GRCh37.p13)](http://www.gencodegenes.org/releases/19.html))
 ```
-#bin    name    chrom   strand  txStart txEnd   cdsStart        cdsEnd  exonCount       exonStarts      exonEnds        score   name2   cdsStartStat    cdsEndStat      exonFrames
-0       NM_032291       chr1    +       66999824        67210768        67000041        67208778        25      66999824,67091529,67098752,67101626,67105459,67108492,67109226,67126195,67
-133212,67136677,67137626,67138963,67142686,67145360,67147551,67154830,67155872,67161116,67184976,67194946,67199430,67205017,67206340,67206954,67208755, 67000051,67091593,67098777,6710169
-8,67105516,67108547,67109402,67126207,67133224,67136702,67137678,67139049,67142779,67145435,67148052,67154958,67155999,67161176,67185088,67195102,67199563,67205220,67206405,67207119,6721
-0768,   0       SGIP1   cmpl    cmpl    0,1,2,0,0,0,1,0,0,0,1,2,1,1,1,1,0,1,1,2,2,0,2,1,1,
-1       NM_032785       chr1    -       48998526        50489626        48999844        50489468        14      48998526,49000561,49005313,49052675,49056504,49100164,49119008,49128823,49
-332862,49511255,49711441,50162984,50317067,50489434,    48999965,49000588,49005410,49052838,49056657,49100276,49119123,49128913,49332902,49511472,49711536,50163109,50317190,50489626,  0AGBL4    cmpl    cmpl    2,2,1,0,0,2,1,1,0,2,0,1,1,0,
-1       NM_018090       chr1    +       16767166        16786584        16767256        16785385        8       16767166,16770126,16774364,16774554,16775587,16778332,16782312,16785336, 16767348,16770227,16774469,16774636,16775696,16778510,16782388,16786584, 0       NECAP2  cmpl    cmpl    0,2,1,1,2,0,1,2,
-1       NM_052998       chr1    +       33546713        33585995        33547850        33585783        12      33546713,33546988,33547201,33547778,33549554,33557650,33558882,33560148,33
-562307,33563667,33583502,33585644,      33546895,33547109,33547413,33547955,33549728,33557823,33559017,33560314,33562470,33563780,33583717,33585995,    0       ADC     cmpl    cmpl    -1
-,-1,-1,0,0,0,2,2,0,1,0,2,
-...
-```
-- repeat_mask_file = A BED formatted file containing repeat masked regions. These can be found from [UCSC Genome Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?hgsid=370921603_HSUaLVPi7dEbtDqCy5W1ANaqC7Fz) with group = Repeats, track = RepeatMasker, table = rmsk
-```
-chr1    16777160        16777470        AluSp   2147    +
-chr1    25165800        25166089        AluY    2626    -
-chr1    33553606        33554646        L2b     626     +
-chr1    50330063        50332153        L1PA10  12545   +
-chr1    58720067        58720973        L1PA2   8050    -
-chr1    75496180        75498100        L1MB7   10586   +
-chr1    83886030        83886750        ERVL-E-int      980     -
-chr1    100662895       100663391       L2a     1422    -
-chr1    117440426       117440514       L1ME1   532     +
-chr1    117440494       117441457       L1ME1   4025    +
+column-number content values/format
+1 chromosome name chr{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,M}
+2 annotation source {ENSEMBL,HAVANA}
+3 feature-type  {gene,transcript,exon,CDS,UTR,start_codon,stop_codon,Selenocysteine}
+4 genomic start location  integer-value (1-based)
+5 genomic end location  integer-value
+6 score (not used)  .
+7 genomic strand  {+,-}
+8 genomic phase (for CDS features)  {0,1,2,.}
+9 additional information as key-value pairs see below
+
+chr21   HAVANA  transcript      10862622        10863067        .       +       .       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  exon    10862622        10862667        .       +       .       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  CDS     10862622        10862667        .       +       0       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  start_codon     10862622        10862624        .       +       0       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  exon    10862751        10863067        .       +       .       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  CDS     10862751        10863064        .       +       2       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  stop_codon      10863065        10863067        .       +       0       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
+chr21   HAVANA  UTR     10863065        10863067        .       +       .       gene_id "ENSG00000169861"; transcript_id "ENST00000302092"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "IGHV1OR15-5"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "IGHV1OR15-5-001"; level 2; havana_gene "OTTHUMG00000074130"; havana_transcript "OTTHUMT00000157419";
 ...
 ```
 
@@ -198,22 +183,37 @@ BreaKmer parameters
 -------------
 | Parameter | Description | Default |
 |---------- | ----------- | ------- |
-| -l, --log_level    | Logging level | Debug |
-| -a, --keep_repeat_regions | Keep indels in repeat regions. No repeat mask bed file required if set. | False |
-| -p, --preset_ref_data | Preset all the reference dta for all the target regions before running analysis. | False |
-| -s, --indel_size | Indel size filter | 15 |
-| -c, --trl_sr_thresh | Assembled read support threshold for translocations | 2 |
-| -d, --indel_sr_thresh | Assembled read support threshold for indels | 5 | 
-| -r, --rearr_sr_thresh | Assembled read support threshold for inversions and tandem duplications | 3 |
-| -g, --gene_list | File containing a list of target region names to consider for analysis. Names must match targets_bed_file region names. | None |
-| -k, --keep_intron_vars | Keep indels or rearrangements with breakpoints in intron regions | False |
-| -v, --var_filter | Variant types to report (all, indel, trl, rearrangement) | all |
-| -m, --rearr_min_seg_len | Threshold for minimum segment length to be rearranged | 30 |
-| -n, --trl_min_seg_len | Threshold for minimum length of a translocation segment | 25 |
-| -t, --align_thresh | Threshold for minimum read alignment for assembly | .90 |
-| -z, --no_output_header | Suppress headers on output files. | False |
-
-- kmer_size = option to change the length of the kmer size used (default = 15 bp).
+| run | Perform structural variant detection analysis | NA |
+| -h, --help | Show the help message and exit | NA |
+| --log_level | The level of logging detail to record while program is running. | DEBUG |
+| --indel_size | The minimum indel size (in base pairs) to keep and output. | 15 |
+| --trl_sr_thresh | Split read support threshold for translocation events (i.e., the minimum number of split reads required to keep a translocation event). | 2 |
+| --indel_sr_thresh | Split read support threshold for indels | 5 |
+| --rearr_sr_thresh | Split read support threshold for general rearrangements, inversions, tandem duplications, or other unclassified rearrangements. | 2 |
+| --rearr_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a rearrangement event (inversions, tandem duplications, other unclassified rearrangements). | 30 |
+| --trl_min_seg_len | Minimum length (in base pairs) of a realignment portion of an assembled contig sequence to consider for filtering a translocation event. | 25 |
+| --align_thresh | Threshold for minimum read alignment during assembly. | 0.9 |
+| --no_output_header | Suppress column headers in output files. | False |
+| --discread_only_thresh | The number of discordant read pairs in a cluster to output without evidence from a split read event. | 2 |
+| --generate_image | Generate a plot containing the assembled reads used to create a contig sequence with a called variant along with genes and transcripts associated with the event - requires gene_annotation_file in configuration file to be set with GTF file containing transcript annotations. | False |
+| --hostname | The hostname for the blat server. | localhost |
+| -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
+| -f, --filter_list | A file containing specific variant events to filter out. | None |
+| -n, --nprocessors | The number of processors to use for analysis. | 1 |
+| -s, --start_blat_sever | Option to indicate that a blat server needs to be started before analysis begins. A random part number and the localhost will be used if neither is specified. | False |
+| -k, --keep_blat_server | Option to keep the blat server running after the analysis completes. | False |
+| -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
+| -c, --config | The configuration filename that contains additional parameters. | None |
+| start_blat_server | Start the blat server prior to performing the analysis | NA |
+| -h, --help | Show the help message and exit. | NA |
+| --hostname | The hostname for the blat server. | localhost |
+| -p, --port_number | The port number for the blat server to either start on or already is running on. | None |
+| -c, --config | The configuration filename that contains additional parameters. | None |
+| prepare_reference_data | Extract the reference sequence from all the input target regions and store them in files to access during analysis. | NA |
+| -h, --help | Show the help message and exit | NA |
+| -g, --gene_list | File containing the names of specific regions to analyze, these target names must match the names in the bed file defining the target regions to analyze. | None |
+| -c, --config | The configuration filename that contains additional parameters. | None |
+| -n, --nprocessors | The number of processors to use for analysis. | 1 |
 
 Output files and formats
 -----------
@@ -236,17 +236,23 @@ Output files and formats
     - A summary file labeled \<analysis_name\>\_summary.out contains columns: Target name, number of contigs assembled, total number of variants detected, number of indels, number of inversions and tandem duplications, number of translocations, and a list of translocation gene partners.
   - Output for each SV type are put in respective tab-delimited files, labeled \<analysis_name\>\_\<indel,trl,inv\_rearrangement,td\_rearrangement\>\_svs.out
     - The columns are:
-       - genes - Gene/Target names
-       - target_breakpoints - Target genomic breakpoints (chr:pos) (I/D<size> for indels)
-       - align_cigar - Re-alignment CIGAR string
-       - mismatches - Number of re-alignment mismatches
-       - strands - Strand(s) of contig when realigned
-       - rep_overlap_segment_len - Percentage re-alignment overlaps with repeat regions:length of aligned BLAT segments
-       - sv_type - Type of variation detected
-       - split_read_count - Number of assembled reads that cover the assembled contig at the inferred breakpoint
-       - nkmers - Number of kmers used to assemble the contig
-       - disc_read_count - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).
-       - breakpoint_coverages - Number of non-duplicated reads aligned at the inferred breakpoint locations.
-       - contig_id - Contig ID
-       - contig_seq - Contig sequence. 
+       - Target_Name - Target region name
+       - SV_type - Rearrangement type (rearrangement, indel)
+       - SV_subtype - Rearrangement subtype (trl, inversion, tandem duplication)
+       - Description - Description of the indel (I5 = Insertion of 5 base pairs, D5 = deletion of 5 base pairs)
+       - All_genomic_breakpoints - All the genomic breakpoints for the structural variant event.
+       - Target_genomic_breakpoints - Breakpoints only within the target region.
+       - Split_read_counts - Number of assembled reads that cover the assembled contig at the inferred breakpoint.
+       - Discordant_read_counts - Number of discordantly-mapped paired-end reads that support the event (Not applicable to indels).
+       - Read_depth_at_genomic_breakpoints - Depth of coverage at the inferred breakpoints.
+       - Align_cigar - Cigar formatted string to indicate realignment to the reference sequence.
+       - Strands - Strands the contig sequence realigned to on the reference sequence.
+       - Total_mismatches - Number of base pairs that were mismatched in the realignment to the reference sequence.
+       - Realignment_uniqueness - Uniqueness metric for the realignment.
+       - Contig_ID - Contig ID
+       - Contig_length - Number of base pairs in the contig sequence.
+       - Contig_sequence - Contig sequence.
+       - Filtered - Boolean field to indicate if the variant passed basic filtering criteria.
+       - Filtered_reason - Message for filter reason if Filtered is True.
+       - Filter_values - Additional information from the realignment.
   - Each target gene in which a SV was detected has a separate output directory (\<analysis\_dir\>/output/\<target\_name\>) containing formatted output specific to the target and the related reference-aligned sequence reads for the contigs that contain the structural variants detected in BAM format.
