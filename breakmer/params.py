@@ -249,7 +249,9 @@ class ParamManager:
         insertSizes = []
         readIter = 0
         for read in testReads:
-            proper_map = read.flag == 83 or read.flag == 99 and read.mapq > 0
+            if read.is_duplicate or read.mapq == 0:
+                continue
+            proper_map = read.flag == 83 or read.flag == 99
             if read.is_read1 and proper_map:  # Sample the read and store the insert size to its partner.
                 readIter += 1
                 insertSizes.append(abs(read.tlen))
