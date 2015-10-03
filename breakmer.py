@@ -32,7 +32,7 @@ The blat server provides a challenge in workflow. The best method is to:
 
 args = sys.argv
 
-PARSER = argparse.ArgumentParser(description='Program to identify structural variants within targeted locations.', usage='%(prog)s [options]', add_help=False)
+PARSER = argparse.ArgumentParser(description='Program to identify structural variants within targeted locations.', usage='%(prog)s [options]', add_help=True)
 SUBPARSERS = PARSER.add_subparsers(help='Program mode (run, start_blat_server, prepare_reference_data).', dest='fncCmd')
 
 RUN_PARSER = SUBPARSERS.add_parser('run', help='Run analysis to detect structural variants.')
