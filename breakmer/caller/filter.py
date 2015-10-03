@@ -215,10 +215,12 @@ class ResultFilter:
             utils.log(self.loggingName, 'info', logMsg)
             svEvent.set_filtered(logMsg)
         else:
-            if discReadCount >= 2 and minSegmentLen and minBrkptCoverages and minBrkptKmers:
+            if discReadCount >= 2:
                 utils.log(self.loggingName, 'info', 'Translocation event passed all basic requirements. Filter set 1.')
             elif discReadCount == 0 and nStrictFiltersFail <= 1:
                 utils.log(self.loggingName, 'info', 'Translocation event passed all basic requirements. Filter set 2.')
+            elif (discReadCount < 2 and discReadCount > 0) and (minSegmentLen and minBrkptCoverages and minBrkptKmers):
+                utils.log(self.loggingName, 'info', 'Translocation event passed all basic requirements. Filter set 3.')
             else:
                 logMsg = 'Translocation failed to pass filters.'
                 filteredReasons = [logMsg]
