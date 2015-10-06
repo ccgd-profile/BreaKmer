@@ -106,7 +106,7 @@ class Segment:
                         else:    
                             # Check if the choosen transcript overlaps the segment. 
                             # The end coord of the transcript should be > than the right breakpoint coord.
-                            if leftBpTrxList[keepIdx].end < svBreakpoint.genomicCoords[1]:
+                            if leftBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[1]:
                                 addLeft = False
                     if addLeft:
                         trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
@@ -123,7 +123,7 @@ class Segment:
                         else:
                             # Check if the choosen transcript overlaps the segment. 
                             # The end coord of the transcript should be > than the left breakpoint coord.
-                            if rightBpTrxList[keepIdx].end < svBreakpoint.genomicCoords[0]:
+                            if rightBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[0]:
                                 addRight = False
                     # Right
                     if addRight:
