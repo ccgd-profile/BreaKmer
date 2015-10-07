@@ -3,7 +3,7 @@
 
 """bam_handler.py module
 
-This module contains the classes and functions to handle the 
+This module contains the classes and functions to handle the
 """
 
 import pysam
@@ -319,6 +319,7 @@ class discReadPair:
         self.set_values(read, orderType)
 
     def set_values(self, read, orderType):
+        print 'bam_handler.py set_values() for discReadPair', read.pos, read.mpos
         self.pos = [read.pos, read.mpos]
         self.strands = [get_strand_str(read.is_reverse), get_strand_str(read.mate_is_reverse)]
         if (orderType == 'ordered') and (read.mpos < read.pos):
@@ -326,6 +327,7 @@ class discReadPair:
             self.pos.reverse()
             self.strands.reverse()
         self.readInfoStr = '|'.join([str(x) for x in [read.qname, self.strands[0], self.strands[1], read.tlen, read.mpos]])
+        print 'bam_hanlder.py set_values() readInfoStr', self.readInfoStr
 
 
 class discReads:
@@ -339,6 +341,7 @@ class discReads:
         self.disc = {}
 
     def add_inter_discread(self, bam, read):
+        print 'bam_handler.py add_inter_discread()', read
         dRead = discReadPair(read, 'unordered')
         mateRefId = bam.getrname(read.rnext)
         if mateRefId not in self.reads['inter']:
