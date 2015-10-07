@@ -234,8 +234,8 @@ class AlignResults:
         if self.hasResults:
             cond1 = self.results[0].spans_query() and (self.ngaps > 0)
             cond2 = (len(self.results) == 1) and self.get_query_coverage() >= 90.0 and (self.ngaps > 0)
-            cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
-            self.targetHit = cond1 or cond2 or cond3
+            # cond3 = (len(self.results) > 1) and (self.get_query_coverage() >= 90.0)
+            self.targetHit = cond1 or cond2  # or cond3
         utils.log(self.loggingName, 'debug', 'Checking if query is a target hit or not %r' % self.targetHit)
 
         if self.targetHit:
