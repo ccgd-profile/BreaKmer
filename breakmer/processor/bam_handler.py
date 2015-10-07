@@ -354,6 +354,7 @@ class discReads:
         if mateRefId not in self.disc:
             self.disc[mateRefId] = []
         self.disc[mateRefId].append((read.pos, read.mpos))
+        print 'bam_handler.py add_inter_discread() disc dictionary', mateRefId, self.disc[mateRefId]
 
     def add_intra_discread(self, read):
         discType = 'other'
