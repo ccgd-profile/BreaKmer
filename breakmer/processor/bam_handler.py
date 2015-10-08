@@ -473,7 +473,7 @@ class discReads:
                                         break
                                 if not matchFound:
                                     print 'No match', regionPairKey
-                                    interClusterClusters[regionPairKey] = []
+                                    interClusterClusters[regionPairKey] = [regionPairKey]
                         self.clusters[regionPairKey]['readCount'] += 1
                         self.clusters[regionPairKey]['interClusterCount'] += 1
                 if len(interClusterClusters) > 0:
