@@ -414,7 +414,7 @@ class discReads:
         if read.tid == read.rnext and not overlapping_reads:
             self.add_intra_discread(read, overlapping_reads)
         elif diff_chroms:
-            print 'bam_handler.py add_read_pair(), diff_chroms', diff_chroms, read.rnext, read.tid, read.rnext
+            # print 'bam_handler.py add_read_pair(), diff_chroms', diff_chroms, read.rnext, read.tid, read.rnext
             self.add_inter_discread(bam, read)
 
     def cluster_discreads(self):
