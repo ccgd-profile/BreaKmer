@@ -361,7 +361,7 @@ class discReads:
         self.disc[mateRefId].append((read.pos, read.mpos))
         print 'bam_handler.py add_inter_discread() disc dictionary', mateRefId, self.disc[mateRefId]
 
-    def add_intra_discread(self, read):
+    def add_intra_discread(self, read, overlapping_reads):
         discType = 'other'
         dRead = discReadPair(read, True)
         disc_ins_size = abs(read.tlen) >= self.insertSizeThresh
@@ -394,7 +394,7 @@ class discReads:
             self.disc[read.tid] = []
         self.disc[read.tid].append((read.pos, read.mpos))
 
-    def add_read_pair(self, bam, read):
+    def add_read_pair(self, bam, read, overlapping_reads):
         """
         Args:
             read:
@@ -411,8 +411,8 @@ class discReads:
 
         # Extract read-pairs that are mapped to different chromosomes or fair apart.
         diff_chroms = read.rnext != -1 and read.tid != read.rnext
-        if read.tid == read.rnext:
-            self.add_intra_discread(read)
+        if read.tid == read.rnext and not overlapping_reads:
+            self.add_intra_discread(read, overlapping_reads)
         elif diff_chroms:
             print 'bam_handler.py add_read_pair(), diff_chroms', diff_chroms, read.rnext, read.tid, read.rnext
             self.add_inter_discread(bam, read)
@@ -627,7 +627,7 @@ class VariantReadTracker:
 
         proper_map, overlapping_reads = pe_meta(read)
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
-            self.discReadTracker.add_read_pair(self.bam, read)
+            self.discReadTracker.add_read_pair(self.bam, read, overlapping_reads)
 
         self.valid.append((read, proper_map, overlapping_reads))
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
