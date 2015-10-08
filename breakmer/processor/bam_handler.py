@@ -271,9 +271,11 @@ def get_strand_key(read, ordered=False):
 
 
 def cluster_regions(dReadLst, idx, clusterType):
-    distBuffer = 50
+    distBuffer = None
     clusterLst = []
     for dRead in dReadLst:
+        if distBuffer is None:
+            distBuffer = dRead.readLen
         # trgtStart = dRead.pos[0]
         # mateStart = dRead.pos[1]
         print 'cluster_regions dRead', dRead.pos, dRead.readLen, clusterType
@@ -429,6 +431,7 @@ class discReads:
             for key2 in d1:
                 print 'key2', key2
                 d2 = d1[key2]
+                interClusterClusters = {}
                 for key3 in d2:
                     print 'key3', key3
                     dReadsLst = d2[key3]
@@ -451,12 +454,31 @@ class discReads:
                         if rightStrand == '+':
                             rightBrkpt = c2[cIdx2][1]
                         if regionPairKey not in self.clusters:
-                            self.clusters[regionPairKey] = {'readCount': 0,
+                            self.clusters[regionPairKey] = {'readCount': 0,  # Read count for sub cluster, based on strand
+                                                            'interClusterCount': 0,  # Read count for cluster ignoring strands, this will be used for interchrom clustering.
                                                             'leftBounds': c1[cIdx1][0:2],
                                                             'rightBounds': c2[cIdx2][0:2],
                                                             'leftBrkpt': leftBrkpt,
                                                             'rightBrkpt': rightBrkpt}
+                            if key3 == 'inter':
+                                matchFound = False
+                                for clusterKey in interClusterClusters:
+                                    if (abs(self.clusters[clusterKey]['leftBrkpt'] - leftBrkpt) < 1000) and (abs(self.clusters[clusterKey]['rightBrkpt'] - rightBrkpt) < 1000):
+                                        # Merge the clusters
+                                        interClusterClusters[clusterKey].append(regionPairKey)
+                                        matchFound = True
+                                        break
+                                if not matchFound:
+                                    interClusterClusters[regionPairKey] = []
                         self.clusters[regionPairKey]['readCount'] += 1
+                        self.clusters[regionPairKey]['interClusterCount'] += 1
+                if len(interClusterClusters) > 0:
+                    for clusterKey in interClusterClusters:
+                        totalCounts = 0
+                        for cKey in clusterLst:
+                            totalCounts += self.clusters[cKey]['readCount']
+                        for cKey in clusterLst:
+                            self.clusters[cKey]['interClusterCount'] = totalCounts
         print 'Complete clusters', self.clusters
         return self.clusters
 
