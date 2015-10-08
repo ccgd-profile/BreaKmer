@@ -460,7 +460,7 @@ class discReads:
                                                             'rightBounds': c2[cIdx2][0:2],
                                                             'leftBrkpt': leftBrkpt,
                                                             'rightBrkpt': rightBrkpt}
-                            if key3 == 'inter':
+                            if key1 == 'inter':
                                 print 'Inter check clustering', interClusterClusters
                                 matchFound = False
                                 for clusterKey in interClusterClusters:
