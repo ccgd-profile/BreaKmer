@@ -352,9 +352,10 @@ class Variation:
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
             k1, k2, k3, c1, c2 = key.split('|')
+            checkCount = readCount
             if k1 == 'inter':
-                readCount = self.discReadClusters[key]['interClusterCount']
-            if readCount < self.params.get_param('discread_only_thresh'):
+                checkCount = self.discReadClusters[key]['interClusterCount']
+            if checkCount < self.params.get_param('discread_only_thresh'):
                 continue
             svType = 'inter-chromosomal'
             lChrom = 'chr' + targetChrom.replace('chr', '')
