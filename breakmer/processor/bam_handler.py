@@ -479,9 +479,9 @@ class discReads:
                 if len(interClusterClusters) > 0:
                     for clusterKey in interClusterClusters:
                         totalCounts = 0
-                        for cKey in clusterLst:
+                        for cKey in interClusterClusters[clusterKey]:
                             totalCounts += self.clusters[cKey]['readCount']
-                        for cKey in clusterLst:
+                        for cKey in interClusterClusters[clusterKey]:
                             self.clusters[cKey]['interClusterCount'] = totalCounts
         print 'Complete clusters', self.clusters
         return self.clusters
