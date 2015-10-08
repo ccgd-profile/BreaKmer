@@ -459,7 +459,8 @@ class discReads:
                                                             'leftBounds': c1[cIdx1][0:2],
                                                             'rightBounds': c2[cIdx2][0:2],
                                                             'leftBrkpt': leftBrkpt,
-                                                            'rightBrkpt': rightBrkpt}
+                                                            'rightBrkpt': rightBrkpt,
+                                                            'clusterId': len(self.clusters) + 1}
                             if key1 == 'inter':
                                 # print 'Inter check clustering', interClusterClusters
                                 matchFound = False
@@ -483,7 +484,8 @@ class discReads:
                             totalCounts += self.clusters[cKey]['readCount']
                         for cKey in interClusterClusters[clusterKey]:
                             self.clusters[cKey]['interClusterCount'] = totalCounts
-        # print 'Complete clusters', self.clusters
+                            self.clusters[cKey]['clusterId'] = self.clusters[clusterKey]['clusterId']
+        print 'Complete clusters', self.clusters
         return self.clusters
 
     def check_inv_readcounts(self, brkpts):
