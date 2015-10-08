@@ -353,7 +353,7 @@ class discReads:
             self.reads['inter'][mateRefId][strandKey] = []
         self.reads['inter'][mateRefId][strandKey].append(dRead)
         # print 'bam_handler.py add_inter_discread() self.reads inter', mateRefId, strandKey, '\n'
-        for dRead in self.reads['inter'][mateRefId][strandKey]:
+        # for dRead in self.reads['inter'][mateRefId][strandKey]:
             # print '\t', dRead.readInfoStr
 
         if mateRefId not in self.disc:
