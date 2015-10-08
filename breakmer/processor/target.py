@@ -351,9 +351,11 @@ class Variation:
         headerStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
+            k1, k2, k3, c1, c2 = key.split('|')
+            if k1 == 'inter':
+                readCount = self.discReadClusters[key]['interClusterCount']
             if readCount < self.params.get_param('discread_only_thresh'):
                 continue
-            k1, k2, k3, c1, c2 = key.split('|')
             svType = 'inter-chromosomal'
             lChrom = 'chr' + targetChrom.replace('chr', '')
             if k1 == 'inter':
