@@ -463,6 +463,8 @@ class discReads:
                             if key3 == 'inter':
                                 matchFound = False
                                 for clusterKey in interClusterClusters:
+                                    print 'Checking clustering of inter clusters', clusterKey, self.clusters[clusterKey]['leftBrkpt'], regionPairKey, leftBrkpt
+                                    print 'Checking clustering of inter clusters', clusterKey, self.clusters[clusterKey]['rightBrkpt'], regionPairKey, rightBrkpt
                                     if (abs(self.clusters[clusterKey]['leftBrkpt'] - leftBrkpt) < 1000) and (abs(self.clusters[clusterKey]['rightBrkpt'] - rightBrkpt) < 1000):
                                         # Merge the clusters
                                         interClusterClusters[clusterKey].append(regionPairKey)
