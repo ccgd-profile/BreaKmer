@@ -485,7 +485,7 @@ class discReads:
                         for cKey in interClusterClusters[clusterKey]:
                             self.clusters[cKey]['interClusterCount'] = totalCounts
                             self.clusters[cKey]['clusterId'] = self.clusters[clusterKey]['clusterId']
-        print 'Complete clusters', self.clusters
+        # print 'Complete clusters', self.clusters
         return self.clusters
 
     def check_inv_readcounts(self, brkpts):
