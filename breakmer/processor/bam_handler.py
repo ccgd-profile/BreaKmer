@@ -461,6 +461,7 @@ class discReads:
                                                             'leftBrkpt': leftBrkpt,
                                                             'rightBrkpt': rightBrkpt}
                             if key3 == 'inter':
+                                print 'Inter check clustering', interClusterClusters
                                 matchFound = False
                                 for clusterKey in interClusterClusters:
                                     print 'Checking clustering of inter clusters', clusterKey, self.clusters[clusterKey]['leftBrkpt'], regionPairKey, leftBrkpt
@@ -471,6 +472,7 @@ class discReads:
                                         matchFound = True
                                         break
                                 if not matchFound:
+                                    print 'No match', regionPairKey
                                     interClusterClusters[regionPairKey] = []
                         self.clusters[regionPairKey]['readCount'] += 1
                         self.clusters[regionPairKey]['interClusterCount'] += 1
