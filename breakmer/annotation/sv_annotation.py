@@ -119,8 +119,14 @@ def store_annotations(svEventResult, bpMap, trxMap, annotationFn, params, tmpFil
                 # print blatResult, blatResult.get_sv_brkpts()
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([trx], [dist], coordIdx)
             else:
-                upTrx, upDist = upstream
-                downTrx, downDist = downstream
+                upTrx = None
+                upDist = None
+                downTrx = None
+                downDist = None
+                if upstream is not None:
+                    upTrx, upDist = upstream
+                if downstream is not None:
+                    downTrx, downDist = downstream
                 # print 'Up', upTrx.id, upDist
                 # print 'Down', downTrx.id, downDist
                 if params.get_param('generate_image') or True:

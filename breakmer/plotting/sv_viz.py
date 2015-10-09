@@ -99,14 +99,18 @@ class Segment:
                         # Take the inner trxs
                         if self.alignResult != '-':
                             keepIdx = 1
-                            # Check if the choosen transcript overlaps the segment. 
-                            # The start coord of the transcript should be < than the right breakpoint coord.
-                            if leftBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[1]:
+                            if leftBpTrxList[keepIdx] is None:
                                 addLeft = False
-                        else:    
-                            # Check if the choosen transcript overlaps the segment. 
+                            # Check if the choosen transcript overlaps the segment.
+                            # The start coord of the transcript should be < than the right breakpoint coord.
+                            elif leftBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[1]:
+                                addLeft = False
+                        else:
+                            if leftBpTrxList[keepIdx] is None:
+                                addLeft = False
+                            # Check if the choosen transcript overlaps the segment.
                             # The end coord of the transcript should be > than the right breakpoint coord.
-                            if leftBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[1]:
+                            elif leftBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[1]:
                                 addLeft = False
                     if addLeft:
                         trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
@@ -116,20 +120,25 @@ class Segment:
                         if self.alignResult == '-':
                             # Take the inner trxs
                             keepIdx = 1
-                            # Check if the choosen transcript overlaps the segment. 
+                            if rightBpTrxList[keepIdx] is None:
+                                addRight = False
+                            # Check if the choosen transcript overlaps the segment.
                             # The end coord of the transcript should be > than the left breakpoint coord.
-                            if rightBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[0]:
+                            elif rightBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[0]:
                                 addRight = False
                         else:
-                            # Check if the choosen transcript overlaps the segment. 
+                            if rightBpTrxList[keepIdx] is None:
+                                addRight = False
+                            # Check if the choosen transcript overlaps the segment.
                             # The end coord of the transcript should be > than the left breakpoint coord.
-                            if rightBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[0]:
+                            elif rightBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[0]:
                                 addRight = False
                     # Right
                     if addRight:
                         trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
                     # print 'Right brkpt items', trxItems, trxIds
                 else:
+                    add = True
                     # Single breakpoint
                     trxList, distList = annotatedTrxsDict[0]
                     # print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
@@ -144,23 +153,33 @@ class Segment:
                                 # Get downstream gene
                                 trx = trxList[1]
                                 trxDist = distList[1]
+                                if trx is None:
+                                    add = False
                             else:
                                 trx = trxList[0]
                                 trxDist = distList[0]
+                                if trx is None:
+                                    add = False
                         elif self.idx == (self.nSegments - 1):
                             if self.alignResult.strand == '-':
                                 # Get upstream gene
                                 trx = trxList[0]
                                 trxDist = distList[0]
+                                if trx is None:
+                                    add = False
                             else:
                                 trx = trxList[1]
                                 trxDist = distList[1]
+                                if trx is None:
+                                    add = False
                                 # print 'trx', trx, trxDist
-                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
+                        if add:
+                            trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
                         # print 'trxItems, trxIds', trxItems, trxIds
                     else:
-                        # lands in a single trancript
-                        trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
+                        if trxList[0] is not None:
+                            # lands in a single trancript
+                            trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
             elif svBreakpoint.svType == 'indel':
                 # print 'sv_viz.py', annotatedTrxsDict, dKeys
                 if len(dKeys) == 1:
