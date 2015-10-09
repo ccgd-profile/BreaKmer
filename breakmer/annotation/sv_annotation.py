@@ -130,8 +130,10 @@ def store_annotations(svEventResult, bpMap, trxMap, annotationFn, params, tmpFil
                 # print 'Up', upTrx.id, upDist
                 # print 'Down', downTrx.id, downDist
                 if params.get_param('generate_image') or True:
-                    upTrx.get_exons(annotationFn, tmpFilePath)
-                    downTrx.get_exons(annotationFn, tmpFilePath)
+                    if upTrx is not None:
+                        upTrx.get_exons(annotationFn, tmpFilePath)
+                    if downTrx is not None:
+                        downTrx.get_exons(annotationFn, tmpFilePath)
                 blatResult.get_sv_brkpts()[svBrkptIdx].store_annotation([upTrx, downTrx], [upDist, downDist], coordIdx)
 
 
