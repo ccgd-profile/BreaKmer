@@ -365,7 +365,7 @@ class Variation:
             elif k1 == 'intra':
                 svType = 'intra-chromosomal_' + k2
                 rChrom = lChrom
-                clusterDist = abs(int(self.discReadClusters[key]['leftBrkpt'].split(':')[1]) - int(self.discReadClusters[key]['rightBrkpt'].split(':')[1]))
+                clusterDist = abs(self.discReadClusters[key]['leftBrkpt'] - self.discReadClusters[key]['rightBrkpt'])
             lStrand, rStrand = k3.split(':')
             lBrkpt = self.discReadClusters[key]['leftBrkpt']
             rBrkpt = self.discReadClusters[key]['rightBrkpt']
