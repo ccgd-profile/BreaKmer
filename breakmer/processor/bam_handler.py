@@ -3,7 +3,7 @@
 
 """bam_handler.py module
 
-This module contains the classes and functions to handle the 
+This module contains the classes and functions to handle the
 """
 
 import pysam
@@ -271,9 +271,11 @@ def get_strand_key(read, ordered=False):
 
 
 def cluster_regions(dReadLst, idx, clusterType):
-    distBuffer = 50
+    distBuffer = None
     clusterLst = []
     for dRead in dReadLst:
+        if distBuffer is None:
+            distBuffer = dRead.readLen
         # trgtStart = dRead.pos[0]
         # mateStart = dRead.pos[1]
         # print 'cluster_regions dRead', dRead.pos, dRead.readLen, clusterType
@@ -319,6 +321,7 @@ class discReadPair:
         self.set_values(read, orderType)
 
     def set_values(self, read, orderType):
+        # print 'bam_handler.py set_values() for discReadPair', read.pos, read.mpos
         self.pos = [read.pos, read.mpos]
         self.strands = [get_strand_str(read.is_reverse), get_strand_str(read.mate_is_reverse)]
         if (orderType == 'ordered') and (read.mpos < read.pos):
@@ -326,6 +329,7 @@ class discReadPair:
             self.pos.reverse()
             self.strands.reverse()
         self.readInfoStr = '|'.join([str(x) for x in [read.qname, self.strands[0], self.strands[1], read.tlen, read.mpos]])
+        # print 'bam_hanlder.py set_values() readInfoStr', self.readInfoStr
 
 
 class discReads:
@@ -339,6 +343,7 @@ class discReads:
         self.disc = {}
 
     def add_inter_discread(self, bam, read):
+        # print 'bam_handler.py add_inter_discread()', read
         dRead = discReadPair(read, 'unordered')
         mateRefId = bam.getrname(read.rnext)
         if mateRefId not in self.reads['inter']:
@@ -347,12 +352,16 @@ class discReads:
         if strandKey not in self.reads['inter'][mateRefId]:
             self.reads['inter'][mateRefId][strandKey] = []
         self.reads['inter'][mateRefId][strandKey].append(dRead)
+        # print 'bam_handler.py add_inter_discread() self.reads inter', mateRefId, strandKey, '\n'
+        # for dRead in self.reads['inter'][mateRefId][strandKey]:
+            # print '\t', dRead.readInfoStr
 
         if mateRefId not in self.disc:
             self.disc[mateRefId] = []
         self.disc[mateRefId].append((read.pos, read.mpos))
+        # print 'bam_handler.py add_inter_discread() disc dictionary', mateRefId, self.disc[mateRefId]
 
-    def add_intra_discread(self, read):
+    def add_intra_discread(self, read, overlapping_reads):
         discType = 'other'
         dRead = discReadPair(read, True)
         disc_ins_size = abs(read.tlen) >= self.insertSizeThresh
@@ -385,7 +394,7 @@ class discReads:
             self.disc[read.tid] = []
         self.disc[read.tid].append((read.pos, read.mpos))
 
-    def add_read_pair(self, bam, read):
+    def add_read_pair(self, bam, read, overlapping_reads):
         """
         Args:
             read:
@@ -402,9 +411,10 @@ class discReads:
 
         # Extract read-pairs that are mapped to different chromosomes or fair apart.
         diff_chroms = read.rnext != -1 and read.tid != read.rnext
-        if read.tid == read.rnext:
-            self.add_intra_discread(read)
+        if read.tid == read.rnext and not overlapping_reads:
+            self.add_intra_discread(read, overlapping_reads)
         elif diff_chroms:
+            # print 'bam_handler.py add_read_pair(), diff_chroms', diff_chroms, read.rnext, read.tid, read.rnext
             self.add_inter_discread(bam, read)
 
     def cluster_discreads(self):
@@ -414,20 +424,28 @@ class discReads:
         3. -:+, -:-, +:+, +:-
         4. List of discRead objects
         """
+        # print 'cluster_discreads()', '*'*25
         for key1 in self.reads:
+            # print 'key1', key1
             d1 = self.reads[key1]
             for key2 in d1:
+                # print 'key2', key2
                 d2 = d1[key2]
+                interClusterClusters = {}
                 for key3 in d2:
+                    # print 'key3', key3
                     dReadsLst = d2[key3]
+                    # print 'read list', dReadsLst
                     srt1 = sorted(dReadsLst, key=lambda x: x.pos[0])
                     srt2 = sorted(dReadsLst, key=lambda x: x.pos[1])
                     c1 = cluster_regions(srt1, 0, 'target')
                     c2 = cluster_regions(srt2, 1, 'mate')
                     for item in dReadsLst:
+                        # print 'Disc read pair obj', item.readInfoStr
                         cIdx1 = get_cluster_membership(item, c1, 0)
                         cIdx2 = get_cluster_membership(item, c2, 1)
                         regionPairKey = '|'.join([key1, key2, key3, str(cIdx1), str(cIdx2)])
+                        # print 'regionPairKey', regionPairKey
                         leftBrkpt = c1[cIdx1][0]
                         rightBrkpt = c2[cIdx2][0]
                         leftStrand, rightStrand = key3.split(':')
@@ -436,12 +454,38 @@ class discReads:
                         if rightStrand == '+':
                             rightBrkpt = c2[cIdx2][1]
                         if regionPairKey not in self.clusters:
-                            self.clusters[regionPairKey] = {'readCount': 0,
+                            self.clusters[regionPairKey] = {'readCount': 0,  # Read count for sub cluster, based on strand
+                                                            'interClusterCount': 0,  # Read count for cluster ignoring strands, this will be used for interchrom clustering.
                                                             'leftBounds': c1[cIdx1][0:2],
                                                             'rightBounds': c2[cIdx2][0:2],
                                                             'leftBrkpt': leftBrkpt,
-                                                            'rightBrkpt': rightBrkpt}
+                                                            'rightBrkpt': rightBrkpt,
+                                                            'clusterId': len(self.clusters) + 1}
+                            if key1 == 'inter':
+                                # print 'Inter check clustering', interClusterClusters
+                                matchFound = False
+                                for clusterKey in interClusterClusters:
+                                    # print 'Checking clustering of inter clusters', clusterKey, self.clusters[clusterKey]['leftBrkpt'], regionPairKey, leftBrkpt
+                                    # print 'Checking clustering of inter clusters', clusterKey, self.clusters[clusterKey]['rightBrkpt'], regionPairKey, rightBrkpt
+                                    if (abs(self.clusters[clusterKey]['leftBrkpt'] - leftBrkpt) < 1000) and (abs(self.clusters[clusterKey]['rightBrkpt'] - rightBrkpt) < 1000):
+                                        # Merge the clusters
+                                        interClusterClusters[clusterKey].append(regionPairKey)
+                                        matchFound = True
+                                        break
+                                if not matchFound:
+                                    # print 'No match', regionPairKey
+                                    interClusterClusters[regionPairKey] = [regionPairKey]
                         self.clusters[regionPairKey]['readCount'] += 1
+                        self.clusters[regionPairKey]['interClusterCount'] += 1
+                if len(interClusterClusters) > 0:
+                    for clusterKey in interClusterClusters:
+                        totalCounts = 0
+                        for cKey in interClusterClusters[clusterKey]:
+                            totalCounts += self.clusters[cKey]['readCount']
+                        for cKey in interClusterClusters[clusterKey]:
+                            self.clusters[cKey]['interClusterCount'] = totalCounts
+                            self.clusters[cKey]['clusterId'] = self.clusters[clusterKey]['clusterId']
+        # print 'Complete clusters', self.clusters
         return self.clusters
 
     def check_inv_readcounts(self, brkpts):
@@ -585,7 +629,7 @@ class VariantReadTracker:
 
         proper_map, overlapping_reads = pe_meta(read)
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:
-            self.discReadTracker.add_read_pair(self.bam, read)
+            self.discReadTracker.add_read_pair(self.bam, read, overlapping_reads)
 
         self.valid.append((read, proper_map, overlapping_reads))
         if read.qname not in self.pair_indices and not read.mate_is_unmapped:

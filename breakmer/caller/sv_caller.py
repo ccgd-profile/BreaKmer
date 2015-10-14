@@ -390,10 +390,10 @@ class SVBreakpoints:
             self.q[1].append([qe, qe - qs, None])
             self.q[0] = [qs, qe]
             tbrkpt = [ts, te]
+            self.genomicBrkpts[targetKey].append((chrom, ts, te))
+            self.genomicBrkpts['all'].append((chrom, ts, te))
             if br.strand == '+':
                 br.set_sv_brkpt((chrom, ts, te), 'rearrangement', targetKey)
-                self.genomicBrkpts[targetKey].append((chrom, ts, te))
-                self.genomicBrkpts['all'].append((chrom, ts, te))
             if br.strand == '-':
                 filt_rep_start = br.filter_reps_edges[1]
                 tbrkpt = [te, ts]
@@ -431,13 +431,13 @@ class SVBreakpoints:
     def get_brkpt_str(self, targetKey):
         """ """
         if targetKey is None:
-            brkptStr = ''
-            for key in self.genomicBrkpts:
-                outStr = self.get_brkpt_str(key)
-                if brkptStr == '':
-                    brkptStr = outStr
-                elif outStr != '':
-                    brkptStr += ',' + outStr
+            brkptStr = ','.join(self.brkptStr)  # self.genomicBrkpts['all']
+            # for key in self.genomicBrkpts:
+            #     outStr = self.get_brkpt_str(key)
+            #     if brkptStr == '':
+            #         brkptStr = outStr
+            #     elif outStr != '':
+            #         brkptStr += ',' + outStr
             return brkptStr
         else:
             brkptStr = []
@@ -451,18 +451,17 @@ class SVBreakpoints:
         """ """
         depths = []
         bamfile = pysam.Samfile(sampleBamFn, 'rb')
-        for key in self.genomicBrkpts:
-            for genomicBrkpt in self.genomicBrkpts[key]:
-                chrom = genomicBrkpt[0].strip('chr')
-                bps = genomicBrkpt[1:]
-                for bp in bps:
-                    alignedDepth = 0
-                    alignedReads = bamfile.fetch(str(chrom), int(bp), int(bp) + 1)
-                    for alignedRead in alignedReads:
-                        if alignedRead.is_duplicate or alignedRead.is_qcfail or alignedRead.is_unmapped or alignedRead.mapq < 10:
-                            continue
-                        alignedDepth += 1
-                    depths.append(alignedDepth)
+        for genomicBrkpt in self.genomicBrkpts['all']:
+            chrom = genomicBrkpt[0].strip('chr')
+            bps = genomicBrkpt[1:]
+            for bp in bps:
+                alignedDepth = 0
+                alignedReads = bamfile.fetch(str(chrom), int(bp), int(bp) + 1)
+                for alignedRead in alignedReads:
+                    if alignedRead.is_duplicate or alignedRead.is_qcfail or alignedRead.is_unmapped or alignedRead.mapq < 10:
+                        continue
+                    alignedDepth += 1
+                depths.append(alignedDepth)
         return depths
 
     def get_splitread_count(self):

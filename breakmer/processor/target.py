@@ -348,12 +348,15 @@ class Variation:
 
         self.discReadClusters = self.var_reads['sv'].cluster_discreads()
         self.discReadFormatted = []
-        headerStr = '\t'.join(['Target_name', 'sv_type', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
+        headerStr = '\t'.join(['Target_name', 'sv_type', 'cluster_id', 'left_breakpoint_estimate', 'right_breakpoint_estimate', 'strands', 'discordant_readpair_count'])
         for key in self.discReadClusters:
             readCount = self.discReadClusters[key]['readCount']
-            if readCount < self.params.get_param('discread_only_thresh'):
-                continue
             k1, k2, k3, c1, c2 = key.split('|')
+            checkCount = readCount
+            if k1 == 'inter':
+                checkCount = self.discReadClusters[key]['interClusterCount']
+            if checkCount < self.params.get_param('discread_only_thresh'):
+                continue
             svType = 'inter-chromosomal'
             lChrom = 'chr' + targetChrom.replace('chr', '')
             if k1 == 'inter':
@@ -364,7 +367,8 @@ class Variation:
             lStrand, rStrand = k3.split(':')
             lBrkpt = self.discReadClusters[key]['leftBrkpt']
             rBrkpt = self.discReadClusters[key]['rightBrkpt']
-            outStr = '\t'.join([targetName, svType, lChrom + ':' + str(lBrkpt), rChrom + ':' + str(rBrkpt), lStrand + ',' + rStrand, str(readCount)])
+            clusterId = targetName + '_' + str(self.discReadClusters[key]['clusterId'])
+            outStr = '\t'.join([targetName, svType, clusterId, lChrom + ':' + str(lBrkpt), rChrom + ':' + str(rBrkpt), lStrand + ',' + rStrand, str(readCount)])
             self.discReadFormatted.append((headerStr, outStr))
 
 

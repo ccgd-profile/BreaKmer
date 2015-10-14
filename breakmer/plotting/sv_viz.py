@@ -87,27 +87,58 @@ class Segment:
             # If the type is 'rearrangement' then there should only be one - this needs to be inferred by the realignment
             # strand and the index of the segment.
             brkptTrxs = []
-
             if svBreakpoint.svType == 'rearrangement':
                 if len(dKeys) > 1:
-                    # This indicates that the segment is in the middle - key innner transcripts if the breakpoints are intergenic.
+                    addLeft = True
+                    addRight = True
+                    # This indicates that the segment is in the middle - key inner transcripts if the breakpoints are intergenic.
                     leftBpTrxList, leftBpDistList = annotatedTrxsDict[0]
                     rightBpTrxList, rightBpDistList = annotatedTrxsDict[1]
                     keepIdx = 0
                     if len(leftBpTrxList) > 1:
                         # Take the inner trxs
-                        keepIdx = 1
-                    # Left
-                    trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
+                        if self.alignResult != '-':
+                            keepIdx = 1
+                            if leftBpTrxList[keepIdx] is None:
+                                addLeft = False
+                            # Check if the choosen transcript overlaps the segment.
+                            # The start coord of the transcript should be < than the right breakpoint coord.
+                            elif leftBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[1]:
+                                addLeft = False
+                        else:
+                            if leftBpTrxList[keepIdx] is None:
+                                addLeft = False
+                            # Check if the choosen transcript overlaps the segment.
+                            # The end coord of the transcript should be > than the right breakpoint coord.
+                            elif leftBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[1]:
+                                addLeft = False
+                    if addLeft:
+                        trxItems, trxIds = check_add_trx(leftBpTrxList[keepIdx], trxItems, trxIds, leftBpDistList[keepIdx], svBreakpoint, 0, 'rearr')
                     # print 'Left brkpt items', trxItems, trxIds
                     keepIdx = 0
                     if len(rightBpTrxList) > 1:
-                        # Take the inner trxs
-                        keepIdx = 0
+                        if self.alignResult == '-':
+                            # Take the inner trxs
+                            keepIdx = 1
+                            if rightBpTrxList[keepIdx] is None:
+                                addRight = False
+                            # Check if the choosen transcript overlaps the segment.
+                            # The end coord of the transcript should be > than the left breakpoint coord.
+                            elif rightBpTrxList[keepIdx].start > svBreakpoint.genomicCoords[0]:
+                                addRight = False
+                        else:
+                            if rightBpTrxList[keepIdx] is None:
+                                addRight = False
+                            # Check if the choosen transcript overlaps the segment.
+                            # The end coord of the transcript should be > than the left breakpoint coord.
+                            elif rightBpTrxList[keepIdx].stop < svBreakpoint.genomicCoords[0]:
+                                addRight = False
                     # Right
-                    trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
+                    if addRight:
+                        trxItems, trxIds = check_add_trx(rightBpTrxList[keepIdx], trxItems, trxIds, rightBpDistList[keepIdx], svBreakpoint, 1, 'rearr')
                     # print 'Right brkpt items', trxItems, trxIds
                 else:
+                    add = True
                     # Single breakpoint
                     trxList, distList = annotatedTrxsDict[0]
                     # print 'Selecting transcripts', trxList, distList, self.idx, self.nSegments, self.alignResult.strand
@@ -122,23 +153,33 @@ class Segment:
                                 # Get downstream gene
                                 trx = trxList[1]
                                 trxDist = distList[1]
+                                if trx is None:
+                                    add = False
                             else:
                                 trx = trxList[0]
                                 trxDist = distList[0]
+                                if trx is None:
+                                    add = False
                         elif self.idx == (self.nSegments - 1):
                             if self.alignResult.strand == '-':
                                 # Get upstream gene
                                 trx = trxList[0]
                                 trxDist = distList[0]
+                                if trx is None:
+                                    add = False
                             else:
                                 trx = trxList[1]
                                 trxDist = distList[1]
+                                if trx is None:
+                                    add = False
                                 # print 'trx', trx, trxDist
-                        trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
+                        if add:
+                            trxItems, trxIds = check_add_trx(trx, trxItems, trxIds, trxDist, svBreakpoint, 0, 'rearr')
                         # print 'trxItems, trxIds', trxItems, trxIds
                     else:
-                        # lands in a single trancript
-                        trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
+                        if trxList[0] is not None:
+                            # lands in a single trancript
+                            trxItems, trxIds = check_add_trx(trxList[0], trxItems, trxIds, distList[0], svBreakpoint, 0, 'rearr')
             elif svBreakpoint.svType == 'indel':
                 # print 'sv_viz.py', annotatedTrxsDict, dKeys
                 if len(dKeys) == 1:
@@ -589,7 +630,7 @@ class AnnotationBrkpt:
                     # elif absDist > firstLastExons['furthest_exon'][0]:
                     #     firstLastExons['furthest_exon'] = [absDist, len(selectedExons), 'exon' + str(eIter)]
                     # print 'Adding exon', exonCoords, eIter, bpOverlap[1]
-                    selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter)], bpOverlap[1])
+                    selectedExons[bpCoordKey]['coords'].append([int(exonCoords[0]), int(exonCoords[1]), 'exon' + str(eIter), bpOverlap[1]])
                     if maxminCoords[0] > int(exonCoords[0]):
                         maxminCoords[0] = int(exonCoords[0])
                     if maxminCoords[1] < int(exonCoords[1]):
@@ -761,120 +802,126 @@ def plot_global_trx_track(ax, yCoord, xOffset, segmentManager):
         trxOffset = segStart + xOffset
         segTrxIter = 0
         yCoord = yCoord + ((i + 0.75) * 0.25)
-        for segTrx in segTrxs:
-            # print 'Global trx ycoord', yCoord
-            trxLen = float(segLen) / float(len(segTrxs))
-            # print 'TRX len', trxLen
-            trxOffset += segTrxIter * (trxLen)
-            # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
-            # ax.add_patch(rect)
-            # print 'TRX offset', trxOffset
-            trx = segTrx.trx
-            # print 'Trx', trx
-            brkpts = segTrx.brkpts
-            exons = sorted(trx.exons, key=lambda x: x.start)
-            # print 'Exons', exons
 
-            parsedExons = []
-            for exon in exons:
-                parsedExons.append((int(exon.start), int(exon.stop), 'exon'))
-
-            bpPlotBins = []
-            for brkpt in brkpts:
-                # print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
-                gCoord = brkpt.get_genomic_coord()
-                # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
-                if gCoord < trx.start or gCoord > trx.stop:
-                    parsedExons.append((int(gCoord) - 1, int(gCoord), 'breakpoint'))
-                else:
-                    for i, exon in enumerate(exons):
-                        if gCoord >= exon.start and gCoord <= exon.stop:
-                            # within exon
-                            # print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
-                            bpPlotBins.append(('exon', i))
-                            break
-                        elif gCoord < exon.start:
-                            # print 'Gcoord, exon.start', gCoord, exon.start, i
-                            bpPlotBins.append(('intron', i - 1))
-                            break
-
-            newExons = sorted(parsedExons, key=lambda x: x[0])
-
-            binSize = trxLen / (2 * len(newExons) - 1)
-            offset = trxOffset
-            ycoord = int(yCoord) - (float(segTrxIter) / float(5))
-            # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
-            # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
-            trxElements = []
-            # print 'New exons', newExons
-            # print 'Offset', offset, binSize
-            exonHit = False
-            for i, exon in enumerate(newExons):
-                rectLen = binSize
-                start = offset
-                color = segment.color
-                height = 0.35
-                exonStr = exon[2]
-                # print 'start', start
-                if exon[2] == 'breakpoint':
-                    rectLen = 0.5
-                    height = 5
-                    exonStr = ''
-                    if i == (len(newExons) - 1) and segmentPos == 'first':
-                        start += binSize
-                    ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
-                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
-                        trxElements.append(start)
-                offset += binSize + rectLen + (binSize - rectLen)
-                if exon[2] != 'breakpoint':
-                    # print 'Plotting rectangle', start, yCoord, rectLen, height
-                    rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
-                    ax.add_patch(rect)
-                if exonStr != '':
-                    if not exonHit:
-                        tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
-                        tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
-                        ax.text(start, yCoord - 0.35, tStart, ha='left', va='center', size=8)
-                        ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
-                        exonLabel = 'exon1'
-                        if trx.strand == '-':
-                            exonLabel = 'exon' + str(len(exons))
-                        ax.text(start, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
-                        exonHit = True
-
-                    # exstart = exon[0]
-                    # exend = exon[1]
-                    # if segment.strand == '-':
-                    #     exstart = exon[1]
-                    #     exend = exon[0]
-                    # exstart = segment.chromName + ':' + str(exstart)
-                    # exend = segment.chromName + ':' + str(exend)
-                    # ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
-                    # ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
-                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
-                        trxElements.append(start)
-                        trxElements.append(start + binSize)
-                        # print 'trxElements', exon, trxElements
-            segTrxIter += 1
-            # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            # print 'TRX elements', trxElements, trxOffset, trxLen
-            trxMin = max(min(trxElements), trxOffset)
-            trxMax = min(max(trxElements), trxOffset + trxLen)
-            # print 'TRX max, min', trxMin, trxMax
-            # print 'Rectangle', trxMin, yCoord, trxMax - trxMin
-            rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
+        if len(segTrxs) == 0:
+            trxLen = segLen
+            rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.125, color='grey')
             ax.add_patch(rect)
+        else:
+            for segTrx in segTrxs:
+                # print 'Global trx ycoord', yCoord
+                trxLen = float(segLen) / float(len(segTrxs))
+                # print 'TRX len', trxLen
+                trxOffset += segTrxIter * (trxLen)
+                # rect = patches.Rectangle((trxOffset, yCoord + 0.15), trxLen, 0.05, color=segment.color)
+                # ax.add_patch(rect)
+                # print 'TRX offset', trxOffset
+                trx = segTrx.trx
+                # print 'Trx', trx
+                brkpts = segTrx.brkpts
+                exons = sorted(trx.exons, key=lambda x: x.start)
+                # print 'Exons', exons
 
-            for bp in bpPlotBins:
-                # print 'BP', bp
-                add = -(float(binSize) / float(2))
-                inc = 1
-                if bp[0] == 'exon':
-                    add = (float(binSize) / float(2))
-                    inc = 0
-                start = trxOffset + (binSize * 2 * (bp[1] + inc)) + add
-                # print 'Start coord', start
-                ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
+                parsedExons = []
+                for exon in exons:
+                    parsedExons.append((int(exon.start), int(exon.stop), 'exon'))
+
+                bpPlotBins = []
+                for brkpt in brkpts:
+                    # print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+                    gCoord = brkpt.get_genomic_coord()
+                    # exonCode = get_exon_code(brkpt, segmentPos, segment.strand)
+                    if gCoord < trx.start or gCoord > trx.stop:
+                        parsedExons.append((int(gCoord) - 1, int(gCoord), 'breakpoint'))
+                    else:
+                        for i, exon in enumerate(exons):
+                            if gCoord >= exon.start and gCoord <= exon.stop:
+                                # within exon
+                                # print 'Gcoord, exon', gCoord, exon.start, exon.stop, i
+                                bpPlotBins.append(('exon', i))
+                                break
+                            elif gCoord < exon.start:
+                                # print 'Gcoord, exon.start', gCoord, exon.start, i
+                                bpPlotBins.append(('intron', i - 1))
+                                break
+
+                newExons = sorted(parsedExons, key=lambda x: x[0])
+
+                binSize = trxLen / (2 * len(newExons) - 1)
+                offset = trxOffset
+                ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+                # labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
+                # ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 2, labelStr, ha='center', va='center', size=12)
+                trxElements = []
+                # print 'New exons', newExons
+                # print 'Offset', offset, binSize
+                exonHit = False
+                for i, exon in enumerate(newExons):
+                    rectLen = binSize
+                    start = offset
+                    color = segment.color
+                    height = 0.35
+                    exonStr = exon[2]
+                    # print 'start', start
+                    if exon[2] == 'breakpoint':
+                        rectLen = 0.5
+                        height = 5
+                        exonStr = ''
+                        if i == (len(newExons) - 1) and segmentPos == 'first':
+                            start += binSize
+                        ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
+                        if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                            trxElements.append(start)
+                    offset += binSize + rectLen + (binSize - rectLen)
+                    if exon[2] != 'breakpoint':
+                        # print 'Plotting rectangle', start, yCoord, rectLen, height
+                        rect = patches.Rectangle((start, yCoord - 0.125), rectLen, height, color=color)
+                        ax.add_patch(rect)
+                    if exonStr != '':
+                        if not exonHit:
+                            tStart = trx.chr.replace('chr', '') + ':' + str(trx.start)
+                            tStop = trx.chr.replace('chr', '') + ':' + str(trx.stop)
+                            ax.text(start, yCoord - 0.35, tStart, ha='left', va='center', size=8)
+                            ax.text(trxOffset + trxLen, yCoord - 0.35, tStop, ha='right', va='center', size=8)
+                            exonLabel = 'exon1'
+                            if trx.strand == '-':
+                                exonLabel = 'exon' + str(len(exons))
+                            ax.text(start, yCoord + 0.4, exonLabel, ha='left', va='center', size=8)
+                            exonHit = True
+
+                        # exstart = exon[0]
+                        # exend = exon[1]
+                        # if segment.strand == '-':
+                        #     exstart = exon[1]
+                        #     exend = exon[0]
+                        # exstart = segment.chromName + ':' + str(exstart)
+                        # exend = segment.chromName + ':' + str(exend)
+                        # ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
+                        # ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
+                        if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                            trxElements.append(start)
+                            trxElements.append(start + binSize)
+                            # print 'trxElements', exon, trxElements
+                segTrxIter += 1
+                # This guarantees that intergenic breakpoints don't appear to be in the transcript.
+                # print 'TRX elements', trxElements, trxOffset, trxLen
+                trxMin = max(min(trxElements), trxOffset)
+                trxMax = min(max(trxElements), trxOffset + trxLen)
+                # print 'TRX max, min', trxMin, trxMax
+                # print 'Rectangle', trxMin, yCoord, trxMax - trxMin
+                rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
+                ax.add_patch(rect)
+
+                for bp in bpPlotBins:
+                    # print 'BP', bp
+                    add = -(float(binSize) / float(2))
+                    inc = 1
+                    if bp[0] == 'exon':
+                        add = (float(binSize) / float(2))
+                        inc = 0
+                    start = trxOffset + (binSize * 2 * (bp[1] + inc)) + add
+                    # print 'Start coord', start
+                    ax.vlines(x=start, ymin=yCoord - 0.35, ymax=yCoord + 0.35, color='grey', linewidth=1.5, zorder=2)
 
 
 def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
@@ -920,186 +967,191 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
             # last transcript plots.
             trxOffset += 3
 
-        # Iterate through the segment transcripts.
-        for segTrxIter, segTrx in enumerate(segTrxs):
-            # print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
-
-            # For the first and last segments, use ... at the beginning and end.
-            if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
-                # Decrease the segment length by 3 units for each '.'
-                segLen = segLen - 3
-                for i in range(3):
-                    rect = patches.Rectangle((trxOffset - 3 + i, yCoord), 0.25, 0.1, color=segment.color)
-                    ax.add_patch(rect)
-            if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
-                # Last segment and trx
-                segLen = segLen - 3
-                for i in range(3):
-                    rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord), 0.2, 0.1, color=segment.color)
-                    ax.add_patch(rect)
-
-            # Transcript plot length is the length of the segment divided by the number of transcripts
-            # corresponding to that segment (i.e. 2 transcripts for an intergenic breakpoint.)
-            trxLen = float(segLen) / float(len(segTrxs))
-            # print 'TRX len', trxLen
-            # Increment the transcript x-coordinate by transcript iterator * length.
-            trxOffset += segTrxIter * (trxLen)
-            # print 'TRX offset', trxOffset
-            trx = segTrx.trx
-            brkpts = segTrx.brkpts
-            trx_reverse = False
-            if trx.strand == '-':
-                trx_reverse = True
-
-            # Sort the exons increasing in genome coordinate if the transcript is coded on the + strand.
-            # Sort in decreasing order if the transcript is coded on the - strand.
-            exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
-
-            # for brkpt in brkpts:
-            #     print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
-
-            abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
-            selectedExons = abrkpt.select_exons(exons)
-            # print selectedExons
-
-            # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
-            # bpUnits = float(trxLen) / float(genomicLen)
-
-            mergedExons = []
-            for item in selectedExons:
-                mergedExons.extend(selectedExons[item]['coords'])
-            allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
-
-            # Only grab the nearest two (or one) exons to the breakpoints
-            plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
-
-            '''
-            Annotated exons are uniformly plotted across the transcript length.
-            The introns between exons are given the same amount of space as well.
-            There must be 3 units for every two exons - this is including breakpoints that do
-            not land within exons.
-
-            binsize = transcript_length / (2 * number_exons) - 1
-            1 exon = 2 * 1 - 1 = 1 bin (note this scenario is unlikely.)
-            2 exons = 2 * 2 - 1 = 3 bins (i.e. 2 exons and 1 intron)
-            3 exons = 2 * 3 - 1 = 5 bins
-
-            Example for the first segment where the breakpoint lands in a transcript intron
-            exon1           exon2                   breakpoint               
-            ||||||||        ||||||||               |
-            ----------------------------------------
-            '''
-            binSize = trxLen / (2 * len(plotExons) - 1)
-            offset = trxOffset
-            ycoord = int(yCoord) - (float(segTrxIter) / float(5))
-            labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
-            ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
-            trxElements = []
-
-            # print 'Plot exons', plotExons
-            # print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
-            for i, exon in enumerate(plotExons):
-                # exon list contains: exon.start, exon.stop, exon.number or breakpoint, breakpoint genomic coordinate
-                rectLen = binSize
-                start = offset
-                color = segment.color
-                height = 0.5
-                exonStr = exon[2]
-                # print 'start$$$', start
-                if exon[2] != 'breakpoint':
-                    rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=segment.color)
-                    ax.add_patch(rect)
-                    ax.text(start + (float(binSize) / float(2)), yCoord + 0.45, exonStr, ha='center', va='center', size=8)
-                # if exonStr != '':
-                    exstart = exon[0]
-                    exend = exon[1]
-                    if segment.strand == '-':
-                        exstart = exon[1]
-                        exend = exon[0]
-                    exstart = segment.chromName + ':' + str(exstart)
-                    exend = segment.chromName + ':' + str(exend)
-                    ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
-                    ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
-                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
-                        trxElements.append(start)
-                        trxElements.append(start + binSize)
-                        # print 'trxElements', exon, trxElements
-
-                if exon[2] == 'breakpoint' or exon[3] is not None:
-                    # The exon lists contain the genomic coordinate for the breakpoint if it
-                    # overlaps an exon element. This checks for that instance and plots the
-                    # '|' for the breakpoint at the end of the exon.
-                    exonStr = ''
-                    if i == (len(plotExons) - 1):
-                        # If the breakpoint is the last 'exon' to be plotted
-                        # in the segment, then adjust the start by a binsize.
-                        # print 'Exon', exon, 'adjusting start', start
-                        start += binSize
-                        # print 'New start', start
-                    minCoord = 0.2
-                    if segTrx.svType != 'rearrangement':
-                        minCoord = yCoord - 0.5
-                    ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
-
-                    if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
-                        trxElements.append(start)
-
-                offset += binSize + rectLen + (binSize - rectLen)
-                # print 'Rect plot coords', start, yCoord, start + rectLen, binSize
-                # if exon[3] is not None:
-                #     # The exon lists contain the genomic coordinate for the breakpoint if it
-                #     # overlaps an exon element. This checks for that instance and plots the
-                #     # '|' for the breakpoint at the end of the exon.
-                #     if i == (len(plotExons) - 1):
-                #         start += binSize
-                #     minCoord = 0.2
-                #     if segTrx.svType != 'rearrangement':
-                #         minCoord = yCoord - 0.5
-                #     # print minCoord
-                #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
-            # This guarantees that intergenic breakpoints don't appear to be in the transcript.
-            # print 'trxMin Max', trxElements
-            trxMin = max(min(trxElements), trxOffset)
-            trxMax = max(max(trxElements), trxOffset + trxLen)
-            rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
+        if len(segTrxs) == 0:
+            trxLen = segLen
+            rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.125, color='grey')
             ax.add_patch(rect)
-                    # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
-                    # ax.add_patch(rect)
+        else:
+            # Iterate through the segment transcripts.
+            for segTrxIter, segTrx in enumerate(segTrxs):
+                # print 'segTRX svtype', segTrx.svType, segTrx.trx.exons
+
+                # For the first and last segments, use ... at the beginning and end.
+                if (segmentPos == 'first' or segmentPos == 'only') and segTrxIter == 0:
+                    # Decrease the segment length by 3 units for each '.'
+                    segLen = segLen - 3
+                    for i in range(3):
+                        rect = patches.Rectangle((trxOffset - 3 + i, yCoord), 0.25, 0.1, color=segment.color)
+                        ax.add_patch(rect)
+                if segTrxIter == (len(segTrxs) - 1) and (segmentPos == 'last' or segmentPos == 'only'):
+                    # Last segment and trx
+                    segLen = segLen - 3
+                    for i in range(3):
+                        rect = patches.Rectangle((trxOffset + 0.5 + segLen + i, yCoord), 0.2, 0.1, color=segment.color)
+                        ax.add_patch(rect)
+
+                # Transcript plot length is the length of the segment divided by the number of transcripts
+                # corresponding to that segment (i.e. 2 transcripts for an intergenic breakpoint.)
+                trxLen = float(segLen) / float(len(segTrxs))
+                # print 'TRX len', trxLen
+                # Increment the transcript x-coordinate by transcript iterator * length.
+                trxOffset += segTrxIter * (trxLen)
+                # print 'TRX offset', trxOffset
+                trx = segTrx.trx
+                brkpts = segTrx.brkpts
+                trx_reverse = False
+                if trx.strand == '-':
+                    trx_reverse = True
+
+                # Sort the exons increasing in genome coordinate if the transcript is coded on the + strand.
+                # Sort in decreasing order if the transcript is coded on the - strand.
+                exons = sorted(trx.exons, key=lambda x: x.start, reverse=trx_reverse)
+
+                # for brkpt in brkpts:
+                #     print 'SV breakpoints for segTrx', brkpt.dist, brkpt.svBrkpt.chrom, brkpt.svBrkpt.svType, brkpt.svBrkpt.genomicCoords[brkpt.brkptIdx], brkpt.brkptIdx, segment.strand
+
+                abrkpt = determine_annotation_brkpts(segTrx.brkpts, segmentPos, segment.strand)
+                selectedExons = abrkpt.select_exons(exons)
+                # print selectedExons
+
+                # genomicLen = log(abs(maxminCoords[0] - maxminCoords[1]), 2)
+                # bpUnits = float(trxLen) / float(genomicLen)
+
+                mergedExons = []
+                for item in selectedExons:
+                    mergedExons.extend(selectedExons[item]['coords'])
+                allExons = sorted(mergedExons, key=lambda x: x[0], reverse=reverse)
+
+                # Only grab the nearest two (or one) exons to the breakpoints
+                plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
+
+                '''
+                Annotated exons are uniformly plotted across the transcript length.
+                The introns between exons are given the same amount of space as well.
+                There must be 3 units for every two exons - this is including breakpoints that do
+                not land within exons.
+
+                binsize = transcript_length / (2 * number_exons) - 1
+                1 exon = 2 * 1 - 1 = 1 bin (note this scenario is unlikely.)
+                2 exons = 2 * 2 - 1 = 3 bins (i.e. 2 exons and 1 intron)
+                3 exons = 2 * 3 - 1 = 5 bins
+
+                Example for the first segment where the breakpoint lands in a transcript intron
+                exon1           exon2                   breakpoint               
+                ||||||||        ||||||||               |
+                ----------------------------------------
+                '''
+                binSize = trxLen / (2 * len(plotExons) - 1)
+                offset = trxOffset
+                ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+                labelStr = trx.geneName + ':' + trx.id + ' (' + trx.strand + ')'
+                ax.text(trxOffset + (float(trxLen) / float(2)), yCoord + 1.25, labelStr, ha='center', va='center', size=12)
+                trxElements = []
+
+                # print 'Plot exons', plotExons
+                # print 'Offset$$$', offset, binSize, trxLen, (2 * len(plotExons) - 1)
+                for i, exon in enumerate(plotExons):
+                    # exon list contains: exon.start, exon.stop, exon.number or breakpoint, breakpoint genomic coordinate
+                    rectLen = binSize
+                    start = offset
+                    color = segment.color
+                    height = 0.5
+                    exonStr = exon[2]
+                    # print 'start$$$', start
+                    if exon[2] != 'breakpoint':
+                        rect = patches.Rectangle((start, yCoord - 0.1875), rectLen, height, color=segment.color)
+                        ax.add_patch(rect)
+                        ax.text(start + (float(binSize) / float(2)), yCoord + 0.45, exonStr, ha='center', va='center', size=8)
+                    # if exonStr != '':
+                        exstart = exon[0]
+                        exend = exon[1]
+                        if segment.strand == '-':
+                            exstart = exon[1]
+                            exend = exon[0]
+                        exstart = segment.chromName + ':' + str(exstart)
+                        exend = segment.chromName + ':' + str(exend)
+                        ax.text(start, yCoord - 0.45, str(exstart), ha='left', va='center', size=8)
+                        ax.text(start + binSize, yCoord - 0.45, str(exend), ha='right', va='center', size=8)
+                        if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                            trxElements.append(start)
+                            trxElements.append(start + binSize)
+                            # print 'trxElements', exon, trxElements
+
+                    if exon[2] == 'breakpoint' or exon[3] is not None:
+                        # The exon lists contain the genomic coordinate for the breakpoint if it
+                        # overlaps an exon element. This checks for that instance and plots the
+                        # '|' for the breakpoint at the end of the exon.
+                        exonStr = ''
+                        if i == (len(plotExons) - 1):
+                            # If the breakpoint is the last 'exon' to be plotted
+                            # in the segment, then adjust the start by a binsize.
+                            # print 'Exon', exon, 'adjusting start', start
+                            start += binSize
+                            # print 'New start', start
+                        minCoord = 0.2
+                        if segTrx.svType != 'rearrangement':
+                            minCoord = yCoord - 0.5
+                        ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
+
+                        if int(exon[0]) >= int(trx.start) and int(exon[1]) <= int(trx.stop):
+                            trxElements.append(start)
+
+                    offset += binSize + rectLen + (binSize - rectLen)
+                    # print 'Rect plot coords', start, yCoord, start + rectLen, binSize
+                    # if exon[3] is not None:
+                    #     # The exon lists contain the genomic coordinate for the breakpoint if it
+                    #     # overlaps an exon element. This checks for that instance and plots the
+                    #     # '|' for the breakpoint at the end of the exon.
+                    #     if i == (len(plotExons) - 1):
+                    #         start += binSize
+                    #     minCoord = 0.2
+                    #     if segTrx.svType != 'rearrangement':
+                    #         minCoord = yCoord - 0.5
+                    #     # print minCoord
+                    #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
+                # This guarantees that intergenic breakpoints don't appear to be in the transcript.
+                # print 'trxMin Max', trxElements
+                trxMin = max(min(trxElements), trxOffset)
+                trxMax = min(max(trxElements), trxOffset + trxLen)
+                rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
+                ax.add_patch(rect)
+                        # rect = patches.Rectangle((start, yCoord), 0.1, 5, color='black')
+                        # ax.add_patch(rect)
 
 
-            # for exon in selectedExons:
-            #     genomicStart = maxminCoords[2]
-            #     if maxminCoords[3] == 'all':
-            #         genomicStart = int(trx.start)
-            #     # if reverse:
-            #     #     genomicStart = maxminCoords[1]
-            #     # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
-            #     e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
-            #     e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
-            #     if segmentPos == 'first':
-            #         e1 = trxLen - e1
-            #         e2 = trxLen - e2
-            #     print 'genomic start', genomicStart, bpUnits
-            #     print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
-            #     eCoords = [e1, e2]
-            #     print 'Mapped coords', e1, e2
-            #     eCoords.sort()
-            #     if reverse:
-            #         print 'Reversing exon coords'
-            #         tmp = e2
-            #         e2 = e1
-            #         e1 = tmp
-            #         print 'Mapped exon coords', e1, e2
-            #     ycoord = int(yCoord) - (float(segTrxIter) / float(5))
-            #     color = segment.color
-            #     rectLen = e2 - e1
-            #     if exon[2] == 'breakpoint':
-            #         color = 'black'
-            #         # rectLen = 0.25
+                # for exon in selectedExons:
+                #     genomicStart = maxminCoords[2]
+                #     if maxminCoords[3] == 'all':
+                #         genomicStart = int(trx.start)
+                #     # if reverse:
+                #     #     genomicStart = maxminCoords[1]
+                #     # ll = [log(int(exon[0]), 2), log(int(exon[1]), 2)]
+                #     e1 = log(max(abs(int(genomicStart) - int(exon[0])), 1), 2) * bpUnits
+                #     e2 = log(max(abs(int(genomicStart) - int(exon[1])), 1), 2) * bpUnits
+                #     if segmentPos == 'first':
+                #         e1 = trxLen - e1
+                #         e2 = trxLen - e2
+                #     print 'genomic start', genomicStart, bpUnits
+                #     print 'Exon', exon[0], exon[1], trxOffset + e1, exon[0] - exon[1]
+                #     eCoords = [e1, e2]
+                #     print 'Mapped coords', e1, e2
+                #     eCoords.sort()
+                #     if reverse:
+                #         print 'Reversing exon coords'
+                #         tmp = e2
+                #         e2 = e1
+                #         e1 = tmp
+                #         print 'Mapped exon coords', e1, e2
+                #     ycoord = int(yCoord) - (float(segTrxIter) / float(5))
+                #     color = segment.color
+                #     rectLen = e2 - e1
+                #     if exon[2] == 'breakpoint':
+                #         color = 'black'
+                #         # rectLen = 0.25
 
-            #     rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
-            #     ax.add_patch(rect)
-            #     if exon[2] != '' and exon[2] != 'breakpoint':
-            #         ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
-            # ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
-            segTrxIter += 1
+                #     rect = patches.Rectangle((trxOffset + e1, ycoord), rectLen, 1, color=color)
+                #     ax.add_patch(rect)
+                #     if exon[2] != '' and exon[2] != 'breakpoint':
+                #         ax.text(trxOffset + e1, ycoord, exon[2], ha='center', va='top', size=8)
+                # ax.text(trxOffset, yCoord + 1, trx.strand, ha='center', va='top', size=10)
+                segTrxIter += 1
