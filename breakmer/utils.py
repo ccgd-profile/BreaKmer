@@ -834,20 +834,20 @@ class FastqFile(object):
     def next(self):
         header, seq, qual_header, qual = [self._f.next() for _ in range(4)]
         header = header.strip()
-        inst, lane, tile, x, y_end = header.split(':')
-        seq = seq.strip()
-        qual = qual.strip()
-        bc = None
-        y = y_end
-        if y.find('/') > -1:
-            y, end = y.split('/')
-        if y.find('#') > -1:
-            y, bc = y.split('#')
-        header_dict = {'inst': inst,
-                       'lane': int(lane),
-                       'tile': int(tile),
-                       'x': int(x),
-                       'y': int(y),
-                       'end': end,
-                       'bc': bc}
+        # inst, lane, tile, x, y_end = header.split(':')
+        # seq = seq.strip()
+        # qual = qual.strip()
+        # bc = None
+        # y = y_end
+        # if y.find('/') > -1:
+        #     y, end = y.split('/')
+        # if y.find('#') > -1:
+        #     y, bc = y.split('#')
+        # header_dict = {'inst': inst,
+        #                'lane': int(lane),
+        #                'tile': int(tile),
+        #                'x': int(x),
+        #                'y': int(y),
+        #                'end': end,
+        #                'bc': bc}
         return (header, seq, qual)
