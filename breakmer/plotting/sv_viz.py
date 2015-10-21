@@ -1025,11 +1025,6 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                 # Only grab the nearest two (or one) exons to the breakpoints
                 plotExons = sorted(get_neighbor_exons(allExons), key=lambda x: x[0], reverse=reverse)
 
-                if len(plotExons) == 0:
-                    rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.125, color='grey')
-                    ax.add_patch(rect)
-                    continue
-
                 '''
                 Annotated exons are uniformly plotted across the transcript length.
                 The introns between exons are given the same amount of space as well.
@@ -1116,6 +1111,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                 # This guarantees that intergenic breakpoints don't appear to be in the transcript.
                 # print 'trxMin Max', trxElements
+
+                if len(trxElements) == 0:
+                    rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.125, color='grey')
+                    ax.add_patch(rect)
+                    continue
                 trxMin = max(min(trxElements), trxOffset)
                 trxMax = min(max(trxElements), trxOffset + trxLen)
                 rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)
