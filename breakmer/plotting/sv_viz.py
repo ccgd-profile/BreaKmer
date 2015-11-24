@@ -1111,6 +1111,11 @@ def plot_annotation_track(ax, yCoord, xOffset, segmentManager):
                     #     ax.vlines(x=start, ymin=minCoord, ymax=yCoord + 0.5, color='grey', linewidth=1.5, zorder=2)
                 # This guarantees that intergenic breakpoints don't appear to be in the transcript.
                 # print 'trxMin Max', trxElements
+
+                if len(trxElements) == 0:
+                    rect = patches.Rectangle((trxOffset, yCoord), trxLen, 0.125, color='grey')
+                    ax.add_patch(rect)
+                    continue
                 trxMin = max(min(trxElements), trxOffset)
                 trxMax = min(max(trxElements), trxOffset + trxLen)
                 rect = patches.Rectangle((trxMin, yCoord), trxMax - trxMin, 0.125, color=segment.color)

@@ -835,8 +835,8 @@ class FastqFile(object):
         header, seq, qual_header, qual = [self._f.next() for _ in range(4)]
         header = header.strip()
         # inst, lane, tile, x, y_end = header.split(':')
-        # seq = seq.strip()
-        # qual = qual.strip()
+        seq = seq.strip()
+        qual = qual.strip()
         # bc = None
         # y = y_end
         # if y.find('/') > -1:
