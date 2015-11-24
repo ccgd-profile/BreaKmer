@@ -472,15 +472,23 @@ class SVBreakpoints:
         """ """
 
         contigCountTracker = contig.get_contig_count_tracker()
+        print 'SV Breakpoint object set_counts(), self.q', self.q
+        print 'self.tcoords', self.tcoords
+        print 'self.qcoords', self.qcoords
+        print 'self.counts', self.counts
         for qb in self.q[1]:
             left_idx = qb[0] - min(qb[1], 5)
             right_idx = qb[0] + min(qb[2], 5)
+            print 'qb', qb
+            print 'left idx', left_idx
+            print 'right idx', right_idx
             bc = contigCountTracker.get_counts(left_idx, right_idx, svType)
             self.counts['n'].append(min(bc))
             self.counts['d'].append(min(contigCountTracker.get_counts((qb[0] - 1), (qb[0] + 1), svType)))
             self.counts['b'].append(contigCountTracker.get_counts(qb[0], qb[0], svType))
             self.kmers.append(contig.get_kmer_locs()[qb[0]])
             utils.log(self.loggingName, 'debug', 'Read count around breakpoint %d : %s' % (qb[0], ",".join([str(x) for x in bc])))
+        print 'Stored counts', self.counts
         utils.log(self.loggingName, 'debug', 'Kmer count around breakpoints %s' % (",".join([str(x) for x in self.kmers])))
 
 
