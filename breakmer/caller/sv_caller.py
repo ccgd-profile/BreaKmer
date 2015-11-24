@@ -192,6 +192,7 @@ class SVResult:
         svEvent.blatResultsSorted = sorted(svEvent.blatResultsSorted, key=lambda x: x[1])
         if svEvent.brkpts.diff_chr():
             # translocation event
+            print 'sv_caller.py format_rearrangement_values(), set trl values', svEvent.contig.meta.id, svEvent.contig.seq
             svEvent.set_brkpt_counts('trl')
             self.discReadCount = svEvent.get_disc_read_count()
             self.svType = 'rearrangement'
