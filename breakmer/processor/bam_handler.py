@@ -144,7 +144,7 @@ def trim_coords(qualStr, minQual):
     """Searches quality values of a sequence read start->end and end->start to
     determine if there is a string of low quality sequences.
 
-    Scan along the qualStr and continue while the quality is < minQual and 
+    Scan along the qualStr and continue while the quality is < minQual and
     return the index of the last low quality score in the string.
 
     qualStr = [1-1-1-2-2-2-2-20-20-20-30-30-30]
@@ -196,7 +196,7 @@ def pe_meta(read):
 
 
 def get_region_reads(bamFile, chrom, start, end):
-    """Open BAM file using pysam and fetch aligned reads in the
+    """Open Bam file using pysam and fetch aligned reads in the
     specified region.
 
     Args:
@@ -227,7 +227,8 @@ def get_variant_reads(bamFile, chrom, start, end, insertSizeThresh):
         chrom (str):    Chromosome of the region to extract
         start (int):    Region start location to extract.
         end (int):      Region end location to extract.
-    Return:
+
+    Returns:
         varReadTracker (VariantReadTracker): VarReadTracker object
     """
 
@@ -242,7 +243,7 @@ def get_variant_reads(bamFile, chrom, start, end, insertSizeThresh):
         if read.is_unmapped:
             varReadTracker.add_unmapped_read(read)
             skip = True
-        if skip:
+        if skip:  # Skip a read if it is marked as a duplicate, qc failed, or unmapped
             continue
         varReadTracker.check_read(read)
     return varReadTracker
@@ -611,7 +612,7 @@ class VariantReadTracker:
 
     def check_read(self, read):
         """Stores all reads in the self.pair_indices dictionary if it is
-        mapped. 
+        mapped.
 
         Check if the read is part of a discordantly mapped read pair.
 
@@ -622,9 +623,10 @@ class VariantReadTracker:
         self.pair_indices[read.qname][1 (read1)/0 (read2)] = index of read in self.valid
 
         Args:
-            read (pysam read obj): An aligned sequence read. 
-        Return:
-            None 
+            read (pysam read obj): An aligned sequence read.
+
+        Returns:
+            None
         """
 
         proper_map, overlapping_reads = pe_meta(read)
@@ -642,7 +644,8 @@ class VariantReadTracker:
 
         Args:
             read (pysam read obj): pysam read object.
-        Return:
+
+        Returns:
             None
         """
 

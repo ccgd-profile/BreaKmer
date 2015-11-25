@@ -19,13 +19,19 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+'''
+
+'''
+
 
 def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
     """Return new sample kmers from the existing contig sequence that can help extend
     the contig sequence.
+
     All the k-length mers are determined from the new_seq. These kmer sequences are put
     into a set and intersected with the kmer sequences in the sample, ordered according
     to the position of the kmer in the new_seq string and returned.
+
     Args:
         new_seq: String of the contig sequence to create kmers from.
         kmerLen: Integer of the kmer length
@@ -56,13 +62,15 @@ def get_read_kmers(new_seq, kmerLen, kmer_seqs, order='for'):
 class AssemblyRead:
     """Wrapper class for a sequence read used in a contig assembly. This will
     track meta information about the sequence read.
+
     Attributes:
-        read:           fq_read object
-        redundant:      Boolean to indicate whether the read is duplicated.
-        alignChecked:   Boolean to indicate if the read has been checked against
-                        the contig sequence.
-        aligned:        Boolean to indicate if the read aligned to the contig sequence.
+        read (fq_read object):      A previously generate fastq read object in utils.py
+        redundant (boolean):        Indicator whether the read is duplicated.
+        alignChecked (boolean):     Indicator if the read has been checked against
+                                    the contig sequence.
+        aligned (boolean):          Indicator if the read is aligned to the contig sequence.
     """
+
     def __init__(self, read, redundant, checked, aligned):
         self.read = read
         self.redundant = redundant
@@ -903,6 +911,7 @@ class Contig:
     def make_calls(self):
         """
         """
+
         contigCaller = sv_caller.ContigCaller(self.realignment, self, self.meta.params)
         self.svEventResult = contigCaller.call_svs()
 

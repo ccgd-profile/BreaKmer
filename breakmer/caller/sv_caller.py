@@ -333,6 +333,13 @@ class SVResult:
 
 
 class SVBreakpoints:
+    """
+
+    Attributes:
+        loggingName (str):
+
+    """
+
     def __init__(self):
         self.loggingName = 'breakmer.caller.sv_caller'
         self.t = {'target': None, 'other': None}
@@ -354,6 +361,7 @@ class SVBreakpoints:
     def update_brkpt_info(self, br, i, last_iter):
         """Infer the breakpoint information from the blat result for rearrangments.
         """
+
         chrom = 'chr' + br.get_seq_name('ref')
         ts, te = br.get_coords('ref')
         qs, qe = br.get_coords('query')
@@ -494,6 +502,17 @@ class SVBreakpoints:
 
 
 class SVEvent:
+    """
+
+    Attributes:
+        loggingName (str):
+        svType ():
+        svSubtype ():
+        events ():
+        blatResults (list):
+        blatResultsSorted (list):
+    """
+
     def __init__(self, blatResult, contig, svType):
         self.loggingName = 'breakmer.caller.sv_caller'
         self.svType = svType
@@ -517,6 +536,9 @@ class SVEvent:
         self.add(blatResult)
 
     def add(self, blatResult):
+        """
+        """
+
         queryStartCoord = blatResult.alignVals.get_coords('query', 0)
         queryEndCoord = blatResult.alignVals.get_coords('query', 1)
         self.blatResults.append((queryStartCoord, blatResult))
@@ -526,6 +548,7 @@ class SVEvent:
             self.queryCoverage[i] += 1
         if not self.querySize:
             self.querySize = blatResult.get_seq_size('query')
+
         self.qlen += blatResult.get_query_span()
         self.nmatch += blatResult.get_nmatch_total()
         self.in_target = self.in_target or blatResult.in_target
@@ -534,25 +557,36 @@ class SVEvent:
         self.blatResultsSorted.append((blatResult, blatResult.get_nmatch_total()))
 
     def result_valid(self):
+        """
+        """
+
         valid = False
         if (len(self.blatResults) > 1) and self.in_target:
             valid = True
         return valid
 
     def check_annotated(self):
-        """ """
+        """ 
+        """
+
         return self.annotated and not self.failed_annotation
 
     def has_annotations(self):
-        """ """
+        """
+        """
+
         return self.annotated
 
     def get_genomic_brkpts(self):
-        """ """
+        """
+        """
 
         return self.brkpts.genomicBrkpts
 
     def check_previous_add(self, br):
+        """
+        """
+
         ncoords = br.get_coords('query')
         prev_br, prev_nmatch = self.blatResultsSorted[-1]
         prev_coords = prev_br.get_coords('query')
@@ -567,12 +601,14 @@ class SVEvent:
     def format_indel_values(self):
         """
         """
+
         self.brkpts.set_indel_brkpts(self.blatResults[0][1])
         self.resultValues.format_indel_values(self)
 
     def format_rearr_values(self):
         """
         """
+
         self.resultValues.format_rearrangement_values(self)
 
     def get_disc_read_count(self):
@@ -671,6 +707,9 @@ class SVEvent:
         return contained
 
     def which_rearr(self, varReads, tcoords, qcoords, strands, brkpts):
+        """
+        """
+
         rearrValues = {'discReadCount': None, 'svType': 'rearrangement', 'svSubType': None, 'hit': False}
         if not self.check_overlap(tcoords[0], tcoords[1]):
             utils.log(self.loggingName, 'debug', 'Checking rearrangement svType, strand1 %s, strand2 %s, breakpt1 %d, breakpt %d' % (strands[0], strands[1], brkpts[0], brkpts[1]))
@@ -704,7 +743,9 @@ class SVEvent:
         return rearrValues
 
     def define_rearr(self):
-        """ """
+        """
+        """
+
         varReads = self.contig.get_var_reads('sv')
         strands = self.resultValues.strands
         brkpts = self.brkpts.r
@@ -752,6 +793,7 @@ class SVEvent:
     def get_max_meanCoverage(self):
         """Return the highest mean hit frequency among all blat results stored.
         """
+
         maxAlignFreq = 0
         for blatResult, nBasesAligned in self.blatResultsSorted:
             if int(blatResult.alignFreq) > int(maxAlignFreq):
@@ -797,7 +839,14 @@ class SVEvent:
     def get_startend_missing_query_coverage(self):
         """Calculate the percentage of the contig sequence that is not realigned to the reference, only examining the
         beginning and end of the contig sequence.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
+
         missingCov = 0
         for i in self.queryCoverage:
             if i == 0:
@@ -814,19 +863,27 @@ class SVEvent:
         return percentMissing
 
     def is_filtered(self):
-        """"""
+        """
+        """
+
         return self.resultValues.is_filtered()
 
     def set_filtered(self, filterReason):
-        """ """
+        """
+        """
+
         self.resultValues.set_filtered(filterReason)
 
     def set_annotations(self):
-        """ """
+        """
+        """
+
         self.annotated = True
 
     def set_failed_annotation(self):
-        """ """
+        """
+        """
+
         self.failed_annotation = True
 
 
@@ -842,7 +899,8 @@ class ContigCaller:
         self.loggingName = 'breakmer.caller.sv_caller'
 
     def call_svs(self):
-        """ """
+        """
+        """
 
         if not self.realignment.has_results():
             utils.log(self.loggingName, 'info', 'No blat results file exists, no calls for %s.' % self.contig.get_id())
@@ -855,7 +913,15 @@ class ContigCaller:
         return self.svEvent
 
     def check_indels(self):
-        """ """
+        """
+
+        Args:
+            None
+
+        Returns:
+            hasIndel (boolean): Indicator that the contig contains an indel.
+        """
+
         hasIndel = False
         blatResults = self.realignment.get_blat_results()
         for i, blatResult in enumerate(blatResults):
@@ -932,7 +998,9 @@ class ContigCaller:
         return new_gaps
 
     def check_add_br(self, qs, qe, gs, ge, blatResult):
-        """ """
+        """
+        """
+
         utils.log(self.loggingName, 'info', 'Checking to add blat result with start %d, end %d' % (qs, qe))
         add = False
         # Calc % of segment overlaps with gap

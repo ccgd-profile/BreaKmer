@@ -12,21 +12,39 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+'''
+assembler.py module contains classes to track assembly based information for a
+set of extracted reads.
+
+It initializes the assembly of the set of reads using a tumor-only kmer sequence.
+
+Classes:
+    - ContigBuffer
+    - KmerTracker
+
+Functions:
+    - init_assembly
+    - setup_contigs
+'''
+
 
 def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
     """Entry function for assemblying a contiguous sequence from
     a pool of sample only kmers and the reads that contain them.
     A kmer tracker object is instantiated containing all the kmer seqs and
     their associated counts. These are sorted by
+
     Args:
-        kmers: Dictionary of kmers only in the sample key = kmer, value = count in reads
-        fqRecs: Dictionary with sequence values as keys and a list of fq_read objects.
-        kmerLen: Integer of kmer size.
-        rcThresh: Integer representing the minimum readcount threshold for keeping a contig.
-        readLen: Integer of the read length.
-    Return:
-        contigs: List of contig objects.
+        kmers (dict):   Kmers only in the sample. key = kmer sequence, value = frequency of occurence in extracted reads.
+        fqRecs (dict):  Sequence values as keys and a list of fq_read objects as values.
+        kmerLen (int):  kmer sequence size.
+        rcThresh (int): Minimum number of reads supporting a contig to keep the contig for further analysis.
+        readLen (int):  The number of bases in the reads being processed.
+
+    Returns:
+        contigs (list): List of Contig objects.
     """
+
     logger = logging.getLogger('breakmer.assembly.assembler')
     contigs = []
 
@@ -35,17 +53,13 @@ def init_assembly(kmers, fqRecs, kmerLen, rcThresh, readLen):
         logger.info('No kmers to built contigs, returning.')
         return contigs
 
-    # Store kmers in KmerTracker object.
-    kmerTracker = KmerTracker()
+    kmerTracker = KmerTracker()  # Store kmers in KmerTracker object.
     for kmer in kmers:
         kmerTracker.add_kmer(kmer, kmers[kmer])
 
-    # While there are kmers to analyze continue to build contigs.
-    contigBuffer = ContigBuffer()
-    # Sort all the kmers by count and store in order.
-    kmerTracker.set_all_kmer_values()
-    # Check if there are any kmers left to seed the build process.
-    while kmerTracker.has_mers():
+    contigBuffer = ContigBuffer()  # While there are kmers to analyze continue to build contigs.
+    kmerTracker.set_all_kmer_values()  # Sort all the kmers by count and store in order.
+    while kmerTracker.has_mers():  # Check if there are any kmers left to seed the build process.
         # Update the set of kmers to consider for building.
         kmerTracker.update_kmer_set()
         # Get kmer seed for new contig.
@@ -76,18 +90,22 @@ def setup_contigs(kmerSeq, fqRecs, kmerLen, kmerTracker, contigBuffer):
     """Create a contig instance starting with a seed kmer and associated reads.
     First find the reads containing the kmerSeq value, iterate through reads and
     either create a new contig or add to existing contig.
+
     Args:
-        kmerSeq:        String of kmer sequence.
+        kmerSeq (str):  Kmer sequence.
         fqRecs:         Dictionary with sequence values as keys and a list of fq_read objects.
         kmerLen:        Integer of kmer size.
         kmerTracker:    KmerTracker object that contains all the kmer values.
         contigBuffer:   ContigBuffer object to track the buffered contig objects.
-    Return: None
+
+    Returns: None
     """
+
     logger = logging.getLogger('breakmer.assembly.assembler')
     contig = None
+
     # Find all reads with kmer sequence passed in.
-    # kmerReads contains a list of tuples.
+    # kmerReads is a list of tuples. Each tuple contains:
     #   1. fq_read object defined in breakmer.utils.py
     #   2. Starting position of the kmer match in the read sequence
     #   3. Boolean that a match was found.
@@ -200,12 +218,14 @@ class ContigBuffer:
 class KmerTracker:
     """Wrapper class for storing the kmer objects. Useful for adding
     and extracting kmers.
+
     Attributes:
-        kmers:          List of tuples containing kmer count, kmer, kmer object.
-        orderedKmers:   OrderedDict object containing kmer seq as key and kmer count as value.
-                        The top values are the most frequence kmer values.
-        kmerSeqs:       Set of kmer seq values that exist in orderedKmers.
+        kmers (list):               List of tuples containing kmer count, kmer, kmer object.
+        orderedKmers (OrderedDict): OrderedDict object containing kmer seq as key and kmer count as value.
+                                    The top values are the most frequence kmer values.
+        kmerSeqs (set):             Set of kmer seq values that exist in orderedKmers.
     """
+
     def __init__(self):
         self.kmers = []
         self.orderedKmers = OrderedDict()
@@ -214,23 +234,28 @@ class KmerTracker:
     def add_kmer(self, mer, count):
         """Add a kmer object to the list. Stores a tuple with kmer count and kmer sequence string.
         This allows easy sorting.
+
         Args:
-            mer:    String kmer sequence value.
-            count:  Integer of number of reads kmer is within.
-        Return:
+            mer (str):   String kmer sequence value.
+            count (int): Integer of number of reads kmer is within.
+
+        Returns:
             None
         """
+
         if len(set(mer)) > 1:
             self.kmers.append((int(count), mer))
 
     def set_all_kmer_values(self):
         """Sort the kmer list by number of reads (descending) first and then
         by sequence value and store them in an ordered dictionary.
+
         Args:
             None
-        Return:
+        Returns:
             None
         """
+
         kmersSorted = sorted(self.kmers, key=lambda x: (int(x[0]), x[1]), reverse=True)
         for kmer in kmersSorted:
             self.orderedKmers[kmer[1]] = kmer[0]

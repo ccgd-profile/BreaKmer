@@ -349,15 +349,18 @@ def check_intervals(breakpts, query_region):
 def setup_logger(logFnPath, name):
     """Creates the logger object and associated text file to use throughout
     the analysis.
+
     It first creates a log.txt file in the specified analyis directory as the
     FileHandler. The console handler is then formatted to report the time,
     name of the source, level of the message and the message.
+
     Args:
-        log_fn_path: Absolute path for the directory that will contain the
-        log file.
-        name: The name of the package to initially setup the logger object.
+        log_fn_path (str): Absolute path for the directory that will contain the
+                           log file.
+        name (str):        The name of the package to initially setup the logger object.
+
     Returns:
-        Nothing is returned.
+        None
     """
 
     outputPath = os.path.abspath(logFnPath)
@@ -603,25 +606,6 @@ def get_fastq_reads_old(fn, sv_reads):
             read_len = max(read_len, len(fr.seq))
             fq_recs[fr.id] = fr
     return fq_recs, read_len
-
-
-# def load_kmers(fns, kmers):
-#     """
-#     """
-
-#     if not fns:
-#             return kmers
-
-#     fns = fns.split(",")
-#     for fn in fns:
-#             f = open(fn, 'rU')
-#             for line in f.readlines():
-#                     line = line.strip()
-#                     mer, count = line.split()
-#                     if mer not in kmers:
-#                             kmers[mer] = 0
-#                     kmers[mer] += int(count)
-#     return kmers
 
 
 def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction, target_fa_fn):

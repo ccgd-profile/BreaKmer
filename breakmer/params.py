@@ -18,6 +18,14 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+'''
+Track all the input information and organize into a ParamManager object.
+
+Classes:
+    - ParamManager
+'''
+
+
 class ParamManager:
     """ParamManager class stores all the input specifications provided to the program to run. These include
     file paths, thresholds, directories, etc...
@@ -31,14 +39,12 @@ class ParamManager:
     """
 
     def __init__(self, arguments):
-        """Initialize ParamManager class.
+        """Initialize ParamManager class. Store the function command and then setup the parameters.
 
         Args:
-            fncCmd (str):       The command to execute - run / prepare_reference_data / start_blat_server.
-            arguments (dict):   The argparse dictionary object from the command line parameters.
+            arguments (argparse object): The argparse dictionary object from the command line parameters.
+
         Returns:
-            None
-        Raises:
             None
         """
 
@@ -56,10 +62,8 @@ class ParamManager:
         set are logged. The target objects are set along with the paths.
 
         Args:
-            arguments (dict): The argparse dictionary object from the command line options.
+            arguments (argparse object): The argparse dictionary object from the command line options.
         Returns:
-            None
-        Raises:
             None
         """
 
@@ -71,7 +75,7 @@ class ParamManager:
         for paramKey, paramValue in self.opts.items():
             utils.log(self.loggingName, 'info', '%s = %s' % (paramKey, paramValue))
 
-        self.set_targets()
+        self.set_targets()  # Populate self.targets dictionary with intervals in the input bed file.
         self.paths['ref_data'] = os.path.abspath(os.path.normpath(self.opts['reference_data_dir']))  # Path to target reference sequence fast files.
         self.set_param('reference_fasta_dir', os.path.split(self.opts['reference_fasta'])[0])  # Path to genome fasta file.
 
@@ -127,10 +131,9 @@ class ParamManager:
         - gene_annotation_file
 
         Args:
-            arguments (dict):   The argparse dictionary object from the command line options.
+            arguments (dict): The argparse dictionary object from the command line options.
+
         Returns:
-            None
-        Raises:
             None
         """
 
@@ -172,6 +175,7 @@ class ParamManager:
 
     def check_binaries(self):
         """Check the required binaries.
+
         There are six required binaries to perform the complete analysis (blat, gfserver,
         gfclient, fatotwobit, cutadapt, jellyfish). Each binary is checked whether
         the path provided in the configuration file has an executable file attached or
@@ -180,17 +184,16 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
-            None
-        Raises:
             None
         """
 
-        binaries = ('blat', 
-                    'gfserver', 
-                    'gfclient', 
-                    'fatotwobit', 
-                    'cutadapt', 
+        binaries = ('blat',
+                    'gfserver',
+                    'gfclient',
+                    'fatotwobit',
+                    'cutadapt',
                     'jellyfish')
         for binaryName in binaries:
             binaryPath = self.get_param(binaryName)
@@ -237,9 +240,8 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
-            None
-        Raises:
             None
         """
 
@@ -313,11 +315,10 @@ class ParamManager:
             feature = None if len(targetsplit) <= 4 else targetsplit[4]
             self.targets.setdefault(name.upper(), [])
             self.targets[name.upper()].append((chrm, int(bp1), int(bp2), name, feature))
-        # print 'Targets', self.targets
         utils.log(self.loggingName, 'info', '%d targets' % len(self.targets))
 
     def check_blat_server(self):
-        """Run a test query on the specified blat server to make sure it is running. 
+        """Run a test query on the specified blat server to make sure it is running.
 
         Args:
             None
@@ -371,7 +372,7 @@ class ParamManager:
             # If no port is specified for this function, then randomly select a port between 8000-9500.
             if port is None:
                 self.set_param('blat_port', random.randint(8000, 9500))
-                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.get_param('blat_port'), self.get_param('blat_hostname')))    
+                utils.log(self.loggingName, 'info', 'Starting blat server on port %d on host %s.' % (self.get_param('blat_port'), self.get_param('blat_hostname')))
         elif self.fncCmd == 'run':  # Start the blat server if it is not already running.
             if not self.get_param('start_blat_server'):  # Start blat server option is not set. Check that one is running, if not, start it.
                 port = self.get_param('blat_port')
@@ -424,6 +425,7 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
             A list of the target region names that were defined from the input bed file (list).
         """
@@ -432,6 +434,13 @@ class ParamManager:
 
     def get_target_intervals(self, targetName):
         """Return the stored intervals for a specific target.
+
+        Args:
+            targetName (string): The gene or target name with associated intervals in the input bed file.
+
+        Returns:
+            list:                A list of tuples containing the chr, start, end, name of intervals for the
+                                 the input targetName.
         """
 
         if targetName in self.targets:
@@ -445,8 +454,10 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
             kmer size (int): Kmer size that was input to use.
+
         Raises:
             TypeError when the kmer_size is not an integer.
         """
@@ -464,8 +475,10 @@ class ParamManager:
 
         Args:
             type (str): The variant type to get the minimum segment length - trl / rearr
+
         Returns:
             min_seg_len (int)
+
         Raises:
             TypeError when the value is not an integer.
         """
@@ -484,9 +497,12 @@ class ParamManager:
 
         Args:
             type (str): The variant type to get the read support threshold.
+
         Returns:
             Integer of the split read threshold for specific events.
+
         Raises:
+            None
         """
 
         if type == 'min':
@@ -528,10 +544,12 @@ class ParamManager:
         """Set the parameter value in the self.opts dict.
 
         Args:
-            key (str):              Dictionary key
+            key (str):                Dictionary key
             value (int/str/boolean):  Value to store
+
         Returns:
             None
+
         Raises:
             None
         """

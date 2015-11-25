@@ -12,10 +12,14 @@ __license__ = "MIT"
 
 
 class Kmer:
-    """Class to track value associated with a particular kmer sequence.
+    """Class to track values associated with a particular kmer sequence.
     Attributes:
-
+        seq (str):  
+        counts ():
+        kmerSeqSet ():
+        kmerLen ():
     """
+
     def __init__(self, seq, counts, kmerSeqSet, kmerLen):
         self.seq = seq
         self.counts = counts
@@ -28,13 +32,14 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
     First search all the read sequences for the given kmer sequence. Then,
     filter out used reads and order them according to position of the kmer
     sequence in the read sequence.
+
     Args:
         kmerSeq: String of kmer sequence.
         readItems: List of fq_recs (key, value) tuples.
         usedReads: Set of read IDs that have been previously used.
         order: String indicating how the list of the identified reads
                should be ordered.
-    Return:
+    Returns:
         kmerReads: List of tuples containing:
                     1. read object,
                     2. start position of kmer match in read seq
@@ -42,6 +47,7 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
                     4. Length of the read sequence.
                     5. Number of reads with this sequence.
     """
+
     kmerReads = []
     # Filter all the reads not containing the kmerSeq
     mappedReads = filter(lambda x: x[2], map(read_search, [kmerSeq] * len(readItems), readItems))

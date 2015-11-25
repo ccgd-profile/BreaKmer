@@ -15,12 +15,36 @@ __copyright__ = "Copyright 2015, Ryan Abo"
 __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
+'''
+analysis.py module contains the main analysis class that controls the
+processing and analysis of all the target regions.
+
+1. RunTracker initialized
+2. RunTracker.run()
+3. analyze_targets()
+    For each target region:
+    1. set reference data.
+    2. Extract structural variant reads
+    3. Kmer subtraction
+    4. Assemble extracted reads and realign.
+    5. Make calls and output results.
+
+Classes:
+    - RunTracker
+
+Functions:
+    - check_status
+    - wait
+    - analyze_targets
+'''
+
 
 def check_status(results):
-    """Check the status of the multiple processors running analysis
+    """Check the status of the multiple processors running analysis.
 
     Args:
         results (list): A list of results from the multiprocessing analysis.
+
     Returns:
         notReady (int): An integer value indicating the number of processors not complete.
     """
@@ -37,9 +61,8 @@ def wait(results):
 
     Args:
         results (list): A list of results from the multiprocessing analysis.
+
     Returns:
-        None
-    Raises:
         None
     """
 
@@ -61,17 +84,15 @@ def analyze_targets(targetList):
     This function performs all the top level functions on the target regions being analyzed.
 
     Args:
-        targetList (list):          A list of TargetManager objects, representing target regions.
+        targetList (list):       A list of TargetManager objects, representing target regions.
+
     Returns:
-        aggregateResults (dict):    A dictoinary containing lists of formatted output strings for the
-                                    contig-based calls and the discordant-only read clusters.
-    Raises:
-        None
+        aggregateResults (dict): A dictionary containing lists of formatted output strings for the
+                                 contig-based calls and the discordant-only read clusters.
     """
 
     aggregateResults = {'contigs': [], 'discreads': []}  # Formatted output strings for contig based calls and discordant read calls are different.
     for targetRegion in targetList:
-        # print 'Analyzing', targetRegion.name
         utils.log('breakmer.processor.analysis', 'info', 'Analyzing %s' % targetRegion.name)
         targetRegion.set_ref_data()
         if targetRegion.fnc == 'prepare_reference_data':  # Stop here if only preparing ref data.
@@ -90,6 +111,7 @@ def analyze_targets(targetList):
 
 class RunTracker:
     """Class to manage the running of all the target region analyses.
+
     The params object is passed in with all the input information.
     The run() function creates the target region objects from the
     param inputs and then starts the analysis for each target.
@@ -101,8 +123,16 @@ class RunTracker:
     """
 
     def __init__(self, params):
+        """Initialize the RunTracker object.
+
+        Args:
+            params (ParamManager object): ParamManager to track inputs.
+            loggingName (string):         The logging name.
+
+        Returns:
+            None
+        """
         self.params = params
-        # self.results = []
         self.loggingName = 'breakmer.processor.analysis'
 
     def run(self):
@@ -113,18 +143,20 @@ class RunTracker:
 
         Args:
             None
-        Returns
+        Returns:
             None
         """
 
         startTime = time.clock()  # Track the run time.
 
+        # Start the blat server for realignment. Return and quit if
+        # the function is 'start_blat_server'
         self.params.start_blat_server()
         if self.params.fncCmd == 'start_blat_server':
             print 'Server started!'
             return
 
-        targetAnalysisList = self.create_targets()
+        targetAnalysisList = self.create_targets()  # Create the list of TargetManager objects for each target.
 
         aggResults = {'contigs': [], 'discreads': []}  # Buffer the formatted output strings for each target to write out in batch.
         nprocs = int(self.params.get_param('nprocs'))
@@ -146,6 +178,7 @@ class RunTracker:
             print 'Reference data setup!'
             return
 
+        # Write the output files with results.
         self.write_aggregated_output(aggResults)
         utils.log(self.loggingName, 'info', 'Analysis complete in %s' % str(time.clock() - startTime))
 
