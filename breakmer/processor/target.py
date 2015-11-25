@@ -593,6 +593,8 @@ class TargetManager(object):
         If blastn is specified in the configuration file, it will setup the necessary blastn files as
         well. This is currently under development and needs more testing.
 
+        The reference files are named 
+
         Args:
             None
 
