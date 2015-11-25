@@ -163,8 +163,8 @@ class ContigCounts:
             counts: List of integers for counts of reads assembled at the provided range.
         """
 
-        print 'Contig stored counts, indel_only', self.indel_only
-        print 'Contig stored counts, others', self.others
+        # print 'Contig stored counts, indel_only', self.indel_only
+        # print 'Contig stored counts, others', self.others
         counts = []
         if sv_type == 'indel' or sv_type == 'rearr':
             if p1 == p2:

@@ -166,7 +166,7 @@ def trim_coords(qualStr, minQual):
     if start == len(qualStr):
         return (0, 0, 0)
     else:
-        # Reverse qualStr and scan from the start and stop when the base qual > minQual 
+        # Reverse qualStr and scan from the start and stop when the base qual > minQual
         end = len(qualStr) - seq_trim(qualStr[::-1], minQual)
         trimLength = end - start
         return (start, end, trimLength)
