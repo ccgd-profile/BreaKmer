@@ -24,18 +24,19 @@ The blat server provides a challenge in workflow. The best method is to:
     breakmer.py start_blat_server -p <port_number> --hostname <hostname> -c <config file>
 3. run the analysis and keep the blat server alive in the background for use in other analyses.
     breakmer.py run -k -p <port_number> --hostname <hostname> -c <config file> -n <nprocessors> -g <gene_list>
-
 '''
 
 PARSER = argparse.ArgumentParser(description='Program to identify structural variants within targeted locations.',
                                  usage='%(prog)s [options]', add_help=True)
 SUBPARSERS = PARSER.add_subparsers(help='Program mode (run, start_blat_server, prepare_reference_data).', dest='fncCmd')
 
-# Setup three separate parsers for the three different functions.
+# Setup three separate subparsers for the three different functions.
 RUN_PARSER = SUBPARSERS.add_parser('run', help='Run analysis to detect structural variants.')
 SERVER_PARSER = SUBPARSERS.add_parser('start_blat_server', help='Start the blat server prior to performing the analysis.')
 REF_PARSER = SUBPARSERS.add_parser('prepare_reference_data', help='Prepare the reference sequence data for target regions \
                                     prior to analysis.')
+
+# Add options for the three different functions
 
 # Run parser
 RUN_PARSER.add_argument('--log_level', dest='log_level', default='DEBUG', help='Log level [default: DEBUG]')

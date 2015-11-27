@@ -218,15 +218,15 @@ def get_variant_reads(bamFile, chrom, start, end, insertSizeThresh):
     """Get the softclipped, discordant read pairs, and unmapped reads.
     These reads are stored in the VarReadTracker object.
 
-    Iterate through all the reads in a region. Skip the duplicates and 
+    Iterate through all the reads in a region. Skip the duplicates and
     qc failed reads. Store all the unmapped reads. All other reads pass
     to the check_read function.
 
     Args:
-        bamFile (str):  Path to the bam file to open, must be indexed!
-        chrom (str):    Chromosome of the region to extract
-        start (int):    Region start location to extract.
-        end (int):      Region end location to extract.
+        bamFile (str): Path to the bam file to open, must be indexed!
+        chrom (str):   Chromosome of the region to extract
+        start (int):   Region start location to extract.
+        end (int):     Region end location to extract.
 
     Returns:
         varReadTracker (VariantReadTracker): VarReadTracker object

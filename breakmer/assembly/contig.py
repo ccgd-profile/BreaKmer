@@ -299,6 +299,7 @@ class Builder:
         current read has not been used in any other contigs then store for later
         analysis to build another contig possibly. Otherwise, discard the read for
         further analysis.
+
         Args:
             kmerObj:       Kmer object containing kmer seq specific values.
             readAlignValues: Dictionary containing:
@@ -306,9 +307,11 @@ class Builder:
                          - 'align_pos': Integer position of kmer in read sequence
                          - 'nreads': Integer of number of reads with the same sequence.
             type: String indicating the state of this function.
-        Return:
-            hit: String value 'remove' or ''.
+
+        Returns:
+            hit (str): String value 'remove' or ''.
         """
+
         hit = ''
         self.read_batch.check_kmer_read(readAlignValues['align_pos'], readAlignValues['read'])
         if self.check_align(kmerObj, readAlignValues, alignType):
@@ -327,6 +330,7 @@ class Builder:
         the contig and the read and an identity at least 90%. If there is clear
         alignment between the read sequence and the contig sequence, then the
         assembly consensus sequence is appropriately changed.
+
         Args:
             kmerObj: Dictionary containing:
                          - 'seq': String kmer sequence value.
@@ -338,10 +342,12 @@ class Builder:
                          - 'align_pos': Integer position of kmer in read sequence
                          - 'nreads': Integer of number of reads with the same sequence.
             type: String indicating the state of this function.
-        Return:
-            match: Boolean indicating if the read aligns sufficiently with the
-                   contig sequence and will be added.
+
+        Returns:
+            match (boolean): Indicates if the read aligns sufficiently with the
+                             contig sequence and will be added.
         """
+
         match = False
         queryRead = readAlignValues['read']
 
@@ -393,12 +399,15 @@ class Builder:
 
     def set_superseq(self, read, nreads, start, end):
         """The read sequence contains the current contig sequence.
+
         Args:
             read: fq_read object.
             nreads: Integer for the number of reads with the same sequence as the read passed in.
             start: Integer for the start position the contig sequence aligns to the read sequence.
             end: Integer for the end position the contig sequence aligns to the read sequence.
-        Return: None
+
+        Returns:
+            None
         """
         self.seq = read.seq
         self.counts.set_superseq(read, nreads, start, end)
@@ -731,19 +740,23 @@ class Contig:
         self.realignment = None
 
     def check_read(self, kmerObj, readAlignValues, fncType='setup'):
-        """Check if the read passed in can be added to the current contig.
-        Wrapper function to Builder class check_read function.
+        """Wrapper function to Builder class check_read function.
+
+        Check if the read passed in can be added to the current contig.
+
         Args:
-            kmerObj:         Instance of Kmer object with attributes for kmer sequence.
-            readAlignValues: Dictionary containing:
-                         - 'read': fq_read object that contains kmer sequence.
-                         - 'align_pos': Integer position of kmer in read sequence
-                         - 'nreads': Integer of number of reads with the same sequence.
-            fncType: String indicating the state of this function.
-        Return:
+            kmerObj (AssemblyKmer:  Instance of AssemblyKmer object with attributes for kmer sequence.
+            readAlignValues (dict): Contains keys:
+                                    - 'read': fq_read object that contains kmer sequence.
+                                    - 'align_pos': Integer position of kmer in read sequence
+                                    - 'nreads': Integer of number of reads with the same sequence.
+            fncType (str):   String indicating the state of this function.
+
+        Returns:
             String containing 'hit' or '' indicating that read matched contig seq
             or did not, respectively.
         """
+
         self.buffer.add(readAlignValues['read'].id)
         return self.builder.check_read(kmerObj, readAlignValues, fncType)
 
@@ -765,13 +778,17 @@ class Contig:
     def finalize(self, fq_recs, kmerTracker, contigBuffer, source='setup'):
         """Finish an assembly and add the buffered contigs that were created from
         non-aligned reads to the contigBuffer.
+
         Args:
             fq_recs: Dicionary of fq_read objects.
             kmerTracker: KmerTracker object with all kmer sequence values.
             contigBuffer: ContigBuffer object.
             source: String for the source of function call.
-        Return: None
+
+        Returns:
+            None
         """
+
         if source == 'setup':
             self.set_kmers(kmerTracker.kmerSeqs)
         # Get alternate read kmers and see if any are different from contig kmers.

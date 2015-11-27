@@ -63,6 +63,7 @@ class ParamManager:
 
         Args:
             arguments (argparse object): The argparse dictionary object from the command line options.
+
         Returns:
             None
         """
@@ -170,6 +171,8 @@ class ParamManager:
         if self.fncCmd == 'prepare_reference_data':
             required = ['reference_data_dir', 'reference_fasta', 'targets_bed_file']
 
+        # Use the get_param() function to check if the parameter
+        # is set or not.
         for req in required:
             self.get_param(req, True)
 
@@ -284,9 +287,8 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
-            None
-        Raises:
             None
         """
 
@@ -322,10 +324,9 @@ class ParamManager:
 
         Args:
             None
+
         Returns:
             serverSuccess (boolean): Indicates whether the test ran without errors.
-        Raises:
-            None
         """
 
         testDir = os.path.join(self.paths['analysis'], 'blatserver_test')
@@ -349,7 +350,7 @@ class ParamManager:
         return serverSuccess
 
     def start_blat_server(self):
-        """Fire up a blat server instance using a random port number and localhost.
+        """Start a blat server instance using a random port number and localhost.
         The required files to start a blat server are first checked and created, if
         necessary. These include a genome-wide reference fasta file and a 2bit
         file generated from that fasta file. The faToTwoBit program is used if the
@@ -358,7 +359,8 @@ class ParamManager:
 
         Args:
             None
-        Return:
+
+        Returns:
             None
         """
 
@@ -500,9 +502,6 @@ class ParamManager:
 
         Returns:
             Integer of the split read threshold for specific events.
-
-        Raises:
-            None
         """
 
         if type == 'min':
@@ -518,8 +517,9 @@ class ParamManager:
     def get_param(self, key, required=False):
         """Get the parameter value in the self.opts dictionary.
 
-        If the parameer is required to be availale, then exit the program
+        If the parameter is required to be availale, then exit the program
         and throw an error.
+
         Args:
             key (str): The key in the opts dictionary to access the parameter value.
                        required: Boolean value to indicate if the key should be required to
@@ -528,8 +528,6 @@ class ParamManager:
             value (int, str, boolean): The value of the parameter if it is found. If the parameter is
                                        required and not found the program will exit with error. If the parameter is
                                        not required and not found, it will return None.
-        Raises:
-            None
         """
 
         value = None

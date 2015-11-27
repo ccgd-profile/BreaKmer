@@ -795,6 +795,7 @@ def server_ready(f):
 class fq_read:
     """
     """
+
     def __init__(self, header, seq, qual, indel_only):
         self.id = header
         self.seq = str(seq)

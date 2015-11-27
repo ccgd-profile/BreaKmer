@@ -116,18 +116,16 @@ class RunTracker:
     The run() function creates the target region objects from the
     param inputs and then starts the analysis for each target.
 
-    Args:
-        params: ParamManager object.
-    Returns:
-        None
+    Attributes:
+        params (ParamManager): ParamManager object.
     """
 
     def __init__(self, params):
         """Initialize the RunTracker object.
 
         Args:
-            params (ParamManager object): ParamManager to track inputs.
-            loggingName (string):         The logging name.
+            params (ParamManager): ParamManager to track inputs.
+            loggingName (str):     Logging name.
 
         Returns:
             None
@@ -137,12 +135,14 @@ class RunTracker:
 
     def run(self):
         """Create and analyze the target regions.
+
         The target objects are made and grouped for multiprocessing (if set)
         and these are all analyzed independently. This is where the analysis
         starts and ends.
 
         Args:
             None
+
         Returns:
             None
         """
@@ -201,6 +201,7 @@ class RunTracker:
 
         Args:
             None
+
         Returns:
             trgtGroups (list): A list of lists containing target objects. Each toplevel list is
                                analyzed by a processor.
@@ -250,6 +251,7 @@ class RunTracker:
 
         Args:
             aggregateResults (dict): A dictionary containing the formatted output string values.
+
         Returns:
             None
         """

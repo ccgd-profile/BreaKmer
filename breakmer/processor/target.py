@@ -28,8 +28,8 @@ For each target region:
     1. breakmer.assembly.contig.make_calls()
 
 Classes:
-    - TargetManager - interface for target region functions and values.
-        - Variation - Manages read data for a target.
+    - TargetManager - Interface for target region functions and values.
+    - Variation - A "subclass" to TargetManager. It is designed to manage the extracted read data for a target.
 
 Functions:
     - load_kmers
@@ -68,14 +68,14 @@ class Variation:
     be contributing to the support of a structural variant.
 
     Attributes:
-        params (ParamManager):      Parameters for breakmer analysis.
-        loggingName (str):          Module name for logging file purposes.
-        var_reads (dict):           Dictionary containing the tumor sample or normal sample variation read objects (breakmer.process.bam_handler.VariantReadTracker).
-        cleaned_read_recs (dict):   Dictionary containing the cleaned reads.
-        files (dict):               Dicionary containing paths to file names needed for analysis.
-        kmer_clusters (list):       
-        kmers (dict):
-        results (list):
+        params (ParamManager):    Parameters for breakmer analysis.
+        loggingName (str):        Module name for logging file purposes.
+        var_reads (dict):         Tumor/normal sample variation read objects (breakmer.process.bam_handler.VariantReadTracker).
+        cleaned_read_recs (dict): Cleaned reads for tumor/normal samples.
+        files (dict):             File paths for tumor/normal analysis.
+        kmer_clusters (list):     A list of Contig objects that are assembled from tumor extracted reads.  
+        kmers (dict):             A set of processed kmer sequences from tumor/normal/reference sequences.
+        results (list):           
         discReadClusters (dict):
         discReadFormatted (list):
     """
@@ -114,7 +114,16 @@ class Variation:
         return self.var_reads[sampleType]
 
     def clear_sv_reads(self, sampleType):
-        """
+        """Wrapper function to call the clear_sv_reads() function in bam_handler.VariationReadTracker.
+
+        Clears the data structure containing the extracted reads for this target.
+
+        Args:
+            sampleType (str): A string to indicate if the data being processed is from
+                              tumor/normal.
+
+        Returns:
+            None
         """
 
         self.var_reads[sampleType].clear_sv_reads()
@@ -150,6 +159,9 @@ class Variation:
         """Pass in the bam file and the coordinates for a target region and extract the
         reads that indicate a structural variant is present.
 
+        The region is extended by the size specified in the regionBuffer, both upstream and downstream
+        from the start and end inputs, respectively.
+
         A VariantReadTracker object is returned and stored in a dictionary, where the key is the sampleType (sv or norm).
         The extracted sequences are written to multiple files:
         1. Fastq
@@ -157,12 +169,12 @@ class Variation:
         3. Bam
 
         Args:
-            sampleType (str):
-            bamFile (str):
-            chrom (str):
-            start (int):
-            end (int):
-            regionBuffer (int):
+            sampleType (str):   'sv' or 'norm' to indicate tumor or normal sample being processed.
+            bamFile (str):      The full path to the bam file containing the reads to be extracted.
+            chrom (str):        The chromosome of the target region to extract.
+            start (int):        The start coordinate of the target region.
+            end (int):          The end coordinate of the target region.
+            regionBuffer (int): The additional base pairs to extract upstream and downstream of the target region.
 
         Returns:
             None
@@ -203,9 +215,9 @@ class Variation:
         4. sorted bam file with extracted reads = sv_bam_sorted
 
         Args:
-            sampleType (str):   The type of input data - sv / normal
-            dataPath (str):     The path to the data files for this target.
-            name (str):         The target name.
+            sampleType (str): The type of input data - sv / normal
+            dataPath (str):   The path to the data files for this target.
+            name (str):       The target name.
 
         Returns:
             None
@@ -234,12 +246,13 @@ class Variation:
         The softclipped sequences that remain are stored and a new fastq file is written.
 
         Args:
-            dataPath (str):   The path to the data files for this target.
-            name (str):       The target name.
-            type (str):       A string indicating a tumor ('sv') or normal ('norm') sample being processed.
-        Return:
-            check (boolean):  A boolean to indicate whether the are any reads left after
-                              cleaning is complete.
+            dataPath (str):  The path to the data files for this target.
+            name (str):      The target name.
+            type (str):      A string indicating a tumor ('sv') or normal ('norm') sample being processed.
+
+        Returns:
+            check (boolean): A boolean to indicate whether the are any reads left after
+                             cleaning is complete.
         """
 
         cutadapt = self.params.get_param('cutadapt')  # Cutadapt binary
@@ -459,6 +472,12 @@ class TargetManager(object):
     The analysis is peformed at the target level, so this class contains all the information
     necessary to perform an independent analysis.
 
+    Call the setup() function from the init() function. This will iterate over the input interval
+    regions and sets the chromosome of the target region and the max(interval coordinates) as the end
+    and the min(interval coordinates) as the start.
+
+    This will setup all the directories and files for this target.
+
     Attributes:
         params (ParamManager):      Parameters for breakmer analysis.
         loggingName (str):          Module name for logging file purposes.
@@ -529,7 +548,6 @@ class TargetManager(object):
                 self.end = end
             elif end > self.end:
                 self.end = end
-        # print 'Region coords', self.chrom, self.start, self.end
 
         # Create the proper paths for the target analysis.
         '''
@@ -593,7 +611,13 @@ class TargetManager(object):
         If blastn is specified in the configuration file, it will setup the necessary blastn files as
         well. This is currently under development and needs more testing.
 
-        The reference files are named 
+        The target reference files stored in:
+        <ref_data_dir>/
+            <target_name>/
+                <target_name>_forward_refseq.fa
+                <target_name>_reverse_refseq.fa
+                <target_name>_forward_refseq.fa_dump
+                <target_name>_reverse_refseq.fa_dump
 
         Args:
             None
@@ -631,10 +655,11 @@ class TargetManager(object):
 
         Args:
             None
+
         Returns:
-            check (boolean):    Variable to determine if the analysis should continue. It is
-                                False when there are no reads extracted or left after cleaning
-                                and True when there are.
+            check (boolean): Variable to determine if the analysis should continue. It is
+                             False when there are no reads extracted or left after cleaning
+                             and True when there are.
         """
 
         self.extract_bam_reads('sv')  # Extract variant reads.
@@ -648,11 +673,13 @@ class TargetManager(object):
         return check
 
     def extract_bam_reads(self, sampleType):
-        """Wrapper for Variation extract_bam_reads function.
+        """Wrapper for Variation extract_bam_reads function for both tumor and normal
+        samples if both are input.
 
         Args:
             sampleType (str): Indicates a tumor ('sv') or normal ('norm') sample being processed.
-        Return:
+
+        Returns:
             None
         """
 
@@ -679,7 +706,7 @@ class TargetManager(object):
         return self.variation.clean_reads(self.paths['data'], self.name, sampleType)
 
     def compare_kmers(self):
-        """Obtain the sample only kmers and initiate assembly of reads with these kmers.
+        """Wrapper for Variation compare_kmers function.
 
         Args:
             None
@@ -692,6 +719,15 @@ class TargetManager(object):
 
     def resolve_sv(self):
         """Perform variant calling on the Contig object that was generated from the split reads in the target.
+
+        All the assembled contigs are iterated through and processed.
+        1. Realign to reference sequence.
+        2. Process the realignment.
+        3. Make variant call based on realignment.
+        4. Check filters
+        5. Annotate call.
+        6. Output call.
+        7. Perform discordant read clustering.
 
         Args:
             None
@@ -715,7 +751,8 @@ class TargetManager(object):
                 contig.filter_calls()
                 contig.annotate_calls()
                 contig.output_calls(self.paths['output'], self.variation.files['sv_bam_sorted'])
-                self.add_result(contig.svEventResult)
+                if contig.svEventResult:
+                    self.variation.add_result(contig.svEventResult)
             else:
                 utils.log(self.loggingName, 'info', '%s has no structural variant result.' % contigId)
             iter += 1
@@ -751,12 +788,6 @@ class TargetManager(object):
         """ """
 
         self.variation.clear_cleaned_reads()
-
-    def add_result(self, result):
-        """ """
-
-        if result:
-            self.variation.add_result(result)
 
     def has_results(self):
         """ """

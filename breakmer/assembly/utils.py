@@ -11,20 +11,20 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
-class Kmer:
-    """Class to track values associated with a particular kmer sequence.
-    Attributes:
-        seq (str):  
-        counts ():
-        kmerSeqSet ():
-        kmerLen ():
-    """
+# class Kmer:
+#     """Class to track values associated with a particular kmer sequence.
+#     Attributes:
+#         seq (str):
+#         counts ():
+#         kmerSeqSet ():
+#         kmerLen ():
+#     """
 
-    def __init__(self, seq, counts, kmerSeqSet, kmerLen):
-        self.seq = seq
-        self.counts = counts
-        self.kmerSeqSet = kmerSeqSet
-        self.kmerLen = kmerLen
+#     def __init__(self, seq, counts, kmerSeqSet, kmerLen):
+#         self.seq = seq
+#         self.counts = counts
+#         self.kmerSeqSet = kmerSeqSet
+#         self.kmerLen = kmerLen
 
 
 def find_reads(kmerSeq, readItems, usedReads, order='for'):
@@ -34,11 +34,12 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
     sequence in the read sequence.
 
     Args:
-        kmerSeq: String of kmer sequence.
-        readItems: List of fq_recs (key, value) tuples.
-        usedReads: Set of read IDs that have been previously used.
-        order: String indicating how the list of the identified reads
-               should be ordered.
+        kmerSeq (str):    Kmer sequence.
+        readItems (list): List of dictionary items. These items will containing
+                          be a tuple of (read sequence, list of fq_read objects with read sequence).
+        usedReads (set):  Previously used read IDs.
+        order (str):      Indicates how the list of the identified reads
+                          should be ordered.
     Returns:
         kmerReads: List of tuples containing:
                     1. read object,
@@ -53,6 +54,7 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
     mappedReads = filter(lambda x: x[2], map(read_search, [kmerSeq] * len(readItems), readItems))
     # Extract the read ids of the reads containing kmerSeq
     mappedReadIds = map(lambda x: x[0].id, mappedReads)
+    # Remove the used read IDs.
     filterIds = set(mappedReadIds) - set(usedReads)
     matchedReads = filter(lambda x: (x[0].id in filterIds), mappedReads)
     if order == 'rev':
@@ -65,14 +67,18 @@ def find_reads(kmerSeq, readItems, usedReads, order='for'):
 def read_search(kmerSeq, readItems):
     """Return a tuple containing information regarding the alignment of the kmerSeq
     in a sequence read.
+
     This uses regex searching function re.search to determine if the kmerSeq
     is contained in the read sequence. If so, then it returns a 5 element
     tuple about information regarding this alignment. If no match, then return
     a 3 element tuple with None values.
+
     Args:
-        kmerSeq: String of kmer sequence.
-        readItems: List of fq_recs (key, value) tuples.
-    Return:
+        kmerSeq (str):    Kmer sequence.
+        readItems (list): List of dictionary items. These items will containing
+                          be a tuple of (read sequence, list of fq_read objects with read sequence).
+
+    Returns:
         searchResult: Tuple of result information.
                        1. read object,
                        2. start position of kmer match in read seq
@@ -80,6 +86,7 @@ def read_search(kmerSeq, readItems):
                        4. Length of the read sequence.
                        5. Number of reads with this sequence.
     """
+
     searchResult = (None, None, None)
     seq, reads = readItems
     x = re.search(kmerSeq, seq)
