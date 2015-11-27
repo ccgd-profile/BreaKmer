@@ -12,11 +12,40 @@ __email__ = "ryanabo@gmail.com"
 __license__ = "MIT"
 
 
+'''
+realigner.py module contains classes to track contig realignment information for a
+particular contig sequence.
+
+Classes:
+    - AlignParams
+    - RealignManager
+    - Realignment
+    - AlignResults
+'''
+
+
 class AlignParams:
-    """
+    """A class to contain the aligment parameters as specified in the parameters object.
+
+    Attributes:
+        program (dict):     The program name that is used for realignment for target and genome.
+        extension (dict):   The extension of the output file for target and genome realignment.
+        binary (dict):      The binary of the realignment programs for target and genome.
+        binarParams (dict): The parameters for the realignment for target and genome.
+        ref (dict):         The reference files for realignment for target and genome.
     """
 
     def __init__(self, params, targetRefFns):
+        """Initiate the AlignParams object frmo the RealignManager object.
+
+        Args:
+            params (ParamManager): ParamManager object.
+            targetRefFns (list): A list of target reference sequence fasta files - forward and reverse sequences.
+
+        Returns:
+            None
+        """
+
         self.program = {'target': 'blat', 'genome': 'blat'}
         self.extension = {'target': 'psl', 'genome': 'psl'}
         self.binary = {'target': None, 'genome': None}
@@ -25,8 +54,16 @@ class AlignParams:
         self.set_values(params, targetRefFns)
 
     def set_values(self, params, targetRefFns):
+        """Check the params object to set the program, binary and extensions for realignment.
+
+        Args:
+            params (ParamManager): ParamManager object.
+            targetRefFns (list): A list of target reference sequence fasta files - forward and reverse sequences.
+
+        Returns:
+            None
         """
-        """
+
         self.binary['target'] = params.get_param('blat')
         blast = params.get_param('blast')
         if blast is not None:
@@ -42,20 +79,62 @@ class AlignParams:
         self.ref['genome'] = params.get_param('reference_fasta_dir')
 
     def get_values(self, type):
+        """Return a tuple of the parameter values that were set.
+
+        Args:
+            type (str): Indicates 'target' or 'genome' for acquiring the parameters.
+
+        Returns:
+            tuple containing:
+                1. program name
+                2. extension string
+                3. full path to the realignment program binary
+                4. dictionary of the binary parameters
+                5. full path to reference files
+        """
+
         return (self.program[type], self.extension[type], self.binary[type], self.binaryParams[type], self.ref[type])
 
 
 class RealignManager:
-    """
+    """A class to manage the realignment process of the contig sequence. It creates and stores the other
+    classes that are used during the process and interfaces with the Contig object to report the results.
+
+    Attributes:
+        realignment (Realignment): A Realignment object
+        alignParams (AlignParams): AlignParams object
     """
 
     def __init__(self, params, targetRefFns):
+        """Initiate the RealignManager object. Create the AlignParams object.
+
+        Args:
+            params (ParamManager): ParamManager object.
+            targetRefFns (list):   A list of target reference sequence fasta files - forward and reverse sequences.
+
+        Returns:
+            None
+        """
+
         self.realignment = None
         self.alignParams = AlignParams(params, targetRefFns)
 
     def realign(self, contig):
+        """Realign the contig sequence to the reference sequence.
+
+        This will first align the contig sequence to the target sequence and check if it meets certain
+        alignment thresholds. If it fails to align to the target sequence it will then align to the 
+        genome.
+
+        The realignment values are stored in the Realignment object.
+
+        Args:
+            contig (Contig): A Contig object that needs to be realigned
+
+        Returns:
+            None
         """
-        """
+
         if not contig.has_fa_fn():
             return
 
@@ -69,34 +148,93 @@ class RealignManager:
                 self.realignment.check_record_merge()
 
     def get_result_fn(self):
+        """Returns the file path to the realignment output file.
+
+        Args:
+            None
+
+        Returns:
+            resultFn (str): Full path to the realignment output file. It returns None if there were no results.
+        """
+
         resultFn = None
         if self.realignment.has_results():
             resultFn = self.realignment.get_result_fn()
         return resultFn
 
     def has_results(self):
-        """ """
+        """A wrapper function for Realignment.has_results() to determine if there are alignment
+        results.
+
+        Args:
+            None
+
+        Returns:
+            A boolean that indicates if there were realignment results.
+        """
+
         return self.realignment.has_results()
 
     def get_blat_results(self):
+        """A wrapper function for Realignment.get_blat_results() to return processed results.
+
+        Args:
+            None
+
+        Returns:
+            A list of blat results (blat_result.BlatResult) sorted by: -x.alignScore, -x.perc_ident, x.get_total_num_gaps().
         """
-        """
+
         return self.realignment.get_blat_results()
 
     def store_clipped_queryseq(self, blatResultValues):
+        """A wrapper function for Realignment.store_clipped_queryseq() to store blat result values that
+        did not fully align to the target sequence and will be processed to determine if there is a
+        rearrangement supported by these results.
+
+        Args:
+            blatResultValues (list): List of blat_result.BlatResult values.
+
+        Returns:
+            None
         """
-        """
+
         self.realignment.store_clipped_queryseq(blatResultValues)
 
     def get_qsize(self):
-        """ """
+        """A wrapper function to obtain Realignment.results.querySize
+
+        Args:
+            None
+
+        Returns:
+            querySize (int): The length of the contig sequence used for realignment.
+        """
+
         return self.realignment.results.querySize
 
 
 class Realignment:
+    """A class to contain and manage the realignment values. It performs the alignment in the align() function
+    and provides the interface for the results of the realignment through the AlignResults object.
+
+    Attributes:
+        loggingName (str):         Module name for logging purposes.
+        scope (str):               The scope of the realignment - 'target' or 'genome'
+        results (list):            A list of blat_result.BlatResult objects.
+        targetHit (boolean):       Indicates if the contig sequence aligned to the target reference sequence.
+        resultFn (str):            The full path to the raw output file from the realignment.
+        alignParams (AlignParams): AlignParams object.
+        contig (Contig):           Contig object.
     """
-    """
+
     def __init__(self, contig):
+        """Initialize the Realignment object.
+
+        Args:
+            contig (Contig): Contig object
+        """
+
         self.loggingName = 'breakmer.realignment.realigner'
         self.scope = None
         self.results = None
@@ -106,8 +244,18 @@ class Realignment:
         self.contig = contig
 
     def align(self, alignParams, scope):
+        """Perform realignment of the contig sequence to target or genome sequence.
+
+        Store the results in a file output by the specified program.
+
+        Args:
+            alignParams (AlignParams): AlignParams object with all the parameters for realignment.
+            scope (str):               Indicates whether realignment instance was for target or genome.
+
+        Returns:
+            A boolean to indicate if there were realignment results or not.
         """
-        """
+
         self.alignParams = alignParams
         alignProgram, alignExt, alignBinary, binaryParams, alignRef = self.alignParams
         self.scope = scope
@@ -140,12 +288,16 @@ class Realignment:
             return True
 
     def get_result_fn(self):
-        """ """
+        """
+        """
+
         if self.results is not None:
             return self.resultFn
 
     def has_results(self):
-        """ """
+        """
+        """
+
         if self.results is not None:
             return True
         else:
@@ -154,6 +306,7 @@ class Realignment:
     def target_aligned(self):
         """
         """
+
         noAlignmentResults = False
         targetHit = False
         if self.results is None:
@@ -171,13 +324,19 @@ class Realignment:
     def get_blat_results(self):
         """
         """
+
         return self.results.sortedResults
 
     def store_clipped_queryseq(self, blatResultValues):
+        """
+        """
+
         self.clippedQs.append(blatResultValues)
 
     def check_record_merge(self):
-        """ """
+        """
+        """
+
         # Check if need to merge indels from blast results
         if len(self.results.mergedRecords) > 0:
             # Re-write a blast-style file and re-procress with merged records.
@@ -192,7 +351,13 @@ class Realignment:
 
 
 class AlignResults:
+    """
+    """
+
     def __init__(self, program, scope, alignResultFn, contig, alignRefFn):
+        """
+        """
+
         self.loggingName = 'breakmer.realignment.realigner'
         self.resultFn = alignResultFn
         self.program = program

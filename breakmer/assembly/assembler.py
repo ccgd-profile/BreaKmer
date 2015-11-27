@@ -21,6 +21,7 @@ It initializes the assembly of the set of reads using a tumor-only kmer sequence
 Classes:
     - ContigBuffer
     - KmerTracker
+    - AssemblyKmer
 
 Functions:
     - init_assembly
@@ -165,18 +166,18 @@ class ContigBuffer:
             self.contigs[read.id] = contig
             read.used = True
 
-    def remove_contig(self, read_id):
+    def remove_contig(self, readId):
         """Remove read ID from contigs dictionary.
 
         Args:
-            read_id (str): Read ID.
+            readId (str): Read ID.
 
         Returns:
             None
         """
 
-        if read_id in self.contigs:
-            del self.contigs[read_id]
+        if readId in self.contigs:
+            del self.contigs[readId]
 
     def get_contig(self):
         """Return the contig associated with the first record the contigs dictionary.

@@ -527,8 +527,6 @@ def get_fastq_reads(fn, sv_reads):
     filtered_fq_fn = fn.split(".fastq")[0] + "_filtered.fastq"
     filt_fq = open(filtered_fq_fn, 'w')
     fq_recs = {}
-#  f = open(fn,'r')
-#  fq_recs = list(SeqIO.parse(f,'fastq'))
     for header, seq, qual in FastqFile(fn):
         qname_split = header.lstrip("@").split("_")
         indel_only = qname_split[-1]
@@ -575,7 +573,6 @@ def get_fastq_reads_old(fn, sv_reads):
     read_len = 0
     fq_recs = {}
     f = open(fn, 'r')
-#  fq_recs = list(SeqIO.parse(f,'fastq'))
     for header, seq, qual in FastqFile(fn):
         qname = header.lstrip("@")
         if qname in sv_reads:
@@ -600,7 +597,6 @@ def get_fastq_reads_old(fn, sv_reads):
                         if cleaned_seq.find(sc_seq) == -1:
                             # Don't add, just trimmed clipped portion.
                             add = False
-#    else: print qname, 'not in sv reads'
         if add:
             fr = fq_read(header, seq, qual)
             read_len = max(read_len, len(fr.seq))
