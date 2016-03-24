@@ -666,7 +666,6 @@ class target :
         pp.pprint(self.files['sv_bam_sorted'])
         pp.pprint(self.paths['output'])
         self.results.append(ctig.result)
-        #xgxg
         self.export_reads_json(ctig.contig_seq, self.paths['output'], contig_id)        
       else : 
         self.logger.info('%s has no structural variant result.'%ctig.id)
