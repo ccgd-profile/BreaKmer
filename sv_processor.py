@@ -7,6 +7,10 @@ from sv_assembly import *
 from sv_caller import *
 import math
 import logging
+import pysam
+import json
+import pprint
+pp = pprint.PrettyPrinter(indent=8)
 
 #-----------------------------------------------------------
 def process_reads(areads, read_d, bamfile) :
@@ -657,11 +661,30 @@ class target :
 
       if ctig.has_result() :
         ctig.write_result(self.paths['output'])
+        #this is the targets reads
         ctig.write_bam(self.files['sv_bam_sorted'],self.paths['output'])
+        pp.pprint(self.files['sv_bam_sorted'])
+        pp.pprint(self.paths['output'])
         self.results.append(ctig.result)
+        #xgxg
+        self.export_reads_json(ctig.contig_seq, self.paths['output'], contig_id)        
       else : 
         self.logger.info('%s has no structural variant result.'%ctig.id)
       iter += 1
+
+  def export_reads_json(self, contig_seq, outPath, contigId):
+    bam_sorted_fn = os.path.join(outPath,contigId+"_reads.sorted.bam")
+    bamFile = pysam.Samfile(bam_sorted_fn, "rb")
+    raw_reads = bamFile.fetch()
+    res={"reads":[], "contigSeq":contig_seq, "contigId":contigId}
+    for read in raw_reads:
+        r={"pos":read.pos,"qstart": read.qstart, "seq":read.seq, "start":read.pos-read.qstart, 'tid':read.tid}
+        res["reads"].append(r)
+    bamFile.close()
+    jsonf = open(outPath+"/"+contigId+".json",'w')
+    jsonf.write(json.dumps(res))
+    jsonf.close()
+
   #*********************************************************
 
   #*********************************************************
