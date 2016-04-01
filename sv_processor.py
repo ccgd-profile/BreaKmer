@@ -677,7 +677,7 @@ class target :
     raw_reads = bamFile.fetch()
     res={"reads":[], "contigSeq":contig_seq, "contigId":contigId}
     for read in raw_reads:
-        r={"pos":read.pos,"qstart": read.qstart, "seq":read.seq, "start":read.pos-read.qstart, 'tid':read.tid}
+        r={"seq":read.seq, "start":read.pos-read.qstart}
         res["reads"].append(r)
     bamFile.close()
     jsonf = open(outPath+"/"+contigId+".json",'w')
