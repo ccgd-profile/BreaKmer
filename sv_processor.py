@@ -649,6 +649,25 @@ class target :
   #*********************************************************
 
   #*********************************************************
+  def totalMatch(self, s, t):
+    totalMatch = 0
+    for i, c in enumerate(s):
+        if(i <len(t) and c==t[i]):
+            totalMatch=totalMatch+1
+    return totalMatch
+
+  def getMatchIndex(self, contigSeq, readSeq):
+    index = -1
+    totalMatchMax = -1
+    for i, c in enumerate(contigSeq):
+        if((len(contigSeq)-i)<len(readSeq)):
+            break
+        tMatch=totalMatch(contigSeq[i:len(contigSeq)], readSeq)
+        if(tMatch>totalMatchMax):
+            totalMatchMax=tMatch
+            index=i
+    return index
+
   def resolve_sv(self) :
     iter = 1
     self.logger.info('Resolving structural variants from %d kmer clusters'%len(self.kmers['clusters']))
@@ -677,8 +696,9 @@ class target :
     raw_reads = bamFile.fetch()
     res={"reads":[], "contigSeq":contig_seq, "contigId":contigId}
     for read in raw_reads:
-        r={"seq":read.seq, "start":read.pos-read.qstart}
-        res["reads"].append(r)
+      start=getMatchIndex(contig_seq, read.seq)
+      r={"seq":read.seq, "start":start}
+      res["reads"].append(r)
     bamFile.close()
     jsonf = open(outPath+"/"+contigId+".json",'w')
     jsonf.write(json.dumps(res))
