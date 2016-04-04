@@ -662,7 +662,7 @@ class target :
     for i, c in enumerate(contigSeq):
         if((len(contigSeq)-i)<len(readSeq)):
             break
-        tMatch=totalMatch(contigSeq[i:len(contigSeq)], readSeq)
+        tMatch=self.totalMatch(contigSeq[i:len(contigSeq)], readSeq)
         if(tMatch>totalMatchMax):
             totalMatchMax=tMatch
             index=i
@@ -696,7 +696,7 @@ class target :
     raw_reads = bamFile.fetch()
     res={"reads":[], "contigSeq":contig_seq, "contigId":contigId}
     for read in raw_reads:
-      start=getMatchIndex(contig_seq, read.seq)
+      start=self.getMatchIndex(contig_seq, read.seq)
       r={"seq":read.seq, "start":start}
       res["reads"].append(r)
     bamFile.close()
