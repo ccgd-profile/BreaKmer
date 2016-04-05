@@ -700,6 +700,7 @@ class target :
       r={"seq":read.seq, "start":start}
       res["reads"].append(r)
     bamFile.close()
+    res["reads"]=sorted(res["reads"], key=lambda x:x['start'])
     jsonf = open(outPath+"/"+contigId+".json",'w')
     jsonf.write(json.dumps(res))
     jsonf.close()
