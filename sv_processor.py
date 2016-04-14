@@ -696,7 +696,7 @@ class target :
     raw_reads = bamFile.fetch()
     res={"reads":[], "contigSeq":contig_seq, "contigId":contigId}
     for read in raw_reads:
-      start=self.getMatchIndex(contig_seq, read.seq)
+      start=self.getMatchIndex("          " + contig_seq+ "          ", read.seq)-10
       r={"seq":read.seq, "start":start}
       res["reads"].append(r)
     bamFile.close()
