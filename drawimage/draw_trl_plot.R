@@ -160,7 +160,7 @@ draw<-function(grid_, cigar_obj, out_f, annotation_obj){
     grid_h=grid_nofrows*18
   }else if(grid_nofrows>100){
     grid_h=grid_nofrows*8
-  } else{
+  }else{
     grid_h=grid_nofrows*12
   }
   #draw -----------------------------------------------------------
@@ -221,9 +221,12 @@ draw<-function(grid_, cigar_obj, out_f, annotation_obj){
   }
   #mark deletion
   if(length(cigar_obj$deletion_label)>0){
-    grid.lines(x=(cigar_obj$deletion_label-1)/grid_nofcols, y=c(0,1), arrow=arrow(angle=0, ends="first"))
-    seekViewport("box")
-    grid.lines(x=(cigar_obj$deletion_label-1)/grid_nofcols, y=c(0,1))
+    for(i in 1:length(cigar_obj$deletion_label)){
+      seekViewport("header")
+      grid.lines(x=(cigar_obj$deletion_label[i]-1)/grid_nofcols, y=c(0,1), arrow=arrow(angle=0, ends="first"))
+      seekViewport("box")
+      grid.lines(x=(cigar_obj$deletion_label[i]-1)/grid_nofcols, y=c(0,1))
+    }
   }
   #end of annotation
   dev.off()
