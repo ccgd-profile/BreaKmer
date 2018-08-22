@@ -16,7 +16,8 @@ setup(name='BreaKmer',
       license='LICENSE',
       py_modules=['BreaKmer'],
       install_requires=[
-        'pysam >= 0.6',
-        'biopython >= 1.62'
+        'pysam == 0.7.6',
+        'biopython >= 1.62',
+        'matplotlib >= 2.2.3'
       ]  
       )
