@@ -6,6 +6,7 @@ import math
 from utils import *
 from sv_processor import *
 from optparse import OptionParser
+from storage import open_demuxer
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Class sv event
@@ -569,10 +570,10 @@ class blat_manager :
   def set_values(self) :
     if not self.fn :
       self.has_blat_results = False
-    elif len(open(self.fn, 'rU').readlines()) == 0 : 
+    elif len(open_demuxer(self.fn, 'rU').readlines()) == 0 : 
       self.has_blat_results = False
     else :
-      qres_f = open(self.fn, 'rU')
+      qres_f = open_demuxer(self.fn, 'rU')
       qres_lines = qres_f.readlines()
       for line in qres_lines :
         line = line.strip()
@@ -598,7 +599,7 @@ class blat_manager :
 
   #*********************************************************
   def write_mod_result_file(self, fn) :
-    blat_ff = open(fn,'w')
+    blat_ff = open_demuxer(fn,'w')
     for br in self.blat_results :
       blat_ff.write(br[3].get_blat_output() + "\n")
     blat_ff.close()
@@ -1145,7 +1146,7 @@ class blat_res :
 
 def parse_config_f(config_fn, opts) :
   param_opts = {}
-  config_f = open(config_fn, 'rU')
+  config_f = open_demuxer(config_fn, 'rU')
   flines = config_f.readlines()
   for line in flines :
     line = line.strip()
@@ -1191,7 +1192,7 @@ if __name__ == '__main__' :
 
   contig_fa_fn = os.path.join(contig_path,contig_id+'.fa')
   contig_seq = ''
-  for line in open(contig_fa_fn,'r').readlines() :
+  for line in open_demuxer(contig_fa_fn,'r').readlines() :
     line = line.strip()
     if line.find('>') == -1 : contig_seq = line
 

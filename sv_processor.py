@@ -7,6 +7,7 @@ from sv_assembly import *
 from sv_caller import *
 import math
 import logging
+from storage import open_demuxer
 
 #-----------------------------------------------------------
 def process_reads(areads, read_d, bamfile) :
@@ -217,14 +218,14 @@ class runner :
         header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
         res_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name']+"_"+tag+"_svs.out")
         self.logger.info('Writing %s output file %s'%(tag,res_fn))
-        result_files[tag] = open(res_fn,'w')
+        result_files[tag] = open_demuxer(res_fn,'w')
         if not self.params.opts['no_output_header'] :
           result_files[tag].write(header)
       result_files[tag].write("\t".join([str(x) for x in res]) + "\n")
     for f in result_files : result_files[f].close()
 
     summary_fn = os.path.join(self.params.paths['output'], self.params.opts['analysis_name']+"_summary.out")
-    summary_f = open(summary_fn,'w')
+    summary_f = open_demuxer(summary_fn,'w')
     self.logger.info('Writing summary file to %s'%summary_fn)
     summary_f.write(self.summary_header+"\n")
     keys = self.summary.keys()
@@ -320,8 +321,8 @@ class target :
     self.repeat_mask = [] 
     if not os.path.isfile(marker_fn) :
       out_fn = self.files['rep_mask_fn']
-      fout = open(out_fn,'w')
-      f = open(self.params.opts['repeat_mask_file'],'rU')
+      fout = open_demuxer(out_fn,'w')
+      f = open_demuxer(self.params.opts['repeat_mask_file'],'rU')
       flines = f.readlines()
       for line in flines :
         line = line.strip()
@@ -338,7 +339,7 @@ class target :
       output, errors = p.communicate()  
       self.logger.info('Completed writing repeat mask file %s, touching marker file %s'%(out_fn,marker_fn))
     else :
-      rep_f = open(self.files['rep_mask_fn'],'rU')
+      rep_f = open_demuxer(self.files['rep_mask_fn'],'rU')
       rep_flines = rep_f.readlines()
       for line in rep_flines :
         line = line.strip()
@@ -508,8 +509,8 @@ class target :
       if (aread.pos >= self.start and aread.pos <= self.end) and aread.mapq > 0 and aread.mate_is_unmapped : 
         read_d['unmapped_keep'].append(aread.qname)
 
-    sv_fq = open(self.files['sv_fq'],'w')
-    sv_sc_fa = open(self.files['sv_sc_unmapped_fa'],'w')
+    sv_fq = open_demuxer(self.files['sv_fq'],'w')
+    sv_sc_fa = open_demuxer(self.files['sv_sc_unmapped_fa'],'w')
 
     for qname in read_d['unmapped_keep'] :
       if qname in read_d['unmapped'] :
@@ -623,7 +624,7 @@ class target :
 
     # Write case only kmers out to file.
     self.files['sample_kmers'] = os.path.join(self.paths['kmers'],self.name + "_sample_kmers.out")
-    sample_kmer_fout = open(self.files['sample_kmers'],'w')
+    sample_kmer_fout = open_demuxer(self.files['sample_kmers'],'w')
     kmer_counter = 1
     self.kmers['case_only'] = {}
     for mer in sample_only_mers :
@@ -675,7 +676,7 @@ class target :
         header = "\t".join(['genes', 'target_breakpoints', 'align_cigar', 'mismatches', 'strands', 'rep_overlap_segment_len', 'sv_type', 'split_read_count', 'nkmers', 'disc_read_count', 'breakpoint_coverages', 'contig_id', 'contig_seq']) + "\n"
         res_fn = os.path.join(self.paths['output'],self.name+"_"+tag+"_svs.out")
         self.logger.info('Writing %s results to file %s'%(tag,res_fn))
-        result_files[tag] = open(res_fn,'w')
+        result_files[tag] = open_demuxer(res_fn,'w')
         if not self.params.opts['no_output_header'] :
           result_files[tag].write(header)
       result_files[tag].write("\t".join([str(x) for x in res]) + "\n")
@@ -756,7 +757,7 @@ class contig :
 
   #*********************************************************
   def write_cluster_file(self, cluster_fn) :
-    cluster_f = open(cluster_fn, 'w')
+    cluster_f = open_demuxer(cluster_fn, 'w')
     cluster_f.write(self.id + " " + str(len(self.kmers)) + "\n")
     cluster_f.write(",".join([x[0] for x in self.kmers]) + "\n")
     cluster_f.write(",".join([x.id for x in self.reads]) + "\n\n")
@@ -765,7 +766,7 @@ class contig :
 
   #*********************************************************      
   def write_read_fq(self) :
-    assembly_fq = open(self.assembly_fq_fn, 'w')
+    assembly_fq = open_demuxer(self.assembly_fq_fn, 'w')
     self.logger.info('Writing reads containing kmers to fastq %s'%self.assembly_fq_fn)
     for read in self.reads :
       assembly_fq.write(read.id+"\n"+read.seq+"\n+\n"+read.qual+"\n")
@@ -776,7 +777,7 @@ class contig :
   def write_contig_fa(self) :
     self.contig_fa_fn = os.path.join(self.path, self.id+".fa")
     self.logger.info('Writing contig fasta file for blatting %s'%self.contig_fa_fn)
-    blat_f = open(self.contig_fa_fn, 'w')
+    blat_f = open_demuxer(self.contig_fa_fn, 'w')
     blat_f.write(">contig1"+"\n"+self.contig_seq)
     blat_f.close()
   #*********************************************************
@@ -792,7 +793,7 @@ class contig :
     res_fn = os.path.join(self.path,self.id + "_svs.out")
     self.logger.info('Writing %s result file %s'%(self.id,res_fn))
     if self.result : 
-      res_f = open(res_fn,'w')
+      res_f = open_demuxer(res_fn,'w')
       res_f.write("\t".join([str(x) for x in self.result]))
       res_f.close()
       shutil.copyfile(res_fn, os.path.join(output_path, self.id+"_svs.out"))

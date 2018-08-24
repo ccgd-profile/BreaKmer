@@ -11,7 +11,7 @@ import time
 from pysam import *
 import multiprocessing
 from itertools import izip, islice, repeat, izip_longest
-
+from storage import open_demuxer
 
 ################################################################
 # Utility functions
@@ -203,7 +203,7 @@ def setup_ref_data(setup_params) :
 def get_fastq_reads(fn, sv_reads) :
   read_len = 0
   filtered_fq_fn = fn.split(".fastq")[0] + "_filtered.fastq"
-  filt_fq = open(filtered_fq_fn, 'w')
+  filt_fq = open_demuxer(filtered_fq_fn, 'w')
   fq_recs = {}
 #  f = open(fn,'r')
 #  fq_recs = list(SeqIO.parse(f,'fastq'))
@@ -250,7 +250,7 @@ def get_fastq_reads(fn, sv_reads) :
 def get_fastq_reads_old(fn, sv_reads) :
   read_len = 0
   fq_recs = {}
-  f = open(fn,'r')
+  f = open_demuxer(fn,'r')
 #  fq_recs = list(SeqIO.parse(f,'fastq'))
   for header,seq,qual in FastqFile(fn) : 
     qname = header.lstrip("@")
@@ -287,7 +287,7 @@ def get_fastq_reads_old(fn, sv_reads) :
 def load_kmers(fns,kmers) :
   fns = fns.split(",")
   for fn in fns :
-    f = open(fn,'rU')
+    f = open_demuxer(fn,'rU')
     for line in f.readlines() :
       line = line.strip()
       mer, count = line.split()
@@ -303,7 +303,7 @@ def setup_rmask_all(rmask_fn) :
   logger = logging.getLogger('root')
 
   rmask = {}
-  f = open(rmask_fn,'rU')
+  f = open_demuxer(rmask_fn,'rU')
   flines = f.readlines()
   for line in flines :
     line = line.strip()
@@ -325,8 +325,8 @@ def setup_rmask(gene_coords, ref_path, rmask_fn) :
 
   rmask = []
   if not os.path.isfile(marker_fn) :
-    fout = open(mask_out_fn,'w')
-    f = open(rmask_fn,'rU')
+    fout = open_demuxer(mask_out_fn,'w')
+    f = open_demuxer(rmask_fn,'rU')
     flines = f.readlines()
     for line in flines :
       line = line.strip()
@@ -344,7 +344,7 @@ def setup_rmask(gene_coords, ref_path, rmask_fn) :
     output, errors = p.communicate()  
     logger.info('Completed writing repeat mask file %s, touching marker file %s'%(mask_out_fn,marker_fn))
   else :
-    rep_f = open(mask_out_fn,'rU')
+    rep_f = open_demuxer(mask_out_fn,'rU')
     rep_flines = rep_f.readlines()
     for line in rep_flines :
       line = line.strip()
@@ -369,7 +369,7 @@ def extract_refseq_fa(gene_coords, ref_path, ref_fa, direction) :
       seq_str = str(seq.reverse_complement())
     else :
       seq_str = str(seq)
-    fa = open(fa_fn,'w')
+    fa = open_demuxer(fa_fn,'w')
     fa.write(">"+name+"\n"+seq_str+"\n")
     fa.close()
     cmd = 'touch %s'%marker_fn
@@ -519,7 +519,7 @@ def server_ready(f) :
     logger.info("Waiting for log file %s"%f)
     time.sleep(10)
   ready = False
-  f = open(f,'r')
+  f = open_demuxer(f,'r')
   flines = f.readlines()
   for line in flines : 
     if line.find('Server ready for queries') > -1 : ready = True
@@ -546,7 +546,7 @@ class params :
     region_list = None
     if gene_list :
       region_list = []
-      hl = open(gene_list,'r')
+      hl = open_demuxer(gene_list,'r')
       for line in hl.readlines() :
         line = line.strip()
         region_list.append(line.upper())
@@ -554,7 +554,7 @@ class params :
     self.logger.info('Parsing target list')
     # Gene file
     # TODO: Check to make sure there aren't duplicate genes.
-    targets_f = open(self.opts['targets_bed_file'],'rU')
+    targets_f = open_demuxer(self.opts['targets_bed_file'],'rU')
     cur_region = ['',[]]
     for target in targets_f.readlines() :
       # Each target is formatted like a bed, chr bp1 bp2 name
@@ -693,7 +693,7 @@ class fq_read :
 class FastqFile(object) :
   def __init__(self,f) :
     if isinstance(f,str) :
-      f = open(f)
+      f = open_demuxer(f)
       self._f = f
   def __iter__(self) :
     return self
@@ -731,7 +731,7 @@ class anno :
 
   def add_genes(self, gene_fn) :
     self.logger.info('Adding gene annotations from %s'%gene_fn)
-    gene_f = open(gene_fn,'r')
+    gene_f = open_demuxer(gene_fn,'r')
     gene_flines = gene_f.readlines()
     for line in gene_flines[1:] :
       line = line.strip()
@@ -746,7 +746,7 @@ class anno :
     gene_f.close()
 
   def add_regions(self, regions_bed_fn) :
-    region_f = open(regions_bed_fn, 'rU')
+    region_f = open_demuxer(regions_bed_fn, 'rU')
     region_lines = region_f.readlines()
     for line in region_lines :
       line = line.strip()

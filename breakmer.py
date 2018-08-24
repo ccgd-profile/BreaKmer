@@ -7,6 +7,7 @@ import sys
 import os
 from utils import *
 from sv_processor import *
+from storage import open_demuxer
 import logging
 from optparse import OptionParser
 
@@ -49,7 +50,7 @@ sv_caller.py - call SVs from blat result.
 #-----------------------------------------------------------
 def parse_config_f(config_fn, opts) :
   param_opts = {}
-  config_f = open(config_fn, 'rU')
+  config_f = open_demuxer(config_fn, 'rU')
   flines = config_f.readlines()
   for line in flines :
     line = line.strip()

@@ -7,6 +7,8 @@ import os
 import olc
 from collections import OrderedDict
 from utils import *
+from storage import open_demuxer
+
 #----------------------------------------------------------- 
 def setup_contigs(mer, fq_recs, kmer_len, akmers, buff) :
   logger = logging.getLogger('root')
@@ -666,7 +668,7 @@ if __name__ == '__main__' :
   in_fn, fq_in, rc_thresh, kmer_len = args
   rc_thresh = int(rc_thresh)
   kmer_len=int(kmer_len)
-  fa_f = open(in_fn,"rU")
+  fa_f = open_demuxer(in_fn,"rU")
   fq_recs = {}
   read_len = 0
   for header,seq,qual in FastqFile(fq_in) : 
