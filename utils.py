@@ -96,7 +96,10 @@ def check_intervals(breakpts, query_region ) :
 
 #-----------------------------------------------------------
 def setup_logger(param_opts, name) :
-  output_path = os.path.abspath(os.path.normpath(param_opts['output']))
+  # This is a bit dangerous.  It relies on setting an "output" directory under the analysis directory
+  output_path = os.path.abspath(os.path.normpath(param_opts['analysis_dir']))
+  if not os.path.exists(output_path) : os.makedirs(output_path)
+
   if not os.path.exists(output_path) : os.makedirs(output_path)
 
   logger = logging.getLogger(name)
