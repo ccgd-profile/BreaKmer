@@ -235,12 +235,16 @@ class runner :
       summary_f.write(self.summary[gene]+"\n")
     summary_f.close()
 
+    self.logger.info('DONE: Writing summary file to %s' % summary_fn)
+
     # Check if we want to tar.gz the analysis directory when we are done
     if self.params.opts['tar_gzip_output'] :
       output_filename = self.params.opts['analysis_name'] + ".tar.gz"
-      source_dir = self.paths['analysis']
-      with tarfile.open(output_filename, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+      source_dir = self.params.paths['analysis']
+      output_with_path = os.path.join(source_dir, output_filename)
+      self.logger.info('Tar-gziping output to %s' % output_with_path)
+      with tarfile.open(output_with_path, "w:gz") as tar:
+        tar.add(source_dir, arcname=self.params.opts['analysis_name'] + "_Breakmer")
 
 
 
