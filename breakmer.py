@@ -72,7 +72,7 @@ def parse_config_file_and_command_line_options(config_file_name, command_line_op
 
   # This pulls the key-value pairs out of the command line options
   # and adds them to the dictionary created from the config file
-  for opt in vars(opts) : 
+  for opt in vars(command_line_options) :
     param_opts[opt] = vars(command_line_options)[opt]
 
   return param_opts
