@@ -1,2 +1,0 @@
-genes	target_breakpoints	align_cigar	mismatches	strands	rep_overlap_segment_len	sv_type	split_read_count	nkmers	disc_read_count	contig_id	contig_seq
-B2M	chr15:45007873-45008026 (D153)	89M153D50M	0	+	0.0:139	indel	12	14	0	contig1	AAGGACTGGTCTTTCTATCTCTTGTACTACACTGAATTCACCCCCACTGAAAAAGATGAGTATGCCTGCCGTGTGAACCATGTGACTTTACAATCTGCATATTGGGATTGTCAGGGAATGTTCTTAAAGATCAGATTAG
