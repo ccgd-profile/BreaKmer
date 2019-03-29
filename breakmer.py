@@ -47,22 +47,34 @@ sv_caller.py - call SVs from blat result.
 #-----------------------------------------------------------
 # TODO: Set required options, exit if these are not set.
 #-----------------------------------------------------------
-def parse_config_f(config_fn, opts) :
+def parse_config_file_and_command_line_options(config_file_name, command_line_options) :
   param_opts = {}
-  config_f = open(config_fn, 'rU')
-  flines = config_f.readlines()
+  config_file = open(config_file_name, 'rU')
+  flines = config_file.readlines()
   for line in flines :
     line = line.strip()
+
+    # Allow blank lines
+    if (len (line) == 0):
+      continue
+
+    # Allow comment lines
+    if (line.startswith('#')):
+      continue
+
     linesplit = line.split("=")
     if len(linesplit) == 1 : 
       print 'Config line', line, ' not set correctly. Exiting.'
       sys.exit()
     else :
-      k,v = linesplit
-      param_opts[k] = v
+      key,value = linesplit
+      param_opts[key] = value
 
+  # This pulls the key-value pairs out of the command line options
+  # and adds them to the dictionary created from the config file
   for opt in vars(opts) : 
-    param_opts[opt] = vars(opts)[opt]
+    param_opts[opt] = vars(command_line_options)[opt]
+
   return param_opts
 #-----------------------------------------------------------
 
@@ -85,13 +97,17 @@ parser.add_option('-n', '--trl_min_seg_len', dest='trl_minseg_len', default=25, 
 parser.add_option('-t', '--align_thresh', dest='align_thresh', default=.90, type='int', help='Threshold for minimum read alignment for assembly [default: %default]')
 parser.add_option('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %default]')
 
-if __name__ == '__main__' :
-  opts, args = parser.parse_args(sys.argv[1:])
-  config_fn = args[0]
 
-  tic = time.clock()
-  config_d = parse_config_f(config_fn,opts)
-  setup_logger(config_d,'root')
-  r = runner(config_d)
-  r.run(tic)
+parser.add_option('-o', '--tar_gzip_output', dest='tar_gzip_output', default=False, action='store_true', help='Create a tar.gz file of the final output.  Useful for running on the cloud. [default: %default]')
+
+
+if __name__ == '__main__' :
+  command_line_options, args = parser.parse_args(sys.argv[1:])
+  config_file_name = args[0]
+
+  start_time = time.clock()
+  config_dictionary = parse_config_file_and_command_line_options(config_file_name,command_line_options)
+  setup_logger(config_dictionary,'root')
+  r = runner(config_dictionary)
+  r.run(start_time)
 #````````````````````````````````````````````````````````````

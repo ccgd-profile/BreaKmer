@@ -7,6 +7,8 @@ from sv_assembly import *
 from sv_caller import *
 import math
 import logging
+import tarfile
+
 
 #-----------------------------------------------------------
 def process_reads(areads, read_d, bamfile) :
@@ -96,8 +98,8 @@ def add_discordant_pe(aread, read_d, bamfile) :
 # Class sv_analysis
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 class runner :
-  def __init__(self, config_d) :
-    self.params = params(config_d)
+  def __init__(self, config_dictionary) :
+    self.params = params(config_dictionary)
     self.results = []
     self.targets = {}
     self.summary = {}
@@ -232,6 +234,16 @@ class runner :
     for gene in keys :
       summary_f.write(self.summary[gene]+"\n")
     summary_f.close()
+
+    # Check if we want to tar.gz the analysis directory when we are done
+    if self.params.opts['tar_gzip_output'] :
+      output_filename = self.params.opts['analysis_name'] + ".tar.gz"
+      source_dir = self.paths['analysis']
+      with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
+
+
+
   #*********************************************************
 # End of sv_analysis class    
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

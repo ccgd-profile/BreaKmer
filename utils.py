@@ -96,7 +96,7 @@ def check_intervals(breakpts, query_region ) :
 
 #-----------------------------------------------------------
 def setup_logger(param_opts, name) :
-  output_path = os.path.abspath(os.path.normpath(param_opts['analysis_dir']))
+  output_path = os.path.abspath(os.path.normpath(param_opts['output']))
   if not os.path.exists(output_path) : os.makedirs(output_path)
 
   logger = logging.getLogger(name)
@@ -533,8 +533,8 @@ def server_ready(f) :
 # Tracks the analysis-level parameters.
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 class params :
-  def __init__(self,config_d) :
-    self.opts = config_d
+  def __init__(self,config_dictionary) :
+    self.opts = config_dictionary
     self.gene_annotations = None
     self.targets = {}
     self.paths = {}
