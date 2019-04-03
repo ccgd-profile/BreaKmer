@@ -67,7 +67,7 @@ def parse_config_file_and_command_line_options(config_file_name, command_line_op
     linesplit = line.split("=")
     if len(linesplit) == 1 : 
       print 'Config line', line, ' not set correctly. Exiting.'
-      sys.exit()
+     # sys.exit()
     else :
       key,value = linesplit
       param_opts[key] = value
@@ -77,6 +77,8 @@ def parse_config_file_and_command_line_options(config_file_name, command_line_op
   for opt in vars(command_line_options) :
     param_opts[opt] = vars(command_line_options)[opt]
 
+
+  sys.exit()
   return param_opts
 #-----------------------------------------------------------
 
