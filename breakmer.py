@@ -52,6 +52,8 @@ def parse_config_file_and_command_line_options(config_file_name, command_line_op
   config_file = open(config_file_name, 'rU')
   flines = config_file.readlines()
   for line in flines :
+    print 'config line #', line, '#'
+
     line = line.strip()
 
     # Allow blank lines
@@ -98,7 +100,6 @@ parser.add_option('-t', '--align_thresh', dest='align_thresh', default=.90, type
 parser.add_option('-z', '--no_output_header', dest='no_output_header', default=False, action='store_true', help='Suppress output headers [default: %default]')
 
 
-parser.add_option('-o', '--tar_gzip_output', dest='tar_gzip_output', default=False, action='store_true', help='Create a tar.gz file of the final output.  Useful for running on the cloud. [default: %default]')
 
 
 if __name__ == '__main__' :
