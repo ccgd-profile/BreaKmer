@@ -588,7 +588,7 @@ class target :
     self.logger.info('Cleaning reads using %s with configuration file %s'%(cutadapt,cutadapt_config))
     self.files['cleaned_fq'] = os.path.join(self.paths['data'],self.name + "_sv_reads_cleaned.fastq")
     self.logger.info('Writing clean reads to %s'%self.files['cleaned_fq'])
-    cmd = '%s %s $(<%s) %s > %s'%(sys.executable, cutadapt, cutadapt_config, self.files['sv_fq'], self.files['cleaned_fq'])
+    cmd = '%s %s $(cat %s) %s > %s'%(sys.executable, cutadapt, cutadapt_config, self.files['sv_fq'], self.files['cleaned_fq'])
     self.logger.debug('Cutadapt system command %s'%cmd)
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     output, errors = p.communicate()
