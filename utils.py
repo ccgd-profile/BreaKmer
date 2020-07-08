@@ -643,6 +643,11 @@ class params :
     self.opts['gfserver_log'] = os.path.join(self.paths['output'],'gfserver_%d.log'%self.opts['blat_port'])
     cmd = '%s -canStop -log=%s -stepSize=5 start localhost %d %s &'%(self.opts['gfserver'], self.opts['gfserver_log'], self.opts['blat_port'],ref_fasta_name+".2bit")
     self.logger.info("Starting gfServer %s"%cmd)
+
+    matt_two_bit = self.opts['blat_2bit']
+    self.logger.info("Current working directory: %s "%os.getcwd())
+    self.logger.info("2Bit file: %s"%matt_two_bit) 
+
     p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     start_time = time.time()
     while not server_ready(self.opts['gfserver_log']) :
