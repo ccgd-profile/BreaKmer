@@ -12,18 +12,29 @@ import logging
 def process_reads(areads, read_d, bamfile) :
   pair_indices = {}
   valid_reads = []
+  duplicates = []
+  areads2 = []
+  # Pass 1 - remove failures, store duplicate read names, index unmapped
   for aread in areads :
     skip = False
     if aread.mate_is_unmapped or aread.rnext == -1 : # Indicate that mate is unmapped
       aread.mate_is_unmapped = True
     if aread.is_duplicate or aread.is_qcfail : # Skip duplicates and failures
       skip = True
+    if aread.is_duplicate :
+      duplicates.append(aread.qname)
     if aread.is_unmapped : # Store unmapped reads
       read_d['unmapped'][aread.qname] = aread
       skip = True
 
     # If read is unmapped or duplicate or qcfail, then don't store
     if not skip :
+      areads2.append(aread)
+
+  # Pass 2 - index reads that are kept and remove supplemental alignments whose primary alignments are dups
+  for aread in areads2 :
+    supp_dup = (aread.is_supplementary or aread.is_secondary) and (aread.qname in duplicates)
+    if not supp_dup:
       proper_map = False
       overlap_reads = False
       # These two functions can opeate on the first read of the pair.
